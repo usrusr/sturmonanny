@@ -1,10 +1,13 @@
-import _root_.org.mortbay.jetty.Connector
+package de.immaterialien.sturmonanny
+
 import _root_.org.mortbay.jetty.Server
 import _root_.org.mortbay.jetty.webapp.WebAppContext
 
-object RunWebApp extends Application {
+
+object Main{
+   def main(args : Array[String]) {
   val server = new Server(8080)
-  val context = new WebAppContext() 
+  val context = new WebAppContext()
   context.setServer(server)
   context.setContextPath("/")
   context.setWar("src/main/webapp")
@@ -18,11 +21,12 @@ object RunWebApp extends Application {
       Thread.sleep(5000)
     }
     server.stop()
-    server.join() 
+    server.join()
   } catch {
     case exc : Exception => {
-      exc.printStackTrace() 
-      System.exit(100) 
-    }
+      exc.printStackTrace()
+      System.exit(100)
+    } 
   }
+   }
 }

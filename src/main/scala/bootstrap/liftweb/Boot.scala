@@ -1,6 +1,9 @@
 package bootstrap.liftweb
 
 import _root_.net.liftweb.util._
+
+
+import _root_.net.liftweb.common._
 import _root_.net.liftweb.http._
 import _root_.net.liftweb.sitemap._
 import _root_.net.liftweb.sitemap.Loc._
@@ -23,7 +26,7 @@ class Boot {
 
     // where to search snippet
     LiftRules.addToPackages("de.immaterialien.sturmonanny")
-    Schemifier.schemify(true, Log.infoF _, User)
+    Schemifier.schemify(true, Log.infoF _, de.immaterialien.sturmonanny.model.User)
 
     // Build SiteMap
     val entries = Menu(Loc("Home", List("index"), "Home")) :: User.sitemap
@@ -41,10 +44,26 @@ class Boot {
     LiftRules.ajaxEnd =
       Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
 
-    LiftRules.early.append(makeUtf8)
+    LiftRules.early.append{ _.setCharacterEncoding("UTF-8") }
 
 
-    MultiplexerO.instance = MultiplexerO.create(2002, 2003)
+
+    LogBoot.defaultProps =  
+      """<?xml version="1.0" encoding="UTF-8" ?>  
+       <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">    
+       <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">    
+         <appender name="appender" class="org.apache.log4j.ConsoleAppender">    
+           <layout class="org.apache.log4j.SimpleLayout"/>    
+         </appender>    
+        <root>    
+           <priority value="DEBUG"/>    
+           <appender-ref ref="appender"/>    
+         </root>    
+       </log4j:configuration>    
+       """   
+    
+    
+    Multiplexer.instance = Multiplexer.create(2002, 2003)
                        
     S.addAround(DB.buildLoanWrapper)
   }
