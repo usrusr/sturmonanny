@@ -19,13 +19,13 @@ import _root_.javax.servlet.http.{HttpServletRequest}
   * A class that's instantiated early and run.  It allows the application
   * to modify lift's environment
   */
-class Boot {
+class Boot extends net.liftweb.util.LiftLogger{
   def boot {
     if (!DB.jndiJdbcConnAvailable_?)
       DB.defineConnectionManager(DefaultConnectionIdentifier, DBVendor)
 
     // where to search snippet
-    LiftRules.addToPackages("de.immaterialien.sturmonanny")
+    LiftRules.addToPackages("de.immaterialien.sturmonanny.snippet")
     Schemifier.schemify(true, Log.infoF _, de.immaterialien.sturmonanny.model.User)
 
     // Build SiteMap
@@ -45,22 +45,23 @@ class Boot {
       Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
 
     LiftRules.early.append{ _.setCharacterEncoding("UTF-8") }
-
-
-
-    LogBoot.defaultProps =  
-      """<?xml version="1.0" encoding="UTF-8" ?>  
-       <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">    
-       <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">    
-         <appender name="appender" class="org.apache.log4j.ConsoleAppender">    
-           <layout class="org.apache.log4j.SimpleLayout"/>    
-         </appender>    
-        <root>    
-           <priority value="DEBUG"/>    
-           <appender-ref ref="appender"/>    
-         </root>    
-       </log4j:configuration>    
-       """   
+    net.liftweb.util.LogBoot.loggerSetup
+net.liftweb.util.LogBoot.loggerByName("test").error("====///\\\\\\====")
+net.liftweb.util.Log.warn("====///w\\\\\\====")
+debug("\n\n\n\n\n hello world\n\n")
+//    LogBoot.defaultProps =  
+//      """<?xml version="1.0" encoding="UTF-8" ?>  
+//       <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">    
+//       <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">    
+//         <appender name="appender" class="org.apache.log4j.ConsoleAppender">    
+//           <layout class="org.apache.log4j.SimpleLayout"/>    
+//         </appender>    
+//        <root>    
+//           <priority value="DEBUG"/>    
+//           <appender-ref ref="appender"/>    
+//         </root>    
+//       </log4j:configuration>    
+//       """   
     
     
     Multiplexer.instance = Multiplexer.create(2002, 2003)

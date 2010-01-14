@@ -6,54 +6,63 @@ import java.io._
 //import scala.actors.TIMEOUT
 import net.liftweb.actor._
 import net.liftweb.common._
+import net.liftweb.util.LiftLogger
 
 import scala.collection.mutable.Queue
 
-import scala.util.logging._
+//import scala.util.logging._
 
 import de.immaterialien.sturmonanny.util._
 
-class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger with LiftActor with TimedLiftActor{
+class Multiplexer(val il2port : Int , val scport : Int) extends LiftActor with TimedLiftActor with Logging{
   
 //problem: unangeforderte nachrichten aus dem spiel (chat by player) werden erst mit dem nächsten paket als nachricht erkannt.
 //plan: zeilenweise an den actor übergeben, der kann dann in einer kurze timeoutschleife empfangen und beim TIMEOUT broadcasten oder eben nicht
  
   case class DownMessage(val lines: List[List[Byte]]){
-    log("creating downmessage"+ Multiplexer.linesListsToStrings(lines))
+    debug("creating downmessage"+ Multiplexer.linesListsToStrings(lines))
   }
+  case class DownLine(val line: List[Byte]){
+    debug("creating downline"+ Multiplexer.linesListsToStrings(line :: Nil))
+    def asMessage() = DownMessage(line::Nil)
+  }  
+                                                     
   case class UpMessage(val lines: List[List[Byte]], val from : Console)
   case object Close
   val il2actor : LiftActor = this
 
   val defaultMessageHandler : PartialFunction[Any, Unit] = {
-  		case msg : DownMessage => {
-          log("v\n"+msg.lines)
+		// default: broadcast as lines
+  		case msg : DownLine => {
+          debug("v\n"+msg.line)
           for(client <- clients) {
-//          log("v\n"+msg.lines)
-          	client ! msg
+//          debug("v\n"+msg.lines)
+          	client ! msg.asMessage
           }
         }
         case msg : UpMessage => {
-          // broadcast pending DownMessages
+          // broadcast pending DownLines
           var more = true
           while(more){
             more=false
-            temporarily(10){
-              case DownMessage => for(client <- clients) {
-                client ! msg
+            onceWithin(10){
+              case down : DownLine => for(client <- clients) {
+                client ! down.asMessage
                 more = true
               }
             }
           }
           
           for(out <- il2out; line : List[Byte]<-msg.lines) {
-//          log("^\n" +line.toArray)
+debug("^\n" +line.toArray)
+
             out.write( line.toArray )
           }
           // wait for response for 500 ms, after that go back to accepting new UpMessages and broadcasting any
           // unexpected downmessages
-          temporarily(500){
-            case down : DownMessage => msg.from ! down 
+          onceWithin(500){
+            case down : DownMessage => msg.from ! down
+            
           }
         }
 
@@ -74,12 +83,12 @@ class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger wi
     var list : List[Byte] = Nil
 
     val thread = Multiplexer.daemon{
-          //log("waiting for console stream")
+          //debug("waiting for console stream")
           reader.read match {
             case x if x<0 => Thread.currentThread.interrupt
             case Multiplexer.newline  if list(0)=='\r' => {
               val toReverse : List[Byte] = Multiplexer.newline :: list
-              //log("received newlinee "+toReverse)
+              //debug("received newlinee "+toReverse)
               Multiplexer.this ! UpMessage( List(toReverse.reverse), consoleself)
               list = Nil
             }
@@ -101,11 +110,11 @@ class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger wi
     }
     override def messageHandler = {
           case msg : UpMessage =>{
-            //log("console up for "+msg.lines)
+            //debug("console up for "+msg.lines)
             msg.lines.map(line=>stream.write(line.toArray))
           }
           case msg : DownMessage =>{
-            //log("console down for "+msg.lines)
+            //debug("console down for "+msg.lines)
             msg.lines.map(line=>stream.write(line.toArray))
           }
     }
@@ -130,7 +139,7 @@ class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger wi
       }
     }catch{
       case e : IOException => {
-        log("client listener connection on port "+scport+" failed, retrying ")
+        debug("client listener connection on port "+scport+" failed, retrying ")
         Thread.sleep(1000)
         listenersocket = None
       }
@@ -146,24 +155,24 @@ class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger wi
     var il2lines : List[List[Byte]] = Nil
     il2in match{
       case Some(instream) => Multiplexer.daemon{
-        //log("waiting for instream")
+        debug("waiting for instream")
         instream.read match {
           case x if x<0 => Thread.currentThread.interrupt
           case Multiplexer.newline if il2line(0)=='\r' => {
             il2line  = Multiplexer.newline :: il2line
             il2line = il2line.reverse
             il2lines ::= il2line
-            //log("line:"+new String(il2line.reverse.toArray) +il2line.reverse)
+            debug("line:"+new String(il2line.reverse.toArray) +il2line.reverse)
             val toTest = new String(il2line.toArray).trim
             toTest match {
               case Multiplexer.consoleNPattern(n) => {
-                //log("sending "+il2lines.reverse.map(x=>new String(x.toArray)))
+                debug("sending "+il2lines.reverse.map(x=>new String(x.toArray)))
                 Multiplexer.this ! DownMessage(il2lines.reverse)
                 il2lines = Nil
               }
               case _ =>
-            //         				    log("appending "+il2lines.reverse.map(x=>new String(x.toArray))+"\nfrom "+il2line.map(x=>(x, ""+new String((x::Nil).toArray)))
-            //                             +"\ndd not find '"+toTest+"'"+"\n with "+ consoleNPattern.pattern)
+                     				    debug("appending "+il2lines.reverse.map(x=>new String(x.toArray))+"\nfrom "+il2line.map(x=>(x, ""+new String((x::Nil).toArray)))
+                                         +"\ndd not find '"+toTest+"'"+"\n with "+ Multiplexer.consoleNPattern.pattern)
             }
 
             il2line = Nil
@@ -172,7 +181,7 @@ class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger wi
           case _ => Thread.currentThread.interrupt
         }
       }then{
-        log("lost connection to IL2 instance on port "+il2port+", restarting Multiplexer!")
+        warn ("lost connection to IL2 instance on port "+il2port+", restarting Multiplexer!")
         il2in = None
         il2out = None
         il2socket.map(_.close)
@@ -188,16 +197,16 @@ class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger wi
             il2out = Some(socket.getOutputStream)
             il2socket = Some(socket)
             // thread has done its job
-            log("connected to IL2 server on port "+il2port+"")
+            debug("connected to IL2 server on port "+il2port+"")
             Thread.currentThread.interrupt
           }catch{
             case e : IOException => {
-              log("could not connect to IL2 server on port "+il2port+", retrying after a small pause ("+e.getMessage+")")
+              debug("could not connect to IL2 server on port "+il2port+", retrying after a small pause ("+e.getMessage+")")
               Thread.sleep(1000)
             }
           }
         }then{
-          //log("creating new il2waiter with il2in stream "+il2in)
+          //debug("creating new il2waiter with il2in stream "+il2in)
           il2waiter = newIl2Waiter
         }
       }
@@ -208,11 +217,11 @@ class Multiplexer(val il2port : Int , val scport : Int) extends ConsoleLogger wi
 
   }
 }
-object Multiplexer extends ConsoleLogger{
+object Multiplexer extends LiftLogger{
   def daemon(body: => Unit): Then = {
     new Then(body)
   }
-  class Then(body: => Unit){
+  class Then(body: => Unit) {
 
     def then(fin: => Unit) : Thread = {
       val ret : Thread = new Thread{
@@ -222,7 +231,7 @@ object Multiplexer extends ConsoleLogger{
               body
             }
           }catch{
-            case e:Exception => log("Exception in daemon thread: "+e.getClass.getSimpleName+"\n"+e.getMessage)
+            case e:Exception => debug("Exception in daemon thread: "+e.getClass.getSimpleName+"\n"+e.getMessage)
           }
           fin
         }
@@ -244,7 +253,7 @@ object Multiplexer extends ConsoleLogger{
       Some(new Multiplexer(il2port, scport))
     }catch{
       case e: Exception => {
-        log("failed to connect "+e.getMessage)
+        warn("failed to connect "+e.getMessage)
 
         None
       }

@@ -23,6 +23,40 @@ import net.liftweb.actor._
  */
 
 trait TimedLiftActor extends LiftActor {
+
+  /**
+   * replace the messageHandler for at least forMillis milliseconds
+   */
+  final def temporarilyWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+    counter += 1 // counter is used so that 
+    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, 0) 
+  }
+  /**
+   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched <code>times</code> times
+   */
+  final def nTimesWithin(times : Int, forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+    counter += 1 // counter is used so that 
+    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, times) 
+  }
+  /**
+   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
+   */
+  final def onceWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+    counter += 1 // counter is used so that 
+    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, 1) 
+  }
+    /**
+   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
+   */
+  final def backToRegular() = {
+	messageHandler = messageHandler match {
+	  case handler : TemporaryHandlerFunction => handler.originalHandler
+	  case _ => messageHandler
+	}
+  }
+  
+  var messageHandler : PartialFunction[Any, Unit]
+  
   private var counter : Long = 0
   
   /**
@@ -58,28 +92,6 @@ trait TimedLiftActor extends LiftActor {
 	
 	timer ! Reminder(TimedLiftActor.this, timeout, waitFor)
   }  
-  /**
-   * replace the messageHandler for at least forMillis milliseconds
-   */
-  final def temporarilyWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    counter += 1 // counter is used so that 
-    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, 0) 
-  }
-  /**
-   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched <code>times</code> times
-   */
-  final def nTimesWithin(times : Int, forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    counter += 1 // counter is used so that 
-    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, times) 
-  }
-  /**
-   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
-   */
-  final def onceWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    counter += 1 // counter is used so that 
-    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, 1) 
-  }
-  var messageHandler : PartialFunction[Any, Unit]
 }
 
 
