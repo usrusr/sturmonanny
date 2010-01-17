@@ -3,28 +3,21 @@ package de.immaterialien.sturmonanny.multiplexer
 import java.net._
 import java.io._
 
-//import scala.actors.TIMEOUT
+
 import net.liftweb.actor._
 import net.liftweb.common._
 import net.liftweb.util.LiftLogger
 
 import scala.collection.mutable.Queue
 
-//import scala.util.logging._
-
 import de.immaterialien.sturmonanny.util._
  
 class Multiplexer(val il2port : Int , val scport : Int) extends LiftActor with TimedLiftActor with Logging{
    
-//problem: unangeforderte nachrichten aus dem spiel (chat by player) werden erst mit dem nächsten paket als nachricht erkannt.
-//plan: zeilenweise an den actor übergeben, der kann dann in einer kurze timeoutschleife empfangen und beim TIMEOUT broadcasten oder eben nicht
- 
   case class DownMessage(val lines: List[List[Byte]]){
-//    debug("creating downmessage"+ Multiplexer.linesListsToStrings(lines))
     override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(lines).mkString
   }
   case class DownLine(val line: List[Byte]){
-//    debug("creating downline"+ Multiplexer.linesListsToStrings(line :: Nil))
     def asMessage() = DownMessage(line::Nil)
     override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(line :: Nil).mkString
   }  
@@ -39,34 +32,26 @@ class Multiplexer(val il2port : Int , val scport : Int) extends LiftActor with T
   val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines
   		case msg : DownLine => {
-//          debug("v\n"+msg.line)
           for(client <- clients) {
-//          debug("v\n"+msg.lines)
           	client ! msg.asMessage
           }
         }
         case msg : UpMessage => {
-debug("received "+msg) 
           // broadcast pending DownLines
             reactOnceWithin(10){
               case down : DownLine => for(client <- clients) {
-debug("broadcast pending "+down)          
                 client ! down.asMessage
                 extendTimeFromNow(10)
                 extendCountFromNow(1)
               }
             }
           
-          
           for(out <- il2out; line : List[Byte]<-msg.lines) {
-debug("sending directed "+line) 
-//todo: fix temporarilywithin
             out.write( line.toArray )
           }
-          // wait for response for 500 ms, after that go back to accepting new UpMessages and broadcasting any
+          // wait for response for 500 ms, after that (or after receiving DownPromptLine) go back to accepting new UpMessages and broadcasting any
           // unexpected downmessages
           var lines : List[DownLine] = Nil
-debug("entering temporarilyWIthin")          
           reactWithin(500){
             case down : DownPromptLine => {
               lines.reverse.foreach(msg.from ! _)
@@ -78,8 +63,6 @@ debug("entering temporarilyWIthin")
               lines ::= down
             }
           }
-debug("returning from temporarilyWIthin")          
-if(lines!=Nil) debug("broadcasting saved lines "+lines.reverse.mkString )          
           for(line <- lines.reverse ; client <- clients) client ! line
         }
 
@@ -100,12 +83,10 @@ if(lines!=Nil) debug("broadcasting saved lines "+lines.reverse.mkString )
     var list : List[Byte] = Nil
 
     val thread = Multiplexer.daemon{
-          //debug("waiting for console stream")
           reader.read match {
             case x if x<0 => Thread.currentThread.interrupt
             case Multiplexer.newline  if list(0)=='\r' => {
               val toReverse : List[Byte] = Multiplexer.newline :: list
-              //debug("received newlinee "+toReverse)
               Multiplexer.this ! UpMessage( List(toReverse.reverse), consoleself)
               list = Nil
             }
@@ -126,21 +107,16 @@ if(lines!=Nil) debug("broadcasting saved lines "+lines.reverse.mkString )
       }
     }
     override def messageHandler = {
-          case msg : UpMessage =>{
-            //debug("console up for "+msg.lines)
-            msg.lines.map(line=>stream.write(line.toArray))
-          }
-          case msg : DownMessage =>{
-            //debug("console down for "+msg.lines)
-            msg.lines.map(line=>stream.write(line.toArray))
-          }
+//          case msg : UpMessage => 	msg.lines.map(line=>stream.write(line.toArray))
+          case msg : DownMessage => msg.lines.map(line=>stream.write(line.toArray))
+          case msg : DownLine => 	stream.write(msg.line.toArray)
     }
   }
 
   var clients : List[Console] = Nil
   var il2socket : Option[Socket] = None
-  var il2out : Option[OutputStream] = None//il2port.getOutputStream
-  var il2in : Option[InputStream] = None//il2port.getInputStream
+  var il2out : Option[OutputStream] = None
+  var il2in : Option[InputStream] = None
   var listenersocket : Option[ServerSocket] = None
 
   val serverThread : Thread = Multiplexer.daemon{
@@ -169,31 +145,19 @@ if(lines!=Nil) debug("broadcasting saved lines "+lines.reverse.mkString )
 
   def newIl2Waiter() : Thread = {
     var il2line : List[Byte] = Nil
-//    var il2lines : List[List[Byte]] = Nil
     il2in match{
       case Some(instream) => Multiplexer.daemon{
-//        debug("waiting for instream")
         instream.read match {
           case x if x<0 => Thread.currentThread.interrupt
           case Multiplexer.newline if il2line(0)=='\r' => {
             il2line  = Multiplexer.newline :: il2line
             il2line = il2line.reverse
-//            il2lines ::= il2line
-//            debug("line:"+new String(il2line.toArray) +il2line.reverse)
             val toTest = new String(il2line.toArray).trim
             toTest match {
-              case Multiplexer.consoleNPattern(n) => {
-//                debug("sending "+il2lines.reverse.map(x=>new String(x.toArray)))
-//                Multiplexer.this ! DownMessage(il2lines.reverse)
-//                il2lines = Nil
-//                debug("sending "+toTest)
-  				Multiplexer.this ! DownPromptLine(il2line)
-              }
-              case _ =>
+              case Multiplexer.consoleNPattern(n) => 
+                Multiplexer.this ! DownPromptLine(il2line)
+              case _ => 
                 Multiplexer.this ! DownLine(il2line)
-//                Multiplexer.this ! DownMessage(il2lines.reverse)
-//                     				    debug("appending "+il2lines.reverse.map(x=>new String(x.toArray))+"\nfrom "+il2line.map(x=>(x, ""+new String((x::Nil).toArray)))
-//                                         +"\ndd not find '"+toTest+"'"+"\n with "+ Multiplexer.consoleNPattern.pattern)
             }
 
             il2line = Nil
