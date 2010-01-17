@@ -2,80 +2,120 @@ package de.immaterialien.sturmonanny.util
 
 import net.liftweb.common._
 import net.liftweb.actor._
+import net.liftweb.util._
 
 /**
  * 
  * extends a LiftActor (which has to implement messageHandler as a var) with methods roughly resembling receiveWithin/reactWithin methods of the scala.actor 
  * 
- * temporarilyWithin(<timeout>){
+ * reactWithin(<timeout>){
  * 	 <temporary message handler body>
  * }
  * 
- * nTimesWithin(<hoMany>, <timeout>){
+ * reactNTimesWithin(<hoMany>, <timeout>){
  * 	 <temporary message handler body>
  * }
  * 
- * onceWithin(<timeout>){
+ * reactOnceWithin(<timeout>){
  * 	 <temporary message handler body>
  * }
+ * 
+ * reactNormally()
+ * 
+ * and a number of extend... methods to manipulate the timeout/countout of the current handler 
  * 
  * @author Ulf Schreiber
  */
 
-trait TimedLiftActor extends LiftActor {
+trait TimedLiftActor extends LiftActor with Logging {
+level=LiftLogLevels.Trace
 
   /**
    * replace the messageHandler for at least forMillis milliseconds
    */
-  final def temporarilyWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    counter += 1 // counter is used so that 
-    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, 0) 
+  final def reactWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+    messageHandler = new TemporaryHandlerFunction(forMillis, body, -1) 
   }
   /**
    * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched <code>times</code> times
    */
-  final def nTimesWithin(times : Int, forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    counter += 1 // counter is used so that 
-    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, times) 
+  final def reactNTimesWithin(times : Int, forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+    messageHandler = new TemporaryHandlerFunction(forMillis, body, times) 
   }
   /**
    * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
    */
-  final def onceWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    counter += 1 // counter is used so that 
-    messageHandler = new TemporaryHandlerFunction(counter, forMillis, body, 1) 
+  final def reactOnceWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+    messageHandler = new TemporaryHandlerFunction(forMillis, body, 1) 
   }
-    /**
-   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
+  /**
+   * return to the last messageHandler, even before timeout 
    */
-  final def backToRegular() = {
+  final def reactNormally() = {
 	messageHandler = messageHandler match {
 	  case handler : TemporaryHandlerFunction => handler.originalHandler
 	  case _ => messageHandler
 	}
   }
-  
+  /**
+   * add more time to current nonstandard handler 
+   */
+  final def extendTime(additionalMillis : Long ) = {
+	messageHandler match {
+	  case handler : TemporaryHandlerFunction => handler.until += additionalMillis
+	  case _ => messageHandler
+	}
+  }
+  /**
+   * add more matches to current nonstandard handler (if it is counting) 
+   */
+  final def extendCount(additionalCount : Int) = {
+	messageHandler match {
+	  case handler : TemporaryHandlerFunction if(handler.matchCount > 0) => handler.toDo += additionalCount
+	  case _ => messageHandler
+	}
+  }
+  /**
+   * set new timeout
+   */
+  final def extendTimeFromNow(millis : Long ) = {
+	messageHandler match {
+	  case handler : TemporaryHandlerFunction => handler.until = java.lang.System.currentTimeMillis + millis
+	  case _ => messageHandler
+	}
+  }  
+  /**
+   * set new maximum matches, from now (unless the handler started unlimited) 
+   */
+  final def extendCountFromNow(newCount : Int) = {
+	messageHandler match {
+	  case handler : TemporaryHandlerFunction if(handler.matchCount > 0)  => handler.toDo = newCount
+	  case _ => messageHandler
+	}
+  }
+
   var messageHandler : PartialFunction[Any, Unit]
-  
-  private var counter : Long = 0
+
   
   /**
    * inner class for the temporary handler function, used to identify messageHandlers that were set by previous, unfinished calls to temporarily
    */  
-  private class TemporaryHandlerFunction(val unique : Long, val waitFor : Int, val body : PartialFunction[Any, Unit], val matchCount:Int) extends PartialFunction[Any, Unit]{
-	val timeout = Timeout(unique)    
-	val startedAt = java.lang.System.currentTimeMillis
+  private case class TemporaryHandlerFunction(val waitFor : Int, val body : PartialFunction[Any, Unit], val matchCount:Int) extends PartialFunction[Any, Unit]{
+	var until = java.lang.System.currentTimeMillis + waitFor
+ 
 	val originalHandler : PartialFunction[Any, Unit] = messageHandler match{
 	  // unwrap old TimeOutHandler if old will end before new to avoid unneccessary chaining of TimeoutHandlers
-	  case old : TemporaryHandlerFunction if (old.startedAt+old.waitFor < startedAt+waitFor) => old.originalHandler  
-	  case _ => messageHandler
+	  case old : TemporaryHandlerFunction if (old.until < until) => {
+	    old.originalHandler
+      }
+	  case _ => {
+	    messageHandler
+     }
 	}
-	val timeoutReceiver : PartialFunction[Any, Unit] = {
-	  case timeout => messageHandler = originalHandler
-	}  
+
+    var toDo = matchCount
 	val countingBody = if(matchCount>0){
 	  new PartialFunction[Any, Unit]{
-	    var toDo = matchCount
 	    override def isDefinedAt(x : Any) = body.isDefinedAt(x)
 	    override def apply(x : Any) = {
 	      inner.apply(x)
@@ -86,58 +126,24 @@ trait TimedLiftActor extends LiftActor {
 	}else{
 	  body
 	}
-	val inner : PartialFunction[Any, Unit] = timeoutReceiver orElse body
-	override def isDefinedAt(x : Any) = inner.isDefinedAt(x)
-	override def apply(x : Any) = inner.apply(x)
+	var inner : PartialFunction[Any, Unit] = countingBody
+ 
+	def ranOut() = (matchCount>0 && toDo<1) || (java.lang.System.currentTimeMillis>until)
 	
-	timer ! Reminder(TimedLiftActor.this, timeout, waitFor)
-  }  
-}
-
-
-private case class Timeout(unique : Long)
-private case class Reminder(to : TimedLiftActor, message : Timeout ,  millis : Int)
-private case class Remove(who : TimeOnce)
-
-
-
-/**
- * short-lived actor that, on receiving a Reminder message sends an IGNORE message to self to wait for a response (which wont happen)
- * and then sends the message in the Reminder to the receiver defined by the Reminder (the message happens to be a Timeout(unique) but who cares)
- */
-private  class TimeOnce extends LiftActor{
-  object IGNORE
-  object WONTHAPPEN
-  
-	val ignoreEverything : PartialFunction[Any, Unit] = {
-	  case WONTHAPPEN => // ignores IGNORE
- 	}
-	val self = this
-	val idle : PartialFunction[Any, Unit]= {
-	  case in : Reminder => {
-	    self.messageHandler = self.ignoreEverything
-	    self.!!(Box[Any](Some(IGNORE)), in.millis)
-	    in.to ! in.message
-	    self.messageHandler = self.idle
-	    timer ! Remove(self)
-	  }  
-	  case IGNORE => // accept any pending ignores and ignore them
+ 
+	override def isDefinedAt(x : Any) = {
+	  if( ! ranOut()) inner.isDefinedAt(x)
+	  else {
+		  messageHandler = originalHandler
+		  messageHandler.isDefinedAt(x)
+	  }
+   	}
+	override def apply(x : Any) = {
+	  if( ! ranOut()) inner.apply(x)
+	  else {
+		  messageHandler = originalHandler
+		  messageHandler.apply(x)
+	  }
 	}
-	var messageHandler = idle 
-}
-
-/**
- * our central manager for instances of TimeOnce
- */
-private object timer extends LiftActor{
-  var inflight : List[TimeOnce] = Nil
-  val self = this
-  def messageHandler = {
-    case in : Reminder =>{
-      val timer = new TimeOnce
-      inflight ::=timer
-      timer ! in
-    }
-    case Remove(timer) => inflight -= timer
-  } 
+  }  
 }

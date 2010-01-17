@@ -8,7 +8,7 @@ import _root_.net.liftweb.util._
 import _root_.net.liftweb.common._
 
 object AppTest {
-  def suite: Test = {
+  def suite: Test = { 
     val suite = new TestSuite(classOf[AppTest])
     suite
   }
