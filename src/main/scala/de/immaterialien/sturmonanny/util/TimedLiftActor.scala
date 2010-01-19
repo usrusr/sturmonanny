@@ -6,7 +6,7 @@ import net.liftweb.util._
 
 /**
  * 
- * extends a LiftActor (which has to implement messageHandler as a var) with methods roughly resembling receiveWithin/reactWithin methods of the scala.actor 
+ * extends a LiftActor (which has to implement temporaryMessageHandler as a var) with methods roughly resembling receiveWithin/reactWithin methods of the scala.actor 
  * 
  * reactWithin(<timeout>){
  * 	 <temporary message handler body>
@@ -22,80 +22,87 @@ import net.liftweb.util._
  * 
  * reactNormally()
  * 
- * and a number of extend... methods to manipulate the timeout/countout of the current handler 
+ * and a number of extend... methods to manipulate the timeout/countout of the current handler
+ * 
+ * implement defaultMessageHandler instead of messageHandler
  * 
  * @author Ulf Schreiber
  */
 
-trait TimedLiftActor extends LiftActor with Logging {
-level=LiftLogLevels.Trace
+trait TimedLiftActor extends LiftActor { 
+//with Logging {
+//loglevel=LiftLogLevels.Trace
 
   /**
-   * replace the messageHandler for at least forMillis milliseconds
+   * replace the temporaryMessageHandler for at least forMillis milliseconds
    */
   final def reactWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    messageHandler = new TemporaryHandlerFunction(forMillis, body, -1) 
+    temporaryMessageHandler = new TemporaryHandlerFunction(forMillis, body, -1) 
   }
   /**
-   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched <code>times</code> times
+   * replace the temporaryMessageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched <code>times</code> times
    */
   final def reactNTimesWithin(times : Int, forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    messageHandler = new TemporaryHandlerFunction(forMillis, body, times) 
+    temporaryMessageHandler = new TemporaryHandlerFunction(forMillis, body, times) 
   }
   /**
-   * replace the messageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
+   * replace the temporaryMessageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
    */
   final def reactOnceWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
-    messageHandler = new TemporaryHandlerFunction(forMillis, body, 1) 
+    temporaryMessageHandler = new TemporaryHandlerFunction(forMillis, body, 1) 
   }
   /**
-   * return to the last messageHandler, even before timeout 
+   * return to the last temporaryMessageHandler, even before timeout 
    */
   final def reactNormally() = {
-	messageHandler = messageHandler match {
+	temporaryMessageHandler = temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction => handler.originalHandler
-	  case _ => messageHandler
+	  case _ => temporaryMessageHandler
 	}
   }
   /**
    * add more time to current nonstandard handler 
    */
   final def extendTime(additionalMillis : Long ) = {
-	messageHandler match {
+	temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction => handler.until += additionalMillis
-	  case _ => messageHandler
+	  case _ => temporaryMessageHandler
 	}
   }
   /**
    * add more matches to current nonstandard handler (if it is counting) 
    */
   final def extendCount(additionalCount : Int) = {
-	messageHandler match {
+	temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction if(handler.matchCount > 0) => handler.toDo += additionalCount
-	  case _ => messageHandler
+	  case _ => temporaryMessageHandler
 	}
   }
   /**
    * set new timeout
    */
   final def extendTimeFromNow(millis : Long ) = {
-	messageHandler match {
+	temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction => handler.until = java.lang.System.currentTimeMillis + millis
-	  case _ => messageHandler
+	  case _ => temporaryMessageHandler
 	}
   }  
   /**
    * set new maximum matches, from now (unless the handler started unlimited) 
    */
   final def extendCountFromNow(newCount : Int) = {
-	messageHandler match {
+	temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction if(handler.matchCount > 0)  => handler.toDo = newCount
-	  case _ => messageHandler
+	  case _ => temporaryMessageHandler
 	}
   }
+  
+  private var temporaryMessageHandler : PartialFunction[Any, Unit] = defaultMessageHandler
+  override final def messageHandler : PartialFunction[Any, Unit]  = temporaryMessageHandler 
 
-  var messageHandler : PartialFunction[Any, Unit]
-
+  final def mes = 0;
+  
+  def defaultMessageHandler : PartialFunction[Any, Unit] 
   
   /**
    * inner class for the temporary handler function, used to identify messageHandlers that were set by previous, unfinished calls to temporarily
@@ -103,13 +110,13 @@ level=LiftLogLevels.Trace
   private case class TemporaryHandlerFunction(val waitFor : Int, val body : PartialFunction[Any, Unit], val matchCount:Int) extends PartialFunction[Any, Unit]{
 	var until = java.lang.System.currentTimeMillis + waitFor
  
-	val originalHandler : PartialFunction[Any, Unit] = messageHandler match{
+	val originalHandler : PartialFunction[Any, Unit] = temporaryMessageHandler match{
 	  // unwrap old TimeOutHandler if old will end before new to avoid unneccessary chaining of TimeoutHandlers
 	  case old : TemporaryHandlerFunction if (old.until < until) => {
 	    old.originalHandler
       }
 	  case _ => {
-	    messageHandler
+	    temporaryMessageHandler
      }
 	}
 
@@ -120,7 +127,7 @@ level=LiftLogLevels.Trace
 	    override def apply(x : Any) = {
 	      inner.apply(x)
 	      toDo -= 1
-	      if(toDo<1) messageHandler = originalHandler
+	      if(toDo<1) temporaryMessageHandler = originalHandler
 	    }
 	  }
 	}else{
@@ -134,15 +141,15 @@ level=LiftLogLevels.Trace
 	override def isDefinedAt(x : Any) = {
 	  if( ! ranOut()) inner.isDefinedAt(x)
 	  else {
-		  messageHandler = originalHandler
-		  messageHandler.isDefinedAt(x)
+		  temporaryMessageHandler = originalHandler
+		  temporaryMessageHandler.isDefinedAt(x)
 	  }
    	}
 	override def apply(x : Any) = {
 	  if( ! ranOut()) inner.apply(x)
 	  else {
-		  messageHandler = originalHandler
-		  messageHandler.apply(x)
+		  temporaryMessageHandler = originalHandler
+		  temporaryMessageHandler.apply(x)
 	  }
 	}
   }  

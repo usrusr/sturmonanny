@@ -3,16 +3,12 @@ package de.immaterialien.sturmonanny.multiplexer
 import java.net._
 import java.io._
 
-
 import net.liftweb.actor._
 import net.liftweb.common._
-import net.liftweb.util.LiftLogger
-
-import scala.collection.mutable.Queue
 
 import de.immaterialien.sturmonanny.util._
  
-class Multiplexer(val il2port : Int , val scport : Int) extends LiftActor with TimedLiftActor with Logging{
+class Multiplexer(val il2port : Int , val scport : Int) extends TimedLiftActor with Logging{
    
   case class DownMessage(val lines: List[List[Byte]]){
     override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(lines).mkString
@@ -29,7 +25,7 @@ class Multiplexer(val il2port : Int , val scport : Int) extends LiftActor with T
   case object Close
   val il2actor : LiftActor = this
 
-  val defaultMessageHandler : PartialFunction[Any, Unit] = {
+  override val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines
   		case msg : DownLine => {
           for(client <- clients) {
@@ -69,8 +65,6 @@ class Multiplexer(val il2port : Int , val scport : Int) extends LiftActor with T
         case Close => exit
   }
   
-  
-  override var messageHandler = defaultMessageHandler
 
   /**
    *  a client connection, defined with a socket and an accompanying thread listening on the socket's input stream
@@ -202,11 +196,11 @@ class Multiplexer(val il2port : Int , val scport : Int) extends LiftActor with T
 
   }
 }
-object Multiplexer extends LiftLogger{
+object Multiplexer extends Logging{
   def daemon(body: => Unit): Then = {
     new Then(body)
   }
-  class Then(body: => Unit) {
+  class Then(body: => Unit) extends Logging{
 
     def then(fin: => Unit) : Thread = {
       val ret : Thread = new Thread{

@@ -27,9 +27,9 @@ trait Logging {
   def fatal(msg: AnyRef): Unit = logger.fatal(msg)
   def fatal(msg: AnyRef, t: Throwable): Unit = logger.fatal(msg, t)
 
-  def level: LiftLogLevels.Value = logger.level
-  def level_=(level: LiftLogLevels.Value): Unit = logger.level = level
-  def name: String = logger.name
+  def loglevel: LiftLogLevels.Value = logger.level
+  def loglevel_=(level: LiftLogLevels.Value): Unit = logger.level = level
+  private def name: String = logger.name
 //  def parent = logger.getParent
 
   def isInfoEnabled: Boolean = logger.isInfoEnabled
@@ -42,5 +42,5 @@ trait Logging {
   def warn(msg: => AnyRef): Unit = logger.warn(msg)
   def warn(msg: => AnyRef, t: => Throwable): Unit = logger.warn(msg,t)
   
-  level = LiftLogLevels.Trace
+  loglevel = LiftLogLevels.Trace
 }
