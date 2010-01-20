@@ -11,10 +11,9 @@ import net.liftweb.util._
 trait Domain[D <: Domain[D]] extends LiftActor with Logging{
  	self : D =>
 	val items : mutable.Map[String, this.Element] = new mutable.LinkedHashMap
-	//override var messageHandler : PartialFunction[Any, Unit] = {
 	override def messageHandler = {
 	  case p : this.Element => items.put(p.name, p)
-	  case forElement(who, what) => items.get(who).foreach(x=>x ! what)
+	  case forward(who, what) => items.get(who).foreach(x=>x ! what)
 	  case forAll(what) => items.values.foreach(x=>x ! what)
 	  case unregister(p) => items.removeKey(p.name) 
 	}
@@ -24,6 +23,6 @@ trait Domain[D <: Domain[D]] extends LiftActor with Logging{
 		def unknownMessage(x : Any) = debug(this.getClass.getSimpleName +" "+name + " got unidentified message "+ x)
 	}
   	case class unregister(val who : Element)
-  	case class forElement(val who : String, val what : Any)
+  	case class forward(val who : String, val what : Any)
   	case class forAll(what : Any)
 }

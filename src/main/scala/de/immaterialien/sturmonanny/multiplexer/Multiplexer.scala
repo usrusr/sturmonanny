@@ -238,5 +238,31 @@ object Multiplexer extends Logging{
       }
     }
   }
+  object minutes extends Thread with LiftActor {
+//    import scala.collection.mutable
+//    import java.{util => mutable}
+    import scala.collection._
+    object minute
+    private case class add(val who : LiftActor)
+    private case class remove(val who : LiftActor)
 
+    def unsubscribe( who : LiftActor) {
+      this ! add(who)
+    }
+    def subscribe( who : LiftActor) {
+      this ! remove(who)
+    }
+    override def run = while(! this.isInterrupted ){
+       Thread.sleep(60*1000)
+	   this ! minute
+    }
+    val multiplexers :mutable.Set[LiftActor]= (new jcl.WeakHashMap(new java.util.WeakHashMap)).keySet
+    def messageHandler = {
+      case add(who) => multiplexers += who
+      case remove(who) => multiplexers -= who
+      case minute => multiplexers map ( _ ! minute) 
+    }
+    this setDaemon true
+    this start
+  }
 }
