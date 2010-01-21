@@ -7,7 +7,7 @@ import scala.collection.mutable
 import net.liftweb.common._
 import net.liftweb.actor._
 import net.liftweb.util._
-
+ 
 trait Domain[D <: Domain[D]] extends LiftActor with Logging{
  	self : D =>
 	val items : mutable.Map[String, this.Element] = new mutable.LinkedHashMap

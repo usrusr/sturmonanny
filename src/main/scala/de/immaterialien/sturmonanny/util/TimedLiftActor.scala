@@ -131,7 +131,7 @@ trait TimedLiftActor extends LiftActor {
 	    }
 	  }
 	}else{
-	  body
+	  body 
 	}
 	var inner : PartialFunction[Any, Unit] = countingBody
  

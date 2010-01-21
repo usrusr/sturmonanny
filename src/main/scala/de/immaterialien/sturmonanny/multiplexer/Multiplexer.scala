@@ -8,7 +8,8 @@ import net.liftweb.common._
 
 import de.immaterialien.sturmonanny.util._
  
-class Multiplexer(val il2port : Int , val scport : Int) extends TimedLiftActor with Logging{
+class Multiplexer(val host : String, val il2port : Int , val scport : Int) extends TimedLiftActor with Logging{
+  def this(il2port : Int , scport : Int) = this("127.0.0.1", il2port, scport)
    
   case class DownMessage(val lines: List[List[Byte]]){
     override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(lines).mkString
