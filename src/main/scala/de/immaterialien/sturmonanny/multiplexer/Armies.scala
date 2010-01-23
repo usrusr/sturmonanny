@@ -22,7 +22,7 @@ object Army extends Enumeration("Red", "Blue", "None") {
   class SidesVar[T](x : => T) extends SidesVal[T](x) {
     def update(which : SideProvider, body : => T) = which currentSide match {
 		case Red => red = body
-	    case Blue => blue = body 
+	    case Blue => blue = body  
 	    case _ => none = body
     }
   }

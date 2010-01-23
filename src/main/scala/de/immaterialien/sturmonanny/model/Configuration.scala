@@ -4,61 +4,90 @@ import _root_.net.lag.configgy
 import _root_.de.immaterialien.sturmonanny.util.ConfiggyGroup
 import _root_.de.immaterialien.sturmonanny.multiplexer
 
-class Configuration(val name : String, val file : String) {
+class Configuration(val file : String) {
+	
 	object server  extends ConfiggyGroup{ 
-	  var host : String = try{java.net.InetAddress.getLocalHost.getHostName}catch{case _ => "127.0.0.1"}
-	  var il2port = 2001
-	  var consoleport = 2011
-	  override def update(conf : Reconfigure) {
-	    host = conf get "host" or host
-	    il2port = conf get "il2port" or il2port
-	    consoleport = conf get "consoleport" or consoleport
-	  } 
+	  object host extends Field( try{java.net.InetAddress.getLocalHost.getHostName}catch{case _ => "127.0.0.1"})
+	  object il2port extends Field(2001)   	  
+	  object consoleport extends Field(2011)
+      object toolName extends Field("Sturmonanny")
+	  object serverName extends Field("testserver")
 	}
 	object game extends ConfiggyGroup {
-	  var deathpenalty = 2
-	  var startcost = 10
-	  var refund = 50
-	  var accountlimit = 1000
-	  var recruitshare = 50
-	  override def update(conf : Reconfigure) {
-		   deathpenalty = conf get "deathpenalty" or deathpenalty
-		   startcost = conf get "startcost" or startcost
-		   refund = conf get "refund" or refund
-		    accountlimit = conf get "accountlimit" or accountlimit
-		    recruitshare = conf get "recruitshare" or recruitshare
-	  }
+	  object deathpenalty extends Field(2)
+	  object warningsToKick extends Field(10)
+	  object warningInterval extends Field(3)
+	  object startcost extends Field(10)
+	  object refund extends Field(50)
+	  object accountlimit extends Field(1000)
+	  object recruitshare extends Field(50)
+
 	}
 	object market extends ConfiggyGroup {
-	  var planesfile = "planes.lst"
-	  var unlimitedquanity = 50
-	  var maxStartPrice = 50
-	  var maxPrice = 100
-	  var updatePeriod = 5
-	  var maxStep = 5
-	  var tolerance = 20 
-   
-	  override def update(conf : Reconfigure) {
-	  	planesfile = conf get "planesfile" or planesfile
-	  	unlimitedquanity = conf get "unlimitedquanity" or unlimitedquanity
-	  	maxStartPrice = conf get "maxStartPrice" or maxStartPrice
-	  	maxPrice = conf get "maxPrice" or maxPrice
-	  	updatePeriod = conf get "updatePeriod" or updatePeriod
-	  	maxStep = conf get "maxStep" or maxStep
-	  	tolerance = conf get "tolerance" or tolerance
-	  }
+	  object planesfile extends Field("planes.lst")
+	  object unlimitedquanity extends Field(50)
+	  object maxStartPrice extends Field(50)
+	  object maxPrice extends Field(100)
+	  object updatePeriod extends Field(5)
+	  object maxStep extends Field(5)
+	  object tolerance extends Field(20 )
 	} 
 	
+    private val all = List(server, game, market)
 	def apply(conf : configgy.Config) = {
-	  val list = List(server, game, market)
-	  list foreach (_ apply conf)
+	  all foreach (_ apply conf)
 	}
 	try{
 		this(configgy.Config.fromFile(file))
 	}catch{
 	  case x: _root_.java.io.IOException => x.printStackTrace
+	  case x => println(""+x)
 	}
-	var multi = new multiplexer.Multiplexer(server.host, server.il2port, server.consoleport)
- 
+	override def toString = {
+	  val sb = new scala.StringBuilder
+      var prefix : String= ""
+	  for(group<-all){
+	    val blanks = changeGroup(sb, prefix, group.prefix)
+	    group.write(sb, blanks)
+	    prefix = group.prefix
+	  }
+	  changeGroup(sb, prefix, "")
+	  sb toString
+	}
+	private def changeGroup(sb : StringBuilder, oldP : String, newP : String):String = {
+	  var oldS = List.fromString(oldP, '.')
+	  var newS = List.fromString(newP, '.')
+	  var count = -1
+	  while (newS != Nil && oldS!=Nil &&  oldS.head == newS.head ){
+	    newS = newS.tail
+	    oldS = oldS.tail
+	    count+=1
+	  }
+	  count+=oldS.length
+	  for(close <- oldS.reverse){
+	    sb append ("   "*count)+"</"+close+">\r\n"
+	    count-=1
+	  }
+	  for(open<- newS){
+	    count+=1
+	    sb append ("   "*count)+"<"+open+">\r\n"
+	  }
+	  "   "*(1+count)
+	} 
 }
+object Configuration {
+   implicit def fieldReadConversionString (in : ConfiggyGroup#Field[String]) : String = in.apply
+   implicit def fieldReadConversionBoolean (in : ConfiggyGroup#Field[Boolean]) : Boolean = in.apply
+   implicit def fieldReadConversionInt (in : ConfiggyGroup#Field[Int]) : Int = in.apply
+   
+   implicit def fieldIntString (in : Int) : String = ""+in
+   implicit def fieldIntString (in : Boolean) : String = ""+in
+   
+//   implicit def fieldStringConversionString (in : ConfiggyGroup#Field[String]) : String = in.apply
+//   implicit def fieldStringConversionBoolean (in : ConfiggyGroup#Field[Boolean]) : String = ">>"+in.apply
+//   implicit def fieldStringConversionInt (in : ConfiggyGroup#Field[Int]) : String = ">>"+in.apply
+   
+   object Default extends Configuration("default.conf")
+}
+
 

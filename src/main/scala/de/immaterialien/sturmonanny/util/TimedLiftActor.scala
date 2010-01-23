@@ -143,7 +143,7 @@ trait TimedLiftActor extends LiftActor {
 	  else {
 		  temporaryMessageHandler = originalHandler
 		  temporaryMessageHandler.isDefinedAt(x)
-	  }
+	  } 
    	}
 	override def apply(x : Any) = {
 	  if( ! ranOut()) inner.apply(x)

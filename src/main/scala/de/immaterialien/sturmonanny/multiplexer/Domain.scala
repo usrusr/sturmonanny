@@ -11,7 +11,7 @@ import net.liftweb.util._
 trait Domain[D <: Domain[D]] extends LiftActor with Logging{
  	self : D =>
 	val items : mutable.Map[String, this.Element] = new mutable.LinkedHashMap
-	override def messageHandler = {
+	override def messageHandler = { 
 	  case p : this.Element => items.put(p.name, p)
 	  case forward(who, what) => items.get(who).foreach(x=>x ! what)
 	  case forAll(what) => items.values.foreach(x=>x ! what)

@@ -11,7 +11,7 @@ class ActorTest  {
     case class two()  
     
     class Waiter extends LiftActor with TimedLiftActor {    
-      override var messageHandler : PartialFunction[Any, Unit] = {
+      override val defaultMessageHandler : PartialFunction[Any, Unit] = {
         case one() => print("< one\n") 
         case push() => {
            print("push!\n")

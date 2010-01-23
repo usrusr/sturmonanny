@@ -111,6 +111,8 @@
         </executions>
         <configuration>
           <scalaVersion>${scala.version}</scalaVersion>
+          <javaRebelPath>E:/java/javarebel/javarebel.jar</javaRebelPath>
+          
         </configuration>
       </plugin>
       <plugin>
