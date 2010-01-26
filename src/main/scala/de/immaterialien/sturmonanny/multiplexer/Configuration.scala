@@ -1,4 +1,4 @@
-package de.immaterialien.sturmonanny.model
+package de.immaterialien.sturmonanny.multiplexer
 
 import _root_.net.lag.configgy
 import _root_.de.immaterialien.sturmonanny.util.ConfiggyGroup
@@ -23,14 +23,18 @@ class Configuration(val file : String) {
 	  object recruitshare extends Field(50)
 
 	}
+//	object market extends ConfiggyGroup {
+//	  object planesfile extends Field("planes.lst")
+//	  object unlimitedquanity extends Field(50)
+//	  object maxStartPrice extends Field(50)
+//	  object maxPrice extends Field(100)
+//	  object updatePeriod extends Field(5)
+//	  object maxStep extends Field(5)
+//	  object tolerance extends Field(20 )
+//	} 
 	object market extends ConfiggyGroup {
-	  object planesfile extends Field("planes.lst")
-	  object unlimitedquanity extends Field(50)
-	  object maxStartPrice extends Field(50)
-	  object maxPrice extends Field(100)
-	  object updatePeriod extends Field(5)
-	  object maxStep extends Field(5)
-	  object tolerance extends Field(20 )
+	  object implementation extends Field("de.immaterialien.sturmonanny.multiplexer.AllPlanesEqualMarket")
+	  object configuration extends Field("planes.lst")
 	} 
 	
     private val all = List(server, game, market)
@@ -80,8 +84,8 @@ object Configuration {
    implicit def fieldReadConversionBoolean (in : ConfiggyGroup#Field[Boolean]) : Boolean = in.apply
    implicit def fieldReadConversionInt (in : ConfiggyGroup#Field[Int]) : Int = in.apply
    
-   implicit def fieldIntString (in : Int) : String = ""+in
-   implicit def fieldIntString (in : Boolean) : String = ""+in
+//   implicit def fieldIntString (in : Int) : String = ""+in
+//   implicit def fieldIntString (in : Boolean) : String = ""+in
    
 //   implicit def fieldStringConversionString (in : ConfiggyGroup#Field[String]) : String = in.apply
 //   implicit def fieldStringConversionBoolean (in : ConfiggyGroup#Field[Boolean]) : String = ">>"+in.apply

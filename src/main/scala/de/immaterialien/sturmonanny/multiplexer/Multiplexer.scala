@@ -7,9 +7,9 @@ import net.liftweb.actor._
 import net.liftweb.common._
 
 import de.immaterialien.sturmonanny.util._
-import de.immaterialien.sturmonanny.model.Configuration
+  import de.immaterialien.sturmonanny.multiplexer._
  
-class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with Member{
+class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{
   
   def this(il2port : Int , scport : Int) = this("127.0.0.1", il2port, scport)
   def updateConfiguration {
@@ -40,10 +40,13 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   case object Close
   val il2actor : LiftActor = this
   case class SwitchConnection(val host : String, val port : Int)
+  case class ChatTo(val who : String, val what : String){
+    def this(pilot : Pilots#Pilot, what :String) = this(pilot.name, what)
+  }
   
 //override val defaultMessageHandler : PartialFunction[Any, Unit] = {case x => debug("ignore"+x)}  
   override val defaultMessageHandler : PartialFunction[Any, Unit] = {
-		// default: broadcast as lines
+		// default: broadcast as lines 
 	    case SwitchConnection(newhost, newport) => {
 	      clients foreach ( _ ! DownInternal("disconnecting IL-2 instance on "+host+":"+il2port+" and switching to "+newhost+":"+newport))
 	      il2socket foreach (_.close)
@@ -84,7 +87,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           }
           for(line <- lines.reverse ; client <- clients) client ! line
         }
-
+        case ChatTo(who, what) => il2out foreach (_ write ("CHAT "+what+" TO "+ who).getBytes)
         case Close => exit
         case addClient(client) => clients ::: client :: Nil
         case removeClient(client) => clients.remove(x => client eq x)
@@ -261,6 +264,6 @@ object Multiplexer extends Logging{
       }
     }
   }  
-  val minute = new util.TimerActor(60000L)    
+
 
 }

@@ -9,7 +9,7 @@ object ConfiggyTest {
     val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf")
     
     println("game.refund before "+(c.game.refund) )
-    c.game.refund() = 10
+    c.game.refund() = 20
     println("game.refund after "+(c.game.refund) ) 
     println("game.refund after "+(0+c.game.refund) )
               println("parsed \n"+c)
