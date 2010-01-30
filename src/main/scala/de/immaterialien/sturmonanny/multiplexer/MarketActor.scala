@@ -43,6 +43,7 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
 	  case Msg.getPrice(plane) => reply(Msg.getPriceResult(internal map (_ getPrice plane) getOrElse 0))
 	  case Msg.addAirTime(plane, millis) => internal map (_ addAirTime(plane, millis))
 	  case Msg.setConfiguration(pathToFile) => reply(Msg.setConfigurationResult(internal map (_ setConfiguration pathToFile) getOrElse false))
+	  case Msg.cycle => internal map (_ cycle)
 	  case _ =>
 	}
 	def getPrice(plane : String) : Double = { 
@@ -63,7 +64,8 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
 	  		.asA[Msg.setConfigurationResult].getOrElse(Msg.setConfigurationResult(false))
 	  		.success
        
-	} 
+	}
+	def cycle = this ! Msg.cycle
 } 
 object Msg {
 	protected case class changeMarket(cls:String)
@@ -72,5 +74,6 @@ object Msg {
 	case class getPriceResult(price : Double)
 	case class addAirTime(plane : String, millis : Long) 
 	case class setConfiguration(pathToFile : String) 
-	case class setConfigurationResult(success : Boolean) 
+	case class setConfigurationResult(success : Boolean)
+	case object cycle  
 }

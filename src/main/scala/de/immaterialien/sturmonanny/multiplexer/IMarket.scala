@@ -14,4 +14,6 @@ trait IMarket {
 	 * return true for a successful configuration update 
 	 */
 	def setConfiguration(pathToFile : String) : Boolean
+	
+	def cycle : Unit
 }
