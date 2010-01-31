@@ -23,6 +23,7 @@ trait Domain[D <: Domain[D]] extends LiftActor with Logging{
 		def unknownMessage(x : Any) = debug(this.getClass.getSimpleName +" "+name + " got unidentified message "+ x)
 	}
   	case class unregister(val who : Element)
+
+}
   	case class forward(val who : String, val what : Any)
   	case class forAll(what : Any)
-}

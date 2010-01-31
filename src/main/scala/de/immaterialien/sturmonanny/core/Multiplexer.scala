@@ -69,10 +69,12 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
         case msg : UpMessage => {
           // broadcast pending DownLines
             reactOnceWithin(10){
-              case down : DownLine => for(client <- clients) {
-                client ! down.asMessage
-                extendTimeFromNow(10)
-                extendCountFromNow(1)
+              case down : DownLine => {
+                for(client <- clients) {
+                  client ! down.asMessage
+                  extendTimeFromNow(10)
+                  extendCountFromNow(1)
+                }
               }
             }
           
@@ -89,9 +91,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
               lines = Nil
               reactNormally
             }
-            case down : DownLine => {
-              lines ::= down
-            }
+            case down : DownLine => lines ::= down
           }
           for(line <- lines.reverse ; client <- clients) client ! line
         }
@@ -179,16 +179,17 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           case Multiplexer.newline if il2line.last=='\r' => {
             il2line  = il2line append "\n"
             
-
-            val toTest = new String(il2line.toArray).trim
-            toTest match {
-              case Multiplexer.consoleNPattern(n) => 
-                Multiplexer.this ! DownPromptLine(il2line.toString)
-              case _ => 
-                Multiplexer.this ! DownLine(il2line.toString)
+            val createdLine = il2line.toString
+            il2line.clear
+            createdLine match {
+              case Multiplexer.consoleNPattern(n) => { 
+                Multiplexer.this ! DownPromptLine(createdLine)
+              }
+              case _ =>  {
+                server.dispatcher ! createdLine
+                Multiplexer.this ! DownLine(createdLine)
+              }
             }
-
-            il2line clear
           }
           case x if x < 65536  => il2line = il2line append x
           case _ => Thread.currentThread.interrupt

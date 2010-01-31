@@ -28,9 +28,15 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember {
    		  case DIES => {  
    		    died() = died+1  
    		    deathPauseUntil = System.currentTimeMillis + (conf.game.deathpenalty * 1000)
+   		    currentPlane () = ""
           }
-   		  case flies(plane) => planes.value.getOrElseUpdate(plane, new PlaneState(0)).flies 
-          
+   		  case flies(plane, army) => {
+   	 	    currentSide_=(army)
+   	 	    currentPlane other = ""
+   	 	    currentPlane () = plane
+
+   		    planes.value.getOrElseUpdate(plane, new PlaneState(0)).flies 
+          }
    		  case server.warning.passed  => if(System.currentTimeMillis<deathPauseUntil){
    		    
    		  }   

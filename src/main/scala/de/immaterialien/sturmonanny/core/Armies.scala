@@ -48,9 +48,16 @@ object Armies extends Enumeration("Red", "Blue", "None") {
     def value = apply
     def other = apply(provider.other)
   }
+  def forName(name : String) : Armies = {
+    name match {
+      case "Red" => Red
+      case "Blue" => Blue
+      case _ => None
+    }
+  }
 }
 
-trait SideProvider{
+trait SideProvider{ 
 	def other: SideProvider = currentSide match {
 	  case Armies.Red => Armies.BlueSide
 	  case Armies.Blue => Armies.RedSide  
@@ -59,7 +66,7 @@ trait SideProvider{
   
 	private var internalSide = Armies.None
 	def currentSide() = internalSide
-	def currentSide_=(in : Armies.Value) = internalSide = in
+	def currentSide_=(in : Armies.Value) = internalSide = in 
 
 	def switchSides = internalSide = other.currentSide
  
