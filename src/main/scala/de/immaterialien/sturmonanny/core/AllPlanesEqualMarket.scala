@@ -1,4 +1,4 @@
-package de.immaterialien.sturmonanny.multiplexer
+package de.immaterialien.sturmonanny.core
 
 /**
  * a dummy market

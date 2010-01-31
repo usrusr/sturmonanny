@@ -11,7 +11,7 @@ import Helpers._
 import _root_.net.liftweb.mapper.{DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, ConnectionIdentifier}
 import _root_.java.sql.{Connection, DriverManager}
 
-import _root_.de.immaterialien.sturmonanny.multiplexer._;
+import _root_.de.immaterialien.sturmonanny.core._;
 import _root_.de.immaterialien.sturmonanny.model._
 import _root_.javax.servlet.http.{HttpServletRequest}
 

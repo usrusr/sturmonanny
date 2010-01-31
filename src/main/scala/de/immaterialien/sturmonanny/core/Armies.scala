@@ -1,10 +1,10 @@
-package de.immaterialien.sturmonanny.multiplexer
+package de.immaterialien.sturmonanny.core
 
 
 /**
  * Armies object provides methods to create holders for variables and values with separate content for each side
  * 
- * 
+ *  
  * 
  */
 object Armies extends Enumeration("Red", "Blue", "None") {
@@ -12,7 +12,7 @@ object Armies extends Enumeration("Red", "Blue", "None") {
   val Red = Value 
   val Blue = Value
   val None = Value
-
+ 
   object BlueSide extends SideProvider {
     override val currentSide = Blue
   }

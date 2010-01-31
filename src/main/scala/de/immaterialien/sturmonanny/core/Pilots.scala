@@ -1,18 +1,20 @@
-package de.immaterialien.sturmonanny.multiplexer
+package de.immaterialien.sturmonanny.core
 
-import _root_.de.immaterialien.sturmonanny.util.{TimedLiftActor, Logging}
+import de.immaterialien.sturmonanny.util.Domain
 import scala.collection.mutable
 import scala.util.matching._
+
  
-object DIES
+object DIES 
 case class chats(val msg : String) 
-case class join(val side : Army.Army)  
+case class join(val side : Armies.Armies)  
 case class inform(val text : String, val to : String)
 
-  
+         
 class Pilots extends Domain[Pilots] with NonUpdatingMember {
+
 	class Pilot(override val name : String) extends Pilots.this.Element(name) with SideProvider{
-		
+		 
    
         val planes = Army Val new mutable.LinkedHashMap[String, PlaneState]
         val currentPlane = Army Var ""
@@ -21,19 +23,19 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember {
 		var deathPauseUntil = 0L
    
 		override def defaultMessageHandler = { 
-		  case PERSIST => 
+		  case PERSIST =>  
 
    		  case DIES => {  
    		    died() = died+1  
    		    deathPauseUntil = System.currentTimeMillis + (conf.game.deathpenalty * 1000)
           }
-   		  case flies(plane) => planes.value.getOrElseUpdate(plane, new PlaneState(0)).flies
+   		  case flies(plane) => planes.value.getOrElseUpdate(plane, new PlaneState(0)).flies 
           
    		  case server.warning.passed  => if(System.currentTimeMillis<deathPauseUntil){
    		    
    		  }   
    		  case chats(msg) => msg match {
-   		    case balancecommand => server.multi ! server.multi.ChatTo(name, "current balance is "+balance)
+   		    case balancecommand => server.multi !  server.multi.ChatTo(name, "current balance is "+balance)
    		  } 
 		  case _ => unknownMessage _ 
 		}
@@ -50,7 +52,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember {
 		  private var since = 0L
 		  private var lastUpdate = 0L
 		  def flies {
-		    if(flying){
+		    if(flying){ 
 		      val cur = System.currentTimeMillis
 		      total += cur - lastUpdate
 		      lastUpdate = cur

@@ -3,7 +3,7 @@ package de.immaterialien.sturmonanny.util
 import de.immaterialien.sturmonanny.util._
 import scala.collection.mutable 
 
-
+ 
 import net.liftweb.common._
 import net.liftweb.actor._
 import net.liftweb.util._
@@ -17,7 +17,7 @@ trait Domain[D <: Domain[D]] extends LiftActor with Logging{
 	  case forAll(what) => items.values.foreach(x=>x ! what)
 	  case unregister(p) => items.removeKey(p.name) 
 	}
-
+ 
 	abstract class Element(val name : String) extends TimedLiftActor with Logging{
 		val domain = Domain.this
 		def unknownMessage(x : Any) = debug(this.getClass.getSimpleName +" "+name + " got unidentified message "+ x)

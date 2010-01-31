@@ -4,7 +4,7 @@ import scala.collection._
 import net.liftweb.actor.LiftActor
 
 
-class TimerActor(var pause : Long) extends Thread with LiftActor  {
+class TimerActor(var pause : Long) extends Thread with LiftActor  { 
   def this(p : Int) = this(p.toLong)
   	private case class SetInterval(val millis : Long)
     private case class add(val who : LiftActor)
@@ -29,7 +29,7 @@ class TimerActor(var pause : Long) extends Thread with LiftActor  {
        Thread.sleep(pause)
 	   this ! passed(pause)
     }
-//    var pause : Int = 60*1000
+//    var pause : Int = 60*1000 
     val multiplexers :mutable.Set[LiftActor]= (new jcl.WeakHashMap(new java.util.WeakHashMap)).keySet
     def messageHandler = {
       case SetInterval(mil) => pause=mil

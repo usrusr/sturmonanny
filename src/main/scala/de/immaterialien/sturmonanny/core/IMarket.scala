@@ -1,4 +1,4 @@
-package de.immaterialien.sturmonanny.multiplexer
+package de.immaterialien.sturmonanny.core
 
 
 /**
@@ -12,8 +12,8 @@ trait IMarket {
 	def addAirTime(plane : String, millis : Long) : Unit
 	/**
 	 * return true for a successful configuration update 
-	 */
+	 */  
 	def setConfiguration(pathToFile : String) : Boolean
 	
-	def cycle : Unit
+	def cycle : Unit   
 }

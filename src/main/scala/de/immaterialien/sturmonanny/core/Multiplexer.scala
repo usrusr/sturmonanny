@@ -1,4 +1,4 @@
-package de.immaterialien.sturmonanny.multiplexer
+package de.immaterialien.sturmonanny.core
 
 import java.net._
 import java.io._
@@ -7,8 +7,15 @@ import net.liftweb.actor._
 import net.liftweb.common._
 
 import de.immaterialien.sturmonanny.util._
-  import de.immaterialien.sturmonanny.multiplexer._
+
  
+/**
+ * manages a server console connection and client console connections, forwarding messages between them 
+ * additional work: occasionally a message might be injected from other classes, messages coming from the 
+ * IL-2 server are also forwarded to the dispatcher
+ * 
+ */ 
+   
 class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{
   
   def this(il2port : Int , scport : Int) = this("127.0.0.1", il2port, scport)
@@ -41,9 +48,10 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   val il2actor : LiftActor = this
   case class SwitchConnection(val host : String, val port : Int)
   case class ChatTo(val who : String, val what : String){
-    def this(pilot : Pilots#Pilot, what :String) = this(pilot.name, what)
-  }
-  
+
+//    def this(pilot : Pilots#Pilot, what :String) = this(pilot.name, what) 
+  } 
+   
 //override val defaultMessageHandler : PartialFunction[Any, Unit] = {case x => debug("ignore"+x)}  
   override val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines 

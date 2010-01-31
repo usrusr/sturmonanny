@@ -1,12 +1,13 @@
-package de.immaterialien.sturmonanny.multiplexer
+package de.immaterialien.sturmonanny.core
 
 import net.liftweb.actor._
 import net.liftweb.common._
 import de.immaterialien.sturmonanny.util._
-
-class MarketActor extends IMarket with LiftActor with UpdatingMember with Logging{
+import de.immaterialien.sturmonanny.core._
+ 
+class MarketActor extends IMarket with LiftActor with UpdatingMember with Logging{  
 	var internal : Option[IMarket] = None
-	var className : String = "de.immaterialien.sturmonanny.multiplexer.AllPlanesEqualMarket"
+	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket"
 	var configurationPath : String = "/dev/null"
 	def updateConfiguration : Unit = {
 
@@ -17,10 +18,10 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
         
         setConfigurationUpdatePath(conf.market.configuration)
       }else if(configurationPath!=conf.market.configuration){
-        setConfigurationUpdatePath(conf.market.configuration)
+        setConfigurationUpdatePath(conf.market.configuration) 
       }
 	}
- 	private def loadMarket(cls:String) : Option[IMarket] = {
+ 	private def loadMarket(cls:String) : Option[IMarket] = { 
  	  if(cls!=className || internal.isEmpty) internal else {
 	 	  try{
 		 	  val c : java.lang.Class[_] = java.lang.Class.forName(cls)

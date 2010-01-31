@@ -2,7 +2,7 @@ package de.immaterialien.sturmonanny.util
 
 import net.lag.configgy._
 import de.immaterialien.sturmonanny
-import sturmonanny.model.Configuration
+import sturmonanny.core.Configuration
 
 object ConfiggyTest {
   def main(args : Array[String]) : Unit = { 

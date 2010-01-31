@@ -1,8 +1,8 @@
-package de.immaterialien.sturmonanny.multiplexer
+package de.immaterialien.sturmonanny.core
 
-import _root_.net.lag.configgy
-import _root_.de.immaterialien.sturmonanny.util.ConfiggyGroup
-import _root_.de.immaterialien.sturmonanny.multiplexer
+import net.lag.configgy
+import de.immaterialien.sturmonanny.util.ConfiggyGroup
+//import de.immaterialien.sturmonanny.core
 
 class Configuration(val file : String) {
 	
@@ -21,7 +21,7 @@ class Configuration(val file : String) {
 	  object refund extends Field(50)
 	  object accountlimit extends Field(1000)
 	  object recruitshare extends Field(50)
-
+ 
 	}
 //	object market extends ConfiggyGroup {
 //	  object planesfile extends Field("planes.lst")
@@ -33,7 +33,7 @@ class Configuration(val file : String) {
 //	  object tolerance extends Field(20 )
 //	} 
 	object market extends ConfiggyGroup {
-	  object implementation extends Field("de.immaterialien.sturmonanny.multiplexer.AllPlanesEqualMarket")
+	  object implementation extends Field("de.immaterialien.sturmonanny.core.AllPlanesEqualMarket")
 	  object configuration extends Field("planes.lst")
 	} 
 	

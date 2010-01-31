@@ -7,7 +7,7 @@ import _root_.net.lag.configgy
  * 
  * update with myObject(configgyConfiguration)
  */
-trait ConfiggyGroup {
+trait ConfiggyGroup {  
 
   protected def update(in : configgy.Config):Unit = {
 	init

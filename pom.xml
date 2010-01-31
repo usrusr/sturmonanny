@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>immaterialien.de</groupId>
   <artifactId>sturmonanny</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <inceptionYear>2010</inceptionYear>
   <properties>
@@ -83,13 +83,19 @@
       <version>${scala.version}</version>
       <scope>test</scope>
     </dependency>
-    
+    <!--  temporarily replaced with a custom 2.7.7 build
     <dependency>
       <groupId>net.lag</groupId>
       <artifactId>configgy</artifactId>
       <version>1.4.7</version> 
       <scope>compile</scope>
-    </dependency>    
+    </dependency>
+    -->    
+    <dependency>
+  <groupId>net.lag</groupId>
+  <artifactId>configgy-2.7.7</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>
