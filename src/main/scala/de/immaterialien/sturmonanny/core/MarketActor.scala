@@ -9,7 +9,7 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
 	var internal : Option[IMarket] = None
 	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket"
 	var configurationPath : String = "/dev/null"
-	def updateConfiguration : Unit = {
+	override def updateConfiguration : Unit = {
 
       val newMarket = loadMarket(conf.market.implementation)
       if( (! newMarket.isEmpty) && (newMarket.get ne internal.get)){

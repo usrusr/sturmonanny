@@ -19,7 +19,7 @@ import de.immaterialien.sturmonanny.util._
 class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{
   
   def this(il2port : Int , scport : Int) = this("127.0.0.1", il2port, scport)
-  def updateConfiguration {
+  override def updateConfiguration {
     if(conf.server.il2port != il2port || conf.server.host != host){
       il2port = conf.server.il2port
       this ! SwitchConnection(conf.server.host, conf.server.il2port)
@@ -27,19 +27,19 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
     } 
   } 
    
-  case class DownMessage(val lines: Seq[Seq[Byte]]){
+  case class DownMessage(val lines: Seq[String]){
     override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(lines).mkString
   }
-  case class DownLine(val line: Seq[Byte]){
+  case class DownLine(val line: String){
     def asMessage() = DownMessage(line::Nil)
     override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(line :: Nil).mkString
   }  
   
-  case class DownInternal(val msg: String) extends DownLine((conf.server.toolName +": "+msg).getBytes)
+  case class DownInternal(val msg: String) extends DownLine(conf.server.toolName +": "+msg)
   
-  case class DownPromptLine(override val line : List[Byte]) extends DownLine(line)
+  case class DownPromptLine(override val line : String) extends DownLine(line)
                                                        
-  case class UpMessage(val lines: List[List[Byte]], val from : Console){
+  case class UpMessage(val lines: List[String], val from : Console){
     override def toString() = this.getClass.getSimpleName +": "+ Multiplexer.linesListsToStrings(lines).mkString
   }
   case class addClient(val client : Console)
@@ -76,7 +76,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
               }
             }
           
-          for(out <- il2out; line : List[Byte]<-msg.lines) {
+          for(out <- il2out; line : String<-msg.lines) {
             out.write( line.toArray )
           }
           // wait for response for 500 ms, after that (or after receiving DownPromptLine) go back to accepting new UpMessages and broadcasting any
@@ -95,7 +95,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           }
           for(line <- lines.reverse ; client <- clients) client ! line
         }
-        case ChatTo(who, what) => il2out foreach (_ write ("CHAT "+what+" TO "+ who).getBytes)
+        case ChatTo(who, what) => il2out foreach (_ write ("CHAT "+what+" TO "+ who))
         case Close => exit
         case addClient(client) => clients ::: client :: Nil
         case removeClient(client) => clients.remove(x => client eq x)
@@ -107,28 +107,28 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
    *  a client connection, defined with a socket and an accompanying thread listening on the socket's input stream
    */
   class Console(val socket : Socket) extends LiftActor{
-    private lazy val stream = socket.getOutputStream
-    val reader = socket.getInputStream
+    private lazy val stream = new OutputStreamWriter(socket.getOutputStream)
+    val reader = new InputStreamReader(socket.getInputStream)
     
     val consoleself = this;
-    var list : List[Byte] = Nil
+    val clientline = new StringBuilder
 
     val thread = Multiplexer.daemon{
-          reader.read match {
+          reader read match {
             case x if x<0 => Thread.currentThread.interrupt
-            case Multiplexer.newline  if list(0)=='\r' => {
-              val toReverse : List[Byte] = Multiplexer.newline :: list
-              Multiplexer.this ! UpMessage( List(toReverse.reverse), consoleself)
-              list = Nil
+            case Multiplexer.newline  if clientline.last=='\r' => {
+              clientline append "\n"
+              Multiplexer.this ! UpMessage( List(clientline.toString), consoleself)
+              clientline clear
             }
-            case x if x<256 => list = x.toByte :: list
+            case x if x<65536  => clientline append x
             case _ => Thread.currentThread.interrupt
           }
         }then{
           Multiplexer.this ! removeClient(this)
         }
 
-    def outputStream() : Option[OutputStream] = {
+    def outputStream() : Option[Writer] = {
       if(socket.isConnected){
         Some(stream)
       }else{
@@ -137,15 +137,15 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
     }
     override def messageHandler = {
 //          case msg : UpMessage => 	msg.lines.map(line=>stream.write(line.toArray))
-          case msg : DownMessage => msg.lines.map(line=>stream.write(line.toArray))
-          case msg : DownLine => 	stream.write(msg.line.toArray)
+          case msg : DownMessage => msg.lines.map(line=>stream.write(line))
+          case msg : DownLine => 	stream.write(msg.line)
     }
   }
 
   var clients : List[Console] = Nil
   var il2socket : Option[Socket] = None
-  var il2out : Option[OutputStream] = None
-  var il2in : Option[InputStream] = None
+  var il2out : Option[Writer] = None
+  var il2in : Option[Reader] = None
   var listenersocket : Option[ServerSocket] = None
 
   val serverThread : Thread = Multiplexer.daemon{
@@ -171,25 +171,26 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   var il2waiter : Thread = newIl2Waiter
 
   def newIl2Waiter() : Thread = {
-    var il2line : List[Byte] = Nil
+    var il2line  = new StringBuilder
     il2in match{
       case Some(instream) => Multiplexer.daemon{
-        instream.read match {
+        instream read match {
           case x if x<0 => Thread.currentThread.interrupt
-          case Multiplexer.newline if il2line(0)=='\r' => {
-            il2line  = Multiplexer.newline :: il2line
-            il2line = il2line.reverse
+          case Multiplexer.newline if il2line.last=='\r' => {
+            il2line  = il2line append "\n"
+            
+
             val toTest = new String(il2line.toArray).trim
             toTest match {
               case Multiplexer.consoleNPattern(n) => 
-                Multiplexer.this ! DownPromptLine(il2line)
+                Multiplexer.this ! DownPromptLine(il2line.toString)
               case _ => 
-                Multiplexer.this ! DownLine(il2line)
+                Multiplexer.this ! DownLine(il2line.toString)
             }
 
-            il2line = Nil
+            il2line clear
           }
-          case x if x<256 => il2line = x.toByte :: il2line
+          case x if x < 65536  => il2line = il2line append x
           case _ => Thread.currentThread.interrupt
         }
       }then{
@@ -205,8 +206,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
         Multiplexer.daemon{
           try{
             val socket = new Socket(host, il2port)
-            il2in = Some(socket.getInputStream)
-            il2out = Some(socket.getOutputStream)
+            il2in = Some(new InputStreamReader(socket.getInputStream))
+            il2out = Some(new OutputStreamWriter(socket.getOutputStream))
             il2socket = Some(socket)
             // thread has done its job
             debug("connected to IL2 server on  "+host+":"+il2port+"")
@@ -254,10 +255,10 @@ object Multiplexer extends Logging{
     }
   }
 
-  def linesListsToStrings(l : Seq[Seq[Byte]])=   l.map(ll=>new String(ll.toArray))
+  def linesListsToStrings(l : Seq[String])=   l.map(ll=>new String(ll.toArray))
   
   val consoleNPattern = """<consoleN><(\d+)>""".r
-  val newline : Byte = '\n'
+  val newline : Char = '\n'
 
   def create(il2port :Int, scport :Int) : Option[Multiplexer] = {
     try{

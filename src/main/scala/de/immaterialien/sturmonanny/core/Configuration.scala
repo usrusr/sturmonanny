@@ -7,7 +7,8 @@ import de.immaterialien.sturmonanny.util.ConfiggyGroup
 class Configuration(val file : String) {
 	
 	object server  extends ConfiggyGroup{ 
-	  object host extends Field( try{java.net.InetAddress.getLocalHost.getHostName}catch{case _ => "127.0.0.1"})
+//	  object host extends Field( try{java.net.InetAddress.getLocalHost.getHostName}catch{case _ => "127.0.0.1"})
+	  object host extends Field( "127.0.0.1")
 	  object il2port extends Field(2001)   	  
 	  object consoleport extends Field(2011)
       object toolName extends Field("Sturmonanny")

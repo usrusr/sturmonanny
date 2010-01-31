@@ -65,6 +65,7 @@ debug("\n\n\n\n\n hello world\n\n")
     
     
 //    Multiplexer.instance = Multiplexer.create(2002, 2003)
+      val s = new Server
                        
     S.addAround(DB.buildLoanWrapper)
   }

@@ -42,3 +42,5 @@ class TimerActor(var pause : Long) extends Thread with LiftActor  {
     this setPriority Thread.MIN_PRIORITY
     this start
 }
+
+ 
