@@ -7,11 +7,7 @@ import _root_.net.lag.configgy
  * 
  * update with myObject(configgyConfiguration)
  */
-trait ConfiggyGroup {  
-
-  protected def update(in : configgy.Config):Unit = {
-	init
-  }
+trait ConfiggyGroup extends Logging{  
   lazy val prefix = {
     val full = this.getClass.getSimpleName()
     full.replace("$", ".")
@@ -39,6 +35,8 @@ trait ConfiggyGroup {
     	  
 	      sb.append(indent+ f.name+"="+v+"\r\n")
       }
+      
+      
   }
   
   private def name(prop:String) : String = prefix+prop
@@ -52,14 +50,16 @@ trait ConfiggyGroup {
 	 conf.apply(name+"."+field, default)
   }
   private def name = "" 
-  final def apply(in : configgy.Config):Unit= for(f<-fields){
+  final def update(in : configgy.Config):Unit= {
     init
-    f.apply match{
-      case v : String => f.asInstanceOf[Field[String]].update(in(f.name, v)) 
-      case v : Int => f.asInstanceOf[Field[Int]].update(in(f.name, v)) 
-      case v : Boolean => f.asInstanceOf[Field[Boolean]].update(in(f.name, v))
-      case x => println("unknown:"+x)
-    }
+  	for(f<-fields){
+	    f.apply match{
+	      case v : String => f.asInstanceOf[Field[String]].update(in(name(f.name), v)) 
+	      case v : Int => f.asInstanceOf[Field[Int]].update(in(name(f.name), v)) 
+	      case v : Boolean => f.asInstanceOf[Field[Boolean]].update(in(name(f.name), v))
+	      case x => println("unknown:"+x)
+	    }
+     }
   }  
 
   
@@ -70,6 +70,13 @@ trait ConfiggyGroup {
 
     
     lazy val name : String= {
+      val group = Field.this
+      	Field.this.getClass.getSimpleName match {
+      	  case ConfiggyConfigured.extractFieldName(name) => name
+      	  case _ => ""
+      	}
+    }
+    lazy val pathname : String= {
       val group = Field.this
       	Field.this.getClass.getSimpleName match {
       	  case ConfiggyConfigured.extractFieldName(name) => name

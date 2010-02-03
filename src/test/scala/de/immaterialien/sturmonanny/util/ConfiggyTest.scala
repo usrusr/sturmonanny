@@ -3,8 +3,8 @@ package de.immaterialien.sturmonanny.util
 import net.lag.configgy._
 import de.immaterialien.sturmonanny
 import sturmonanny.core.Configuration
-
-object ConfiggyTest {
+ 
+object ConfiggyTest { 
   def main(args : Array[String]) : Unit = { 
     val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf")
     

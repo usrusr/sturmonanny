@@ -40,10 +40,10 @@ class Configuration(val file : String) {
 	
     private val all = List(server, game, market)
 	def apply(conf : configgy.Config) = {
-	  all foreach (_ apply conf)
+	  all map (_ update conf)
 	}
 	try{
-		this(configgy.Config.fromFile(file))
+ 		this(configgy.Config.fromFile(file))
 	}catch{
 	  case x: _root_.java.io.IOException => x.printStackTrace
 	  case x => println(""+x)

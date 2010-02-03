@@ -17,6 +17,10 @@ class Dispatcher extends TimedLiftActor with NonUpdatingMember{
 		     extendTimeFromNow(50)
 		   }
 	   }
+//	   case Dispatcher.separator => reactWithin(50){
+//	     
+//	     case Dispatcher.separator => reactNormally
+//	   }
 	   case _ => 
 	 }
 }

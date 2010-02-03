@@ -3,10 +3,11 @@ package de.immaterialien.sturmonanny.core
 import de.immaterialien.sturmonanny.util._
 import de.immaterialien.sturmonanny.core._ 
 
-class Server {  
+class Server(val initConf : String) {  
+	def this() = this("default.conf")
 	private var members : List[UpdatingMember] = Nil
 	this : Server
-	private var internalconf = new Configuration("default.conf")
+	private var internalconf = new Configuration(initConf)
     def conf = internalconf 
     def conf_= (newConf : Configuration) {
       internalconf = newConf
@@ -21,17 +22,10 @@ class Server {
     val planes = new Planes with Member     
     val dispatcher = new Dispatcher with Member
     
-//    val warning = new TimerActor(conf.game.warningInterval)  with Member {  
-//    	override def updateConfiguration = setInterval(conf.game.warningInterval)
-//    }
     val warning = new ConfigurableTimerActor(conf.game.warningInterval) with Member
-//    val minute = new TimerActor(60000) with NonUpdatingMember with Member
-//	val warning = new TimerActor(10000) 
+    val minute = new ConfigurableTimerActor(60000) with Member
 
-      
-     
-
-
+//    members foreach (_ updateConfiguration)
     /**
 	 * mix in Member to connect the UpdatingMember to this   
 	 */

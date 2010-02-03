@@ -17,14 +17,20 @@ import de.immaterialien.sturmonanny.util._
  */ 
    
 class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{
+
+//  override val messageHandler : PartialFunction[Any, Unit] = {case x : Any=> debug("ignore"+x)}  
   
   def this(il2port : Int , scport : Int) = this("127.0.0.1", il2port, scport)
+  def this(conf : Configuration) = this(conf.server.host, conf.server.il2port, conf.server.consoleport)
   override def updateConfiguration {
     if(conf.server.il2port != il2port || conf.server.host != host){
       il2port = conf.server.il2port
       this ! SwitchConnection(conf.server.host, conf.server.il2port)
-      
-    } 
+    }
+    if(conf.server.consoleport != scport){
+      scport = conf.server.consoleport
+      serverThread interrupt
+    }
   } 
    
   case class DownMessage(val lines: Seq[String]){
@@ -45,15 +51,14 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   case class addClient(val client : Console)
   case class removeClient(val client : Console)
   case object Close
-  val il2actor : LiftActor = this
+
   case class SwitchConnection(val host : String, val port : Int)
   case class ChatTo(val who : String, val what : String){
 
-//    def this(pilot : Pilots#Pilot, what :String) = this(pilot.name, what) 
   } 
-   
-//override val defaultMessageHandler : PartialFunction[Any, Unit] = {case x => debug("ignore"+x)}  
-  override val defaultMessageHandler : PartialFunction[Any, Unit] = {
+
+
+  val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines 
 	    case SwitchConnection(newhost, newport) => {
 	      clients foreach ( _ ! DownInternal("disconnecting IL-2 instance on "+host+":"+il2port+" and switching to "+newhost+":"+newport))
@@ -77,9 +82,9 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
                 }
               }
             }
-          
           for(out <- il2out; line : String<-msg.lines) {
-            out.write( line.toArray )
+            out.append( line )
+            out.flush
           }
           // wait for response for 500 ms, after that (or after receiving DownPromptLine) go back to accepting new UpMessages and broadcasting any
           // unexpected downmessages
@@ -97,7 +102,9 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
         }
         case ChatTo(who, what) => il2out foreach (_ write ("CHAT "+what+" TO "+ who))
         case Close => exit
-        case addClient(client) => clients ::: client :: Nil
+        case addClient(client) => {
+          clients ::: client :: Nil
+        }
         case removeClient(client) => clients.remove(x => client eq x)
         case x : Any => debug("unknown "+x)
   }
@@ -116,12 +123,14 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
     val thread = Multiplexer.daemon{
           reader read match {
             case x if x<0 => Thread.currentThread.interrupt
-            case Multiplexer.newline  if clientline.last=='\r' => {
-              clientline append "\n"
+            case Multiplexer.LF if clientline.last== Multiplexer.CR => {
+              clientline append Multiplexer.LF.toChar
               Multiplexer.this ! UpMessage( List(clientline.toString), consoleself)
               clientline clear
             }
-            case x if x<65536  => clientline append x
+            case x if x<65536  => {
+              clientline append x.toChar
+            }
             case _ => Thread.currentThread.interrupt
           }
         }then{
@@ -136,9 +145,14 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
       }
     }
     override def messageHandler = {
-//          case msg : UpMessage => 	msg.lines.map(line=>stream.write(line.toArray))
-          case msg : DownMessage => msg.lines.map(line=>stream.write(line))
-          case msg : DownLine => 	stream.write(msg.line)
+          case msg : DownMessage => {
+            msg.lines.map(line=>stream.write(line))
+            stream flush
+          }
+          case msg : DownLine => {
+            stream.write(msg.line)
+            stream flush
+          }
     }
   }
 
@@ -148,15 +162,18 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   var il2in : Option[Reader] = None
   var listenersocket : Option[ServerSocket] = None
 
-  val serverThread : Thread = Multiplexer.daemon{
+  var serverThread : Thread = newServerThread 
+  def newServerThread  : Thread = Multiplexer.daemon{
     try{
       val actualListenersocket : ServerSocket = listenersocket.getOrElse{
         listenersocket = Some(new ServerSocket(scport))
         listenersocket.get
       }
       val clientconnection : Socket = actualListenersocket.accept
-      
-      Multiplexer.this ! addClient(new Console(clientconnection))
+      val remote = clientconnection.getRemoteSocketAddress.asInstanceOf[InetSocketAddress]
+      debug("new client connecting from "+remote.getHostName+" on "+clientconnection.getLocalPort)
+      val addMessage = addClient(new Console(clientconnection))
+      Multiplexer.this ! addMessage 
     }catch{
       case e : IOException => {
         debug("client listener connection on port "+scport+" failed, retrying ")
@@ -165,7 +182,14 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
       }
     }
     None
-  }then{}
+  }then{
+    try{
+      listenersocket map (_ close)
+    }catch{
+      case _ =>
+    }
+    serverThread = newServerThread
+  }
 
 
   var il2waiter : Thread = newIl2Waiter
@@ -176,8 +200,9 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
       case Some(instream) => Multiplexer.daemon{
         instream read match {
           case x if x<0 => Thread.currentThread.interrupt
-          case Multiplexer.newline if il2line.last=='\r' => {
-            il2line  = il2line append "\n"
+          
+          case Multiplexer.LF if il2line.last== Multiplexer.CR => {
+            il2line append Multiplexer.LF.toChar
             
             val createdLine = il2line.toString
             il2line.clear
@@ -191,7 +216,9 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
               }
             }
           }
-          case x if x < 65536  => il2line = il2line append x
+          case x if x < 65536  => {
+            il2line = il2line append x.toChar
+          }
           case _ => Thread.currentThread.interrupt
         }
       }then{
@@ -221,7 +248,6 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
             }
           }
         }then{
-          //debug("creating new il2waiter with il2in stream "+il2in)
           il2waiter = newIl2Waiter
         }
       }
@@ -236,10 +262,11 @@ object Multiplexer extends Logging{
   def daemon(body: => Unit): Then = {
     new Then(body)
   }
+  case object interrupt 
   class Then(body: => Unit) extends Logging{
 
     def then(fin: => Unit) : Thread = {
-      val ret : Thread = new Thread{
+      val ret : Thread = new Thread {
         override def run() {
           try{
             while( ! Thread.currentThread.isInterrupted ) {
@@ -258,18 +285,16 @@ object Multiplexer extends Logging{
 
   def linesListsToStrings(l : Seq[String])=   l.map(ll=>new String(ll.toArray))
   
-  val consoleNPattern = """<consoleN><(\d+)>""".r
-  val newline : Char = '\n'
+  val consoleNPattern = """<consoleN><(\d+)>\s\s""".r
+  val CR : Int = 13
+  val LF : Int = 10
 
   def create(il2port :Int, scport :Int) : Option[Multiplexer] = {
     try{
-      //val scsock = new ServerSocket(scport)
-
       Some(new Multiplexer(il2port, scport))
     }catch{
       case e: Exception => {
         warn("failed to connect "+e.getMessage)
-
         None
       }
     }

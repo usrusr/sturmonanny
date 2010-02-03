@@ -46,8 +46,8 @@ class Boot extends net.liftweb.util.LiftLogger{
 
     LiftRules.early.append{ _.setCharacterEncoding("UTF-8") }
     net.liftweb.util.LogBoot.loggerSetup
-net.liftweb.util.LogBoot.loggerByName("test").error("====///\\\\\\====")
-net.liftweb.util.Log.warn("====///w\\\\\\====")
+//net.liftweb.util.LogBoot.loggerByName("test").error("====///\\\\\\====")
+//net.liftweb.util.Log.warn("====///w\\\\\\====")
 debug("\n\n\n\n\n hello world\n\n")
 //    LogBoot.defaultProps =  
 //      """<?xml version="1.0" encoding="UTF-8" ?>  
@@ -67,7 +67,7 @@ debug("\n\n\n\n\n hello world\n\n")
 //    Multiplexer.instance = Multiplexer.create(2002, 2003)
       val s = new Server
                        
-    S.addAround(DB.buildLoanWrapper)
+    S.addAround(DB.buildLoanWrapper) 
   }
 
   /**

@@ -36,25 +36,25 @@ trait TimedLiftActor extends LiftActor {
   /**
    * replace the temporaryMessageHandler for at least forMillis milliseconds
    */
-  final def reactWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+  final def reactWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) {
     temporaryMessageHandler = new TemporaryHandlerFunction(forMillis, body, -1) 
   }
   /**
    * replace the temporaryMessageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched <code>times</code> times
    */
-  final def reactNTimesWithin(times : Int, forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+  final def reactNTimesWithin(times : Int, forMillis : Int)(body : PartialFunction[Any, Unit] ) {
     temporaryMessageHandler = new TemporaryHandlerFunction(forMillis, body, times) 
   }
   /**
    * replace the temporaryMessageHandler for at least <code>forMillis</code> milliseconds or until the temporary handler has matched 
    */
-  final def reactOnceWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) = {
+  final def reactOnceWithin(forMillis : Int)(body : PartialFunction[Any, Unit] ) {
     temporaryMessageHandler = new TemporaryHandlerFunction(forMillis, body, 1) 
   }
   /**
    * return to the last temporaryMessageHandler, even before timeout 
    */
-  final def reactNormally() = {
+  final def reactNormally() {
 	temporaryMessageHandler = temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction => handler.originalHandler
 	  case _ => temporaryMessageHandler
@@ -63,28 +63,28 @@ trait TimedLiftActor extends LiftActor {
   /**
    * add more time to current nonstandard handler 
    */
-  final def extendTime(additionalMillis : Long ) = {
+  final def extendTime(additionalMillis : Long ) {
 	temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction => handler.until += additionalMillis
-	  case _ => temporaryMessageHandler
+	  case _ => 
 	}
   }
   /**
    * add more matches to current nonstandard handler (if it is counting) 
    */
-  final def extendCount(additionalCount : Int) = {
+  final def extendCount(additionalCount : Int) {
 	temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction if(handler.matchCount > 0) => handler.toDo += additionalCount
-	  case _ => temporaryMessageHandler
+	  case _ => 
 	}
   }
   /**
    * set new timeout
    */
-  final def extendTimeFromNow(millis : Long ) = {
+  final def extendTimeFromNow(millis : Long ) {
 	temporaryMessageHandler match {
 	  case handler : TemporaryHandlerFunction => handler.until = java.lang.System.currentTimeMillis + millis
-	  case _ => temporaryMessageHandler
+	  case _ => 
 	}
   }  
   /**
@@ -96,18 +96,24 @@ trait TimedLiftActor extends LiftActor {
 	  case _ => temporaryMessageHandler
 	}
   }
-  
+  def defaultMessageHandler : PartialFunction[Any, Unit] 
+
   private var temporaryMessageHandler : PartialFunction[Any, Unit] = defaultMessageHandler
-  override final def messageHandler : PartialFunction[Any, Unit]  = temporaryMessageHandler 
+  override final def messageHandler : PartialFunction[Any, Unit]  = {
+    if(temporaryMessageHandler == null) temporaryMessageHandler = defaultMessageHandler
+//val what = if(temporaryMessageHandler eq defaultMessageHandler){"default"}else{ "custom"}
+//val temp = if(temporaryMessageHandler eq null){"null"}else{ temporaryMessageHandler.getClass.getSimpleName}
+//val default = if(defaultMessageHandler eq null){"null"}else{ defaultMessageHandler.getClass.getSimpleName}
+//println("messageHandler called with " + what + " " +temporaryMessageHandler + " temp="+temp + " def=" + default)    
+    temporaryMessageHandler
+  } 
 
   final def mes = 0;
-  
-  def defaultMessageHandler : PartialFunction[Any, Unit] 
   
   /**
    * inner class for the temporary handler function, used to identify messageHandlers that were set by previous, unfinished calls to temporarily
    */  
-  private case class TemporaryHandlerFunction(val waitFor : Int, val body : PartialFunction[Any, Unit], val matchCount:Int) extends PartialFunction[Any, Unit]{
+  private case class TemporaryHandlerFunction(val waitFor : Int, val body : PartialFunction[Any, Unit], val matchCount:Int) extends PartialFunction[Any, Unit] with Logging{
 	var until = java.lang.System.currentTimeMillis + waitFor
  
 	val originalHandler : PartialFunction[Any, Unit] = temporaryMessageHandler match{
@@ -139,15 +145,19 @@ trait TimedLiftActor extends LiftActor {
 	
  
 	override def isDefinedAt(x : Any) = {
-	  if( ! ranOut()) inner.isDefinedAt(x)
-	  else {
+//println("isDefinedAt called "+ x )	  
+	  if( ! ranOut()) {
+	    inner.isDefinedAt(x)
+	  } else {
 		  temporaryMessageHandler = originalHandler
 		  temporaryMessageHandler.isDefinedAt(x)
 	  } 
    	}
 	override def apply(x : Any) = {
-	  if( ! ranOut()) inner.apply(x)
-	  else {
+//println("apply called "+ x )	  
+	  if( ! ranOut()) {
+	    inner.apply(x)
+	  }else {
 		  temporaryMessageHandler = originalHandler
 		  temporaryMessageHandler.apply(x)
 	  }
