@@ -7,7 +7,7 @@ import sturmonanny.core.Configuration
 object ConfiggyTest { 
   def main(args : Array[String]) : Unit = { 
     val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf")
-    
+     
     println("game.refund before "+(c.game.refund) )
     c.game.refund() = 20
     println("game.refund after "+(c.game.refund) ) 

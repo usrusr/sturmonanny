@@ -127,6 +127,7 @@
         <configuration>
           <contextPath>/</contextPath>
           <scanIntervalSeconds>5</scanIntervalSeconds>
+          <reload>manual</reload> 
         </configuration>
       </plugin>
       <plugin>

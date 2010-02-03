@@ -7,7 +7,7 @@ import scala.util.matching._
  
 object DIES 
 case class chats(val msg : String) 
-case class join(val side : Armies.Armies)  
+case class join(val side : Armies.Armies)   
 case class inform(val text : String, val to : String)
 
          

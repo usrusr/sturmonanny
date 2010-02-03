@@ -44,7 +44,7 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
 	  case Msg.getPrice(plane) => reply(Msg.getPriceResult(internal map (_ getPrice plane) getOrElse 0))
 	  case Msg.addAirTime(plane, millis) => internal map (_ addAirTime(plane, millis))
 	  case Msg.setConfiguration(pathToFile) => reply(Msg.setConfigurationResult(internal map (_ setConfiguration pathToFile) getOrElse false))
-	  case Msg.cycle => internal map (_ cycle)
+	  case Msg.cycle(mission) => internal map (_ cycle(mission))
 	  case _ =>
 	}
 	def getPrice(plane : String) : Double = { 
@@ -55,18 +55,19 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
 	def addAirTime(plane : String, millis : Long) {
 	  this ! Msg.addAirTime(plane, millis)
 	}
- 	def setConfigurationUpdatePath(pathToFile : String){
- 	  if(setConfiguration(pathToFile)) 
- 		  configurationPath=pathToFile
-    }
 	def setConfiguration(pathToFile : String) : Boolean ={
 //	  this ! Msg.setConfiguration(pathToFile)
    	  !!(Msg.setConfiguration(pathToFile), 1000)
 	  		.asA[Msg.setConfigurationResult].getOrElse(Msg.setConfigurationResult(false))
 	  		.success
-       
 	}
-	def cycle = this ! Msg.cycle
+	def cycle(mission : String) = this ! Msg.cycle(mission)
+
+
+ 	def setConfigurationUpdatePath(pathToFile : String){
+ 	  if(setConfiguration(pathToFile)) 
+ 		  configurationPath=pathToFile
+    }
 } 
 object Msg {
 	protected case class changeMarket(cls:String)
@@ -76,5 +77,5 @@ object Msg {
 	case class addAirTime(plane : String, millis : Long) 
 	case class setConfiguration(pathToFile : String) 
 	case class setConfigurationResult(success : Boolean)
-	case object cycle  
+	case class cycle(mission : String)  
 }

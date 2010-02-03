@@ -9,7 +9,7 @@ import net.liftweb.util._
  * extends a LiftActor (which has to implement temporaryMessageHandler as a var) with methods roughly resembling receiveWithin/reactWithin methods of the scala.actor 
  * 
  * reactWithin(<timeout>){
- * 	 <temporary message handler body>
+ * 	 <temporary message handler body> 
  * }
  * 
  * reactNTimesWithin(<hoMany>, <timeout>){

@@ -6,7 +6,7 @@ trait Logging {
  // this : Lg => Logging 
 //trait Logging[Lg] {
 //  this : Lg with Logging[Lg] =>
-  private val logger = LogBoot.loggerByName(this.getClass.getSimpleName)
+  private val logger = LogBoot.loggerByName(this.getClass.getSimpleName) 
   def isTraceEnabled: Boolean = logger.isTraceEnabled
   def trace(msg: => AnyRef): Unit = logger.trace(msg)
   def trace(msg: => AnyRef, t: => Throwable): Unit = logger.trace(msg,t)

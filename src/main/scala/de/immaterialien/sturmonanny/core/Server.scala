@@ -9,18 +9,18 @@ class Server(val initConf : String) {
 	this : Server
 	private var internalconf = new Configuration(initConf)
     def conf = internalconf 
-    def conf_= (newConf : Configuration) {
+    def conf_= (newConf : Configuration) {  
       internalconf = newConf
       members foreach (_ updateConfiguration)
     } 
- 
+  
  
 	val multi = new Multiplexer (conf.server.host, conf.server.il2port, conf.server.consoleport) with Member 
  
     val market = new MarketActor with Member       
     val pilots = new Pilots with Member 
     val planes = new Planes with Member     
-    val dispatcher = new Dispatcher with Member
+    val dispatcher = new Dispatcher with Member 
     
     val warning = new ConfigurableTimerActor(conf.game.warningInterval) with Member
     val minute = new ConfigurableTimerActor(60000) with Member

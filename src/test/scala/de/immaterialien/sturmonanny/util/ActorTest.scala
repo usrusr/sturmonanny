@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.util
 
-import de.immaterialien.sturmonanny.util.TimedLiftActor
+
 import net.liftweb.actor.LiftActor
 
 import org.junit.Test

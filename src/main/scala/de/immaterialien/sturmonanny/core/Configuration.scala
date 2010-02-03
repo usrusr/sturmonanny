@@ -5,7 +5,7 @@ import de.immaterialien.sturmonanny.util.ConfiggyGroup
 //import de.immaterialien.sturmonanny.core
 
 class Configuration(val file : String) {
-	
+	 
 	object server  extends ConfiggyGroup{ 
 //	  object host extends Field( try{java.net.InetAddress.getLocalHost.getHostName}catch{case _ => "127.0.0.1"})
 	  object host extends Field( "127.0.0.1")

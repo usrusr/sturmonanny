@@ -15,5 +15,5 @@ trait IMarket {
 	 */  
 	def setConfiguration(pathToFile : String) : Boolean
 	
-	def cycle : Unit   
+	def cycle(name : String) : Unit   
 }

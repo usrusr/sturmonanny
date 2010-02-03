@@ -14,9 +14,9 @@ import de.immaterialien.sturmonanny.util._
  * additional work: occasionally a message might be injected from other classes, messages coming from the 
  * IL-2 server are also forwarded to the dispatcher
  * 
- */ 
+ */  
    
-class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{
+class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{ 
 
 //  override val messageHandler : PartialFunction[Any, Unit] = {case x : Any=> debug("ignore"+x)}  
   
@@ -103,7 +103,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
         case ChatTo(who, what) => il2out foreach (_ write ("CHAT "+what+" TO "+ who))
         case Close => exit
         case addClient(client) => {
-          clients ::: client :: Nil
+          clients = clients ::: client :: Nil
         }
         case removeClient(client) => clients.remove(x => client eq x)
         case x : Any => debug("unknown "+x)
@@ -208,11 +208,13 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
             il2line.clear
             createdLine match {
               case Multiplexer.consoleNPattern(n) => { 
+//debug("sending prompt " + createdLine )                
                 Multiplexer.this ! DownPromptLine(createdLine)
               }
               case _ =>  {
-                server.dispatcher ! createdLine
-                Multiplexer.this ! DownLine(createdLine)
+//debug("sending " + createdLine )                 
+                server.dispatcher !  createdLine.stripLineEnd
+                Multiplexer.this ! DownLine(createdLine) 
               }
             }
           }
