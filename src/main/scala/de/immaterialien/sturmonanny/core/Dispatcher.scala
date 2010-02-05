@@ -1,19 +1,19 @@
 package de.immaterialien.sturmonanny.core
 
-//import net.liftweb.actor.LiftActor
+import net.liftweb.actor.LiftActor
 import de.immaterialien.sturmonanny.util._
 
 /**
  * a place for message parsing to grow and evolve without being disturbed by the necessities of console connections, game logic or configuration
  */
-class Dispatcher extends TimedLiftActor with NonUpdatingMember with Logging{   
+class Dispatcher extends LiftActor with NonUpdatingMember with Logging{   
 	 def fromServer(lines : Seq[String]) {
 	   
 	 }
-  
+    
 val debugWriter = new java.io.FileWriter("dispatcher.out.txt")   
   
-	 override def defaultMessageHandler = new PartialFunction[Any, Unit](){
+	 override def messageHandler = new PartialFunction[Any, Unit](){
 	   override def isDefinedAt(x : Any) = {
 //println("isDefinedAt called "+ x )	  
 		  internal isDefinedAt(x)
@@ -29,21 +29,22 @@ val debugWriter = new java.io.FileWriter("dispatcher.out.txt")
 	 val internal :  PartialFunction[Any, Unit] = {
 	 //override def defaultMessageHandler = {
 	   case Dispatcher.pilotsHeader(_) => {
-debug("dispatch pilots header ")	     
-	     reactWithin(50){
-	       
+debug("dispatch pilots header ")	    
+	   }
+//	     reactWithin(50){
+	        
 		   case Dispatcher.pilotFlying(id, name, ping, score, army, plane) => {
 debug("dispatch pilot flying "+id+","+name+","+ping+","+score+","+army+","+plane)	     
 		     server.pilots ! Domain.forward(name, flies(plane, Armies.forName(army)))
-		     extendTimeFromNow(500) 
+//		     extendTimeFromNow(500) 
 		   }
-		   case x => {
-debug(" --- temp did not understand '"+x+"'") 		     
-		     reactNormally
-		     this ! x
-		   }
-	     }
-	   }
+//		   case x => {
+//debug(" --- temp did not understand '"+x+"'") 		     
+////		     reactNormally
+//		     this ! x
+//		   }
+//	     }
+//	   }
        case Dispatcher.playerJoin(who) => {
 debug("dispatch player join '"+who+"'")
 			server.pilots ! new server.pilots.Pilot(who)
@@ -81,7 +82,7 @@ object Dispatcher {
 		  """(\d+)\s+"""+ 				// ID number and some blanks
 		  """(\S(?:.{0,14}\S)?)\s+"""+	// name (tolerating blanks and having a maximum length) and some blanks
 		  """(\d+)\s+"""+				// ping and some blanks
-		  """(\d+)\s+"""+				// score and some blanks
+		  """(-?\d+)\s+"""+				// score and some blanks
 		  """\(\d+\)(\S+)\s+"""+		// army with prefixed number (ignored) and some blanks
 		  """.{0,11}\s"""+				// ignore plane registration (with a maximum length, and at least one blank)
 		  """((?:\S.*)?)\\n"""			// plane before end (does it need to tolerate blanks?)

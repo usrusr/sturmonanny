@@ -22,7 +22,7 @@ debug("forwarding  "+who+" <- "+items+" -> "+what)
    case x => debug("unknown in domain "+this.getClass.getSimpleName+": "+x)   
 	}
   
-	abstract class Element(val name : String) extends TimedLiftActor with Logging{
+	abstract class Element(val name : String) extends LiftActor with Logging{
 		val domain = Domain.this
 		domain ! this
 		def unknownMessage(x : Any) = debug(this.getClass.getSimpleName +" "+name + " got unidentified message "+ x)

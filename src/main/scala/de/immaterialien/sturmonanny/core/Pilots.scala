@@ -9,7 +9,7 @@ object DIES
 case class chats(val msg : String) 
 case class join(val side : Armies.Armies)   
 case class inform(val text : String, val to : String)
-
+ 
          
 class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 	override def newElement(name:String) = new Pilot(name)
@@ -22,7 +22,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 		val balance = Army Var 0D
 		var deathPauseUntil = 0L
    
-		override def defaultMessageHandler = { 
+		override def messageHandler = { 
 		  case PERSIST =>  
 
    		  case DIES => {  
