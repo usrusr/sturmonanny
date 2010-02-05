@@ -7,19 +7,19 @@ import _root_.net.lag.configgy
  * 
  * update with myObject(configgyConfiguration)
  */
-trait ConfiggyGroup extends Logging{  
+trait Configgy_Group extends Logging{  
   lazy val prefix = {
     val full = this.getClass.getSimpleName()
     full.replace("$", ".")
   }
 
     lazy val init = {
-      val array = ConfiggyGroup.this.getClass.getDeclaredMethods
+      val array = Configgy_Group.this.getClass.getDeclaredMethods
       val members = List.fromArray(array)
       val found = members foreach {m=>
        if( m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
            try{
-       		m.invoke(ConfiggyGroup.this)
+       		m.invoke(Configgy_Group.this)
            }catch{case _ => }
        }
       }

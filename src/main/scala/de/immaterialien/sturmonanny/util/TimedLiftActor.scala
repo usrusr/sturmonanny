@@ -26,6 +26,8 @@ import net.liftweb.util._
  * 
  * implement defaultMessageHandler instead of messageHandler
  * 
+ * beware of confusion between handler functions with "catchall" and handler functions without, the catchall-versions might steal your messages! 
+ * 
  * @author Ulf Schreiber
  */
 
@@ -182,7 +184,7 @@ trait TimedLiftActor extends LiftActor {
 	}
  
 	override def apply(x : Any) = {
-debug("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< apply called "+ x )	  
+//debug("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< apply called "+ x )	  
 	  if( ! ranOut) {
 	    timeoutOrApply(x, inner)
 //	    inner.apply(x)
