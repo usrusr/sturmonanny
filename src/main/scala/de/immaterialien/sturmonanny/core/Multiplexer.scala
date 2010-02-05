@@ -56,7 +56,13 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   case class ChatTo(val who : String, val what : String){
 
   } 
-
+  private[this] def outWrite(line:String):Unit= outWrite(line::Nil)
+  private[this] def outWrite(lines:Seq[String]){
+    for(out<-il2out){
+       for(line<-lines) out.append( line )
+       out.flush
+    }
+  }
 
   val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines 
@@ -82,10 +88,12 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
                 }
               }
             }
-          for(out <- il2out; line : String<-msg.lines) {
-            out.append( line )
-            out.flush
-          }
+//          for(out <- il2out; line : String<-msg.lines) {
+//            out.append( line )
+//            out.flush
+//          }
+            outWrite(msg.lines)
+          
           // wait for response for 500 ms, after that (or after receiving DownPromptLine) go back to accepting new UpMessages and broadcasting any
           // unexpected downmessages
           var lines : List[DownLine] = Nil
@@ -100,7 +108,9 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           }
           for(line <- lines.reverse ; client <- clients) client ! line
         }
-        case ChatTo(who, what) => il2out foreach (_ write ("CHAT "+what+" TO "+ who))
+        case ChatTo(who, what) => {
+          outWrite("chat "+what+" TO "+ who+"\n")
+        }
         case Close => exit
         case addClient(client) => {
           clients = clients ::: client :: Nil

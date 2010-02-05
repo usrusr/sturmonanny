@@ -10,6 +10,9 @@ class Dispatcher extends TimedLiftActor with NonUpdatingMember with Logging{
 	 def fromServer(lines : Seq[String]) {
 	   
 	 }
+  
+val debugWriter = new java.io.FileWriter("dispatcher.out.txt")   
+  
 	 override def defaultMessageHandler = new PartialFunction[Any, Unit](){
 	   override def isDefinedAt(x : Any) = {
 //println("isDefinedAt called "+ x )	  
@@ -32,11 +35,12 @@ debug("dispatch pilots header ")
 		   case Dispatcher.pilotFlying(id, name, ping, score, army, plane) => {
 debug("dispatch pilot flying "+id+","+name+","+ping+","+score+","+army+","+plane)	     
 		     server.pilots ! Domain.forward(name, flies(plane, Armies.forName(army)))
-		     extendTimeFromNow(50) 
+		     extendTimeFromNow(500) 
 		   }
 		   case x => {
-debug("temp did not understand '"+x+"'") 		     
+debug(" --- temp did not understand '"+x+"'") 		     
 		     reactNormally
+		     this ! x
 		   }
 	     }
 	   }
@@ -58,7 +62,12 @@ debug(who+" chats '"+what+"'")
 //	     case Dispatcher.separator => reactNormally
 //	   }
 	   case x => {
-//debug("did not understand '"+x+"'") 	     
+  debug(" --- did not understand '"+x+"'")
+if(isDebugEnabled) {
+  debugWriter.append("'"+x+"'\n")
+  debugWriter flush
+}
+
 	   }
 	 }
 }
@@ -78,6 +87,8 @@ object Dispatcher {
 		  """((?:\S.*)?)\\n"""			// plane before end (does it need to tolerate blanks?)
   	).r
   val chat = """Chat: (.+): \\t(.*)\\n""".r
+  val hasLeftTheGame = """Chat: --- (.+) has left the game\.\\n'""".r
+  val joinsTheGame = """Chat: --- (.+) joins the game\.\\n'""".r
   
   val seqSeparator = """-------------------------------------------------------\\n""".r;
   val seqName = """Name\: \\t(.*)\\n""".r

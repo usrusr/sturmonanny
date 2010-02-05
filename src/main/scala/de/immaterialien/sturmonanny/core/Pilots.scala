@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.Domain
+import de.immaterialien.sturmonanny.util._
 import scala.collection.mutable
 import scala.util.matching._
 
@@ -11,8 +11,8 @@ case class join(val side : Armies.Armies)
 case class inform(val text : String, val to : String)
 
          
-class Pilots extends Domain[Pilots] with NonUpdatingMember {
-
+class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
+	override def newElement(name:String) = new Pilot(name)
 	class Pilot(override val name : String) extends Pilots.this.Element(name) with SideProvider{
 		 
    
@@ -40,9 +40,17 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember {
    		  case server.warning.passed  => if(System.currentTimeMillis<deathPauseUntil){
    		    
    		  }   
-   		  case chats(msg) => msg match {
-   		    case balancecommand => server.multi !  server.multi.ChatTo(name, "current balance is "+balance)
-   		  } 
+   		  case chats(msg) =>
+   		    msg match {
+   		    	case Pilots.Commands.balancecommand(_) => {
+   		    	  
+   		    	  val reply = server.multi.ChatTo(name, "current balance is "+balance.value)
+debug(name+" balance "+reply)   		    
+   		    	  server.multi !  server.multi.ChatTo(name, "current balance is "+balance.value)
+   		    	}
+case x => debug("unknown command  "+x)
+   		    } 
+   		  
 		  case _ => unknownMessage _ 
 		}
   
@@ -73,7 +81,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember {
 }
 object Pilots {
   object Commands{
-	  val balancecommand = """\s*!\s*balance\s*""".r
+	  val balancecommand = """(\s*!\s*balance\s*)""".r
 	  val pricecommand = """\s*!\s*price\s+(\S+)""".r
   }
 }
