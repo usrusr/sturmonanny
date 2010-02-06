@@ -1,6 +1,5 @@
 package de.immaterialien.sturmonanny.util
 
-
 import net.lag.configgy
 
 /**
@@ -43,7 +42,7 @@ import net.lag.configgy
  * 
  */
 abstract class ConfiggyFile(val file : String) extends Logging{ 
-    private var all : List[Group] = Nil
+    private var groups : List[Group] = Nil
     try{
  		this(configgy.Config.fromFile(file))
 	}catch{
@@ -53,14 +52,14 @@ abstract class ConfiggyFile(val file : String) extends Logging{
     
 	def apply(conf : configgy.Config) = {
 	  initFile
-	  all map (_ update conf)
+	  groups map (_ update conf)
 	}
 
 	override def toString = {
 	  initFile
 	  val sb = new scala.StringBuilder
       var prefix : String= ""
-	  for(group<-all){
+	  for(group<-groups){
 	    val blanks = changeGroup(sb, prefix, group.prefix)
 	    group.write(sb, blanks)
 	    prefix = group.prefix
@@ -99,11 +98,13 @@ abstract class ConfiggyFile(val file : String) extends Logging{
 	           }catch{case _ => }
 	       }
 	      }	  
+		  groups = groups.sort((e1, e2) => (e1 compareTo e2) < 0)
 	  true
 	}
 	initFile
  
-	protected trait Group {  
+	
+	protected trait Group extends SortableByInitialisationStack{  
 	  lazy val prefix = {
 	    val full = this.getClass.getSimpleName()
 	    full.replace("$", ".")
@@ -112,27 +113,25 @@ abstract class ConfiggyFile(val file : String) extends Logging{
 	  lazy val initGroup = {
 		// reflection magic to make sure all fields are initialized
 	      val array = Group.this.getClass.getDeclaredMethods
-	      val members = List.fromArray(array)
-	      val found = members foreach {m=>
+	      val list = array.toList
+	      val found = array foreach {m=>
 	       if( m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
 	           try{
 	       		m.invoke(Group.this)
 	           }catch{case _ => }
 	       }
 	      }
-		  ConfiggyFile.this.all = ConfiggyFile.this.all ::: Group.this :: Nil  
+		  members = members.sort((a,b)=>(a compareTo b)<0)
+    
+		  ConfiggyFile.this.groups = ConfiggyFile.this.groups ::: Group.this :: Nil  
 	      true
 	  }
 	  def write(sb : scala.StringBuilder, indent : String){
 	    initGroup
-	      for(f <- fields) {
-	    	  var v = f.apply match {
-	    	    case x:String=> "\""+x+"\""
-	    	    case x => x
-	    	  }
-	    	  
-		      sb.append(indent+ f.name+"="+v+"\r\n")
-	      }
+	    for(member <- members) {
+	      member.write(sb, indent)
+
+	    }
 	  }
 	  
 	  private def name(prop:String) : String = prefix+prop
@@ -148,44 +147,113 @@ abstract class ConfiggyFile(val file : String) extends Logging{
 	  private def name = "" 
 	  final def update(in : configgy.Config):Unit= {
 	    initGroup
-	  	for(f<-fields){
-		    f.apply match{
-		      case v : String => f.asInstanceOf[Field[String]].update(in(name(f.name), v)) 
-		      case v : Int => f.asInstanceOf[Field[Int]].update(in(name(f.name), v)) 
-		      case v : Boolean => f.asInstanceOf[Field[Boolean]].update(in(name(f.name), v))
-		      case x => println("unknown:"+x)
-		    }
-	     }
+	  	for(member<-members) member readConfiggy in
 	  }  
 
-  
-  	protected[ConfiggyFile] class Field[T]( var v : T ){
-	    def update(t:T)={v = t}
-	    def apply = v
-	    fields = fields ::: this :: Nil
-	
-	    
-	    lazy val name : String= {
-	      val group = Field.this
-	      	Field.this.getClass.getSimpleName match {
+    protected trait Member extends SortableByInitialisationStack{
+	    members = members ::: this :: Nil      
+        lazy val name : String= { 
+	      val group = Member.this
+	      	Member.this.getClass.getSimpleName match {
 	      	  case ConfiggyConfigured.extractFieldName(name) => name
 	      	  case _ => ""
 	      	}
 	    }
 	    lazy val pathname : String= {
-	      val group = Field.this
-	      	Field.this.getClass.getSimpleName match {
+	      val group = Member.this
+	      	Member.this.getClass.getSimpleName match {
 	      	  case ConfiggyConfigured.extractFieldName(name) => name
 	      	  case _ => ""
 	      	}
 	    }
-	    override def toString = ""+v
+	    protected[Group] def readConfiggy(in:configgy.Config)
+	    def write(sb : scala.StringBuilder, indent : String)
+    }
+    /**
+     * key/value pairs of a certain type that are on the same level as Field
+     */
+	protected[ConfiggyFile] class Table[T]( var v : T ) extends Member{
+	  val defaultValue = v
+	  var map = Map[String, T]()
+	  def apply(what:String) : T = map.get(what) getOrElse defaultValue
+	  def update(what:String, value:T) = map = map + ((what, value))
+	  val extractor = v match {
+     	case x:Int => (cMap : configgy.ConfigMap, k:String, oldValue:T)=>cMap(k,oldValue.asInstanceOf[Int]).asInstanceOf[T]
+     	case x:String => (cMap : configgy.ConfigMap, k:String, oldValue:T)=>cMap(k,oldValue.asInstanceOf[String]).asInstanceOf[T]
+     	case x:Boolean => (cMap : configgy.ConfigMap, k:String, oldValue:T)=>cMap(k,oldValue.asInstanceOf[Boolean]).asInstanceOf[T]
+     
+	    case _ => (cMap : configgy.ConfigMap, k:String, oldValue:T)=>{
+	      oldValue
+	    }
+	  } 
+      def printer = defaultValue match {
+	    case _:String=> (what:T)=>{"\""+what+"\""}
+	    case _ => (what:T)=>{""+what}
 	  }
-	  private var fields : List[ Field[_] ] = Nil
+	  protected[Group] override def readConfiggy(in:configgy.Config){
+	  	    in.getConfigMap(Group.this.name(name)) foreach {cMap =>
+	  	    	var nMap = map
+            	for(k <- cMap.keys) {
+            	  val oldV : T = Table.this.map.get(k) getOrElse defaultValue
+            	  val newV = extractor(cMap, k, oldV)
+            	  if(newV != defaultValue){
+            		  nMap = nMap  + ((k, newV))
+            	  }
+            	}
+	  	    	map = nMap
+	  	    }
+	  	        
+	  }
+	    def write(sb : scala.StringBuilder, indent : String){     
+		  sb.append(indent+"<"+ name+">\r\n")
+		  for((k,v)<-map.projection) sb.append(indent+"   "+k+" = "+printer(v) +"\r\n")
+		  sb.append(indent+"</"+ name+">\r\n")
+        }
 	} 
+  	protected[ConfiggyFile] class Field[T]( var v : T ) extends Member{
+	    def update(t:T)={v = t}
+	    def apply = v
+
+	
+	    protected[Group] override def readConfiggy(in:configgy.Config){
+	    	v match{
+			      case x : String => v = in(Group.this.name(name), x).asInstanceOf[T]  
+			      case x : Int => v = in(Group.this.name(name), x).asInstanceOf[T]  
+			      case x : Boolean => v = in(Group.this.name(name), x).asInstanceOf[T]  
+	    	}
+	    }
+
+	    override def toString = ""+v
+	    def write(sb : scala.StringBuilder, indent : String){     
+	      def string = v match {
+		    case x:String=> "\""+x+"\""
+		    case x => x
+		  }
+		  sb.append(indent+ name+"="+string+"\r\n")
+        }
+	  }
+	  private var members : List[ Member ] = Nil
+   }
+ 
+	/**
+	 * ordering helper based on a little reflective magic stack-trace magic, needs stack traces to work!
+	 */
+	protected trait SortableByInitialisationStack extends Comparable[SortableByInitialisationStack]{
+	   val comparisonKey : String = {
+	     val exception = new Exception()
+		 val trace = exception.getStackTrace
+	     val skipThisFileName = trace(0).getFileName 
+		 val skipped = trace.dropWhile(_.getFileName == skipThisFileName)
+		 val result = ""+skipped(0).getFileName+":"+skipped(0).getLineNumber +" -> "+skipped(0)
+debug(result)
+		 result
+	   }
+       override def compareTo(that:SortableByInitialisationStack) : Int = comparisonKey.compareTo(that.comparisonKey)
+	}
 }
 object ConfiggyFile {
    implicit def fieldReadConversionString (in : ConfiggyFile#Group#Field[String]) : String = in.apply
    implicit def fieldReadConversionBoolean (in : ConfiggyFile#Group#Field[Boolean]) : Boolean = in.apply
    implicit def fieldReadConversionInt (in : ConfiggyFile#Group#Field[Int]) : Int = in.apply
+
 }
