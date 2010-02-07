@@ -1,9 +1,9 @@
 package de.immaterialien.sturmonanny.market.fixed
 import net.lag.configgy
-import de.immaterialien.sturmonanny.util.ConfiggyFile
+import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
 
-class PriceList(file:String) extends ConfiggyFile(file){
+class PriceList(file:String) extends ConfigurationSchema(file){ 
 	object prices extends Group{ 
 //	  object host extends Field( try{java.net.InetAddress.getLocalHost.getHostName}catch{case _ => "127.0.0.1"})
 	  object host extends Field( "127.0.0.1")

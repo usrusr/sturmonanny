@@ -1,10 +1,10 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.ConfiggyFile
+import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
-class Configuration(override val file : String) extends ConfiggyFile(file){
+class Configuration(override val file : String) extends ConfigurationSchema(file){   
 	 
-	object server  extends Group{ 
+	object server  extends Group{   
 	  object host extends Field( "127.0.0.1")
 	  object il2port extends Field(2001)   	  
 	  object consoleport extends Field(2011)

@@ -3,7 +3,7 @@ package de.immaterialien.sturmonanny.util
 import net.liftweb.util._
 
 trait Logging {
- // this : Lg => Logging 
+ // this : Lg => Logging   
 //trait Logging[Lg] {
 //  this : Lg with Logging[Lg] =>
   private val logger = LogBoot.loggerByName(this.getClass.getSimpleName) 

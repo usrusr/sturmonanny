@@ -7,14 +7,14 @@ class Server(val initConf : String) {
 	def this() = this("default.conf")
 	private var members : List[UpdatingMember] = Nil
 	this : Server
-	private var internalconf = new Configuration(initConf)
+	private var internalconf = new Configuration(initConf) 
     def conf = internalconf 
     def conf_= (newConf : Configuration) {  
       internalconf = newConf
       members foreach (_ updateConfiguration)
     } 
+     
   
- 
 	val multi = new Multiplexer (conf.server.host, conf.server.il2port, conf.server.consoleport) with Member 
  
     val market = new MarketActor with Member       
@@ -34,9 +34,9 @@ class Server(val initConf : String) {
 		override def conf  = server.conf
 		server.members ::= this 
     }
-}
+} 
 trait NonUpdatingMember extends UpdatingMember {
-  override def updateConfiguration=()
+  override def updateConfiguration=() 
 } 
 trait UpdatingMember { 
   def updateConfiguration : Unit 

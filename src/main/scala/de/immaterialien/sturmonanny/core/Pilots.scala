@@ -25,7 +25,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 		override def messageHandler = { 
 		  case PERSIST =>  
 
-   		  case DIES => {  
+   		  case DIES => {   
    		    died() = died+1  
    		    deathPauseUntil = System.currentTimeMillis + (conf.game.deathpenalty * 1000)
    		    currentPlane () = ""

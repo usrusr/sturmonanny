@@ -8,14 +8,14 @@ import net.liftweb.common._
 
 import de.immaterialien.sturmonanny.util._
 
- 
+  
 /**
  * manages a server console connection and client console connections, forwarding messages between them 
  * additional work: occasionally a message might be injected from other classes, messages coming from the 
  * IL-2 server are also forwarded to the dispatcher
  * 
  */  
-   
+    
 class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{ 
 
 //  override val messageHandler : PartialFunction[Any, Unit] = {case x : Any=> debug("ignore"+x)}  
