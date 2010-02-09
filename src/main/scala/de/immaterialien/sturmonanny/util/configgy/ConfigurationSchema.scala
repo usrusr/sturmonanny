@@ -4,10 +4,15 @@ import net.lag.configgy.{Config, ConfigMap}
 
  
 /**
+ * 
+ * 
  * base class for type-safe configurations consisting of a number of 
  * Group objects that are containing 
- * Field objects that are bound to a 
- * type (Int, Boolean, String) by providing an example value as constructor argument
+ * Field objects which are bound to a 
+ * type (Int, Boolean, String) by providing a default value as constructor argument
+ * 
+ * features built-in serialization to "XML-style" configgy with field ordering based 
+ * on the definition in the schema (using dirty reflection hacks) and inline documentation
  * 
  * <p/>usage example:
  * 
@@ -37,18 +42,24 @@ import net.lag.configgy.{Config, ConfigMap}
  *  </zombie>
  * 
  * </code>
+ *
+ * possible member object types are:
+ *   Group (nesting of other member object types),
+ *   Field (holds a value)
+ *   Table (exposes child nodes as a map with a fixed value type, identified by a default value)
+ *   Documentation (holds nothing but a constant String)
  * 
-}
-
  * 
  */
 abstract class ConfigurationSchema(val file : String) extends Holder{ 
-    
-    try{
+    val initialized : Boolean = try{
  		this(Config.fromFile(file))
-	}catch{
-	  case x: _root_.java.io.IOException => x.printStackTrace
-	  case x => println("failed to read configuration file '"+file+"': "+x)
+ 		true
+	}catch { 
+	  case x => {
+	    println("failed to read configuration file '"+file+"': "+x)
+	    false
+      }
 	}
     
 	def apply(conf : Config) = {
@@ -60,7 +71,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
 	override def toString = {
 	  initMembers
 	  val sb = new scala.StringBuilder 
-
+println("->> main ")
       write(sb, "", "")
 	  sb toString
 	}
@@ -80,18 +91,12 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
      *  a helper to add documentation to the definition source file 
      *  that gets serialized by the ConfiggyFile
      */
-	protected[ConfigurationSchema] class Documentation( var v : String ) extends Member{
-	  override def readConfiggy(in:Config) = ()
-	  override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-	    
-		def comment(line:String) = sb.append(indent.drop(2)+"# "+line+"\r\n")
-//		comment("=============")
-        sb.append(indent.drop(1)+"###\r\n")
-	    for(line <- v.lines) comment (line)
-        //comment("")
-	  }  
+     protected[ConfigurationSchema] class Documentation( override val v : String ) extends DocMember(v)
+	protected trait Doc extends Member {
+	    override protected[configgy] lazy val documentation = Some(new DocMember(doc))
+	    def doc : String
 	}
-
+ 
     /**
      * key/value pairs of a certain type, we don't just dive into the configgy ConfigMap because we want 
      * the types, the default values and the ability to merge a new Config into an existing ConfigFile
@@ -129,7 +134,8 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
 	  	    }
 	  	        
 	  }
-	    def write(sb : scala.StringBuilder, indent : String, prefix : String){     
+	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
+	      documentation foreach (_ write(sb, indent, prefix))
 		  sb.append(indent+"<"+ name+">\r\n")
 		  for((k,v)<-map.projection) sb.append(indent+"   "+k+" = "+printer(v) +"\r\n")
 		  sb.append(indent+"</"+ name+">\r\n")
@@ -148,7 +154,8 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
     	}
 	
 	    override def toString = "field "+name+":"+v
-	    def write(sb : scala.StringBuilder, indent : String, prefix : String){     
+	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
+	      documentation foreach (_.write(sb, indent, prefix))
 	      def string = v match {
 		    case x:String=> "\""+x+"\""
 		    case x => x
@@ -197,6 +204,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
 		 ""+skipped(0).getFileName+":"+skipped(0).getLineNumber +" -> "+skipped(0)
    	  } 
       override def compare(that:SelfNaming) : Int = comparisonKey.compareTo(that.comparisonKey)
+      protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String)=()
 	}
 
 	sealed protected trait Holder extends SelfNaming {
@@ -208,7 +216,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
 		      val found = array foreach {m=>
 		        val typ = m.getReturnType
 		       if( classOf[Member].isAssignableFrom(m.getReturnType) && m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
-	//debug(this.getClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
+	println(this.getClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
 		           try{
 		       		val member = m.invoke(Holder.this).asInstanceOf[Member]
 		       		members = member :: members
@@ -223,7 +231,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
 		    initMembers
 		  	for(member<-members) member readConfiggy in
 		  }  
-	      protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String){
+	      override protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String){
 		    initMembers
 		    val blanks = changeGroup(sb, inPrefix, full)
 		    for(group<-members) group.write(sb, blanks, full)
@@ -254,8 +262,28 @@ abstract class ConfigurationSchema(val file : String) extends Holder{
 	}
 	sealed protected trait Member extends SelfNaming {
 	    protected[configgy] def readConfiggy(in:Config)
-	    protected[configgy] def write(sb : scala.StringBuilder, indent : String, prefix : String)
+//	    override protected[configgy] def write(sb : scala.StringBuilder, indent : String, prefix : String){
+//println("-> "+ name + ":"+documentation.isDefined)	      
+//	    
+//	      
+//println("<- "+ name + ":"+documentation.isDefined)	         
+//	    }
+	    protected[configgy] lazy val documentation : Option[DocMember]= None
+	    /**
+         * override with a string to create documentation, may be multiline  
+         */
+//	    protected def doc : String = null
 	} 
+	
+    sealed protected[configgy] class DocMember( val v : String ) extends Member{
+	  override def readConfiggy(in:Config) = ()
+	  override def write(sb : scala.StringBuilder, indent : String, prefix : String){
+	    documentation foreach (_.write(sb, indent, prefix))
+		def comment(line:String) = sb.append(indent.drop(2)+"# "+line+"\r\n")
+        sb.append(indent.drop(1)+"###\r\n")
+	    for(line <- v.lines) comment (line)
+	  }  
+	}
 
 object ConfigurationSchema {  
 	   implicit def fieldReadConversionString (in : ConfigurationSchema#Field[String]) : String = in.apply

@@ -15,8 +15,8 @@ import de.immaterialien.sturmonanny.util._
  * IL-2 server are also forwarded to the dispatcher
  * 
  */  
-    
-class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{ 
+     
+class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{  
 
 //  override val messageHandler : PartialFunction[Any, Unit] = {case x : Any=> debug("ignore"+x)}  
   
@@ -45,7 +45,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   
   case class DownPromptLine(override val line : String) extends DownLine(line)
                                                        
-  case class UpMessage(val lines: List[String], val from : Console){
+  case class UpMessage(val lines: List[String], val from : AbstractConsole){
     override def toString() = this.getClass.getSimpleName +": "+ Multiplexer.linesListsToStrings(lines).mkString
   }
   case class addClient(val client : Console)
@@ -53,9 +53,12 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   case object Close
 
   case class SwitchConnection(val host : String, val port : Int)
-  case class ChatTo(val who : String, val what : String){
-
-  } 
+  case class UpCommand(cms:String)
+  case class ChatTo(val who : String, val what : String) extends UpCommand("chat "+what+" TO "+ who)
+  case class ChatBroadcast(val what : String) extends UpCommand("chat "+what+" ALL")
+  case class ChatArmy(val what : String, val army : Armies.Armies) extends UpCommand("chat "+what+" ARMY "+army)
+  case class Kick(val who : String) extends UpCommand("kick "+who)  
+  
   private[this] def outWrite(line:String):Unit= outWrite(line::Nil)
   private[this] def outWrite(lines:Seq[String]){
     for(out<-il2out){
@@ -108,9 +111,10 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           }
           for(line <- lines.reverse ; client <- clients) client ! line
         }
-        case ChatTo(who, what) => {
-          outWrite("chat "+what+" TO "+ who+"\n")
-        }
+//        case ChatTo(who, what) => {
+//          outWrite("chat "+what+" TO "+ who+"\n")
+//        }
+        case UpCommand(cmd) => outWrite(cmd+"\n")
         case Close => exit
         case addClient(client) => {
           clients = clients ::: client :: Nil
@@ -123,11 +127,11 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   /**
    *  a client connection, defined with a socket and an accompanying thread listening on the socket's input stream
    */
-  class Console(val socket : Socket) extends LiftActor{
+  class Console(val socket : Socket) extends AbstractConsole{
     private lazy val stream = new OutputStreamWriter(socket.getOutputStream)
     val reader = new InputStreamReader(socket.getInputStream)
     
-    val consoleself = this;
+//    val consoleself = this;
     val clientline = new StringBuilder
 
     val thread = Multiplexer.daemon{
@@ -135,7 +139,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
             case x if x<0 => Thread.currentThread.interrupt
             case Multiplexer.LF if clientline.last== Multiplexer.CR => {
               clientline append Multiplexer.LF.toChar
-              Multiplexer.this ! UpMessage( List(clientline.toString), consoleself)
+              Multiplexer.this ! UpMessage( List(clientline.toString), Console.this)
               clientline clear
             }
             case x if x<65536  => {
@@ -165,8 +169,29 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           }
     }
   }
-
-  var clients : List[Console] = Nil
+  /**
+   * either a client console or an internal console
+   */
+  sealed abstract class AbstractConsole extends LiftActor{
+  }
+  object pilotsLister extends AbstractConsole {
+	private object Requery
+    override def messageHandler = {
+      case Requery => {
+        Multiplexer.this ! UpMessage( "user\r\n"::Nil, this)
+      }
+      case _ => // ignore all, this console is only responsible for creating 
+    }
+    
+    def requery{
+      this ! Requery
+    }
+    def requery(in : Long){
+      LAPinger.schedule(this, Requery, in)  
+    }
+  }
+  
+  var clients : List[AbstractConsole] = pilotsLister :: Nil
   var il2socket : Option[Socket] = None
   var il2out : Option[Writer] = None
   var il2in : Option[Reader] = None
@@ -223,8 +248,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
               }
               case _ =>  {
 //debug("sending " + createdLine )                 
-                server.dispatcher !  createdLine.stripLineEnd
-                Multiplexer.this ! DownLine(createdLine) 
+//                server.dispatcher !  createdLine.stripLineEnd
+                Multiplexer.this ! DownLine(createdLine)  
               }
             }
           }

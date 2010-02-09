@@ -15,7 +15,7 @@ val debugWriter = new java.io.FileWriter("dispatcher.out.txt")
   
 	 override def messageHandler = new PartialFunction[Any, Unit](){
 	   override def isDefinedAt(x : Any) = {
-//println("isDefinedAt called "+ x )	  
+//println("isDefinedAt called "+ x )	   
 		  internal isDefinedAt(x)
 	  } 
    	
@@ -57,11 +57,10 @@ debug("new mission '"+what+"'")
 debug(who+" chats '"+what+"'")
          	server.pilots ! Domain.forward(who, chats(what))
        }
-	   
-//	   case Dispatcher.separator => reactOnceWithin(50){
-//	     
-//	     case Dispatcher.separator => reactNormally
-//	   }
+       case Dispatcher.landed(who) => {
+         pilot(who, lands) 
+       }
+
 	   case x => {
   debug(" --- did not understand '"+x+"'")
 if(isDebugEnabled) {
@@ -71,6 +70,7 @@ if(isDebugEnabled) {
 
 	   }
 	 }
+	 private def pilot(who:String, msg:Any) = server.pilots ! Domain.forward(who, msg)
 }
 
 object Dispatcher {
@@ -88,8 +88,12 @@ object Dispatcher {
 		  """((?:\S.*)?)\\n"""			// plane before end (does it need to tolerate blanks?)
   	).r
   val chat = """Chat: (.+): \\t(.*)\\n""".r
-  val hasLeftTheGame = """Chat: --- (.+) has left the game\.\\n'""".r
-  val joinsTheGame = """Chat: --- (.+) joins the game\.\\n'""".r
+  val hasLeftTheGame = """Chat: --- (.+) has left the game\.\\n""".r
+  val joinsTheGame = """Chat: --- (.+) joins the game\.\\n""".r
+  val wasKilled = """Chat: --- (.+) was killed\.\\n""".r
+  val hasCrashed = """Chat: --- (.+) has crashed\.\\n""".r
+  val bailedOut = """Chat: --- (.+) bailed out\.\\n""".r
+  val landed = """Chat: --- (.+) is (:?on the ground safe and sound)|(:?RTB)\.\\n""".r
   
   val seqSeparator = """-------------------------------------------------------\\n""".r;
   val seqName = """Name\: \\t(.*)\\n""".r

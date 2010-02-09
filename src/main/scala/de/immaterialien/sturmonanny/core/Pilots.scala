@@ -5,8 +5,11 @@ import scala.collection.mutable
 import scala.util.matching._
 
  
-object DIES 
 case class chats(val msg : String) 
+case object lands
+case object dies
+case object ejects
+case object crashes
 case class join(val side : Armies.Armies)   
 case class inform(val text : String, val to : String)
  
@@ -15,35 +18,81 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 	override def newElement(name:String) = new Pilot(name)
 	class Pilot(override val name : String) extends Pilots.this.Element(name) with SideProvider{
 		 
-   
-        val planes = Army Val new mutable.LinkedHashMap[String, PlaneState]
-        val currentPlane = Army Var ""
+    
+//        val planes = Army Val new mutable.LinkedHashMap[String, PlaneState]
         val died = Army Var 0   
 		val balance = Army Var 0D
 		var deathPauseUntil = 0L
-   
+//		var loggedInPlane : Option[String] = None 
+//		/**
+//		 * a plane the pilot is not allowed to fly 
+//		 */
+//		var forbiddenPlane : Option[String] = None 
+  
+		object plane{
+		   var allowed = true
+		   var name = ""
+		   var since = System.currentTimeMillis
+     
+		     def updateBalance(){
+			    val price = server.market.getPrice(plane.name)
+			    val difference = System.currentTimeMillis - plane.since
+			    
+//			    if(price*)
+			    
+//			    if(balance>conf.game.pilots.)
+			    Nil
+			}
+     
+     
+		   def flies(what:String){
+		     what match {
+		       case "" => {
+		         allowed = true
+		         name = ""
+		       }
+		       case newPlane if(name!=newPlane)=> {
+		    	 since = System.currentTimeMillis 
+    	         name = newPlane
+		         val costResult = server.rules.startCostCheck(what, balance) 
+		         allowed = costResult.isDefined
+		         balance () = costResult getOrElse balance
+		       }
+		       case name => {
+			     if(allowed) updateBalance
+		       }
+		     }
+		     if( ! allowed ){
+		       server.rules.warnPlane(Pilot.this.name, plane.name, since, balance)
+		     }
+		   }
+		   def dies{
+		     flies(name)
+		     name = ""
+		     allowed = true
+		   }
+		   def warn{
+		     
+		   }
+		}
+    
 		override def messageHandler = { 
 		  case PERSIST =>  
-
-   		  case DIES => {   
-   		    died() = died+1  
-   		    deathPauseUntil = System.currentTimeMillis + (conf.game.deathpenalty * 1000)
-   		    currentPlane () = ""
+ 
+   		  case this.died => {
+   			  plane.dies
           }
    		  case flies(plane, army) => {
-   	 	    currentSide_=(army)
-   	 	    currentPlane other = ""
-   	 	    currentPlane () = plane
-
-   		    planes.value.getOrElseUpdate(plane, new PlaneState(0)).flies 
+   	 	    currentSide_=( army )
+   	 	    this.plane flies plane
           }
    		  case server.warning.passed  => if(System.currentTimeMillis<deathPauseUntil){
    		    
    		  }   
    		  case chats(msg) =>
-   		    msg match {
+   		    msg match { 
    		    	case Pilots.Commands.balancecommand(_) => {
-   		    	  
+   		    	   
    		    	  val reply = server.multi.ChatTo(name, "current balance is "+balance.value)
 debug(name+" balance "+reply)   		    
    		    	  server.multi !  server.multi.ChatTo(name, "current balance is "+balance.value)
@@ -77,12 +126,16 @@ case x => debug("unknown command  "+x)
 		    }
 		  }
 		} 
+		def checkDeathPause {
+		  
+		}
+		
 	}
 }
 object Pilots {
   object Commands{
 	  val balancecommand = """(\s*!\s*balance\s*)""".r
 	  val pricecommand = """\s*!\s*price\s+(\S+)""".r
-  }
+	  val pricescommand = """\s*!\s*prices\s+(\S+)""".r  }
 }
 

@@ -3,14 +3,14 @@ package de.immaterialien.sturmonanny.core
 import net.liftweb.actor._
 import net.liftweb.common._
 import de.immaterialien.sturmonanny.util._
-import de.immaterialien.sturmonanny.util.configgy.ConfiggyFile._
+import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema._
 import de.immaterialien.sturmonanny.core._
  
 class MarketActor extends IMarket with LiftActor with UpdatingMember with Logging{     
 	var internal : Option[IMarket] = None
 	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket" 
 	var configurationPath : String = "/dev/null"
-	override def updateConfiguration : Unit = {
+	override def updateConfiguration : Unit = { 
 
       val newMarket = loadMarket(conf.market.implementation) 
       if( (! newMarket.isEmpty) && (newMarket.get ne internal.get)){

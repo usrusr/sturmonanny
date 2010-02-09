@@ -12,18 +12,20 @@ class FixedPriceMarket extends IMarket{
 	 
   
 	override def getPrice(plane : String) : Double = {
-	  // todo
-	  0.0
+	  priceList.planes(plane)
 	}
 	
 	
  
 	def setConfiguration(pathToFile : String) = {
-	  // todo
-	  false
+	  if(pathToFile==filename) true
+	  else {
+		  val newList = new PriceList(pathToFile)
+		  if(newList.initialized) {
+			  priceList = newList
+			  filename = pathToFile
+			  true
+		  } else false
+	  }
 	} 
-	
- 
- 
-	
 }
