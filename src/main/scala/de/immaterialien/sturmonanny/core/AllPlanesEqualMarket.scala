@@ -8,4 +8,5 @@ class AllPlanesEqualMarket extends IMarket{
 	def addAirTime(plane : String, millis : Long) {}
 	def setConfiguration(pathToFile : String) = true
 	def cycle(mission : String) = ()
+	def setServerContext(server : Server) : Unit = ()
 }

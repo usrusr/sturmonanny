@@ -6,15 +6,23 @@ import de.immaterialien.sturmonanny.util._
 import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema._
 import de.immaterialien.sturmonanny.core._
  
-class MarketActor extends IMarket with LiftActor with UpdatingMember with Logging{     
+class MarketActor(val initClassName :String, val initConfigurationPath:String) extends IMarket with LiftActor with UpdatingMember with Logging{     
 	var internal : Option[IMarket] = None
 	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket" 
 	var configurationPath : String = "/dev/null"
-	override def updateConfiguration : Unit = { 
+	var mission = ""
+	def setServerContext(server:Server) = (this ! Msg.updateConfiguration) 
+	override def updateConfiguration : Unit = this ! Msg.updateConfiguration 
 
+	def internalUpdateConfiguration : Unit = { 
       val newMarket = loadMarket(conf.market.implementation) 
       if( (! newMarket.isEmpty) && (newMarket.get ne internal.get)){
         internal = newMarket
+        for(m<-internal){
+          	m setServerContext server
+            m cycle mission
+        }
+
         className = conf.market.implementation
         
         setConfigurationUpdatePath(conf.market.configuration)
@@ -22,18 +30,26 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
         setConfigurationUpdatePath(conf.market.configuration) 
       }
 	}
+	 loadMarket(initClassName)
+	 setConfigurationUpdatePath(initConfigurationPath)
+	 setServerContext(server)
  	private def loadMarket(cls:String) : Option[IMarket] = { 
- 	  if(cls!=className || internal.isEmpty) internal else {
+ 	  if(cls==className && ! internal.isEmpty) internal else {
 	 	  try{
-		 	  val c : java.lang.Class[_] = java.lang.Class.forName(cls)
+debug("reconfiguring market to  "+cls)	 	    
+	 		  var classLoader = Thread.currentThread.getContextClassLoader
+	 		  if (classLoader == null) classLoader = getClass.getClassLoader
+
+		 	  val c : java.lang.Class[_] = classLoader loadClass cls
 		 	  if( ! (classOf[IMarket] isAssignableFrom c) ){
 		 	    error(cls + " does not implement IMarket!")
 		 	    internal
-		 	  }else if(c.isInstance(internal.get)){
+        
+		 	  }else if(internal.isDefined && c.isInstance(internal.get)){
 		 	    // same class
 		 	    internal
 		 	  }else{
-		 	    Some(classOf[IMarket].cast(c.newInstance))
+		 	    Some(c.newInstance.asInstanceOf[IMarket])
 		 	  }
 		  }catch{
 		    case x : Throwable => error("failed to load market class "+cls, x)
@@ -45,7 +61,11 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
 	  case Msg.getPrice(plane) => reply(Msg.getPriceResult(internal map (_ getPrice plane) getOrElse 0))
 	  case Msg.addAirTime(plane, millis) => internal map (_ addAirTime(plane, millis))
 	  case Msg.setConfiguration(pathToFile) => reply(Msg.setConfigurationResult(internal map (_ setConfiguration pathToFile) getOrElse false))
-	  case Msg.cycle(mission) => internal map (_ cycle(mission))
+	  case Msg.cycle(mis) => {
+	    this.mission = mis
+	    internal map (_ cycle(mission))
+      }
+	  case Msg.updateConfiguration => internalUpdateConfiguration
 	  case _ =>
 	}
 	def getPrice(plane : String) : Double = { 
@@ -57,12 +77,13 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
 	  this ! Msg.addAirTime(plane, millis)
 	}
 	def setConfiguration(pathToFile : String) : Boolean ={
-//	  this ! Msg.setConfiguration(pathToFile)
    	  !!(Msg.setConfiguration(pathToFile), 1000)
 	  		.asA[Msg.setConfigurationResult].getOrElse(Msg.setConfigurationResult(false))
 	  		.success
 	}
-	def cycle(mission : String) = this ! Msg.cycle(mission)
+	def cycle(mission : String) = {
+	  this ! Msg.cycle(mission)
+    }
 
 
  	def setConfigurationUpdatePath(pathToFile : String){
@@ -71,12 +92,11 @@ class MarketActor extends IMarket with LiftActor with UpdatingMember with Loggin
     }
 } 
 object Msg {
-	protected case class changeMarket(cls:String)
-	protected case class configureMarket(cls:String)
 	case class getPrice(plane : String)
 	case class getPriceResult(price : Double)
 	case class addAirTime(plane : String, millis : Long) 
 	case class setConfiguration(pathToFile : String) 
 	case class setConfigurationResult(success : Boolean)
 	case class cycle(mission : String)  
+	case object updateConfiguration 
 }

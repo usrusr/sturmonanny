@@ -13,19 +13,16 @@ class Server(val initConf : String) {
       internalconf = newConf
       members foreach (_ updateConfiguration)
     }  
+      
      
-    
-	val multi = new Multiplexer (conf.server.host, conf.server.il2port, conf.server.consoleport) with Member 
 	val rules = new Rules with Member 
-    val market = new MarketActor with Member         
+    val market = new MarketActor(conf.market.implementation, conf.market.configuration) with Member         
     val pilots = new Pilots with Member 
     val planes = new Planes with Member     
     val dispatcher = new Dispatcher with Member  
-    
-    val warning = new ConfigurableTimerActor(conf.game.warningInterval) with Member
-    val minute = new ConfigurableTimerActor(60000) with Member
 
-//    members foreach (_ updateConfiguration)
+   	val multi = new Multiplexer (conf.server.host, conf.server.il2port, conf.server.consoleport) with Member 
+
     /**
 	 * mix in Member to connect the UpdatingMember to this   
 	 */
@@ -34,6 +31,7 @@ class Server(val initConf : String) {
 		override def conf  = server.conf
 		server.members ::= this 
     }
+    multi.start
 } 
 trait NonUpdatingMember extends UpdatingMember {
   override def updateConfiguration=() 
@@ -44,6 +42,4 @@ trait UpdatingMember {
   def conf  : Configuration = Configuration.Default
 }
 
-class ConfigurableTimerActor(extractor : => Int) extends TimerActor(extractor) with UpdatingMember {
-  def updateConfiguration = setInterval(extractor)
-}
+

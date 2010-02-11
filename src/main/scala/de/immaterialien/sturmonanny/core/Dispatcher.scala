@@ -17,10 +17,10 @@ val debugWriter = new java.io.FileWriter("dispatcher.out.txt")
 	   override def isDefinedAt(x : Any) = {
 //println("isDefinedAt called "+ x )	   
 		  internal isDefinedAt(x)
-	  } 
+	  }  
    	
 	override def apply(x : Any) = {
-//debug("dispatching... "+ x )	   
+debug("dispatching... "+ x )	   
 		  internal apply(x)
 	  }
 	
@@ -34,8 +34,9 @@ debug("dispatch pilots header ")
 //	     reactWithin(50){
 	        
 		   case Dispatcher.pilotFlying(id, name, ping, score, army, plane) => {
-debug("dispatch pilot flying "+id+","+name+","+ping+","+score+","+army+","+plane)	     
-		     server.pilots ! Domain.forward(name, flies(plane, Armies.forName(army)))
+debug("dispatch pilot flying "+id+","+name+","+ping+","+score+","+army+","+plane)	
+			server.pilots.forElement(name)( _! flies(plane, Armies.forName(army)) ) 	
+//		     server.pilots ! Domain.forward(name, flies(plane, Armies.forName(army)))
 //		     extendTimeFromNow(500) 
 		   }
 //		   case x => {
@@ -47,7 +48,7 @@ debug("dispatch pilot flying "+id+","+name+","+ping+","+score+","+army+","+plane
 //	   }
        case Dispatcher.playerJoin(who) => {
 debug("dispatch player join '"+who+"'")
-			server.pilots ! new server.pilots.Pilot(who)
+			server.pilots.create(who)
        }
        case Dispatcher.missionIsPlaying(what) => {
 debug("new mission '"+what+"'")
@@ -55,7 +56,8 @@ debug("new mission '"+what+"'")
        }
        case Dispatcher.chat(who, what) => {
 debug(who+" chats '"+what+"'")
-         	server.pilots ! Domain.forward(who, chats(what))
+         	//server.pilots ! Domain.forward(who, chats(what))
+         	server.pilots.forElement(who){ _ ! chats(what)}
        }
        case Dispatcher.landed(who) => {
          pilot(who, lands) 
@@ -70,7 +72,7 @@ if(isDebugEnabled) {
 
 	   }
 	 }
-	 private def pilot(who:String, msg:Any) = server.pilots ! Domain.forward(who, msg)
+	 private def pilot(who:String, msg:Any) = server.pilots.forElement(who)(_!msg)
 }
 
 object Dispatcher {

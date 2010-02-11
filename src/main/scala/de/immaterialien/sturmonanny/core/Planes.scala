@@ -9,7 +9,7 @@ class Planes extends Domain[Planes] with NonUpdatingMember{
 		  case PERSIST => 
 		  case _ => unknownMessage _  
 	  	} 
- 	}    
+ 	}     
 }  
 
- 
+  

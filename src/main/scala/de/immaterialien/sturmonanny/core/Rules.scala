@@ -1,25 +1,34 @@
 package de.immaterialien.sturmonanny.core
 
 class Rules extends NonUpdatingMember {
-  def startCostCheck(plane:String, balance:Double) : Option[Double] = {
+  def startCostCheck(plane:String, balance:Double) :Rules.CostResult = {
     val price = server.market.getPrice(plane)
     if(price>0){
-	    val newBalance = balance - price * conf.game.startcost
+    	val startCost = price * conf.game.startcost
+	    val newBalance = balance - startCost
 	    if(newBalance > 0) {
-	      Some(newBalance)
+	      Rules.CostResult(true, updateBalance(balance, startCost), 100 * startCost / conf.game.refund)
 	    } else {
-	      None  
+	      Rules.CostResult(false, balance, 0)  
 	    }
     }else{
       // jumping in a negatively priced plane does not immediately change the balance
-      Some(0)
+      Rules.CostResult(true, balance, 0)
+      
     }
+  } 
+  def updateBalance(old:Double, diff:Double) : Double = {
+    val ret = old + diff
+    val lowest = conf.pilots.lowestBalance.toDouble
+    val highest = conf.pilots.highestBalance.toDouble
+    if(ret<lowest) lowest
+    else if(ret>highest) highest 
+    else ret
   }
-  
 
   def warnPlane(who:String, what:String, since:Long, balance:Double){
-    val multi = server.multi
-    var difference = System.currentTimeMillis - since
+    val multi = server.multi 
+    var difference = System.currentTimeMillis - since 
     difference = if(difference==0) 1 else difference
     val remaining = ( conf.game.planeWarningsSeconds * 1000 ) - difference
     if(remaining < 0) {
@@ -59,4 +68,6 @@ class Rules extends NonUpdatingMember {
     }
   }
 } 
-  
+object Rules {
+    case class CostResult(val allowed:Boolean, newBalance : Double, refund : Double)
+}

@@ -201,7 +201,9 @@ println("->> main ")
 		 val trace = exception.getStackTrace
 	     val skipThisFileName = trace(0).getFileName 
 		 val skipped = trace.dropWhile(_.getFileName == skipThisFileName)
-		 ""+skipped(0).getFileName+":"+skipped(0).getLineNumber +" -> "+skipped(0)
+		 val lineNumberString = ""+skipped(0).getLineNumber
+		 val padding = "0000000000".drop(lineNumberString.length)
+		 ""+skipped(0).getFileName+":"+padding + lineNumberString +" -> "+skipped(0)
    	  } 
       override def compare(that:SelfNaming) : Int = comparisonKey.compareTo(that.comparisonKey)
       protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String)=()
@@ -216,7 +218,7 @@ println("->> main ")
 		      val found = array foreach {m=>
 		        val typ = m.getReturnType
 		       if( classOf[Member].isAssignableFrom(m.getReturnType) && m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
-	println(this.getClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
+	//println(this.getClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
 		           try{
 		       		val member = m.invoke(Holder.this).asInstanceOf[Member]
 		       		members = member :: members

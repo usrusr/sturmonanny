@@ -58,7 +58,7 @@ trait TimedLiftActor extends LiftActor {
    */
   final def reactNormally() {
 	temporaryMessageHandler = temporaryMessageHandler match {
-	  case handler : TemporaryHandlerFunction => handler.originalHandler
+	  case handler : TemporaryHandlerFunction if(handler.originalHandler!=null) => handler.originalHandler
 	  case _ => temporaryMessageHandler
 	}
   }
@@ -110,22 +110,26 @@ trait TimedLiftActor extends LiftActor {
 
   //private var temporaryMessageHandler : PartialFunction[Any, Unit] = defaultMessageHandler
 
-  private var internalTemporaryMessageHandler : PartialFunction[Any, Unit] = defaultMessageHandler
-  def temporaryMessageHandler  = internalTemporaryMessageHandler
-  def temporaryMessageHandler_=(replacement : PartialFunction[Any, Unit] ) {
+  private var internalTemporaryMessageHandler : PartialFunction[Any, Unit] = null
+  private def temporaryMessageHandler  = internalTemporaryMessageHandler
+  private def temporaryMessageHandler_=(replacement : PartialFunction[Any, Unit] ) {
     internalTemporaryMessageHandler = replacement
-    this ! TimeOut(0) // force reevaluation of mailbox
+//    this ! TimeOut(0) // force reevaluation of mailbox
+    this ! Reevaluate // force reevaluation of mailbox
+    
   }
   
   override final def messageHandler : PartialFunction[Any, Unit]  = {
-    if(temporaryMessageHandler == null) temporaryMessageHandler = defaultMessageHandler
+    if(internalTemporaryMessageHandler == null) internalTemporaryMessageHandler = new TemporaryHandlerFunction(-1, defaultMessageHandler,-1)
 
     temporaryMessageHandler
   } 
 
   final def mes = 0;
-  
-  private case class TimeOut(val until : Long)
+  private case object Reevaluate
+  private case class TimeOut(val until : Long){
+if(until==0) println("0 until from "+new Exception().getStackTraceString)    
+  }
   /**
    * inner class for the temporary handler function, used to identify messageHandlers that were set by previous, unfinished calls to temporarily
    */  
@@ -134,9 +138,10 @@ trait TimedLiftActor extends LiftActor {
     var toDo = matchCount
  	def ranOut() = (matchCount>0 && toDo<1) || (java.lang.System.currentTimeMillis>until)
  	def requestPing() {
-	  LAPinger.schedule(TimedLiftActor.this, TimeOut(until), until - java.lang.System.currentTimeMillis )
+//debug(" requesting ping in  "+new Exception().getStackTraceString)	  
+ 	  LAPinger.schedule(TimedLiftActor.this, TimeOut(until), until - java.lang.System.currentTimeMillis )
 	}
-	requestPing
+	if(internalTemporaryMessageHandler!=null) requestPing
 	val originalHandler : PartialFunction[Any, Unit] = temporaryMessageHandler match{
 	  // unwrap old TimeOutHandler if old will end before new to avoid unneccessary chaining of TimeoutHandlers
 	  case old : TemporaryHandlerFunction if (old.until < until) => {
@@ -167,12 +172,18 @@ trait TimedLiftActor extends LiftActor {
 	}
  
 	override def isDefinedAt(x : Any) = {
-//println("isDefinedAt called "+ x )	  
-	  if( ! ranOut) {
+//println("isDefinedAt called "+ x )	
+	  if(x == Reevaluate){
+	    true
+	  }else if( ! ranOut) {
 	    timeoutOrDefinedAt(x, inner)
 	  } else {
-		  temporaryMessageHandler = originalHandler
-		  timeoutOrDefinedAt(x, temporaryMessageHandler)
+		  if(originalHandler!=null && originalHandler!=this){
+			  temporaryMessageHandler = originalHandler
+			  timeoutOrDefinedAt(x, originalHandler)// or body?
+		  }else{
+			  timeoutOrDefinedAt(x, body)
+		  }
 	  } 
    	}
  	def timeoutOrApply(x:Any, partial : PartialFunction[Any, Unit])= x match {
@@ -180,11 +191,12 @@ trait TimedLiftActor extends LiftActor {
         temporaryMessageHandler = originalHandler
       }
       case TimeOut(_) => ()
+      case Reevaluate => ()
       case _ => partial apply x
 	}
  
 	override def apply(x : Any) = {
-//debug("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< apply called "+ x )	  
+//debug("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< apply called "+ x +" in until "+until)	  
 	  if( ! ranOut) {
 	    timeoutOrApply(x, inner)
 //	    inner.apply(x)

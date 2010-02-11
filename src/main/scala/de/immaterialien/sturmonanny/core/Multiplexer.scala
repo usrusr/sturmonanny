@@ -14,6 +14,8 @@ import de.immaterialien.sturmonanny.util._
  * additional work: occasionally a message might be injected from other classes, messages coming from the 
  * IL-2 server are also forwarded to the dispatcher
  * 
+ * has to be explicitly started, after Server object is initalized
+ * 
  */  
      
 class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{  
@@ -25,6 +27,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   override def updateConfiguration {
     if(conf.server.il2port != il2port || conf.server.host != host){
       il2port = conf.server.il2port
+      host = conf.server.host
       this ! SwitchConnection(conf.server.host, conf.server.il2port)
     }
     if(conf.server.consoleport != scport){
@@ -48,10 +51,10 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   case class UpMessage(val lines: List[String], val from : AbstractConsole){
     override def toString() = this.getClass.getSimpleName +": "+ Multiplexer.linesListsToStrings(lines).mkString
   }
-  case class addClient(val client : Console)
-  case class removeClient(val client : Console)
+  case class addClient(val client : AbstractConsole)
+  case class removeClient(val client : AbstractConsole)
   case object Close
-
+ 
   case class SwitchConnection(val host : String, val port : Int)
   case class UpCommand(cms:String)
   case class ChatTo(val who : String, val what : String) extends UpCommand("chat "+what+" TO "+ who)
@@ -81,8 +84,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           }
         }
         case msg : UpMessage => {
-          // broadcast pending DownLines
-            reactOnceWithin(10){
+        	// broadcast pending DownLines
+            reactOnceWithin(50){
               case down : DownLine => {
                 for(client <- clients) {
                   client ! down.asMessage
@@ -91,14 +94,10 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
                 }
               }
             }
-//          for(out <- il2out; line : String<-msg.lines) {
-//            out.append( line )
-//            out.flush
-//          }
             outWrite(msg.lines)
           
-          // wait for response for 500 ms, after that (or after receiving DownPromptLine) go back to accepting new UpMessages and broadcasting any
-          // unexpected downmessages
+          // wait for response for 500 ms, after that (or after receiving DownPromptLine) 
+          // go back to accepting new UpMessages and broadcasting any unexpected downmessages
           var lines : List[DownLine] = Nil
           reactWithin(500){
             case down : DownPromptLine => {
@@ -111,9 +110,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
           }
           for(line <- lines.reverse ; client <- clients) client ! line
         }
-//        case ChatTo(who, what) => {
-//          outWrite("chat "+what+" TO "+ who+"\n")
-//        }
+
         case UpCommand(cmd) => outWrite(cmd+"\n")
         case Close => exit
         case addClient(client) => {
@@ -179,6 +176,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
     override def messageHandler = {
       case Requery => {
         Multiplexer.this ! UpMessage( "user\r\n"::Nil, this)
+        requery(conf.server.pollMillis.apply)
       }
       case _ => // ignore all, this console is only responsible for creating 
     }
@@ -227,9 +225,12 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   }
 
 
-  var il2waiter : Thread = newIl2Waiter
+  var il2waiter : Thread = null
+  def start = il2waiter = newIl2Waiter
 
   def newIl2Waiter() : Thread = {
+debug("creating thread, server is "+server)
+debug("creating thread, dispatcher is "+server.dispatcher)
     var il2line  = new StringBuilder
     il2in match{
       case Some(instream) => Multiplexer.daemon{
@@ -247,9 +248,9 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
                 Multiplexer.this ! DownPromptLine(createdLine)
               }
               case _ =>  {
-//debug("sending " + createdLine )                 
-//                server.dispatcher !  createdLine.stripLineEnd
+debug("sending " + createdLine )                 
                 Multiplexer.this ! DownLine(createdLine)  
+                server.dispatcher !  createdLine.stripLineEnd
               }
             }
           }
@@ -276,6 +277,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
             il2socket = Some(socket)
             // thread has done its job
             debug("connected to IL2 server on  "+host+":"+il2port+"")
+            pilotsLister.requery
             clients foreach (_ ! DownInternal("connected to IL2 server on  "+host+":"+il2port+""))
             Thread.currentThread.interrupt
           }catch{
@@ -310,7 +312,7 @@ object Multiplexer extends Logging{
               body
             }
           }catch{
-            case e:Exception => debug("Exception in daemon thread: "+e.getClass.getSimpleName+"\n"+e.getMessage)
+            case e:Exception => debug("Exception in daemon thread: "+e.getClass.getSimpleName+"\n"+e.getMessage+"\n"+e.getStackTraceString)
           }
           fin
         }

@@ -15,6 +15,7 @@ trait IMarket {
 	 */  
 	def setConfiguration(pathToFile : String) : Boolean
 	
+	def setServerContext(server : Server) : Unit
 	def cycle(name : String) : Unit   
-}  
+}   
  
