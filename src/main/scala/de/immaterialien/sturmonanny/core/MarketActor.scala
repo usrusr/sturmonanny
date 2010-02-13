@@ -14,26 +14,21 @@ class MarketActor(val initClassName :String, val initConfigurationPath:String) e
 	def setServerContext(server:Server) = (this ! Msg.updateConfiguration) 
 	override def updateConfiguration : Unit = this ! Msg.updateConfiguration 
 
-	def internalUpdateConfiguration : Unit = { 
-      val newMarket = loadMarket(conf.market.implementation) 
-      if( (! newMarket.isEmpty) && (newMarket.get ne internal.get)){
-        internal = newMarket
-        for(m<-internal){
-          	m setServerContext server
-            m cycle mission
-        }
-
-        className = conf.market.implementation
-        
-        setConfigurationUpdatePath(conf.market.configuration)
-      }else if(configurationPath!=conf.market.configuration){
-        setConfigurationUpdatePath(conf.market.configuration) 
-      }
+	def internalUpdateConfiguration : Unit = try{ 
+	  
+	      val newMarket = loadMarket(conf.market.implementation, conf.market.configuration) 
+	      if( (! newMarket.isEmpty) && (internal.isEmpty || (newMarket.get ne internal.get))){
+	        internal = newMarket
+	      }else if(configurationPath!=conf.market.configuration){
+	        setConfigurationUpdatePath(conf.market.configuration) 
+	      }
+    }catch{
+      case e => debug("while setting configuration: "+ e)
 	}
-	 loadMarket(initClassName)
-	 setConfigurationUpdatePath(initConfigurationPath)
+	 //internal = loadMarket(initClassName, initConfigurationPath)
+	 
 	 setServerContext(server)
- 	private def loadMarket(cls:String) : Option[IMarket] = { 
+ 	private def loadMarket(cls:String, cfg:String) : Option[IMarket] = { 
  	  if(cls==className && ! internal.isEmpty) internal else {
 	 	  try{
 debug("reconfiguring market to  "+cls)	 	    
@@ -43,13 +38,28 @@ debug("reconfiguring market to  "+cls)
 		 	  val c : java.lang.Class[_] = classLoader loadClass cls
 		 	  if( ! (classOf[IMarket] isAssignableFrom c) ){
 		 	    error(cls + " does not implement IMarket!")
+debug(cls + " does not implement IMarket!")
 		 	    internal
         
 		 	  }else if(internal.isDefined && c.isInstance(internal.get)){
 		 	    // same class
+debug(cls + " turned out to be same class nontetheless!")
 		 	    internal
 		 	  }else{
-		 	    Some(c.newInstance.asInstanceOf[IMarket])
+				val nu = c.newInstance.asInstanceOf[IMarket]
+debug(cls + " new instance created! "+server)
+				nu setServerContext server
+				if( nu.setConfiguration(cfg)){
+debug(cls + " new instance configured! -> "+server.planes.items.keys.mkString)
+			        nu cycle mission
+			        className = cls
+			        configurationPath = cfg    
+				 Some(nu)
+				}else{
+debug(cls + " new instance not configured!")
+				  internal 
+				}
+				 
 		 	  }
 		  }catch{
 		    case x : Throwable => error("failed to load market class "+cls, x)

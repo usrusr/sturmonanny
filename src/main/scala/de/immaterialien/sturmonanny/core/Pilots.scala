@@ -22,6 +22,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 //        val planes = Army Val new mutable.LinkedHashMap[String, PlaneState]
         val died = Army Var 0   
 		val balance = Army Var 0D
+		val refund = Army Var 0D
 		var deathPauseUntil = 0L
 //		var loggedInPlane : Option[String] = None 
 //		/**
@@ -33,13 +34,16 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 		   var allowed = true
 		   var name = ""
 		   var since = System.currentTimeMillis
-		   var refund : Double = 0.
+//		   var refund : Double = 0.
      
-		     def updateBalance(){
+		     def applyTime(){
+			    val now = System.currentTimeMillis
 			    val price = server.market.getPrice(plane.name)
-			    val difference = System.currentTimeMillis - plane.since
-			    
+			    val millis = System.currentTimeMillis - plane.since
+			    val difference = price * millis / (-60000) 
+debug("price update for "+millis+" with raw price"+ price+ " -> difference "+difference )       
 			    balance () = server.rules.updateBalance(balance, difference)
+			    plane.since = now
 			}
      
      
@@ -48,34 +52,51 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 		       case "" => {
 		         allowed = true
 		         name = ""
+		         refund () =0
 		       }
 		       case newPlane if(name!=newPlane)=> {
 		    	 since = System.currentTimeMillis 
-    	         name = newPlane
-		         server.rules.startCostCheck(what, balance) match {
-		           case Rules.CostResult(false, _, _) => {
+    	         val price : Double= server.market.getPrice(newPlane)
+		         server.rules.startCostCheck(price, balance) match {
+		           case Rules.CostResult(allowedresult, newBalance, newRefund, startFee) => {
+		             if(allowedresult){
+			             allowed = true
+			             if(newBalance!=balance.value){
+			               if(newRefund>0) chat("Start fee "+startFee+"%s, possible refund: "+newRefund +"%s")
+			               else chat("Start fee of "+startFee+"%s debited")
+			             }
+			             balance () = newBalance
+			             refund () = newRefund
+			         }else{
+		        	 chat(""+startFee+"%s needed, available "+(startFee-balance.value)+"%s")
+		           
 		             allowed = false
-		             refund = 0.
-		           }
-		           case Rules.CostResult(true, newBalance, newRefund) => {
-		             allowed = true
-		             balance () = newBalance
-		             refund = newRefund
+		             refund () =0
+			         }
 		           }
 		         }
+		    	 name = newPlane
 		       }
 		       case name => {
-			     if(allowed) updateBalance
+			     if(allowed) applyTime
 		       }
 		     }
 		     if( ! allowed ){
 		       server.rules.warnPlane(Pilot.this.name, plane.name, since, balance)
 		     }
 		   }
+		   def returns(){
+		     if(refund.value>0) {
+		       chat("Awarded a refund of "+refund.value+"%s for returning the "+plane.name)
+		       balance () = server.rules.updateBalance(balance, refund)
+		       refund () = 0
+		     }
+		   } 
 		   def dies{
-		     flies(name)
+		     flies(name)// finish balance
 		     name = ""
 		     allowed = true
+		     refund () = 0
 		   }
 		   def warn{
 		     
@@ -83,15 +104,19 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 		}
     
 		override def messageHandler = { 
-		  case PERSIST =>  
+		  case Is.PERSIST =>  
  
-   		  case this.died => {
-   			  plane.dies
-          }
-   		  case flies(plane, army) => {
+   		  case Is.flying(plane, army) => {
    	 	    currentSide_=( army )
    	 	    this.plane flies plane
           }
+   		  case Is.returns => {
+   		    plane.returns
+   		  }
+          case Is.destroyed => {
+   			  plane.dies
+          }
+
 //   		  case server.warning.passed  => if(System.currentTimeMillis<deathPauseUntil){
 //   		    
 //   		  }   
@@ -99,36 +124,44 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
    		    msg match { 
    		    	case Pilots.Commands.balancecommand(_) => {
    		    	   
-   		    	  val reply = server.multi.ChatTo(name, "current balance is "+balance.value)
-debug(name+" balance "+reply+ " in market +" + server.market.internal)   		    
-   		    	  server.multi !  server.multi.ChatTo(name, "current balance is "+balance.value)
+   		    	  chat("current balance is "+balance.value)
    		    	}
    		    	case Pilots.Commands.pricecommand(which) => {
-   		    	  val list = new scala.collection.jcl.TreeSet[String]()
+   		    		val pilotName = Pilot.this.name
    		    	  server.planes.forMatches(which){plane =>
+//debug(name+" pricecommand: '"+which+"'")   		    	    
    		    	    val price = server.market.getPrice(plane.name)
-   		    	    val affordable = if(price > 0){
-   		    	    	server.rules.startCostCheck(plane.name, balance) match {
-				           case Rules.CostResult(false, _, _) => {
-				             ":-("
+              		def padRight(in:String, reference:String):String=in+(reference.drop(in.length))
+              		def padLeft(in:String, reference:String):String=(reference.drop(in.length))+in
+   		    	    val (affordable, verb) = if(price > 0){
+   		    	    	server.rules.startCostCheck(price, balance) match {
+				           case Rules.CostResult(false, newBal, _, startFee) => {
+				             ("!", "would.cost."+startFee.toInt+".+" )
 				           }
-				           case Rules.CostResult(true, newBalance, newRefund) => {
-				             ";^)"
+				           case Rules.CostResult(true, _, _, startFee) => {
+				             ("+", "costs.once."+startFee.toInt+".+" )
 				           }
-				           case _ => ""
+				           case _ => ("!","gives u respect, yo!")
 				         }
    		    	    }else{
-   		    	      ":-)"
+   		    	      ("*", "gives")
    		    	    }
-   		    	    val msg = plane.name +" costs "+price+"%s per minute "+affordable  
-   		    	    list.add(msg)
-   		    	  }
-   		    	  for(line <- list){
-   		    	    server.multi ! server.multi.ChatTo(Pilot.this.name, line)
-debug(name+" balance for "+which+": "+line)               
+              		
+              	    // padding for longest possible name:
+                    //                                   P_40SUKAISVOLOCHHAWKA2
+                    val paddedPlane = padRight(plane.name, "......................")
+                    //                              would cost 1000 +  
+                    val paddedVerb = padLeft(verb, ".................")
+                    
+                    var intPrice = price.toInt
+                    intPrice = intPrice.abs
+                    val paddedPrice = padLeft(""+price.abs.toInt,".....")
+   		    	    val msg = affordable+" "+paddedPlane+paddedVerb+paddedPrice+"%s.per.minute"  
+            		//server.multi ! server.multi.ChatTo(pilotName, msg)
+            		chat(msg)
    		    	  }
    		    	}
-case x => debug("unknown command by "+name+":"+x)
+   		    	case x => //debug("unknown command by "+name+":"+x)
    		    } 
    		  
 		  case _ => unknownMessage _ 
@@ -141,25 +174,26 @@ case x => debug("unknown command by "+name+":"+x)
 //		  }
         case _ =>
 		}
-		class PlaneState(private var total : Long){
-		  private var flying = false
-		  private var since = 0L
-		  private var lastUpdate = 0L
-		  def flies {
-		    if(flying){ 
-		      val cur = System.currentTimeMillis
-		      total += cur - lastUpdate
-		      lastUpdate = cur
-		    }else{
-		      since = System.currentTimeMillis
-		      lastUpdate = 0L
-//		      server.warning.subscribe(Pilot.this)
-		    }
-		  }
-		} 
+//		class PlaneState(private var total : Long){
+//		  private var flying = false
+//		  private var since = 0L
+//		  private var lastUpdate = 0L
+//		  def flies {
+//		    if(flying){ 
+//		      val cur = System.currentTimeMillis
+//		      total += cur - lastUpdate
+//		      lastUpdate = cur
+//		    }else{
+//		      since = System.currentTimeMillis
+//		      lastUpdate = 0L
+////		      server.warning.subscribe(Pilot.this)
+//		    }
+//		  }
+//		} 
 		def checkDeathPause {
 		  
 		}
+		private def chat(msg:String) = server.multi ! server.multi.ChatTo(name, msg) 
 		
 	}
 }
@@ -167,7 +201,6 @@ object Pilots {
   object Commands{
 	  val balancecommand = """(\s*!\s*balance\s*)""".r
 	  val pricecommand = """\s*!\s*price\s+(\S*)""".r
-//	  val pricescommand = """\s*!\s*prices\s+(\S+)""".r  
   }
 
 }

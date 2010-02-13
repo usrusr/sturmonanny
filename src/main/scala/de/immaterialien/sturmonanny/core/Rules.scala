@@ -1,19 +1,19 @@
 package de.immaterialien.sturmonanny.core
 
 class Rules extends NonUpdatingMember {
-  def startCostCheck(plane:String, balance:Double) :Rules.CostResult = {
-    val price = server.market.getPrice(plane)
+  def startCost(price:Double) = price * conf.game.startcost 
+  def startCostCheck(price:Double, balance:Double) :Rules.CostResult = {
     if(price>0){
-    	val startCost = price * conf.game.startcost
-	    val newBalance = balance - startCost
+    	val cost = startCost(price)
+	    val newBalance = balance - cost
 	    if(newBalance > 0) {
-	      Rules.CostResult(true, updateBalance(balance, startCost), 100 * startCost / conf.game.refund)
+	      Rules.CostResult(true, updateBalance(balance, -cost), 100 * cost / conf.game.refund, cost)
 	    } else {
-	      Rules.CostResult(false, balance, 0)  
+	      Rules.CostResult(false, balance, 0, cost)  
 	    }
     }else{
       // jumping in a negatively priced plane does not immediately change the balance
-      Rules.CostResult(true, balance, 0)
+      Rules.CostResult(true, balance, 0, 0)
       
     }
   } 
@@ -32,13 +32,13 @@ class Rules extends NonUpdatingMember {
     difference = if(difference==0) 1 else difference
     val remaining = ( conf.game.planeWarningsSeconds * 1000 ) - difference
     if(remaining < 0) {
-      multi ! multi.Kick(who) 
+ //     multi ! multi.Kick(who) 
       multi ! multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+what)
     }else{
       lazy val startPrice = server.market.getPrice(what) * conf.game.startcost
       val seconds : Long = remaining / 1000
 
-      val ratio = remaining+difference/difference
+      val ratio = remaining.toDouble/(remaining+difference).toDouble
       val message = if(ratio>0.8) {
         who+", please fly something more common than a "+what
       }else if(ratio>0.65){
@@ -64,10 +64,10 @@ class Rules extends NonUpdatingMember {
       }else{
         who+", if you want to live, jump!"
       }
-      multi ! multi.ChatTo(who, who+", "+message)
+      multi ! multi.ChatTo(who, message)
     }
   }
 } 
 object Rules {
-    case class CostResult(val allowed:Boolean, newBalance : Double, refund : Double)
+    case class CostResult(val allowed:Boolean, newBalance : Double, refund : Double, startFee:Double)
 }

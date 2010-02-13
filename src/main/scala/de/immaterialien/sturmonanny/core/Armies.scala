@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-
+import de.immaterialien.sturmonanny.util.Logging
 /**
  * Armies object provides methods to create holders for variables and values with separate content for each side
  * 
@@ -24,7 +24,10 @@ object Armies extends Enumeration("Red", "Blue", "None") {
   }
 
   class SidesVar[T](x : => T, private val provider : SideProvider) extends SidesVal[T](x, provider : SideProvider) {
-    def update(body : => T):Unit = update(provider, body)
+    def update(body : => T):Unit = {
+println("updating "+provider.currentSide+" "+this.getClass.getSimpleName+" to  "+body )
+      update(provider, body)
+    }
     def update(which:SideProvider, body : => T):Unit = which currentSide match {
 		case Red => red = body
 	    case Blue => blue = body  

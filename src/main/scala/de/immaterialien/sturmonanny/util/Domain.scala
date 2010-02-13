@@ -21,18 +21,24 @@ trait Domain[D <: Domain[D]]  extends  Logging{
 	val items : mutable.Map[String, this.Element] = new mutable.LinkedHashMap
 	private object domainActor extends LiftActor {
 		override def messageHandler : PartialFunction[Any,Unit] = {  
-		  case p : Domain.this.Element => items.put(p.name, p)
+		  case p : Domain.this.Element => {
+//debug("domainactor adding  "+p.name)		    
+		    items.put(p.name, p)
+		  }
 		  case unregister(p) => items.removeKey(p.name)
 	   
-    	  case forMatches(pat, body) => find(pat) map body
+    	  case forMatches(pat, body) => {
+    	    val founds = find(pat)
+    	    for(found <- founds){
+//    	    find(pat) map ({found=>
+//debug("found: "+found.name+" applying "+body)    	    		
+			    	  body(found)    	    
+			
+         }
+    	  }
     	  case forElement(name, body) => {
-debug("for element  '"+name+"'")
-	val elem = items.getOrElseUpdate(name, newElement(name))
- body(elem)
-//    	    items get name map {x=>
-//debug("map '"+x+"'")    	    
-//    	      body(x)
-//    	    } 
+    		  val elem = items.getOrElseUpdate(name, newElement(name))
+    		  body(elem)
          }
 	
 		  case x => debug("unknown in domain "+this.getClass.getSimpleName+": "+x)   
@@ -50,24 +56,39 @@ debug("for element  '"+name+"'")
 	/**
 	 * find elements based on a trivial "*" search pattern, result is lazy so do not expose to a different thread!
 	 */
-    private def find(pat:String) = {
+    private def find(pat:String) : Iterable[this.Element] = {
+try{      
      if(( pat eq null) || pat.trim.isEmpty){
        items map (_ _2)
      }else{
+debug("find '"+pat+"' in "+items.size)       
     	 def regexMatchings(reg : scala.util.matching.Regex) = {
-    	   items filterKeys ( 
-	     	reg findFirstIn _ isDefined
-    	   ) map (_ _2)
+//    	   def matches(name:String)={
+//    	     val found = reg findFirstIn name
+//    	     found isDefined
+//    	   }
+//           items filterKeys matches map (_ _2)
+                 items filterKeys (reg findFirstIn _ isDefined) map (_ _2)
     	 }
-	     val quoted = ("^("+java.util.regex.Pattern.quote(pat).replaceAll("""\*""", ".*")+")$").r
-	     val ret = regexMatchings(quoted)
+//      	def regexMatchings(reg : scala.util.matching.Regex) : Iterable[this.Element] = _regexMatchings(reg).toList
+       
+      	val content = """(\Q"""+pat.replaceAll("""\*""", """\\E.*\\Q""")+"""\E)"""
+      	val unquoted = (content).r
+	    val quoted = ("^"+unquoted+"$").r
+	     var ret = regexMatchings(quoted)
 	     if(ret isEmpty){
-	       val unquoted = ("("+java.util.regex.Pattern.quote(pat).replaceAll("""\*""", ".*")+")").r
-	       regexMatchings(unquoted)       
+	       ret = regexMatchings(unquoted)
+debug("unquoted ret  "+ ret.mkString )        
+			ret
 	     }else{
+debug("quoted ret  "+ ret.mkString )        
 	       ret
 	     }
       }
+}catch{
+  case x:Throwable=>x.printStackTrace
+  None
+}     
    }
 	private case class unregister(val who : Domain.this.Element)
     private case class forMatches(val pat:String, body : (Domain.this.Element) => Unit)

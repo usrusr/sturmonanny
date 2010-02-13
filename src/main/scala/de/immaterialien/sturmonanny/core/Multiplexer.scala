@@ -25,10 +25,12 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   def this(il2port : Int , scport : Int) = this("127.0.0.1", il2port, scport)
   def this(conf : Configuration) = this(conf.server.host, conf.server.il2port, conf.server.consoleport)
   override def updateConfiguration {
+debug("updating mutltiplexer from " +host+":"+il2port )    
     if(conf.server.il2port != il2port || conf.server.host != host){
       il2port = conf.server.il2port
       host = conf.server.host
-      this ! SwitchConnection(conf.server.host, conf.server.il2port)
+debug("updating mutltiplexer to " +host+":"+il2port )    
+      this ! SwitchConnection(host, il2port)
     }
     if(conf.server.consoleport != scport){
       scport = conf.server.consoleport
@@ -73,10 +75,15 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
   val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines 
 	    case SwitchConnection(newhost, newport) => {
+debug("acting conntexction switch")	      
 	      clients foreach ( _ ! DownInternal("disconnecting IL-2 instance on "+host+":"+il2port+" and switching to "+newhost+":"+newport))
+debug("il2socket:"+il2socket)	      
 	      il2socket foreach (_.close)
-	      il2waiter.interrupt
+debug("il2waiter:"+il2waiter)	      
+	      if(il2waiter!=null) il2waiter.interrupt
+debug("il2waiter:"+il2waiter)	      
 	      il2waiter = newIl2Waiter
+debug("created il2waiter:"+il2waiter)	      
 	    } 
   		case msg : DownLine => {
           for(client <- clients) {
@@ -226,7 +233,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 
 
   var il2waiter : Thread = null
-  def start = il2waiter = newIl2Waiter
+//  def start = il2waiter = newIl2Waiter
 
   def newIl2Waiter() : Thread = {
 debug("creating thread, server is "+server)
@@ -244,11 +251,9 @@ debug("creating thread, dispatcher is "+server.dispatcher)
             il2line.clear
             createdLine match {
               case Multiplexer.consoleNPattern(n) => { 
-//debug("sending prompt " + createdLine )                
                 Multiplexer.this ! DownPromptLine(createdLine)
               }
               case _ =>  {
-debug("sending " + createdLine )                 
                 Multiplexer.this ! DownLine(createdLine)  
                 server.dispatcher !  createdLine.stripLineEnd
               }
