@@ -25,7 +25,7 @@ object Armies extends Enumeration("Red", "Blue", "None") {
 
   class SidesVar[T](x : => T, private val provider : SideProvider) extends SidesVal[T](x, provider : SideProvider) {
     def update(body : => T):Unit = {
-println("updating "+provider.currentSide+" "+this.getClass.getSimpleName+" to  "+body )
+//println("updating "+provider.currentSide+" "+this.getClass.getSimpleName+" to  "+body )
       update(provider, body)
     }
     def update(which:SideProvider, body : => T):Unit = which currentSide match {

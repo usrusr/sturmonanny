@@ -7,7 +7,7 @@ class Planes extends Domain[Planes] with NonUpdatingMember{
 	class Plane(override val name : String) extends this.Element(name){
 	  	override def messageHandler : PartialFunction[Any, Unit] = {
 		  case Is.Persisted => 
-		  case _ => unknownMessage _  
+		  case _ => unknownMessage _   
 	  	} 
  	}     
 }  

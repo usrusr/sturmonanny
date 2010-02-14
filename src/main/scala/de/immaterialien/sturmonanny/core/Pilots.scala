@@ -11,24 +11,27 @@ import scala.util.matching._
 class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 	override def newElement(name:String) = new Pilot(name)
 	class Pilot(override val name : String) extends Pilots.this.Element(name) with SideProvider{
-		 
-    
-//        val planes = Army Val new mutable.LinkedHashMap[String, PlaneState]
-        val died = Army Var 0   
 		val balance = Army Var 0D
 		val refund = Army Var 0D
-		var deathPauseUntil = 0L
-//		var loggedInPlane : Option[String] = None 
-//		/**
-//		 * a plane the pilot is not allowed to fly 
-//		 */
-//		var forbiddenPlane : Option[String] = None 
+		val invitations = Army Val (new mutable.HashMap[String, Pilots.Invitation]())
   
+    	object pilot{
+     	  var deathPause = false
+     	  var deathPauseUntil = 0L
+  
+    	  def dies = {
+    	    deathPauseUntil = server.rules.calculateDeathPause
+    	    plane.dies // if the pilot dies the plane is lost as well (forget the corner case of a headshot @ base!)
+    	  }
+    	}
 		object plane{
-		   var allowed = true
-		   var name = ""
-		   var since = System.currentTimeMillis
+			var allowed = true
+		   	var name = ""
+		   	var since = System.currentTimeMillis
 //		   var refund : Double = 0.
+			def none =  name==null || name.trim.isEmpty 
+			def some =  ! none
+			
      
 		     def applyTime(){
 			    val now = System.currentTimeMillis
@@ -42,42 +45,50 @@ debug("price update for "+millis+" with raw price"+ price+ " -> difference "+dif
      
      
 		   def flies(what:String){
-		     what match {
-		       case "" => {
+		     val now = System.currentTimeMillis
+		     invitations.retain(((x,y) => y.until > now))
+		     
+		     if(what==null || what.trim.isEmpty){
 		         allowed = true
 		         name = ""
 		         refund () =0
-		       }
+		     }else what match {
 		       case newPlane if(name!=newPlane)=> {
-		    	 since = System.currentTimeMillis 
-    	         val price : Double= server.market.getPrice(newPlane)
-		         server.rules.startCostCheck(price, balance) match {
-		           case Rules.CostResult(allowedresult, newBalance, newRefund, startFee) => {
-		             if(allowedresult){
-			             allowed = true
-			             if(newBalance!=balance.value){
-			               if(newRefund>0) chat("Start fee "+startFee+"%s, possible refund: "+newRefund +"%s")
-			               else chat("Start fee of "+startFee+"%s debited")
-			             }
-			             balance () = newBalance
-			             refund () = newRefund
-			         }else{
-		        	 chat(""+startFee+"%s needed, available "+(startFee-balance.value)+"%s")
-		           
-		             allowed = false
-		             refund () =0
-			         }
-		           }
-		         }
+		    	 since = now
 		    	 name = newPlane
+		         if(pilot.deathPauseUntil>now){
+			    	 pilot.deathPause = true
+			    	 allowed = false
+			     } else {
+			         pilot.deathPause = false
+		         
+	    	         val price : Double= server.market.getPrice(newPlane)
+			         server.rules.startCostCheck(price, balance) match {
+			           case Rules.CostResult(allowedresult, newBalance, newRefund, startFee) => {
+			             if(allowedresult){
+				             allowed = true
+				             if(newBalance!=balance.value){
+				               if(newRefund>0) chat("Start fee "+startFee+"%s, possible refund: "+newRefund +"%s")
+				               else chat("Start fee of "+startFee+"%s debited")
+				             }
+				             balance () = newBalance
+				             refund () = newRefund
+				         }else{
+				        	 chat(""+startFee+"%s needed, available "+(startFee-balance.value)+"%s")
+			           
+				        	 allowed = false
+				        	 refund () =0
+				         }
+			           }
+		             }
+		         }
 		       }
 		       case name => {
 			     if(allowed) applyTime
 		       }
 		     }
-		     if( ! allowed ){
-		       server.rules.warnPlane(Pilot.this.name, plane.name, since, balance)
-		     }
+		     if(pilot.deathPause ) server.rules.warnDeath(Pilot.this.name, plane.name, since, pilot.deathPauseUntil, invitations.value)
+		     else if( ! allowed ) server.rules.warnPlane(Pilot.this.name, plane.name, since, balance)
 		   }
 		   def returns(){
 		     if(refund.value>0) {
@@ -87,13 +98,10 @@ debug("price update for "+millis+" with raw price"+ price+ " -> difference "+dif
 		     }
 		   } 
 		   def dies{
-		     flies(name)// finish balance
+		     if(allowed && ! pilot.deathPause && plane.some) flies(name)// finish balance
 		     name = ""
 		     allowed = true
 		     refund () = 0
-		   }
-		   def warn{
-		     
 		   }
 		}
     
@@ -107,8 +115,15 @@ debug("price update for "+millis+" with raw price"+ price+ " -> difference "+dif
    		  case Is.Returning => {
    		    plane.returns
    		  }
-          case Is.Destroyed => {
+          case Is.Dying => {
    			  plane.dies
+   			  pilot.dies
+          }
+          case Is.Crashing => {
+        	  plane.dies
+          }
+          case inv : Pilots.Invitation => {
+            invitations.put(inv.plane, inv)
           }
 
 //   		  case server.warning.passed  => if(System.currentTimeMillis<deathPauseUntil){
@@ -161,32 +176,7 @@ debug("price update for "+millis+" with raw price"+ price+ " -> difference "+dif
 		  case _ => unknownMessage _ 
 		}
   
-		def deathPauseFunction : PartialFunction[Any, Unit] = {
-		  
-//		  { 
-//		    case Multiplexer.minute.passed(_) => 
-//		  }
-        case _ =>
-		}
-//		class PlaneState(private var total : Long){
-//		  private var flying = false
-//		  private var since = 0L
-//		  private var lastUpdate = 0L
-//		  def flies {
-//		    if(flying){ 
-//		      val cur = System.currentTimeMillis
-//		      total += cur - lastUpdate
-//		      lastUpdate = cur
-//		    }else{
-//		      since = System.currentTimeMillis
-//		      lastUpdate = 0L
-////		      server.warning.subscribe(Pilot.this)
-//		    }
-//		  }
-//		} 
-		def checkDeathPause {
-		  
-		}
+
 		private def chat(msg:String) = server.multi ! server.multi.ChatTo(name, msg) 
 		
 	}
@@ -196,6 +186,6 @@ object Pilots {
 	  val balancecommand = """(\s*!\s*balance\s*)""".r
 	  val pricecommand = """\s*!\s*price\s+(\S*)""".r
   }
-
+  class Invitation(val by:String, val plane:String, val until:Long) 
 }
 

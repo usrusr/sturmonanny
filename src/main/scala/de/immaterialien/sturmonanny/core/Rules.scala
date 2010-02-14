@@ -1,5 +1,7 @@
 package de.immaterialien.sturmonanny.core
 
+import scala.collection.mutable
+
 class Rules extends NonUpdatingMember {
   def startCost(price:Double) = price * conf.game.startcost 
   def startCostCheck(price:Double, balance:Double) :Rules.CostResult = {
@@ -25,14 +27,15 @@ class Rules extends NonUpdatingMember {
     else if(ret>highest) highest 
     else ret
   }
+  def calculateDeathPause : Long = {
+    System.currentTimeMillis + (1000 * conf.pilots.deathpenalty)
+  }
 
   def warnPlane(who:String, what:String, since:Long, balance:Double){
-    val multi = server.multi 
+    val multi = server.multi
     var difference = System.currentTimeMillis - since 
-    difference = if(difference==0) 1 else difference
     val remaining = ( conf.game.planeWarningsSeconds * 1000 ) - difference
     if(remaining < 0) {
- //     multi ! multi.Kick(who) 
       multi ! multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+what)
     }else{
       lazy val startPrice = server.market.getPrice(what) * conf.game.startcost
@@ -66,6 +69,46 @@ class Rules extends NonUpdatingMember {
       }
       multi ! multi.ChatTo(who, message)
     }
+  }
+  def warnDeath(who:String, what:String, since:Long, pauseUntil:Long, invitations:mutable.Map[String, Pilots.Invitation] ){
+    val multi = server.multi
+    var difference = System.currentTimeMillis - since 
+    val remaining = ( conf.game.planeWarningsSeconds * 1000 ) - difference
+    val seconds : Long = remaining / 1000
+    
+    val inviteString = invitations.values.toList match{
+      case Nil => None
+      case first :: Nil => Some(first.plane +" (with "+first.by+")")
+      case x => Some(x.map(_.plane).mkString(", "))
+    }
+    
+    if(what==null||what.trim.isEmpty){
+    	
+    	multi ! multi.ChatTo(who, who+", you can fly "+inviteString.map(_+" or wait ").getOrElse("again in ")+seconds+" seconds")
+    }else{
+	    if(remaining < 0) {
+	      multi ! multi.ChatBroadcast(who + " has been kicked: hit refly too fast")
+	    }else{
+    	  val ratio = remaining.toDouble/(remaining+difference).toDouble
+	      val message = if(ratio>0.7) {
+	    	  if(inviteString.isDefined) 
+	    		  "Fly "+inviteString.get+" or wait "+seconds+" seconds"
+	    	  else 
+	    		  "After dying, you are not allowed to fly for "+seconds+" seconds"
+	      }else if(ratio>0.4){
+	    	  if(inviteString.isDefined) 
+	    		  "Fly "+inviteString.get+" or wait "+seconds+" seconds"
+	    	  else 
+	    		  who+", you must be back in plane selection in "+seconds+" s!"
+	      }else if(ratio>0.2){
+	        "Kicking "+who+" in "+seconds+" seconds!"
+	      }else{
+	        who+", if you want to live, jump!"
+	      }
+	      
+	      multi ! multi.ChatTo(who, message)
+	    }
+     }
   }
 } 
 object Rules {

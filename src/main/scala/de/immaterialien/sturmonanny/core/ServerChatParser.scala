@@ -8,22 +8,56 @@ import scala.util.parsing.combinator._
  * 
  */
 class ServerChatParser extends RegexParsers{
-	lazy val statusChat : Parser[PilotEvent] =  "Chat: --- " ~> (pilot <~ " ") ~ whatHappens ^^ {(p) => PilotEvent(p _1, p _2)}
+	//lazy val statusChat : Parser[PilotEvent] =  "Chat: --- " ~> (pilot <~ " ") ~ whatHappens ^^ {(p) => PilotEvent(p _1, p _2)}
+	lazy val statusChat : Parser[PilotEvent] =  "Chat: --- " ~> (pilot <~ " ") ~ eventParser
 	lazy val pilot : Parser[String] = "(.+)".r
 	lazy val whatHappens : Parser[Is.Event]= dies | crashes | returns | joins | leaves
-	lazy val dies : Parser[Is.PilotLost] = ( 
-		" has beed captured by the opposing force." 
-	|	" was killed."
- 
- 
-	|	" spun out!"
-	|	" stalls."
-	|	" spins out of control."
+   
 
-	|	" did not recover from a spin."
-	|	" crashed and burned."
-	|	" spins into the ground."
-	) ^^^ Is.Dying 
+   
+	lazy val dies : Parser[Is.PilotLost] = ( 
+//user_joins 	
+//user_leaves 	
+//user_kicked 	
+//user_timeouts 	
+//user_joinarmy 	
+//user_readytogo 
+//user_cheating 	
+//user_cheatkick 
+//gore_kill 		
+//gore_killaaa 	
+//gore_gun 		
+//gore_tank 		
+//gore_ship 		
+//gore_ai 		
+//gore_sawwing 	
+//gore_blowwing 	
+//gore_blowup 	
+//gore_lightfuel 
+//gore_lighteng 	
+//gore_blowtail 	
+//gore_pk 		
+//gore_pk30 		
+//gore_headshot 	
+//gore_throat 	
+//gore_gk 		
+//gore_gheadshot 
+//gore_hitctrls 	
+//gore_crashes 	
+//gore_lands 	
+//gore_crashland 
+//gore_ditch 	
+//gore_swim 		
+//gore_pkonchute 
+//gore_spins 	
+//gore_spinfatal 
+//gore_rocketed 	
+//gore_bombed 	
+//gore_walkaway 	
+//gore_burnedcpt 
+//gore_hitouttac 
+//gore_vulcher 	
+	)
 	lazy val crashes : Parser[Is.PlaneLost] = ( 
 		" crashes." 
 	|	" has crashed."
@@ -62,7 +96,7 @@ class ServerChatParser extends RegexParsers{
 	|	" has been kicked." 
     )^^^ Is.Leaving
  
- case class PilotEvent(who:String, event:Is.Event)
+
 }
 
 /*
@@ -78,7 +112,9 @@ class ServerChatParser extends RegexParsers{
   val landed2 = """(.+) is on the ground safe and sound\.""".r
  */
 
+case class PilotEvent(who:String, event:Is.Event)
 object Is {
+   
 	trait Event 
 	trait PlaneEvent extends Event
 	trait PilotEvent extends Event
@@ -101,8 +137,9 @@ object Is {
    	case object Joining extends PilotEvent 
    	case object Leaving extends PilotEvent
 
+    case object Unknown extends Event
    
-	case object Destroyed extends PlaneLost with PilotLost
+//	case object Destroyed extends PlaneLost with PilotLost
 	case class Informed(val text : String) extends PilotEvent
 	case object Persisted extends Event
 }

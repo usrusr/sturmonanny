@@ -12,14 +12,14 @@ class Server(val initConf : String) extends Logging{
     def conf_= (newConf : Configuration) {  
       internalconf = newConf
       members foreach (_ updateConfiguration)
-    }  
+    }   
       
      
-	val rules = new Rules with Member 
-    val pilots = new Pilots with Member 
+	val rules = new Rules with Member  
+    val pilots = new Pilots with Member  
     val planes = new Planes with Member     
     val market = new MarketActor(conf.market.implementation, conf.market.configuration) with Member         
-    val dispatcher = new Dispatcher with Member  
+    val dispatcher = new Dispatcher with Member   
 
    	//val multi = new Multiplexer (conf.server.host, conf.server.il2port, conf.server.consoleport) with Member 
     val multi = new Multiplexer ("", 0, conf.server.consoleport) with Member
@@ -27,7 +27,7 @@ class Server(val initConf : String) extends Logging{
     for(m <- members){
 debug("initializing configuratoin for "+m.getClass.getClasses.map(x=>{x.getSimpleName}).foldLeft("")((a, b)=>a+"-" + b))      
       m.updateConfiguration
-    }
+    } 
     /**
 	 * mix in Member to connect the UpdatingMember to this   
 	 */

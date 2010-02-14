@@ -8,7 +8,7 @@ import de.immaterialien.sturmonanny.util._
  */
 class Dispatcher extends LiftActor with NonUpdatingMember with Logging{   
 	 def fromServer(lines : Seq[String]) {
-	   
+	    
 	 }
     
 val debugWriter = new java.io.FileWriter("dispatcher.out.txt")   
@@ -81,7 +81,7 @@ debug(who+" chats '"+what+"'")
        case Dispatcher.hasLeftTheGame(who) => {
            debug("dispatch player leave '"+who+"'")
 //				server.pilots ! Pilots.remove(who)
-           			pilot(who, Is.Destroyed)
+           			pilot(who, Is.Leaving)
        }
 
 	   case x => {

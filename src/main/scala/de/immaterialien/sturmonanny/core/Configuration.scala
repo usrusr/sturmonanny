@@ -13,6 +13,9 @@ class Configuration(override val file : String) extends ConfigurationSchema(file
 	  object pollMillis extends Field(1000) with Doc {
 	    def doc = "SC pilots listing is too slow to be useful, set (minimum) number of milliseconds to pass between polls"
 	  }
+	  object serverPath extends Field("..") with Doc {
+	    def doc = "path to the IL-2 server directory (used e.g. to access the i18n files)"
+	  } 
 	}
 	object game extends Group { 
 
