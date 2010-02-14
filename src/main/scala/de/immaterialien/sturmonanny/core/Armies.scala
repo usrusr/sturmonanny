@@ -31,7 +31,7 @@ println("updating "+provider.currentSide+" "+this.getClass.getSimpleName+" to  "
     def update(which:SideProvider, body : => T):Unit = which currentSide match {
 		case Red => red = body
 	    case Blue => blue = body  
-	    case _ => none = body
+	    case _ => none = body 
     }
     def value_=(body : =>T) = update(body)
     def other_=(body : =>T) = update(provider.other, body)

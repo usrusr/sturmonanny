@@ -26,12 +26,12 @@ val debugWriter = new java.io.FileWriter("dispatcher.out.txt")
 	 }
   
 	 val internal :  PartialFunction[Any, Unit] = {
-//	   case Dispatcher.pilotsHeader(_) => {
-//	     // ignore...
-//	   }
+	   case Dispatcher.pilotsHeader(_) => {
+	     // ignore...
+	   }
 	        
 	   case Dispatcher.pilotFlying(id, name, ping, score, army, plane) => {
-			server.pilots.forElement(name)( _! Is.flying(plane, Armies.forName(army)) ) 	
+			server.pilots.forElement(name)( _! Is.Flying(plane, Armies.forName(army)) ) 	
 	   }
        case Dispatcher.playerJoin(who) => {
 debug("dispatch player join '"+who+"'")
@@ -43,79 +43,46 @@ debug("new mission '"+what+"'")
        }
        case Dispatcher.chat(who, what) => {
 debug(who+" chats '"+what+"'")
-         	//server.pilots ! Domain.forward(who, chats(what))
-         	server.pilots.forElement(who){ _ ! chats(what)}
+         	server.pilots.forElement(who){ _ ! Is.Chatting(what)}
        }
-//       case Dispatcher.masterChat(who, what) => what match {
-//       		case Dispatcher.sets.joinsTheGame => {
-//debug("dispatch player join '"+who+"'")
-//				server.pilots.create(who)
-//       		}
-//       		case Dispatcher.sets.hasLeftTheGame => {
-//debug("dispatch player leave '"+who+"'")
-////				server.pilots ! Pilots.remove(who)
-//       		}
-//       		case Dispatcher.sets.destroyed => {
-//debug("pilot(who, Is.destroyed) '"+what+"'")
-//				pilot(who, Is.destroyed)
-//       		}
-//       		case Dispatcher.sets.landed => {
-//       			pilot(who, Is.returns) 
-//       		}
-//       		case x => debug(" ---> did not understand '"+x+"' in ")
-//       }
-           case Dispatcher.masterChat(cont) => cont match{
-	            case Dispatcher.joinsTheGame(who) => {
-	                debug("dispatch player join '"+who+"'")
-					server.pilots.create(who)
-	       		}
-	       		case Dispatcher.hasLeftTheGame(who) => {
-	       			debug("dispatch player leave '"+who+"'")
-	//				server.pilots ! Pilots.remove(who)
-	       		}
-             
-                case Dispatcher.landed1(who) => {
-                	pilot(who, Is.returns) 
-                }
-                case Dispatcher.landed2(who) => {
-                	pilot(who, Is.returns) 
-                }
-                case Dispatcher.wasKilled(who) => {
-                	pilot(who, Is.destroyed)
-                }
-                case Dispatcher.hasCrashed(who) => {
-                	pilot(who, Is.destroyed)
-                }
-                case Dispatcher.bailedOut(who) => {
-                	pilot(who, Is.destroyed)
-                }
-                case x => debug(" ---> did not understand '"+x+"' in ")
-           	}
+       case Dispatcher.parserChat(line) => {
+         Dispatcher.scparser.parse(Dispatcher.scparser.statusChat, line) map {ret=>
+         	server.pilots.forElement(ret.who){ _ ! ret.event}
+         }
+       }
+       
+//           case Dispatcher.masterChat(cont) => {
+//	            case Dispatcher.joinsTheGame(who) => {
+//	                debug("dispatch player join '"+who+"'")
+//					server.pilots.create(who)
+//	       		}
+//	       		case Dispatcher.hasLeftTheGame(who) => {
+//	       			debug("dispatch player leave '"+who+"'")
+//	//				server.pilots ! Pilots.remove(who)
+//	       		}
+//             
+//                case Dispatcher.landed1(who) => {
+//                	pilot(who, Is.returns) 
+//                }
+//                case Dispatcher.landed2(who) => {
+//                	pilot(who, Is.returns) 
+//                }
+//                case Dispatcher.wasKilled(who) => {
+//                	pilot(who, Is.destroyed)
+//                }
+//                case Dispatcher.hasCrashed(who) => {
+//                	pilot(who, Is.destroyed)
+//                }
+//                case Dispatcher.bailedOut(who) => {
+//                	pilot(who, Is.destroyed)
+//                }
+//                case x => debug(" ---> did not understand '"+x+"' in ")
+//           	}
        case Dispatcher.hasLeftTheGame(who) => {
            debug("dispatch player leave '"+who+"'")
 //				server.pilots ! Pilots.remove(who)
+           			pilot(who, Is.Destroyed)
        }
-//       case Dispatcher.landed(who) => {
-//         pilot(who, Is.returns) 
-//       }
-//       case Dispatcher.destroyed(who) => {
-//         pilot(who, Is.destroyed)
-//       }                   
-                           
-                           
-//       case Dispatcher.landed(who) => {
-//         pilot(who, Is.returns) 
-//       }
-       
-//       case Dispatcher.wasKilled(who) => {
-//         pilot(who, Is.destroyed)
-//       }
-//		case Dispatcher.hasCrashed(who) => {
-//		  pilot(who, Is.destroyed)
-//		}
-//		case Dispatcher.bailedOut(who) => {
-//		  pilot(who, Is.destroyed)
-//		}
 
 	   case x => {
   debug(" --- did not understand '"+x+"'")
@@ -153,14 +120,17 @@ object Dispatcher {
 //  val bailedOut = """Chat: --- (.+) bailed out\.\\n""".r
 //  val landed = """Chat: --- (.+) is (:?on the ground safe and sound)|(:?RTB)\.\\n""".r
 //  
-
-  val hasLeftTheGame = """(.+) has left the game""".r
-  val joinsTheGame = """(.+) joins the game""".r
-  val wasKilled = """(.+) was killed""".r
-  val hasCrashed = """(.+) has crashed""".r
-  val bailedOut = """(.+) bailed out""".r
-  val landed1 = """(.+) is RTB""".r
-  val landed2 = """(.+) is on the ground safe and sound""".r
+ 
+  val hasLeftTheGame = """(.+) has left the game\.""".r
+  val joinsTheGame = """(.+) joins the game\.""".r
+  val wasKilled = """(.+) was killed\.""".r
+  val hasCrashed = """(.+) has crashed\.""".r
+  val crashes = """(.+) crashes\.""".r
+  val crashes2 = """(.+) just crashed!""".r
+  val bailedOut = """(.+) bailed out\.""".r
+  val captured = """(.+) has beed captured by the opposing force\.""".r
+  val landed1 = """(.+) is RTB\.""".r
+  val landed2 = """(.+) is on the ground safe and sound\.""".r
   
                                                                                                     
 //    val hasLeftTheGame = """Chat: --- (.+) has left the game\.\\n""".r
@@ -171,8 +141,9 @@ object Dispatcher {
 ////    val bailedOut = """Chat: --- (.+) bailed out\.\\n""".r
 //    val landed = """Chat: --- (.+) is (:?on the ground safe and sound)|(:?RTB)\.\\n""".r
                                                                       
-                                                                        
-  val masterChat = """Chat: --- (.+)\.\\n""".r
+                                              
+  val parserChat = """(Chat: --- .+)\\n""".r                                      
+//  val masterChat = """Chat: --- (.+)\\n""".r
 //  // Chat: --- test was killed.\n
 //  object sets {
 //	  val hasLeftTheGame = Set("""has left the game""")
@@ -191,5 +162,5 @@ object Dispatcher {
   
   val seqSeparator = """-------------------------------------------------------\\n""".r;
   val seqName = """Name\: \\t(.*)\\n""".r
-                              
+  val scparser = new ServerChatParser                            
 }

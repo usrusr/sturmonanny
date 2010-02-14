@@ -57,41 +57,27 @@ trait Domain[D <: Domain[D]]  extends  Logging{
 	 * find elements based on a trivial "*" search pattern, result is lazy so do not expose to a different thread!
 	 */
     private def find(pat:String) : Iterable[this.Element] = {
-try{      
      if(( pat eq null) || pat.trim.isEmpty){
        items map (_ _2)
      }else{
-debug("find '"+pat+"' in "+items.size)       
-    	 def regexMatchings(reg : scala.util.matching.Regex) = {
-//    	   def matches(name:String)={
-//    	     val found = reg findFirstIn name
-//    	     found isDefined
-//    	   }
-//           items filterKeys matches map (_ _2)
-                 items filterKeys (reg findFirstIn _ isDefined) map (_ _2)
-    	 }
-//      	def regexMatchings(reg : scala.util.matching.Regex) : Iterable[this.Element] = _regexMatchings(reg).toList
-       
+    	def regexMatchings(reg : scala.util.matching.Regex) = items filterKeys (reg findFirstIn _ isDefined) map (_ _2)
+    	 
       	val content = """(\Q"""+pat.replaceAll("""\*""", """\\E.*\\Q""")+"""\E)"""
       	val unquoted = (content).r
 	    val quoted = ("^"+unquoted+"$").r
 	     var ret = regexMatchings(quoted)
 	     if(ret isEmpty){
 	       ret = regexMatchings(unquoted)
-debug("unquoted ret  "+ ret.mkString )        
 			ret
 	     }else{
-debug("quoted ret  "+ ret.mkString )        
 	       ret
 	     }
       }
-}catch{
-  case x:Throwable=>x.printStackTrace
-  None
-}     
    }
 	private case class unregister(val who : Domain.this.Element)
     private case class forMatches(val pat:String, body : (Domain.this.Element) => Unit)
     private case class forElement(val name:String, body : (Domain.this.Element) => Unit)
+//   	protected object PERSIST
+
 
 }

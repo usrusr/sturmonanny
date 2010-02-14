@@ -5,13 +5,7 @@ import scala.collection.mutable
 import scala.util.matching._
 
  
-case class chats(val msg : String) 
-case object lands
-case object dies
-case object ejects
-case object crashes
-case class join(val side : Armies.Armies)   
-case class inform(val text : String, val to : String)
+
  
           
 class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
@@ -104,23 +98,23 @@ debug("price update for "+millis+" with raw price"+ price+ " -> difference "+dif
 		}
     
 		override def messageHandler = { 
-		  case Is.PERSIST =>  
+		  case Is.Persisted =>  
  
-   		  case Is.flying(plane, army) => {
+   		  case Is.Flying(plane, army) => {
    	 	    currentSide_=( army )
    	 	    this.plane flies plane
           }
-   		  case Is.returns => {
+   		  case Is.Returning => {
    		    plane.returns
    		  }
-          case Is.destroyed => {
+          case Is.Destroyed => {
    			  plane.dies
           }
 
 //   		  case server.warning.passed  => if(System.currentTimeMillis<deathPauseUntil){
 //   		    
 //   		  }   
-   		  case chats(msg) =>
+   		  case Is.Chatting(msg) =>
    		    msg match { 
    		    	case Pilots.Commands.balancecommand(_) => {
    		    	   
