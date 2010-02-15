@@ -1,0 +1,10 @@
+h1. Sturmonanny, an IL-2 server controller tool extension
+
+The aim is to add interesting, gameplay-improving features while not reinventing the wheel (existing controller software can connect to the server through a built-in proxy) 
+
+  
+
+h2. License
+
+Licensed under the "Apache Public License, Version 2":http://www.apache.org/licenses/LICENSE-2.0.html.
+  
