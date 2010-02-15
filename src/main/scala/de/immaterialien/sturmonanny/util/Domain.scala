@@ -12,7 +12,7 @@ import net.liftweb.util._
 trait Domain[D <: Domain[D]]  extends  Logging{ 
  	self : D =>
   	
-  	// public interface
+  	// public interface 
   	def create(name:String) :Unit = if( ! (items contains name)) domainActor ! newElement(name) 
 	def remove(name:String) :Unit = domainActor ! remove(name)
 	def forElement(name:String) ( body : (this.Element)=>Unit) :Unit = domainActor ! forElement(name, body) 
@@ -22,7 +22,7 @@ trait Domain[D <: Domain[D]]  extends  Logging{
 	private object domainActor extends LiftActor {
 		override def messageHandler : PartialFunction[Any,Unit] = {  
 		  case p : Domain.this.Element => {
-//debug("domainactor adding  "+p.name)		    
+//debug("domainactor adding  "+p.name)		     
 		    items.put(p.name, p)
 		  }
 		  case unregister(p) => items.removeKey(p.name)

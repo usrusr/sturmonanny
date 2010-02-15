@@ -22,7 +22,7 @@ trait Logging {
   def error(msg: => AnyRef): Unit = logger.error(msg)
   def error(msg: => AnyRef, t: => Throwable): Unit = logger.error(msg,t)
 
-
+ 
 
   def fatal(msg: AnyRef): Unit = logger.fatal(msg)
   def fatal(msg: AnyRef, t: Throwable): Unit = logger.fatal(msg, t)

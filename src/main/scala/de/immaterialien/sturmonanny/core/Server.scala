@@ -19,7 +19,8 @@ class Server(val initConf : String) extends Logging{
     val pilots = new Pilots with Member  
     val planes = new Planes with Member     
     val market = new MarketActor(conf.market.implementation, conf.market.configuration) with Member         
-    val dispatcher = new Dispatcher with Member   
+    //val dispatcher = new Dispatcher with Member   
+    val dispatcher = new LocalizedDispatcher with Member
 
    	//val multi = new Multiplexer (conf.server.host, conf.server.il2port, conf.server.consoleport) with Member 
     val multi = new Multiplexer ("", 0, conf.server.consoleport) with Member

@@ -255,7 +255,7 @@ debug("creating thread, dispatcher is "+server.dispatcher)
               }
               case _ =>  {
                 Multiplexer.this ! DownLine(createdLine)  
-                server.dispatcher !  createdLine.stripLineEnd
+                server.dispatcher !  DispatchLine(createdLine.stripLineEnd)
               }
             }
           }
