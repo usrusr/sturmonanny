@@ -25,9 +25,9 @@ class DispatcherTest {
   
 //		d processLine """Chat: --- Pilot(entrop regulation) was killed.\n"""
 
-		d learnNewName "entrop regulation"
-  		d learnNewName "Mad"
-  		d learnNewName "entrop regulationabcdefg"
+		d.pilotNameParser learnNewName "entrop regulation"
+  		d.pilotNameParser learnNewName "Mad"
+//  		d.pilotNameParser learnNewName "entrop regulationabcdefg"
 
     d processLine """\"""+"""u00201      entrop regulationabcdefg 1 0    (2)Blue     ZZ + AH     Ju-87D-5\n"""
     d processLine """\"""+"""u00201      entrop regulationabcdefg 1 0    (2)Blue     ZZ(9)sZa    Ju-87D-5\n"""

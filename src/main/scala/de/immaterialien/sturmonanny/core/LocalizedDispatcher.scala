@@ -8,6 +8,7 @@ import scala.collection.mutable
 
 object LocalizedDispatcher {
   private val propertiesLine = """^\s*(\S*?)[123456789]?\s+(\S.*)$""".r
+  private val PILOTNAMETIMEOUT = 60*1000*1000
 }
 class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParsers with Logging{
 	override def skipWhitespace = false  
@@ -83,7 +84,7 @@ debug("parsed '"+line+"' \n  -> '"+parseResult+"'")
 	  channelRegex ^^ {x:String => 
 	    x match{
 	    	case channelRegex(name) => {
-	    	  learnNewName(name) 
+	    	  pilotNameParser.learnNewName(name) 
 	    	 
 	    	  PilotMessage(name, Is.Joining)
 	    	} 
@@ -94,20 +95,73 @@ debug("parsed '"+line+"' \n  -> '"+parseResult+"'")
 	    }
 	  }
 	}
-	val noNamesParser = literal("")
-	var namesParser = noNamesParser
-	val namesSet = new mutable.HashSet[String]()
-	def learnNewName(name:String){
-debug("extending namesparser: '"+name+"'")	  
-		if( ! namesSet.contains(name)){
-			namesParser = 
-				if(namesSet.size==0) literal(name)
-				else namesSet.foldLeft(literal(name))(_ ||| _)
-			namesSet += name
+ 
+	
+//	val noNamesParser = literal("")
+//	var namesParser = noNamesParser
+//	val namesSet = new mutable.HashSet[String]()
+//	def learnNewName(name:String){
+////debug("extending namesparser: '"+name+"'")	  
+//		if( ! namesSet.contains(name)){
+//			namesParser = 
+//				if(namesSet.size==0) literal(name)
+//				else namesSet.foldLeft(literal(name))(_ ||| _)
+//			namesSet += name
+//		}
+//	} 
+//
+//	def pilotNameParser = namesParser
+//  	private class PilotNameParser
+   	
+  
+  	object non_timeout_pilotNameParser extends Parser[String] {
+		private val noNamesParser = literal("")
+		private var namesParser = noNamesParser
+		private val namesSet = new mutable.HashSet[String]()
+		def learnNewName(name:String){
+	debug("extending namesparser: '"+name+"'")	  
+			if( ! namesSet.contains(name)){
+				namesParser = 
+					if(namesSet.size==0) literal(name)
+					else namesSet.foldLeft(literal(name))(_ ||| _)
+				namesSet += name
+			}
+		} 
+	
+		override def apply(in:Input) = namesParser.apply(in)
+  	} 
+  	object pilotNameParser extends Parser[String] {
+		private val noNamesParser = literal("")
+		private var namesParser : Parser[String]= noNamesParser
+		private val namesSet = new mutable.HashMap[String, TimeOutingLiteral]()
+  
+		class TimeOutingLiteral(val string:String, var lastUse:Long) extends Parser[String] {
+			val inner = literal(string)
+			override def apply(in:Input) = {
+				lastUse = System.currentTimeMillis
+				inner.apply(in) 
+			}
 		}
-	} 
-
-	def pilotNameParser = namesParser
+  
+		def learnNewName(name:String){
+			if( ! namesSet.contains(name)){
+				val now = System.currentTimeMillis
+				val newParser = new TimeOutingLiteral(name, now)
+				val newParserAsStringParser : Parser[String]= newParser 
+				val minLastUse = now - LocalizedDispatcher.PILOTNAMETIMEOUT
+    
+				// cleanup
+				namesSet.retain((_, p)=>p.lastUse > minLastUse)
+				namesParser = 
+					if(namesSet.size==0) newParser
+					else namesSet.projection.foldLeft(newParserAsStringParser)(_ ||| _._2)
+				namesSet.put(name, newParser)
+debug("extended namesparser with '"+name+"', new size is ")	  
+			}
+		} 
+	
+		override def apply(in:Input) = namesParser.apply(in)
+  	} 
  
  	lazy val ignore : Parser[Is.Event] = (
  		literal("-------------------------------------------------------")
@@ -115,47 +169,9 @@ debug("extending namesparser: '"+name+"'")
  	) ^^^ Is.Unknown
 
  	lazy val space :Parser[String] = """\s+""".r
-  
-// 	val pilotPattern = """\S(.*\S)?""".r
- 	
-//   	lazy val flyingLineParser : Parser[PilotMessage] = literal("""\""" + """u0020""")  ~> (
-//   		"""[1234567890 ]{1,8}""".r ~                // number and blanks """       """
-// 		pilotNameParser ~ 							// name _1
-// 		(space ~> """\\d""".r) ~ 					// ping _2
-// 		(space ~> """-?\\d""".r) ~ 					// score _3
-// 		(space ~ """\(\d+\)""" ~> """\S+""".r) ~	// army _4
-// 		(space ~> """\S*""".r)						// plane _5
-// 	 <~ """\n""") ^^ {
-// 	   case (_ ~ pilot ~ _ ~ _ ~ army ~ plane) => PilotMessage(pilot, Is.Flying(plane, Armies.forName(army)))
-// 	 } 
 	lazy val positiveNumber = """\d+""".r ^^ (_ toLong)
 	lazy val number = """-?\d+""".r ^^ (_ toLong)
 
-//	lazy val flyingLineParser : Parser[_] = 
-//			"""\\"""+"""0020\d[1234567890 ]{6}""".r ~>
-//			("""\S(.*\S)""".r <~space) ~ 
-//			(positiveNumber <~space) ~
-//			(number <~space) ~
-//			("""\(\d\)""".r ~> """[ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+""".r <~space) ~ 
-//			("""\S+\s+""".r ~> """\S+""".r) <~ """\n""" ^^ {
-//	  case (pilot ~ _ ~ _ ~ army ~ plane) => PilotMessage(pilot, Is.Flying(plane, Armies.forName(army)))
-//// 	  	3
-//	}
-   
-   	lazy val flyingLineParserFixedNames : Parser[PilotMessage] = literal("""\""" + """u0020""")  ~> (
-   		"""\d[1234567890 ]{6}""".r ~                // number and blanks """       """
- 		pilotNameParser ~ 							// name _1
-//		"""\S(.*\S)""".r ~ 
- 		("\\s*".r ~> positiveNumber) ~ 				// ping _2
- 		("\\s*".r ~> number) ~ 						// score _3
- 		("\\s*".r ~ """\(\d+\)""".r ~> """[ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+""".r <~"\\s*".r) ~	// army _4
- 		(("""\S.{11}""".r ~> """\S+\\n""".r)|"""\n""")// (number) plane _5
- 	) ^^ {
- 	   case (_ ~ pilot ~ _ ~ _ ~ army ~ plane) => {
- 		   val planeName = plane.substring(0,plane.length-2)
- 		   PilotMessage(pilot, Is.Flying(planeName , Armies.forName(army)))
- 	   }
- 	 } 
 
    	/**
    	 * special parsing of the "pilot line" that should be very robust against malicious pilot names
@@ -215,6 +231,7 @@ debug("extending namesparser: '"+name+"'")
 		 		}
 	 		    ()
  			}
+ 			for(pmsg<-ret) pilotNameParser.learnNewName(pmsg.who)
  			ret
  		 }
  	} 	
