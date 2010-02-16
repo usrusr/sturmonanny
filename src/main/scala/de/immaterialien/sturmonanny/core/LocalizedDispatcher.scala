@@ -5,16 +5,24 @@ import scala.util.parsing.combinator._
 import net.liftweb.actor.LiftActor
 import scala.io._
 import scala.collection.mutable
+import scala.util.matching.Regex
+//import java.util.regex.Pattern
 
 object LocalizedDispatcher {
-  private val propertiesLine = """^\s*(\S*?)[123456789]?\s+(\S.*)$""".r
+
   private val PILOTNAMETIMEOUT = 60*1000*1000
 }
-class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParsers with Logging{
+class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParsers with Logging with I18nReader{
 	override def skipWhitespace = false  
-	var serverPath : String= null
-	def i18nSuffix =  """\i18n\netmessages.properties"""
-	def updateConfiguration = {
+	def regexMatch(r : Regex) : Parser[Regex.Match] = Parser { 
+		in => regex(r)(in) match { // see http://www.scala-lang.org/node/1943#comment-15674
+			case Success(aString, theRest) => Success(r.findFirstMatchIn(aString).get, theRest)
+			case f@Failure(_,_) => f
+			case e@Error(_,_) => e
+		}
+	}
+ 
+ 	def updateConfiguration = {
 	  val newPath = conf.server.serverPath
    
 	  if(newPath!=serverPath){
@@ -22,34 +30,11 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
      
 	  } 
 	}
-	def init(newPath:String) = {
-	  val i18nPath = newPath+i18nSuffix
-	  try{
-		  val source = Source.fromFile(i18nPath)// scala.io.BufferedSource.fromFile(i18nPath)
-		  var translations = new mutable.HashMap[String, List[String]]()
-		  for(line : String<- source.getLines) {
+ 	override def updateTranslations(translations:mutable.Map[String, List[String]]){
+    	  localizedMessageParser = new LocalizedParserInstance(translations)
+	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
+    }
 
-		    line.stripLineEnd match{
-			    case LocalizedDispatcher.propertiesLine(name, text) => {
-debug("parsed constant '"+name+"' <- '"+text+"'")				      
-			      translations.get(name) match {
-			        	case None => translations.put(name, List(text))
-			        	case Some(existing) => translations.put(name, text::existing)
-			      } 
-			    }
-			    case x => if( ! x.isEmpty)debug("failed to parse '"+x+"'")	 
-			  }
-		  }
-debug("parsed i18n message definitions: "+translations)
-    
-	      localizedMessageParser = new LocalizedParserInstance(translations)
-	      serverPath = newPath
-	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)
-      }catch{
-        case e:Exception=>if(serverPath!=null) error("Failed to parse i18n message definitions from "+i18nPath+":", e)
-      }
-	} 
-	init(serverPath)
  
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
@@ -57,22 +42,29 @@ debug("parsed i18n message definitions: "+translations)
 	}
 	def processLine(line:String) : Unit = {
 		val parseResult : ParseResult[_] = parse(rootParser, line)
-debug("parsed '"+line+"' \n  -> '"+parseResult+"'")  
+//debug("parsed '"+line+"' \n  -> '"+parseResult+"'")  
 		parseResult.getOrElse(None) match { 
 		      case PilotMessage(who, Is.Ignored) => // ignore
 		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+line+"'")
-		      case PilotMessage(who, what ) => //server.pilots.forElement(who)(_!what)
-        case None => 
-        case x:AnyRef => debug("got "+x+"\n  "+x.getClass.getSimpleName)
+		      case PilotMessage(who, what ) => {
+		        server.pilots.forElement(who)(_!what)
+debug("success "+who+" -> "+what+"  from '"+line+"'")		        
+		       }
+        case None => {
+debug("None                         from '"+line+"'")		        
+        }
+          
+        case Is.Ignored =>
+        case x:AnyRef => debug("got  "+x+"\n  "+x.getClass.getSimpleName+"\n   from '"+line+"'")
         case x => debug("got value "+x)
 		}   
 	}
 	lazy val rootParser = (
 			ignore
-		|   channelLine
-		|	statusChat
 		|	playerChat
 		|	flyingLineParser
+		|	statusChat
+		|   channelLine
 	)
 	
 	lazy val playerChat = {
@@ -97,43 +89,14 @@ debug("parsed '"+line+"' \n  -> '"+parseResult+"'")
 	}
  
 	
-//	val noNamesParser = literal("")
-//	var namesParser = noNamesParser
-//	val namesSet = new mutable.HashSet[String]()
-//	def learnNewName(name:String){
-////debug("extending namesparser: '"+name+"'")	  
-//		if( ! namesSet.contains(name)){
-//			namesParser = 
-//				if(namesSet.size==0) literal(name)
-//				else namesSet.foldLeft(literal(name))(_ ||| _)
-//			namesSet += name
-//		}
-//	} 
-//
-//	def pilotNameParser = namesParser
-//  	private class PilotNameParser
-   	
-  
-  	object non_timeout_pilotNameParser extends Parser[String] {
-		private val noNamesParser = literal("")
-		private var namesParser = noNamesParser
-		private val namesSet = new mutable.HashSet[String]()
-		def learnNewName(name:String){
-	debug("extending namesparser: '"+name+"'")	  
-			if( ! namesSet.contains(name)){
-				namesParser = 
-					if(namesSet.size==0) literal(name)
-					else namesSet.foldLeft(literal(name))(_ ||| _)
-				namesSet += name
-			}
-		} 
-	
-		override def apply(in:Input) = namesParser.apply(in)
-  	} 
+	/**
+     * a dynamic token set (with recently-used timeout) that happens to 
+     * 
+     */
   	object pilotNameParser extends Parser[String] {
 		private val noNamesParser = literal("")
 		private var namesParser : Parser[String]= noNamesParser
-		private val namesSet = new mutable.HashMap[String, TimeOutingLiteral]()
+		private val namesSet = new mutable.LinkedHashMap[String, TimeOutingLiteral]()
   
 		class TimeOutingLiteral(val string:String, var lastUse:Long) extends Parser[String] {
 			val inner = literal(string)
@@ -152,11 +115,19 @@ debug("parsed '"+line+"' \n  -> '"+parseResult+"'")
     
 				// cleanup
 				namesSet.retain((_, p)=>p.lastUse > minLastUse)
+    
+				// longest match or first match? 
+				// we take first match, so there is no possible way to cut off an existing player from commands 
 				namesParser = 
 					if(namesSet.size==0) newParser
-					else namesSet.projection.foldLeft(newParserAsStringParser)(_ ||| _._2)
+					else {
+					  namesSet.values.foldRight(newParserAsStringParser){(older : TimeOutingLiteral, newer : Parser[String])=>
+//debug("prepending "+older.string)  
+					  older | newer
+					}
+      }
 				namesSet.put(name, newParser)
-debug("extended namesparser with '"+name+"', new size is ")	  
+//debug("extended namesparser with '"+name+"', new size is "+namesSet.size )	  
 			}
 		} 
 	
@@ -166,7 +137,7 @@ debug("extended namesparser with '"+name+"', new size is ")
  	lazy val ignore : Parser[Is.Event] = (
  		literal("-------------------------------------------------------")
  	|	"""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft\n"""
- 	) ^^^ Is.Unknown
+ 	) ^^^ Is.Ignored
 
  	lazy val space :Parser[String] = """\s+""".r
 	lazy val positiveNumber = """\d+""".r ^^ (_ toLong)
@@ -179,7 +150,7 @@ debug("extended namesparser with '"+name+"', new size is ")
    	 * 
    	 * consider this as a little gem of imperative programming in all the functional sweetness of parser combinators ;-)
    	 */
-	lazy val flyingLineParser : Parser[PilotMessage] = ("""^\\""" + """u0020.*\\n$""").r ^? new PartialFunction[String, PilotMessage]{
+	lazy val flyingLineParser : Parser[PilotMessage] = ("""^\\""" + """u0020(.*)\\n$""").r ^? new PartialFunction[String, PilotMessage]{
  		 case class Last(in:String, out:Option[PilotMessage])
  		 def isDefinedAt(x:String) = {
  			 internal(x).isDefined
@@ -193,15 +164,15 @@ debug("extended namesparser with '"+name+"', new size is ")
  			if(mem!=null && (mem._1 eq x) ){
  				mem _2
  			}else{
- 				val nMem = (x, unbufferedInternal(x))
+ 				val nMem = (x, unbufferedInternal(x.substring(13, x.length-2)))
  				last = nMem
  				nMem _2
  			}
  		 }
 
- 		 val idPilotPingPoints = """\s+(\d+)\s+(\d+)\s+(\S.*)""".r
- 		 val sideNone = ("""([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+)\s+\\n""").r
- 		 val sidePlane = ("""([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+).*\s+(\S+)\\n""").r
+ 		 val idPilotPingPoints = """\s+(\d+-?)\s+(\d+)\s+(\S.*\S)\s*$""".r
+ 		 val sideNone = ("""^([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+)\s+$""").r
+ 		 val sidePlane = ("""^([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+).*\s+(\S+)$""").r
  		 def unbufferedInternal(x:String) : Option[PilotMessage] = {
  			var i = x.length
  			var ret : Option[PilotMessage] = null
@@ -213,7 +184,8 @@ debug("extended namesparser with '"+name+"', new size is ")
 	 		    }else{
 		 		    val after=x.substring(i+1)
 		 		    val before = x.substring(0,i-2)
-					val rbefore : String = before.substring(13).reverse
+					val rbefore : String = before.reverse
+//debug("trying to read '"+before+"' (..) '"+after+"'")
 					rbefore match {
 						case idPilotPingPoints(rpo, rpi, rpilot) => {
 							val pilot=rpilot.reverse
@@ -224,7 +196,7 @@ debug("extended namesparser with '"+name+"', new size is ")
 							}
 						}
 						case _ =>{
-							//debug("before fail '"+rbefore+"'") 
+//debug("before fail '"+rbefore+"'") 
 							null
 						}
 					}
@@ -232,6 +204,7 @@ debug("extended namesparser with '"+name+"', new size is ")
 	 		    ()
  			}
  			for(pmsg<-ret) pilotNameParser.learnNewName(pmsg.who)
+//debug("pilot line matched to "+ret)
  			ret
  		 }
  	} 	
@@ -246,25 +219,23 @@ debug("extended namesparser with '"+name+"', new size is ")
  
 	 class LocalizedParserInstance(val constantsToLocalized : mutable.Map[String, List[String]]) {
 		private def parserForSingleLine(text:String):Option[Parser[String]] = {
+				
 			val ignoreOne = text.replaceAll("""\{1\}""", """\E.*\Q """).replaceAll("''", "'")
-			def quoted(what:String) = ("""\Q"""+what+"""\E""").r
-		   
-			val parser : Option[Parser[String]]= ignoreOne match {
-				case LocalizedParserInstance.pilotTail(tail) => {
-//debug("creating pilotNameParser <~ "+quoted(tail)+ " ")				  
-			      Some(pilotNameParser <~ quoted(tail))
-			    }
-			    case LocalizedParserInstance.headPilotTail(head, tail) => {
-//debug("creating "+quoted(head)+" ~> pilotNameParser <~ "+quoted(tail)+ " ")				  
-			      Some(quoted(head) ~> pilotNameParser <~ quoted(tail))
-			    }
-			    case LocalizedParserInstance.headPilot(head) => {
-//debug("creating "+quoted(head)+" ~> pilotNameParser ")				  
-			      Some(quoted(head) ~> pilotNameParser)
-			    }
-			    case _ => None
+			val findZero = ignoreOne.replaceAll("""\{0\}""", """\\E(.*)\\Q""")
+			
+			if(findZero==ignoreOne) {
+				None
+			}else{
+				def quoted(what:String) = ("""\Q"""+what+"""\E""").r
+				val regex = quoted(findZero)
+
+				Some(
+					regexMatch(regex) ^^ { (m : Regex.Match) =>
+//debug(" regex match result 0'"+m.group(0)+"' 1'"+m.group(1)+"'" )
+						m.group(1)
+					}
+				) 
 			}
-			parser
 		}
 		private def mergeLineOptions(name:String):Parser[String]={
 		  val texts = constantsToLocalized(name)
@@ -293,38 +264,38 @@ debug("extended namesparser with '"+name+"', new size is ")
 		lazy val user_readytogo = selectLine("""user_readytogo"""	, Is.Unknown)
 		lazy val user_cheating 	= selectLine("""user_cheating"""	, Is.Unknown)
 		lazy val user_cheatkick = selectLine("""user_cheatkick"""	, Is.Leaving)
-		lazy val gore_kill 		= selectLine("""gore_kill"""		, Is.Dying)
+		lazy val gore_kill 		= selectLine("""gore_kill"""		, Is.Unknown)
 		lazy val gore_killaaa 	= selectLine("""gore_killaaa"""		, Is.Dying)
 		lazy val gore_gun 		= selectLine("""gore_gun"""			, Is.Dying)
 		lazy val gore_tank 		= selectLine("""gore_tank"""		, Is.Dying)
 		lazy val gore_ship 		= selectLine("""gore_ship"""		, Is.Dying)
 		lazy val gore_ai 		= selectLine("""gore_ai"""			, Is.Dying)
-		lazy val gore_sawwing 	= selectLine("""gore_sawwing"""		, Is.Crashing)
-		lazy val gore_blowwing 	= selectLine("""gore_blowwing"""	, Is.Dying)
-		lazy val gore_blowup 	= selectLine("""gore_blowup"""		, Is.Dying)
+		lazy val gore_sawwing 	= selectLine("""gore_sawwing"""		, Is.Unknown)
+		lazy val gore_blowwing 	= selectLine("""gore_blowwing"""	, Is.Unknown)
+		lazy val gore_blowup 	= selectLine("""gore_blowup"""		, Is.Unknown)
 		lazy val gore_lightfuel = selectLine("""gore_lightfuel"""	, Is.Unknown)
 		lazy val gore_lighteng 	= selectLine("""gore_lighteng"""	, Is.Unknown)
-		lazy val gore_blowtail 	= selectLine("""gore_blowtail"""	, Is.Crashing)
-		lazy val gore_pk 		= selectLine("""gore_pk"""			, Is.Dying)
-		lazy val gore_pk30 		= selectLine("""gore_pk30"""		, Is.Dying)
-		lazy val gore_headshot 	= selectLine("""gore_headshot"""	, Is.Dying)
-		lazy val gore_throat 	= selectLine("""gore_throat"""		, Is.Dying)
-		lazy val gore_gk 		= selectLine("""gore_gk"""			, Is.Dying)
-		lazy val gore_gheadshot = selectLine("""gore_gheadshot"""	, Is.Dying)
+		lazy val gore_blowtail 	= selectLine("""gore_blowtail"""	, Is.Unknown)
+		lazy val gore_pk 		= selectLine("""gore_pk"""			, Is.Unknown)
+		lazy val gore_pk30 		= selectLine("""gore_pk30"""		, Is.Unknown)
+		lazy val gore_headshot 	= selectLine("""gore_headshot"""	, Is.Unknown)
+		lazy val gore_throat 	= selectLine("""gore_throat"""		, Is.Unknown)
+		lazy val gore_gk 		= selectLine("""gore_gk"""			, Is.Unknown)
+		lazy val gore_gheadshot = selectLine("""gore_gheadshot"""	, Is.Unknown)
 		lazy val gore_hitctrls 	= selectLine("""gore_hitctrls"""	, Is.Unknown)
 		lazy val gore_crashes 	= selectLine("""gore_crashes"""		, Is.Crashing)
 		lazy val gore_lands 	= selectLine("""gore_lands"""		, Is.Returning)
 		lazy val gore_crashland = selectLine("""gore_crashland"""	, Is.Crashing)
 		lazy val gore_ditch 	= selectLine("""gore_ditch"""		, Is.Crashing)
 		lazy val gore_swim 		= selectLine("""gore_swim"""		, Is.Crashing)
-		lazy val gore_pkonchute = selectLine("""gore_pkonchute"""	, Is.Dying)
+		lazy val gore_pkonchute = selectLine("""gore_pkonchute"""	, Is.Unknown)
 		lazy val gore_spins 	= selectLine("""gore_spins"""		, Is.Crashing)
 		lazy val gore_spinfatal = selectLine("""gore_spinfatal"""	, Is.Dying)
-		lazy val gore_rocketed 	= selectLine("""gore_rocketed"""	, Is.Dying)
-		lazy val gore_bombed 	= selectLine("""gore_bombed"""		, Is.Dying)
+		lazy val gore_rocketed 	= selectLine("""gore_rocketed"""	, Is.Unknown)
+		lazy val gore_bombed 	= selectLine("""gore_bombed"""		, Is.Unknown)
 		lazy val gore_walkaway 	= selectLine("""gore_walkaway"""	, Is.Crashing)
 		lazy val gore_burnedcpt = selectLine("""gore_burnedcpt"""	, Is.Dying)
-		lazy val gore_hitouttac = selectLine("""gore_hitouttac"""	, Is.Crashing)
+		lazy val gore_hitouttac = selectLine("""gore_hitouttac"""	, Is.Unknown)
 		lazy val gore_vulcher 	= selectLine("""gore_vulcher"""		, Is.Unknown)
 
 		lazy val gore_captured 	= selectLine("""gore_captured"""	, Is.Dying)

@@ -183,6 +183,8 @@ debug("created il2waiter:"+il2waiter)
     override def messageHandler = {
       case Requery => {
         Multiplexer.this ! UpMessage( "user\r\n"::Nil, this)
+//        Multiplexer.this ! UpMessage( "user STAT\r\n"::Nil, this)
+        
         requery(conf.server.pollMillis.apply)
       }
       case _ => // ignore all, this console is only responsible for creating 
