@@ -10,6 +10,7 @@ object LocalizedDispatcher {
   private val propertiesLine = """^\s*(\S*?)[123456789]?\s+(\S.*)$""".r
 }
 class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParsers with Logging{
+	override def skipWhitespace = false  
 	var serverPath : String= null
 	def i18nSuffix =  """\i18n\netmessages.properties"""
 	def updateConfiguration = {
@@ -100,22 +101,12 @@ debug("parsed '"+line+"' \n  -> '"+parseResult+"'")
 debug("extending namesparser: '"+name+"'")	  
 		if( ! namesSet.contains(name)){
 			namesParser = 
-//				if(namesParser eq noNamesParser) literal(name)
-//				else literal(name) ||| namesParser
 				if(namesSet.size==0) literal(name)
 				else namesSet.foldLeft(literal(name))(_ ||| _)
 			namesSet += name
 		}
 	} 
-//	def pilotNameParser : Parser[String] = new Parser[String]{
-////debug("retrieving namesparser!")	  
-//		override def apply(in : Input) : ParseResult[String] = {
-//		  
-////debug("applying namesparser!")	  
-//		
-//		  namesParser apply in
-//		}
-//	}
+
 	def pilotNameParser = namesParser
  
  	lazy val ignore : Parser[Is.Event] = (
@@ -123,24 +114,113 @@ debug("extending namesparser: '"+name+"'")
  	|	"""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft\n"""
  	) ^^^ Is.Unknown
 
- 	lazy val space :Parser[String] = """\s""".r
+ 	lazy val space :Parser[String] = """\s+""".r
   
 // 	val pilotPattern = """\S(.*\S)?""".r
  	
-   	lazy val flyingLineParser : Parser[PilotMessage] = literal("""\""" + """u0020""")  ~> (
-   		"""[1234567890 ]{1,8}""".r ~                // number and blanks """       """
+//   	lazy val flyingLineParser : Parser[PilotMessage] = literal("""\""" + """u0020""")  ~> (
+//   		"""[1234567890 ]{1,8}""".r ~                // number and blanks """       """
+// 		pilotNameParser ~ 							// name _1
+// 		(space ~> """\\d""".r) ~ 					// ping _2
+// 		(space ~> """-?\\d""".r) ~ 					// score _3
+// 		(space ~ """\(\d+\)""" ~> """\S+""".r) ~	// army _4
+// 		(space ~> """\S*""".r)						// plane _5
+// 	 <~ """\n""") ^^ {
+// 	   case (_ ~ pilot ~ _ ~ _ ~ army ~ plane) => PilotMessage(pilot, Is.Flying(plane, Armies.forName(army)))
+// 	 } 
+	lazy val positiveNumber = """\d+""".r ^^ (_ toLong)
+	lazy val number = """-?\d+""".r ^^ (_ toLong)
+
+//	lazy val flyingLineParser : Parser[_] = 
+//			"""\\"""+"""0020\d[1234567890 ]{6}""".r ~>
+//			("""\S(.*\S)""".r <~space) ~ 
+//			(positiveNumber <~space) ~
+//			(number <~space) ~
+//			("""\(\d\)""".r ~> """[ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+""".r <~space) ~ 
+//			("""\S+\s+""".r ~> """\S+""".r) <~ """\n""" ^^ {
+//	  case (pilot ~ _ ~ _ ~ army ~ plane) => PilotMessage(pilot, Is.Flying(plane, Armies.forName(army)))
+//// 	  	3
+//	}
+   
+   	lazy val flyingLineParserFixedNames : Parser[PilotMessage] = literal("""\""" + """u0020""")  ~> (
+   		"""\d[1234567890 ]{6}""".r ~                // number and blanks """       """
  		pilotNameParser ~ 							// name _1
- 		(space ~> """\\d""".r) ~ 					// ping _2
- 		(space ~> """-?\\d""".r) ~ 					// score _3
- 		(space ~ """\(\d+\)""" ~> """\S+""".r) ~	// army _4
- 		(space ~> """\S*""".r)						// plane _5
- 	 <~ """\n""") ^^ {
- 	   case (_ ~ pilot ~ _ ~ _ ~ army ~ plane) => PilotMessage(pilot, Is.Flying(plane, Armies.forName(army)))
+//		"""\S(.*\S)""".r ~ 
+ 		("\\s*".r ~> positiveNumber) ~ 				// ping _2
+ 		("\\s*".r ~> number) ~ 						// score _3
+ 		("\\s*".r ~ """\(\d+\)""".r ~> """[ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+""".r <~"\\s*".r) ~	// army _4
+ 		(("""\S.{11}""".r ~> """\S+\\n""".r)|"""\n""")// (number) plane _5
+ 	) ^^ {
+ 	   case (_ ~ pilot ~ _ ~ _ ~ army ~ plane) => {
+ 		   val planeName = plane.substring(0,plane.length-2)
+ 		   PilotMessage(pilot, Is.Flying(planeName , Armies.forName(army)))
+ 	   }
  	 } 
 
+   	/**
+   	 * special parsing of the "pilot line" that should be very robust against malicious pilot names
+   	 * since it reads the string back to front, using the (n)Army part as a landmark
+   	 * 
+   	 * consider this as a little gem of imperative programming in all the functional sweetness of parser combinators ;-)
+   	 */
+	lazy val flyingLineParser : Parser[PilotMessage] = ("""^\\""" + """u0020.*\\n$""").r ^? new PartialFunction[String, PilotMessage]{
+ 		 case class Last(in:String, out:Option[PilotMessage])
+ 		 def isDefinedAt(x:String) = {
+ 			 internal(x).isDefined
+ 		 }
+ 		 def apply(x:String) = {
+ 			 internal(x).get
+ 		 }
+ 		 var last : (String,Option[PilotMessage]) = null // memoizing with a "map" of size = 1
+ 		 def internal(x:String) : Option[PilotMessage]={
+ 			val mem = last
+ 			if(mem!=null && (mem._1 eq x) ){
+ 				mem _2
+ 			}else{
+ 				val nMem = (x, unbufferedInternal(x))
+ 				last = nMem
+ 				nMem _2
+ 			}
+ 		 }
+
+ 		 val idPilotPingPoints = """\s+(\d+)\s+(\d+)\s+(\S.*)""".r
+ 		 val sideNone = ("""([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+)\s+\\n""").r
+ 		 val sidePlane = ("""([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+).*\s+(\S+)\\n""").r
+ 		 def unbufferedInternal(x:String) : Option[PilotMessage] = {
+ 			var i = x.length
+ 			var ret : Option[PilotMessage] = null
+ 			while(ret==null){
+	 		    i =x.lastIndexOf(')', i-1)
+	 		    ret = if(i<0){
+	 		    	debug("failed to read '"+x+"'")
+	 		    	None
+	 		    }else{
+		 		    val after=x.substring(i+1)
+		 		    val before = x.substring(0,i-2)
+					val rbefore : String = before.substring(13).reverse
+					rbefore match {
+						case idPilotPingPoints(rpo, rpi, rpilot) => {
+							val pilot=rpilot.reverse
+							after match {
+								case sideNone(side) => Some(PilotMessage(pilot, Is.Flying("", Armies.forName(side))))
+								case sidePlane(side, plane) => Some(PilotMessage(pilot, Is.Flying(plane, Armies.forName(side))))
+								case _ => null
+							}
+						}
+						case _ =>{
+							//debug("before fail '"+rbefore+"'") 
+							null
+						}
+					}
+		 		}
+	 		    ()
+ 			}
+ 			ret
+ 		 }
+ 	} 	
 
 
-  
+
     var localizedMessageParser : LocalizedParserInstance = null
 	def eventParser = localizedMessageParser.pilotEventParser
  
