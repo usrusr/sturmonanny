@@ -3,9 +3,12 @@ package de.immaterialien.sturmonanny.core
 
 case class PilotMessage(who: String, event : Is.Event)
 case class DispatchLine(line:String)
+case class DispatchMessage(message:String) {
+
+}
 object Is {  
     
-	trait Event 
+	sealed trait Event 
 	trait PlaneEvent extends Event
 	trait PilotEvent extends Event
 	trait Positive extends Event
@@ -14,10 +17,16 @@ object Is {
 	trait PlaneSafe extends PlaneEvent with Positive
 	trait PilotLost extends PilotEvent with Negative
 	trait PilotSafe extends PilotEvent with Positive 
+	trait PilotState extends PilotEvent
 	
+ 	case object LandedAtAirfield extends PilotState 
+ 	case object KIA extends PilotState
+ 
 	case class Flying(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
 	  def this(plane:String, side:String) = this(plane, Armies.forName(side )) 
 	}
+	 
+ 
 	case class Chatting(val msg : String) extends PilotEvent 
  
 	case object Ejecting extends PlaneLost    

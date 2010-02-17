@@ -16,7 +16,7 @@ class Server(val initConf : String) extends Logging{
       
      
 	val rules = new Rules with Member  
-    val pilots = new Pilots with Member  
+    val pilots = new Pilots with Member   
     val planes = new Planes with Member     
     val market = new MarketActor(conf.market.implementation, conf.market.configuration) with Member         
     //val dispatcher = new Dispatcher with Member   

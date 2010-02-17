@@ -14,6 +14,7 @@ object LocalizedDispatcher {
 }
 class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParsers with Logging with I18nReader{
 	override def skipWhitespace = false  
+	def regexMatch(r : String): Parser[Regex.Match] = regexMatch(r.r) 
 	def regexMatch(r : Regex) : Parser[Regex.Match] = Parser { 
 		in => regex(r)(in) match { // see http://www.scala-lang.org/node/1943#comment-15674
 			case Success(aString, theRest) => Success(r.findFirstMatchIn(aString).get, theRest)
@@ -35,23 +36,24 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
     }
 
- 
+ 	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
+	  case DispatchMessage(x) => processMessage(x)
 	  case _ => // ignore 
 	}
 	def processLine(line:String) : Unit = {
-		val parseResult : ParseResult[_] = parse(rootParser, line)
+		val parseResult : ParseResult[_] = parse(rootLineParser, line.stripLineEnd+"\n")
 //debug("parsed '"+line+"' \n  -> '"+parseResult+"'")  
 		parseResult.getOrElse(None) match { 
 		      case PilotMessage(who, Is.Ignored) => // ignore
 		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+line+"'")
 		      case PilotMessage(who, what ) => {
-		        server.pilots.forElement(who)(_!what)
+		    	  pilotMessageSend(who, what)
 debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		       }
         case None => {
-debug("None                         from '"+line+"'")		        
+//debug("None                         from '"+line+"'")		        
         }
           
         case Is.Ignored =>
@@ -59,14 +61,93 @@ debug("None                         from '"+line+"'")
         case x => debug("got value "+x)
 		}   
 	}
-	lazy val rootParser = (
+ 
+ 	def processMessage(lines:String) : Unit = {
+		val parseResult  = this.parseAll(rootMessageParser, lines+"\n")
+//debug("parsing '"+lines+"' \n  -> '"+parseResult+"'")  
+		val resList = parseResult getOrElse List() 
+		for (res <- resList) { 
+		  res match { 
+		      case PilotMessage(who, Is.Ignored) => // ignore
+		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+lines+"'")
+		      case PilotMessage(who, what ) => {
+		    	  pilotMessageSend(who, what)
+//debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
+		       }
+//		      case None => {
+//debug("None                         from '"+lines+"'")		        
+//		      }
+//		        case Is.Ignored =>
+//		        case x:AnyRef => debug("got  "+x+"\n  "+x.getClass.getSimpleName+"\n   from '"+lines+"'")
+//		        case x => debug("got value "+x)
+//            case x => debug("got value "+x)
+		  }
+		}
+	}
+ 
+  	lazy val rootMessageParser = (
+			statParser | 
+			( 
+			  pilotsHeader ~ statsLineEnd ~> rep(flyingLineParser)
+			)
+	)
+  
+	lazy val rootLineParser = (
 			ignore
 		|	playerChat
 		|	flyingLineParser
 		|	statusChat
 		|   channelLine
 	)
+	val statsLineEnd = "\\n\n"
+
+	lazy val statParser = {
+ 		rep(
+	 		separatorLine ~statsLineEnd  ~>
+	 		makeStatParserString("""Name""") ~ 
+			makeStatParserLong("""Score""") ~
+			( makeStatParserString("""State""") <~ 
+				makeStatParserLong("""Enemy Aircraft Kill""") ~
+				makeStatParserLong("""Enemy Static Aircraft Kill""") ~
+				makeStatParserLong("""Enemy Tank Kill""") ~
+				makeStatParserLong("""Enemy Car Kill""") ~
+				makeStatParserLong("""Enemy Artillery Kill""") ~
+				makeStatParserLong("""Enemy AAA Kill""") ~
+				makeStatParserLong("""Enemy Wagon Kill""") ~
+				makeStatParserLong("""Enemy Ship Kill""") ~
+				makeStatParserLong("""Friend Aircraft Kill""") ~
+				makeStatParserLong("""Friend Static Aircraft Kill""") ~
+				makeStatParserLong("""Friend Tank Kill""") ~
+				makeStatParserLong("""Friend Car Kill""") ~
+				makeStatParserLong("""Friend Artillery Kill""") ~
+				makeStatParserLong("""Friend AAA Kill""") ~
+				makeStatParserLong("""Friend Wagon Kill""") ~
+				makeStatParserLong("""Friend Ship Kill""") ~
+				makeStatParserLong("""Fire Bullets""") ~
+				makeStatParserLong("""Hit Bullets""") ~
+				makeStatParserLong("""Hit Air Bullets""") ~
+				makeStatParserLong("""Fire Roskets""") ~
+				makeStatParserLong("""Hit Roskets""") ~
+				makeStatParserLong("""Fire Bombs""") ~
+				makeStatParserLong("""Hit Bombs""") 
+				^?  ( stringToState,"'"+_+"' is not a known pilot state!" )
+			) ^^ { case name ~ _ ~ state => PilotMessage(name, state) }
+		)  <~ separatorLine ~statsLineEnd
+	}
+ 	def makeStatParserLong(intro:String ):Parser[Long] = {
+ 		literal(intro+""": """)~rep1("""\t""")~> number <~ statsLineEnd
+	}
+ 	def makeStatParserString (what:String) : Parser[String] = {
+ 	  (what+""": """)~rep1("""\t""") ~> regexMatch("""(\S(.*\S)?)\\n\n""".r)^^(_.group(1))
+	}
+ 	def stringToState : PartialFunction[String, Is.PilotState] = {
+ 	  case """KIA""" => Is.KIA
+ 	  case """Landed at Airfield""" => Is.LandedAtAirfield
+ 	}
 	
+ 
+ 
+ 
 	lazy val playerChat = {
 	  literal("Chat: ")~> pilotNameParser ~ (""": \t""" ~> """.*\\n""".r ) ^^ {case(who ~ what)=>PilotMessage(who, Is.Chatting(what.substring(0, what.length-2)))}
 	}
@@ -133,10 +214,11 @@ debug("None                         from '"+line+"'")
 	
 		override def apply(in:Input) = namesParser.apply(in)
   	} 
- 
+	lazy val separatorLine = literal("-------------------------------------------------------")
+	lazy val pilotsHeader = literal("""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft""")
  	lazy val ignore : Parser[Is.Event] = (
- 		literal("-------------------------------------------------------")
- 	|	"""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft\n"""
+ 		separatorLine
+ 	|	pilotsHeader ~ """\n"""
  	) ^^^ Is.Ignored
 
  	lazy val space :Parser[String] = """\s+""".r
@@ -150,7 +232,7 @@ debug("None                         from '"+line+"'")
    	 * 
    	 * consider this as a little gem of imperative programming in all the functional sweetness of parser combinators ;-)
    	 */
-	lazy val flyingLineParser : Parser[PilotMessage] = ("""^\\""" + """u0020(.*)\\n$""").r ^? new PartialFunction[String, PilotMessage]{
+	lazy val flyingLineParser : Parser[PilotMessage] = ("""^\\""" + """u0020(.*)\\n\n""").r ^? new PartialFunction[String, PilotMessage]{
  		 case class Last(in:String, out:Option[PilotMessage])
  		 def isDefinedAt(x:String) = {
  			 internal(x).isDefined

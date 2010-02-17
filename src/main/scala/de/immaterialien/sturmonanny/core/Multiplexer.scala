@@ -59,10 +59,10 @@ debug("updating mutltiplexer to " +host+":"+il2port )
  
   case class SwitchConnection(val host : String, val port : Int)
   case class UpCommand(cms:String)
-  case class ChatTo(val who : String, val what : String) extends UpCommand("chat "+what+" TO "+ who)
+  case class ChatTo(val who : String, val what : String) extends UpCommand("chat "+what+" TO \""+ who+"\"")
   case class ChatBroadcast(val what : String) extends UpCommand("chat "+what+" ALL")
   case class ChatArmy(val what : String, val army : Armies.Armies) extends UpCommand("chat "+what+" ARMY "+army)
-  case class Kick(val who : String) extends UpCommand("kick "+who)  
+  case class Kick(val who : String) extends UpCommand("kick \""+who+"\"")  
   
   private[this] def outWrite(line:String):Unit= outWrite(line::Nil)
   private[this] def outWrite(lines:Seq[String]){
@@ -107,9 +107,10 @@ debug("created il2waiter:"+il2waiter)
           // go back to accepting new UpMessages and broadcasting any unexpected downmessages
           var lines : List[DownLine] = Nil
           reactWithin(500){
-            case down : DownPromptLine => {
-              lines.reverse.foreach(msg.from ! _)
-              msg.from ! down
+            case prompt : DownPromptLine => {
+              //lines.reverse.foreach(msg.from ! _)
+              msg.from ! DownMessage(lines.reverse map (_ line))
+              msg.from ! prompt
               lines = Nil
               reactNormally
             }
@@ -183,9 +184,18 @@ debug("created il2waiter:"+il2waiter)
     override def messageHandler = {
       case Requery => {
         Multiplexer.this ! UpMessage( "user\r\n"::Nil, this)
-//        Multiplexer.this ! UpMessage( "user STAT\r\n"::Nil, this)
+        Multiplexer.this ! UpMessage( "user STAT\r\n"::Nil, this)
         
         requery(conf.server.pollMillis.apply)
+      }
+      case DownLine(line) => {
+debug("to dispatcher line '"+line+"'")
+        server.dispatcher ! DispatchLine(line)
+      }
+      case DownMessage(msg) => {
+		val merged = msg.map(_.stripLineEnd)mkString("\n")
+debug("to dispatcher msg:\\\n"+merged+"")
+        server.dispatcher ! DispatchMessage(merged)
       }
       case _ => // ignore all, this console is only responsible for creating 
     }
@@ -257,7 +267,7 @@ debug("creating thread, dispatcher is "+server.dispatcher)
               }
               case _ =>  {
                 Multiplexer.this ! DownLine(createdLine)  
-                server.dispatcher !  DispatchLine(createdLine.stripLineEnd)
+//                server.dispatcher !  DispatchLine(createdLine.stripLineEnd)
               }
             }
           }

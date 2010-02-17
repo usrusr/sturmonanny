@@ -36,6 +36,7 @@ class Rules extends NonUpdatingMember {
     var difference = System.currentTimeMillis - since 
     val remaining = ( conf.game.planeWarningsSeconds * 1000 ) - difference
     if(remaining < 0) {
+      kick(who)
       multi ! multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+what)
     }else{
       lazy val startPrice = server.market.getPrice(what) * conf.game.startcost
@@ -70,6 +71,7 @@ class Rules extends NonUpdatingMember {
       multi ! multi.ChatTo(who, message)
     }
   }
+  def kick(who : String)= server.multi ! server.multi.Kick(who)
   def warnDeath(who:String, what:String, since:Long, pauseUntil:Long, invitations:mutable.Map[String, Pilots.Invitation] ){
     val multi = server.multi
     var difference = System.currentTimeMillis - since 
@@ -87,6 +89,7 @@ class Rules extends NonUpdatingMember {
     	multi ! multi.ChatTo(who, who+", you can fly "+inviteString.map(_+" or wait ").getOrElse("again in ")+seconds+" seconds")
     }else{
 	    if(remaining < 0) {
+	      kick(who)
 	      multi ! multi.ChatBroadcast(who + " has been kicked: hit refly too fast")
 	    }else{
     	  val ratio = remaining.toDouble/(remaining+difference).toDouble
