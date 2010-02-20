@@ -4,11 +4,11 @@ import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
 class Configuration(override val file : String) extends ConfigurationSchema(file){   
 	 
-	object server  extends Group{   
+	object server  extends Group{    
 	  object host extends Field( "127.0.0.1")
 	  object il2port extends Field(2001)   	   
 	  object consoleport extends Field(2011)
-      object toolName extends Field("Sturmonanny")
+      
 	  object serverName extends Field("testserver") 
 	  object pollMillis extends Field(1000) with Doc {
 	    def doc = "SC pilots listing is too slow to be useful, set (minimum) number of milliseconds to pass between polls"
@@ -72,6 +72,12 @@ class Configuration(override val file : String) extends ConfigurationSchema(file
 	  object implementation extends Field("de.immaterialien.sturmonanny.core.AllPlanesEqualMarket")
 	  object configuration extends Field("planes.lst")
 	} 
+ 
+	object names extends Group with Doc{
+	  def doc = "a few strings you can set to customize messages"
+	  object tool extends Field("Sturmonanny")
+	  object currency extends Field("%s")
+	}
 }
 object Configuration {
    object Default extends Configuration("default.conf")
