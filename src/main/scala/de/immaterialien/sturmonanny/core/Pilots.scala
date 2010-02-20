@@ -104,8 +104,16 @@ debug("price update for "+millis+" with raw price"+ price+ " -> difference "+dif
 		     refund () = 0
 		   }
 		}
-    
-		override def messageHandler = { 
+		override def messageHandler = new PartialFunction[Any, Unit]{
+		  override def isDefinedAt(x:Any) = {
+debug("pilot "+name +" <- "+x)		    
+		    ImessageHandler isDefinedAt x
+		    
+		  }
+		  override def apply(x:Any) = ImessageHandler.apply(x)
+		}
+  
+		def ImessageHandler : PartialFunction[Any, Unit] = { 
 		  case Is.Persisted =>  
  
    		  case Is.Flying(plane, army) => {

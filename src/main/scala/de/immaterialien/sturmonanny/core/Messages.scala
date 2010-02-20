@@ -4,7 +4,7 @@ package de.immaterialien.sturmonanny.core
 case class PilotMessage(who: String, event : Is.Event)
 case class DispatchLine(line:String)
 case class DispatchMessage(message:String) {
-
+//	val stack = new Exception().getStackTraceString
 }
 object Is {  
     
@@ -20,7 +20,10 @@ object Is {
 	trait PilotState extends PilotEvent
 	
  	case object LandedAtAirfield extends PilotState 
- 	case object KIA extends PilotState
+ 	case object KIA extends PilotState with PilotLost
+ 	case object InFlight extends PilotState
+ 	case object HitTheSilk extends PilotState with PlaneLost
+ 	case object Selecting extends PilotState  
  
 	case class Flying(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
 	  def this(plane:String, side:String) = this(plane, Armies.forName(side )) 

@@ -87,7 +87,7 @@ debug("created il2waiter:"+il2waiter)
 	    } 
   		case msg : DownLine => {
           for(client <- clients) {
-          	client ! msg.asMessage
+          	client ! msg//.asMessage
           }
         }
         case msg : UpMessage => {
@@ -189,12 +189,12 @@ debug("created il2waiter:"+il2waiter)
         requery(conf.server.pollMillis.apply)
       }
       case DownLine(line) => {
-debug("to dispatcher line '"+line+"'")
+//debug("to dispatcher line '"+line+"'")
         server.dispatcher ! DispatchLine(line)
       }
       case DownMessage(msg) => {
 		val merged = msg.map(_.stripLineEnd)mkString("\n")
-debug("to dispatcher msg:\\\n"+merged+"")
+//debug("to dispatcher msg:\\\n"+merged+"")
         server.dispatcher ! DispatchMessage(merged)
       }
       case _ => // ignore all, this console is only responsible for creating 

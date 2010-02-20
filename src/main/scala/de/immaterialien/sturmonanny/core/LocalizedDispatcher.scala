@@ -44,16 +44,16 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	}
 	def processLine(line:String) : Unit = {
 		val parseResult : ParseResult[_] = parse(rootLineParser, line.stripLineEnd+"\n")
-//debug("parsed '"+line+"' \n  -> '"+parseResult+"'")  
+//debug("-------------------------\nparsing line '"+line+"' \n  -> '"+parseResult+"'")  
 		parseResult.getOrElse(None) match { 
 		      case PilotMessage(who, Is.Ignored) => // ignore
 		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+line+"'")
 		      case PilotMessage(who, what ) => {
 		    	  pilotMessageSend(who, what)
-debug("success "+who+" -> "+what+"  from '"+line+"'")		        
+//debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		       }
         case None => {
-//debug("None                         from '"+line+"'")		        
+debug("None                         from '"+line+"'")		        
         }
           
         case Is.Ignored =>
@@ -64,7 +64,7 @@ debug("success "+who+" -> "+what+"  from '"+line+"'")
  
  	def processMessage(lines:String) : Unit = {
 		val parseResult  = this.parseAll(rootMessageParser, lines+"\n")
-//debug("parsing '"+lines+"' \n  -> '"+parseResult+"'")  
+//debug("=============================\nparsing message '"+lines+"' \n  -> '"+parseResult+"'")  
 		val resList = parseResult getOrElse List() 
 		for (res <- resList) { 
 		  res match { 
@@ -72,35 +72,45 @@ debug("success "+who+" -> "+what+"  from '"+line+"'")
 		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+lines+"'")
 		      case PilotMessage(who, what ) => {
 		    	  pilotMessageSend(who, what)
-//debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
+debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
 		       }
-//		      case None => {
-//debug("None                         from '"+lines+"'")		        
-//		      }
-//		        case Is.Ignored =>
-//		        case x:AnyRef => debug("got  "+x+"\n  "+x.getClass.getSimpleName+"\n   from '"+lines+"'")
-//		        case x => debug("got value "+x)
-//            case x => debug("got value "+x)
 		  }
 		}
 	}
  
-  	lazy val rootMessageParser = (
-			statParser | 
-			( 
-			  pilotsHeader ~ statsLineEnd ~> rep(flyingLineParser)
-			)
+  	lazy val rootMessageParser : Parser[Seq[PilotMessage]]= (
+			(rep(lineParser <~ "\n")) ~ statParser ~ (rep(lineParser <~ "\n"))  ^^ {
+//			  case (None ~ s ~ None)=> s
+//			  case (Some(h) ~ s ~ None)=> h ::: s
+//			  case (None ~ s ~ Some(t))=> s ::: t
+//			  case (Some(h) ~ s ~ Some(t))=> (h ::: s) ::: t
+				case (h ~ s ~ t)=> h ::: s ::: t                     
+			}
+//			| (opt(rep(lineParser <~ "\n")) ~ (pilotsHeader ~ statsLineEnd ~> rep(flyingLineParser)) ~ opt(rep(lineParser <~ "\n")))^^ {
+//				  case (None ~ s ~ None)=> s
+//				  case (Some(h) ~ s ~ None)=> h ::: s
+//				  case (None ~ s ~ Some(t))=> s ::: t
+//				  case (Some(h) ~ s ~ Some(t))=> (h ::: s) ::: t
+//			}
+			| ((rep(lineParser <~ "\n")) ~ (pilotsHeader ~ statsLineEnd ~> rep(flyingLineParser)) ~ (rep(lineParser <~ "\n")))^^ {
+				case (h ~ s ~ t)=> h ::: s ::: t
+			}
+			| (rep(lineParser <~ "\n") <~ consoleNLine)
 	)
   
 	lazy val rootLineParser = (
 			ignore
-		|	playerChat
-		|	flyingLineParser
-		|	statusChat
-		|   channelLine
+		|	lineParser
 	)
-	val statsLineEnd = "\\n\n"
-
+	lazy val lineParser : Parser[PilotMessage]= (
+ 			playerChat 
+		//|	flyingLineParser 
+		|	statusChat 
+		|   channelLine
+		|	consoleNLine
+	)
+	lazy val statsLineEnd = "\\n\n"
+	lazy val consoleNLine = ("""<consoleN><\d+>""".r<~"\n") ^^^ PilotMessage("", Is.Ignored) 
 	lazy val statParser = {
  		rep(
 	 		separatorLine ~statsLineEnd  ~>
@@ -141,8 +151,11 @@ debug("success "+who+" -> "+what+"  from '"+line+"'")
  	  (what+""": """)~rep1("""\t""") ~> regexMatch("""(\S(.*\S)?)\\n\n""".r)^^(_.group(1))
 	}
  	def stringToState : PartialFunction[String, Is.PilotState] = {
- 	  case """KIA""" => Is.KIA
+ 	  case """Fyling""" => Is.InFlight 
  	  case """Landed at Airfield""" => Is.LandedAtAirfield
+ 	  case """KIA""" => Is.KIA
+ 	  case """Hit the Silk""" => Is.HitTheSilk  
+ 	  case """Selects Aircraft""" => Is.Selecting 
  	}
 	
  
@@ -201,19 +214,21 @@ debug("success "+who+" -> "+what+"  from '"+line+"'")
 				// we take first match, so there is no possible way to cut off an existing player from commands 
 				namesParser = 
 					if(namesSet.size==0) newParser
-					else {
-					  namesSet.values.foldRight(newParserAsStringParser){(older : TimeOutingLiteral, newer : Parser[String])=>
-//debug("prepending "+older.string)  
-					  older | newer
+					else namesSet.values.foldRight(newParserAsStringParser){
+					    (older : TimeOutingLiteral, newer : Parser[String])=> older | newer
 					}
-      }
+					
 				namesSet.put(name, newParser)
 //debug("extended namesparser with '"+name+"', new size is "+namesSet.size )	  
 			}
 		} 
 	
-		override def apply(in:Input) = namesParser.apply(in)
-  	} 
+		override def apply(in:Input) ={
+			val ret=  namesParser.apply(in)
+debug("pilot names parser applying for "+namesSet.keys.mkString("|")+ " -> "+ret)   
+			ret
+		}
+	}
 	lazy val separatorLine = literal("-------------------------------------------------------")
 	lazy val pilotsHeader = literal("""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft""")
  	lazy val ignore : Parser[Is.Event] = (
@@ -246,7 +261,8 @@ debug("success "+who+" -> "+what+"  from '"+line+"'")
  			if(mem!=null && (mem._1 eq x) ){
  				mem _2
  			}else{
- 				val nMem = (x, unbufferedInternal(x.substring(13, x.length-2)))
+ 				
+ 				val nMem = (x, unbufferedInternal(x.substring(13, x.stripLineEnd.length-2)))
  				last = nMem
  				nMem _2
  			}
