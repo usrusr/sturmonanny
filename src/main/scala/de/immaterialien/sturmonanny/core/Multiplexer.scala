@@ -71,7 +71,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 			out.flush
 		}
 	}
-
+//val handlerLog = new java.io.FileWriter("handler.log")
+	
 	val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines 
 		case SwitchConnection(newhost, newport) => {
@@ -86,14 +87,21 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 			debug("created il2waiter:"+il2waiter)	      
 		} 
 		case msg : DownLine => {
+//handlerLog.write("direct line "+msg)		  
+//handlerLog.flush
 			for(client <- clients) {
 				client ! msg//.asMessage
 			}
 		}
 		case msg : UpMessage => {
-			// broadcast pending DownLines
+//handlerLog.write("beginning processing for "+msg)			
+//handlerLog.flush
+			var collectedLines : List[DownLine] = Nil
+		  // broadcast pending DownLines
 			reactOnceWithin(50){
 				case down : DownLine => {
+//handlerLog.write("cleanup broadcast line "+down)			
+//handlerLog.flush
 					for(client <- clients) {
 						client ! down.asMessage
 						extendTimeFromNow(10)
@@ -105,18 +113,36 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 			
 			// wait for response for 500 ms, after that (or after receiving DownPromptLine) 
 			// go back to accepting new UpMessages and broadcasting any unexpected downmessages
-			var lines : List[DownLine] = Nil
+
 			reactWithin(500){
 				case prompt : DownPromptLine => {
 					//lines.reverse.foreach(msg.from ! _)
-					msg.from ! DownMessage(lines.reverse map (_ line))
-					msg.from ! prompt
-					lines = Nil
+				  collectedLines ::=prompt
+				  val collected = DownMessage(collectedLines.reverse map (_ line))
+					msg.from ! collected
+//handlerLog.write("sending "+collectedLines.length+" for "+prompt+"\n++++++collected++++++\n"+collected+"//////\n")					  
+//handlerLog.flush
+					collectedLines = Nil
 					reactNormally
 				}
-				case down : DownLine => lines ::= down
+				case down : DownLine => {
+				  
+				  collectedLines ::= down
+//handlerLog.write("collecting line "+down +"\n total "+collectedLines.size+" lines\n")					  
+//handlerLog.flush
+				}
+			} andThen {
+//handlerLog.write("leftover "+collectedLines.size+" collected lines: "+collectedLines.mkString("\n ->")+"\n")					  
+//handlerLog.flush
+   
+				for(line <- collectedLines.reverse ; client <- clients) {
+//handlerLog.write("sending leftover collected line to client "+line+"\n")					  
+//handlerLog.flush
+				  client ! line
+	      }			  
 			}
-			for(line <- lines.reverse ; client <- clients) client ! line
+   
+
 		}
 
 		case UpCommand(cmd) => outWrite(cmd+"\n")
@@ -185,7 +211,6 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 			case Requery => {
 				Multiplexer.this ! UpMessage( "user\r\n"::Nil, this)
 				Multiplexer.this ! UpMessage( "user STAT\r\n"::Nil, this)
-				
 				requery(conf.server.pollMillis.apply)
 			}
 			case DownLine(line) => {
@@ -246,11 +271,12 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 
 	var il2waiter : Thread = null
 	//  def start = il2waiter = newIl2Waiter
-
+//val instreamWriter = new java.io.FileWriter("il2-output.log")
 	def newIl2Waiter() : Thread = {
 		debug("creating thread, server is "+server)
 		debug("creating thread, dispatcher is "+server.dispatcher)
 		var il2line  = new StringBuilder
+//instreamWriter.write(""+il2in)  
 		il2in match{
 			case Some(instream) => Multiplexer.daemon{
 				instream read match {
@@ -260,6 +286,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 						il2line append Multiplexer.LF.toChar
 						
 						val createdLine = il2line.toString
+//instreamWriter.write("\n<line>"+il2line+"</line>\n")   
+//instreamWriter.flush
 						il2line.clear
 						createdLine match {
 							case Multiplexer.consoleNPattern(n) => { 

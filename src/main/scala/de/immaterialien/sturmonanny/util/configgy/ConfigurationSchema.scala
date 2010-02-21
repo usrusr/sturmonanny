@@ -153,7 +153,7 @@ println("->> main ")
 		      case x : Boolean => v = in(full, x).asInstanceOf[T]  
     	}
 	
-	    override def toString = "field "+name+":"+v
+	    override def toString = v.toString
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
 	      documentation foreach (_.write(sb, indent, prefix))
 	      def string = v match {

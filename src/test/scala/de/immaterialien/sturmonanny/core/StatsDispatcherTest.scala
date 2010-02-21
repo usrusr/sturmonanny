@@ -14,8 +14,10 @@ class StatsDispatcherTest {
 		} 
 		d.updateConfiguration
 		
-		
 		d processMessage testString
+  
+		println("n->"+(d processMessage """Chat: --- Pilot(entrop regulationabcdefg) has crashed.\n
+"""))
  
     ()
 	}
@@ -74,7 +76,6 @@ Fire Roskets: \t0\n
 Hit Roskets: \t0\n
 Fire Bombs: \t0\n
 Hit Bombs: \t0\n
--------------------------------------------------------\n
-""".replaceAll("""\Q\r\n\E""", """\Q\n\E""")   
+-------------------------------------------------------\n""".replaceAll("""\Q\r\n\E""", """\Q\n\E""")   
 }
  

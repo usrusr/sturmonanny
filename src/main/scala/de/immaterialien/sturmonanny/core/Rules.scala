@@ -1,8 +1,9 @@
 package de.immaterialien.sturmonanny.core
 
 import scala.collection.mutable
+import de.immaterialien.sturmonanny.util.Logging
  
-class Rules extends NonUpdatingMember {
+class Rules extends NonUpdatingMember with Logging {
 	def startCost(price:Double) = price * conf.game.startcost 
 	def startCostCheck(price:Double, balance:Double) :Rules.CostResult = {
 		if(price>0){
@@ -36,7 +37,7 @@ class Rules extends NonUpdatingMember {
 		var difference = System.currentTimeMillis - since 
 		val remaining = ( conf.game.planeWarningsSeconds * 1000 ) - difference
 		if(remaining < 0) {
-			kick(who)
+//			kick(who)
 			multi ! multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+what)
 		}else{
 			lazy val startPrice = server.market.getPrice(what) * conf.game.startcost
@@ -71,7 +72,10 @@ class Rules extends NonUpdatingMember {
 			multi ! multi.ChatTo(who, message)
 		}
 	}
-	def kick(who : String)= server.multi ! server.multi.Kick(who)
+	def kick(who : String){
+	  if(true) debug("NOT KICKING "+who)else 
+	  server.multi ! server.multi.Kick(who)
+   }
 	def warnDeath(who:String, what:String, since:Long, pauseUntil:Long, invitations:mutable.Map[String, Pilots.Invitation] ){
 		val multi = server.multi
 		var difference = System.currentTimeMillis - since 

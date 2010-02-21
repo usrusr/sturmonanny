@@ -16,6 +16,17 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 		val invitations = Army Val (new mutable.HashMap[String, Pilots.Invitation]())
 
 		object state{
+		  override def toString = {
+		    " "+
+		    (if(deathPause) ("for "+(deathPauseUntil-System.currentTimeMillis)) else "") +
+        (if(died) " died" else "") +
+        (if(landed) " landed" else "") +
+        " plane:" +planeName+" @ "+planePrice + 
+        (if(planeVerified) " verified" else " unchecked") +
+        (if(lostPlaneName!="") " lost:"+lostPlaneName else "") +
+        ""
+		  }
+		  
 			var deathPause = false
 			var deathPauseUntil = 0L
 			
@@ -23,29 +34,28 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 			var landed = false
 			
 			var planeName = ""
-			var planeSince = System.currentTimeMillis
-			var planeAllowed = true
-			var oldPlane = "alwaysNew"
+			var lastPlanePriceCommit = System.currentTimeMillis
+			var planeVerified = false
+			var lostPlaneName = "alwaysNew"
 			var planePrice : Double = 0
 			
 			def dies = {
 			  deathPauseUntil = server.rules.calculateDeathPause
 			  val seconds = (deathPauseUntil - System.currentTimeMillis) / 1000 
 			  val priceMsg = planeLost
-			  
+
 			  priceMsg match{
 			    case Some(msg) => {
 			      chat(name+": death pause for "+seconds+"s and "+msg)
 			    }
 			    case None => {
-			      chat(name+": death pause for "+seconds+"s, then clear to fly "+oldPlane)
+			      chat(name+": death pause for "+seconds+"s, then clear to fly "+lostPlaneName)
 			    } 
 			  }
 			}
 			private def planeLost : Option[String] = {
-			  if(planeAllowed && ! deathPause && somePlane) applyTime// finish balance
-				planeAllowed = true
-				refund () = 0    
+			  if(planeVerified && ! deathPause && somePlane) commitPlanePrice// finish balance
+
 				
 				val result =server.rules.startCostCheck(planePrice, balance) match {
 				  case Rules.CostResult(false, _, _, cost) => {
@@ -53,9 +63,11 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 				  }
 				  case _ => None
 				}
-    
-				oldPlane = planeName
+			  refund () = 0    
+				lostPlaneName = planeName
+				planeVerified = false
 				planeName = ""
+				planePrice = 0
 				result
 			}
 			def crashes = {
@@ -66,38 +78,40 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 				}
     	}
 			
-			var since = System.currentTimeMillis
+
 			def noPlane =  planeName==null || planeName.trim.isEmpty 
 			def somePlane =  ! noPlane
 			
 			
-			def applyTime(){
-				val now = System.currentTimeMillis
-				
-				val millis = System.currentTimeMillis - planeSince
-				val difference = planePrice * millis / (-60000) 
-				debug("price update for "+millis+" with raw price"+ planePrice+ " -> difference "+difference )       
-				balance () = server.rules.updateBalance(balance, difference)
-				planeSince = now
+			def commitPlanePrice(){
+			  if(planeVerified){
+					val now = System.currentTimeMillis
+					
+					val millis = System.currentTimeMillis - lastPlanePriceCommit
+					val difference = planePrice * millis / (-60000) 
+					debug("price update for "+millis+" with raw price"+ planePrice+ " -> difference "+difference )       
+					balance () = server.rules.updateBalance(balance, difference)
+					lastPlanePriceCommit = now
+			  }
 			}
 			// call when it is definitely known that the pilot is fresh in a plane
-			def enteringPlane {
+			def definitelyInPlane {
 				refund () =0
 				invitations.retain(((x,y) => y.until > System.currentTimeMillis))
 				planePrice = server.market.getPrice(planeName)
-				oldPlane = ""
+				lostPlaneName = ""
 				val now = System.currentTimeMillis
-				planeSince = now
+				lastPlanePriceCommit = now
 				
 				if(deathPauseUntil>now){
 					// pilot is in death pause, invitations are checked in rules
 					deathPause = true
-					planeAllowed = false
+					planeVerified = false
 				} else {
 					deathPause = false
 					server.rules.startCostCheck(planePrice, balance) match {
 					case Rules.CostResult(true, newBalance, newRefund, startFee) => {
-							planeAllowed = true
+							planeVerified = true
 							if(newBalance!=balance.value){
 								if(newRefund>0) chat("Start fee "+startFee+conf.names.currency+", possible refund: "+newRefund +conf.names.currency+"")
 								else chat("Start fee of "+startFee+conf.names.currency+" debited")
@@ -108,29 +122,31 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 					case Rules.CostResult(false, newBalance, newRefund, startFee) => {
 							chat(""+startFee+conf.names.currency+" needed, available "+(startFee-balance.value)+conf.names.currency+"")
 							
-							planeAllowed = false
+							planeVerified = false
 						}
 					}
 				}          
 			}
-			def planePossiblyOld = planeName != oldPlane
+			def planeNotLostPlane = lostPlaneName!=null && lostPlaneName!="" && planeName != lostPlaneName
 			def updatePlaneName(what:String){
 				if(what==null || what.trim.isEmpty){
-					planeAllowed = true
+					planeVerified = false
 					planeName = ""
-					oldPlane = ""
+					lostPlaneName = ""
 					refund () =0
 				}else what match {   
 					case existingPlane if(existingPlane==planeName) => { // plane name did not change
-						if( existingPlane!=oldPlane ) enteringPlane
+						if(( ! planeVerified) && planeNotLostPlane) definitelyInPlane // once planeNotLostPlane is reset (e.g. by getting a flying None message) we run into this line
 					}
 					case newPlane => {
+					  planeVerified = false
+						lostPlaneName = ""
 						planeName = newPlane
-						enteringPlane
+						definitelyInPlane
 					}
 				}
-				if(deathPause ) server.rules.warnDeath(Pilot.this.name, planeName, since, deathPauseUntil, invitations.value)
-				else if( ! planeAllowed ) server.rules.warnPlane(Pilot.this.name, planeName, since, balance)
+				if(deathPause ) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invitations.value)
+				else if( ! planeVerified ) server.rules.warnPlane(Pilot.this.name, planeName, lastPlanePriceCommit, balance)
 			}
 
 			def returns(){
@@ -139,7 +155,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 					balance () = server.rules.updateBalance(balance, refund)
 					refund () = 0
 				}
-				oldPlane = ""
+				lostPlaneName = ""
 			} 
 		}
   
@@ -147,7 +163,6 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 			val pilotName = Pilot.this.name
    
 			server.planes.forMatches(which){plane =>		  
-				//debug(name+" pricecommand: '"+which+"'")   		    	    
 				val price = server.market.getPrice(plane.name)
 
 				def padRight(in:String, reference:String):String=in+(reference.drop(in.length))
@@ -214,19 +229,43 @@ debug("pilot "+name +" <- "+x)
 			  if(state.deathPause) chat(inv.by + " invites you to fly "+inv.plane+" ("+((inv.until - System.currentTimeMillis)/1000)+"s)")
 			}
 
-
-			case Is.Chatting(msg) => msg match { 
-				case Pilots.Commands.balancecommand(_) => {
-					chat("current balance is "+balance.value)
-				}
-				case Pilots.Commands.pricecommand(which) => {
-					priceMessages(which, true)
-				}
-				case Pilots.Commands.availablecommand(which) => {
-					priceMessages(which, false)
-				}
-				case x => //debug("unknown command by "+name+":"+x)
-			} 
+			// 
+    	case Is.InFlight => {
+debug(name + " Is.InFlight "+state)    	  
+    	  state.commitPlanePrice
+    	}
+      case Is.LandedAtAirfield => {
+debug(name + " Is.LandedAtAirfield "+state)    	  
+    	  state.lostPlaneName = ""
+    	}
+ 			case Is.Selecting => {
+debug(name + " Is.Selecting "+state)    	  
+    	  state.lostPlaneName = ""
+    	}
+    	case Is.KIA => {
+debug(name + " Is.KIA "+state)    	  
+    	  state.lostPlaneName = state.planeName
+    	}
+    	case Is.HitTheSilk => {
+debug(name + " Is.HitTheSilk "+state)    	  
+    	  state.lostPlaneName = state.planeName
+    	}     
+     
+			case Is.Chatting(msg) => {
+debug(name + " sending chat "+msg)  			  
+			  msg match { 
+  	  		case Pilots.Commands.balancecommand(_) => {
+						chat("current balance is "+balance.value)
+					}
+					case Pilots.Commands.pricecommand(which) => {
+						priceMessages(which, true)
+					}
+					case Pilots.Commands.availablecommand(which) => {
+						priceMessages(which, false)
+					}
+					case x => //debug("unknown command by "+name+":"+x)
+			  }
+			}
 			
 			case _ => unknownMessage _ 
 		}
