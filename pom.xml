@@ -8,7 +8,7 @@
   <inceptionYear>2010</inceptionYear>
   <properties>
     <scala.version>2.7.7</scala.version>
-<!--<scala.version>2.8.0.Beta1-RC1</scala.version>-->
+<!--<scala.version>2.8.0.Beta1-RC1</scala.version>--> 
   </properties>
 
   <repositories>
@@ -83,6 +83,14 @@
       <version>${scala.version}</version>
       <scope>test</scope>
     </dependency>
+    
+<!--    <dependency>-->
+<!--    	 closed FBDj integration module, created for improved integration with permission from the FBDj author -->
+<!--    	<groupId>de.immaterialien</groupId>-->
+<!--  		<artifactId>FBDj-overrides</artifactId>-->
+<!--  		<version>0.0.1-SNAPSHOT</version>-->
+<!--  		<scope>compile</scope>-->
+<!--    </dependency>-->
     
     <dependency>
       <groupId>net.lag</groupId>

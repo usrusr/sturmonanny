@@ -78,6 +78,13 @@ class Configuration(override val file : String) extends ConfigurationSchema(file
 	  object tool extends Field("Sturmonanny")
 	  object currency extends Field("%s")
 	}
+	object fbdj extends Group with Doc{
+	  def doc = "sturmonanny can host an FBDj internally, keep empty if you don't want this to happen"
+	  object jarPath extends Field("") with Doc {
+		  def doc = "a (relative) path to your FBDj.jar, the FBDj.jar must not be on your regular classpath for sturmonanny"
+	  }
+	  
+	}
 }
 object Configuration {
    object Default extends Configuration("default.conf")
