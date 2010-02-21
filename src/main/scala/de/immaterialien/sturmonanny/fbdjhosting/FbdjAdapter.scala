@@ -29,7 +29,8 @@ debug("FBDj configuratoin changing!")
 		  		fbdjPath = conf.fbdj.installationPath
 		  		confPath = conf.fbdj.fbdjConfiguration
 		  		overridesPath = conf.fbdj.overridesJar
-	  	    debug("initialized FBDj: \n  "+fbdjPath+"\n   "+overridesPath+"\n   "+confPath)
+	  	    debug("initialized FBDj: \n  "+fbdjPath+"\n  "+overridesPath+"\n  "+confPath+"\n   in:"+System.identityHashCode(fbdj.get.inList)+"   out:"+System.identityHashCode(fbdj.get.outList))
+		  		server.multi.internalConnection ! server.multi.internalConnection.UpdatedQueues 
 		  	}catch{
 		  	  case x => {
 		  	    debug("failed to setup FBDj: "+x)

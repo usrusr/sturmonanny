@@ -49,8 +49,8 @@ class FbdjHost(val fbdjInstallation : String, overridesPath : String, configurat
   		
   		outList = inQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
   		inList = outQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
-//debug("outList : "+outList)    
-//debug("inList : "+inList)    
+debug("FbdjHost: outList : "+System.identityHashCode(outList))    
+debug("FbdjHost: inList  : "+System.identityHashCode(inList))    
   		()
     }catch{
       case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")

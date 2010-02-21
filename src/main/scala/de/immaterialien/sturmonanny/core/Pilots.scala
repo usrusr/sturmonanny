@@ -23,7 +23,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
         (if(landed) " landed" else "") +
         " plane:" +planeName+" @ "+planePrice + 
         (if(planeVerified) " verified" else " unchecked") +
-        (if(lostPlaneName!="") " lost:"+lostPlaneName else "") +
+        (if(lastPlaneName!="") " lost:"+lastPlaneName else "") +
         ""
 		  }
 		  
@@ -35,8 +35,8 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 			
 			var planeName = ""
 			var lastPlanePriceCommit = System.currentTimeMillis
-			var planeVerified = false
-			var lostPlaneName = "alwaysNew"
+			var planeVerified = true
+			var lastPlaneName = ""
 			var planePrice : Double = 0
 			
 			def dies = {
@@ -49,7 +49,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 			      chat(name+": death pause for "+seconds+"s and "+msg)
 			    }
 			    case None => {
-			      chat(name+": death pause for "+seconds+"s, then clear to fly "+lostPlaneName)
+			      chat(name+": death pause for "+seconds+"s, then clear to fly "+lastPlaneName)
 			    } 
 			  }
 			}
@@ -64,7 +64,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 				  case _ => None
 				}
 			  refund () = 0    
-				lostPlaneName = planeName
+				lastPlaneName = planeName
 				planeVerified = false
 				planeName = ""
 				planePrice = 0
@@ -99,7 +99,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 				refund () =0
 				invitations.retain(((x,y) => y.until > System.currentTimeMillis))
 				planePrice = server.market.getPrice(planeName)
-				lostPlaneName = ""
+				lastPlaneName = ""
 				val now = System.currentTimeMillis
 				lastPlanePriceCommit = now
 				
@@ -120,19 +120,20 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 							refund () = newRefund
 						}
 					case Rules.CostResult(false, newBalance, newRefund, startFee) => {
-							chat(""+startFee+conf.names.currency+" needed, available "+(startFee-balance.value)+conf.names.currency+"")
+							chat(""+startFee+conf.names.currency+" needed, available "+(balance.value)+conf.names.currency+"")
 							
 							planeVerified = false
 						}
 					}
 				}          
 			}
-			def planeNotLostPlane = lostPlaneName!=null && lostPlaneName!="" && planeName != lostPlaneName
+			def planeNotEmpty = planeName==null || planeName==""
+			def planeNotLostPlane = lastPlaneName==null || lastPlaneName=="" || planeName != lastPlaneName
 			def updatePlaneName(what:String){
 				if(what==null || what.trim.isEmpty){
 					planeVerified = false
 					planeName = ""
-					lostPlaneName = ""
+					lastPlaneName = ""
 					refund () =0
 				}else what match {   
 					case existingPlane if(existingPlane==planeName) => { // plane name did not change
@@ -140,13 +141,13 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 					}
 					case newPlane => {
 					  planeVerified = false
-						lostPlaneName = ""
+						lastPlaneName = ""
 						planeName = newPlane
 						definitelyInPlane
 					}
 				}
-				if(deathPause ) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invitations.value)
-				else if( ! planeVerified ) server.rules.warnPlane(Pilot.this.name, planeName, lastPlanePriceCommit, balance)
+				if(deathPause && planeNotEmpty) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invitations.value)
+				else if(planeNotEmpty && planeNotLostPlane && ! planeVerified ) server.rules.warnPlane(Pilot.this.name, planeName, lastPlanePriceCommit, balance)
 			}
 
 			def returns(){
@@ -155,7 +156,8 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 					balance () = server.rules.updateBalance(balance, refund)
 					refund () = 0
 				}
-				lostPlaneName = ""
+				lastPlaneName = planeName
+				planeVerified = false
 			} 
 		}
   
@@ -236,26 +238,26 @@ debug(name + " Is.InFlight "+state)
     	}
       case Is.LandedAtAirfield => {
 debug(name + " Is.LandedAtAirfield "+state)    	  
-    	  state.lostPlaneName = ""
+    	  state.lastPlaneName = ""
     	}
  			case Is.Selecting => {
 debug(name + " Is.Selecting "+state)    	  
-    	  state.lostPlaneName = ""
+    	  state.lastPlaneName = ""
     	}
     	case Is.KIA => {
 debug(name + " Is.KIA "+state)    	  
-    	  state.lostPlaneName = state.planeName
+    	  state.lastPlaneName = state.planeName
     	}
     	case Is.HitTheSilk => {
 debug(name + " Is.HitTheSilk "+state)    	  
-    	  state.lostPlaneName = state.planeName
+    	  state.lastPlaneName = state.planeName
     	}     
      
 			case Is.Chatting(msg) => {
 debug(name + " sending chat "+msg)  			  
 			  msg match { 
   	  		case Pilots.Commands.balancecommand(_) => {
-						chat("current balance is "+balance.value)
+						chat("current balance is "+balance)
 					}
 					case Pilots.Commands.pricecommand(which) => {
 						priceMessages(which, true)

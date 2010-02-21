@@ -64,7 +64,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		       }
         case None => {
-debug("None  from '"+line+"'")		        
+debug("no parseResult: None from '"+line+"'")		        
         }
           
         case Is.Ignored =>
@@ -159,7 +159,12 @@ debug("None  from '"+line+"'")
 				makeStatParserLong("""Fire Bombs""") ~
 				makeStatParserLong("""Hit Bombs""") 
 				^?  ( stringToState,"'"+_+"' is not a known pilot state!" )
-			) ^^ { case name ~ _ ~ state => PilotMessage(name, state) }
+			) ^^ { 
+			  case name ~ _ ~ state => {
+			    pilotNameParser.learnNewName(name)
+			    PilotMessage(name, state)
+			  }
+			}
 		)  <~ separatorLine ~statsLineEnd
 	}
  	def makeStatParserLong(intro:String ):Parser[Long] = {
@@ -286,7 +291,7 @@ debug("None  from '"+line+"'")
  			}
  		 }
 
- 		 val idPilotPingPoints = """\s+(\d+-?)\s+(\d+)\s+(\S.*\S)\s*$""".r
+ 		 val idPilotPingPoints = """\s*(\d+-?)\s+(\d+)\s+(\S.*\S)\s*$""".r
  		 val sideNone = ("""^([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+)\s+$""").r
  		 val sidePlane = ("""^([ABCDEFGHIJKLMNOPQRSTUVWXYZ]\w+).*\s+(\S+)$""").r
  		 def unbufferedInternal(x:String) : Option[PilotMessage] = {

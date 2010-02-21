@@ -50,6 +50,16 @@ object Armies extends Enumeration("Red", "Blue", "None") {
     def apply : T = apply(provider)
     def value = apply
     def other = apply(provider.other)
+    
+    override def toString = {
+      val ret = apply(provider)
+      ret match {
+        case d:Double => d.formatted("%,.1f")
+        case d:Float => d.formatted("%,.1f")
+        
+        case x=>x.toString
+      } 
+    }
   }
   def forName(name : String) : Armies = {
     name match {
@@ -81,4 +91,7 @@ trait SideProvider{
 	def apply[T](what:Armies.SidesVal[T]) : T = what.apply 
  
     implicit def fromSidesVal[T](v : Armies.SidesVal[T]):T = v.apply
+//    implicit def toStringSidesValDouble(v : Armies.SidesVal[Double]):String = v.apply.formatted("%,.1f")    
+//    implicit def toStringSidesValString(v : Armies.SidesVal[String]):String = v.apply    
+//    implicit def toStringSidesValOther(v : Armies.SidesVal[_]):String = v.apply.toString    
 }

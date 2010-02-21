@@ -246,12 +246,15 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 				  
 				  thread.foreach(_ interrupt)
       
-				  outQueue.foreach{ list => 
+				  inQueue.foreach{ list => 
 					  thread = Some(
 					  	Multiplexer.daemon{
+//debug("fbdj reader '"+System.identityHashCode(list)+"'")
+					  	  
 					  		list.synchronized{
 					  		  while( ! list.isEmpty) {
 					  		    val line = list.removeFirst
+debug("from fbdj line '"+line+"'")
 					  		    
 					  		    Multiplexer.this ! UpMessage(line::Nil, internalConnection)
 					  		  }
@@ -265,7 +268,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 				}
 			}
 			case DownLine(line) => {
-				debug("to fbdj line '"+line+"'")
+debug("to fbdj line '"+line+"'")
 				outQueue.foreach{list=>
 					list.synchronized{
 					  list.add(line)
@@ -274,7 +277,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 				}
 			}
 			case DownMessage(msg) => {
-				debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
+debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 				outQueue.foreach{list=>
 					list.synchronized{
 					  msg.foreach(list add _)
