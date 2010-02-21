@@ -1,18 +1,19 @@
 package de.immaterialien.sturmonanny.fbdjhosting
 
-import org.mortbay.jetty.webapp
-import de.immaterialien.sturmonanny.core.UpdatingMember
+
 import de.immaterialien.sturmonanny.util.Logging
 
 
-class FbdjHost(val jarPath : String, overridesPath : String, configurationPath:String)  extends Logging {
-		
-		val jarFile = new java.io.File(jarPath)
-  	val jarUrl = jarFile.toURL
+class FbdjHost(val fbdjInstallation : String, overridesPath : String, configurationPath:String)  extends Logging {
+		var outList : java.util.LinkedList[String] = null
+		var inList : java.util.LinkedList[String] = null
+  
+		private val jarFile = new java.io.File(fbdjInstallation+"/FBDj.jar")
+  	private val jarUrl = jarFile.toURL
    
     
-  	val overrideFile = new java.io.File(overridesPath)
-  	val overrideUrl = overrideFile.toURL
+  	private val overrideFile = new java.io.File(overridesPath)
+  	private val overrideUrl = overrideFile.toURL
 
    	if( ! jarFile.canRead || ! overrideFile.canRead ){
    	  var list : List[String] = Nil
@@ -40,6 +41,22 @@ class FbdjHost(val jarPath : String, overridesPath : String, configurationPath:S
       case _:ClassNotFoundException => // check passed, no FBDj.jar on classpath
     }
   	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent)
+   
+  	try{
+  		val connClass = classLoader.loadClass("utility.SocketConnection")
+  		val inQueueField = connClass.getField("inQueue")
+  		val outQueueField = connClass.getField("outQueue")
+  		
+  		outList = inQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
+  		inList = outQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
+//debug("outList : "+outList)    
+//debug("inList : "+inList)    
+  		()
+    }catch{
+      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
+    }
+   
+  	// load main class
   	val mainClass = try{
   		classLoader.loadClass("main.FBDj")
     }catch{
@@ -47,11 +64,14 @@ class FbdjHost(val jarPath : String, overridesPath : String, configurationPath:S
     }
 		val mainMethod = mainClass.getMethod("main", classOf[Array[String]])
   
-		val thread = new Thread {
+		val parameters :Array[Array[String]]= Array(Array(
+				    "config="+configurationPath, 
+				    "installationPath="+fbdjInstallation
+		))
+		val thread = new Thread("FBDj with "+parameters(0).mkString(" ")) {
 		  override def run = {
-				  val parameters :Array[Array[String]]= Array(Array("config="+configurationPath))
-debug("starting FBDj with "+parameters(0).mkString)      
-				  mainMethod.invoke(null, parameters)
+debug("starting "+this.getName)
+				  mainMethod.invoke(null, parameters:_*)
 	//			  mainMethod.invoke(null, Array(args):_* )
       }
 		}
@@ -60,86 +80,6 @@ debug("starting FBDj with "+parameters(0).mkString)
     def stop = {
       if(thread!=null) thread interrupt
     }
-   
-// discarded idea: 
-//   use a classloader to map from some.package.SomeFbdjClass 
-//   to de.immaterialien.sturmonanny.fbdjhosting.override.some.package.SomeFbdjClass
-// this could maybe even work, as long as the overrides extend the original?
-// 		   
-//  	object classLoader extends java.net.URLClassLoader(Array(jarUrl), parent){
-//			val overridePrefix = this.getClass.getPackage.getName + ".override."
-//  	 /**
-//      * core of our custom loading: 
-//  	  */
-//  	  def select(name:String) : java.lang.Class[_] = {
-//  	    try{
-//  	      val actualName = overridePrefix+name
-//  	    	val overridden = parent.loadClass(actualName)
-//  	    	
-//  	    	overridden
-//        }catch{
-//          case _ => {
-//            
-//            try{
-//            	val local = this.findClass(name)
-//            	local
-//            }catch{
-//              case _ => parent.loadClass(name)
-//            }
-//          }
-//        }
-//  	  }
-//  	  
-////			override def findClass(name:String) = {
-////			  parent
-////			}
-//			override def loadClass(name:String, resolve:Boolean) : java.lang.Class[_] ={
-//			  val existing = findLoadedClass(name)
-//			  if(existing!=null){
-//			    existing
-//			  }else{
-//			    select(name)
-//			  }
-//			}
-//  	}
-  
-                                                                                                        
-//		val jarUrl = jarFile.
-//  	var classLoader : ClassLoader = null 
-//  extends java.net.URLClassLoader(){
-//		  
-//		} 
-  
-  
-//	val webconf = new webapp.JettyWebXmlConfiguration() 
-//	webconf.configureDefaults
-// 
-// /*    */ public class FBDj
-///*    */ {
-///*    */   public static void exitProgram()
-///*    */   {
-///*    */   }
-///*    */ 
-///*    */   public static void main(String[] args)
-///*    */   {
-///* 24 */     MainController.startupConfigInitialize(args);
-///*    */ 
-///* 27 */     MainController.configInitialize();
-///* 28 */     MainController.writeDebugLogFile(1, "*******************************************************************");
-///* 29 */     MainController.writeDebugLogFile(1, "*******************************************************************");
-///*    */ 
-///* 31 */     MainController.writeDebugLogFile(1, "FBDj Started with Configuration ( " + MainController.CONFIG.getConfigName() + " )");
-///*    */ 
-///* 34 */     IL2DataLoadController.loadAllDataFiles();
-///*    */ 
-///* 37 */     MainController.setAdmins(AdminController.adminsLoad());
-///*    */ 
-///* 40 */     MainController.setReservedNames(ReservedNameController.reservedNamesLoad());
-///*    */ 
-///* 43 */     MainController.setBannedPilots(PilotBanController.pilotBansLoad());
-///*    */ 
-///* 45 */     MainWindowApp2.main(null);
-///*    */   }
-///*    */ }
+
 	
 }

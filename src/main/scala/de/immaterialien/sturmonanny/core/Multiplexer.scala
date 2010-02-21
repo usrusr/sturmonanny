@@ -232,8 +232,61 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 			LAPinger.schedule(this, Requery, in)  
 		}
 	}
+ 
+	object internalConnection extends AbstractConsole {
+	  object UpdatedQueues
+	  var inQueue : Option[java.util.LinkedList[String]] = None 
+	  var outQueue : Option[java.util.LinkedList[String]] = None 
+	  var thread : Option[Thread] = None
+		override def messageHandler = {
+			case UpdatedQueues => {
+				server.fbdj.fbdj.foreach{fbdj=>
+				  inQueue  = if(fbdj.inList !=null) Some(fbdj.inList ) else None
+				  outQueue = if(fbdj.outList!=null) Some(fbdj.outList) else None
+				  
+				  thread.foreach(_ interrupt)
+      
+				  outQueue.foreach{ list => 
+					  thread = Some(
+					  	Multiplexer.daemon{
+					  		list.synchronized{
+					  		  while( ! list.isEmpty) {
+					  		    val line = list.removeFirst
+					  		    
+					  		    Multiplexer.this ! UpMessage(line::Nil, internalConnection)
+					  		  }
+					  		  list.wait(1000)
+					  		}
+					  	}then{
+					  	  thread=None
+					  	}
+					  )
+				  }
+				}
+			}
+			case DownLine(line) => {
+				debug("to fbdj line '"+line+"'")
+				outQueue.foreach{list=>
+					list.synchronized{
+					  list.add(line)
+					  list.notifyAll
+					}
+				}
+			}
+			case DownMessage(msg) => {
+				debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
+				outQueue.foreach{list=>
+					list.synchronized{
+					  msg.foreach(list add _)
+					  list.notifyAll
+					}
+				}
+			}
+			case _ => // ignore all, this console is only responsible for creating 
+		}
+	}
 
-	var clients : List[AbstractConsole] = pilotsLister :: Nil
+	var clients : List[AbstractConsole] = internalConnection :: pilotsLister :: Nil
 	var il2socket : Option[Socket] = None
 	var il2out : Option[Writer] = None
 	var il2in : Option[Reader] = None

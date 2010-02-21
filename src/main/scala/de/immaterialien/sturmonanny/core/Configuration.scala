@@ -77,13 +77,25 @@ class Configuration(override val file : String) extends ConfigurationSchema(file
 	  def doc = "a few strings you can set to customize messages"
 	  object tool extends Field("Sturmonanny")
 	  object currency extends Field("%s")
-	}
+	} 
 	object fbdj extends Group with Doc{
 	  def doc = "sturmonanny can host an FBDj internally, keep empty if you don't want this to happen"
-	  object jarPath extends Field("") with Doc {
-		  def doc = "a (relative) path to your FBDj.jar, the FBDj.jar must not be on your regular classpath for sturmonanny"
+	  object installationPath extends Field("") with Doc {
+		  def doc = """a (relative) path to your FBDj installation, 
+should contain FBDj.jar and all the other stuff
+    
+note: the FBDj.jar must not be on your regular classpath for sturmonanny"""
 	  }
-	  
+	  object overridesJar extends Field("FBDj-overrides.jar") with Doc {
+def doc = """a (relative) path to your FBDj-overrides jar,
+which is required for FBDj embedding"""	    
+	  }
+	  object fbdjConfiguration extends Field("fbdjConf.ser") with Doc {
+		  def doc = """path to the FBDj configuration for this instance
+if the path with . it will be relative to the FBDj installation, 
+otherwise it will be relative to sturmonanny installation (or absolute)
+"""	    
+	  }   
 	}
 }
 object Configuration {

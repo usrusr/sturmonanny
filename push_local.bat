@@ -1,2 +1,1 @@
-git push /cygdrive/g/gitbak/sturmonanny master
-pause
+git push /cygdrive/g/gitbak/sturmonanny 
