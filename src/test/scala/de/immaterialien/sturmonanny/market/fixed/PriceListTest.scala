@@ -32,25 +32,19 @@ class PriceListTest {
 	} 
 } 
 class MyList(file:String) extends ConfigurationSchema(file){
-	object prices extends Group with Doc{ 
-  def doc = "inline doc"
+	object prices extends Group { 
+  doc = "inline doc"
   object test extends Field( "StringTest") 
-	  object d1 extends Documentation(""" host and port:
-host and il2port are provided as examples
-""")
+
    
-   	object d extends Documentation("""----""")
 	  object host extends Field( "127.0.0.1")
 	  object il2port extends Field(2001)   	  
 
-   	  object d2 extends Documentation(""" planes:
-the planes table maps plane name strings to prices, which have to be positive or negative whole numbers 
-""")
 
 	  object planes extends  Table(0)
 	  object consoleport extends Field(2011)
-      object pricegroup extends Group with Doc{
-        override def doc = """ oh wie schön """
+      object pricegroup extends Group {
+        doc = """ oh wie schön """
    	    object subgroup extends Group{
    	    	object test extends Field("possible? no, does not initialize (make group a member and we are set!)")
 	    }

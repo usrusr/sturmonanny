@@ -51,7 +51,7 @@ import net.lag.configgy.{Config, ConfigMap}
  * 
  * 
  */
-abstract class ConfigurationSchema(val file : String) extends Holder{ 
+abstract class ConfigurationSchema(val file : String) extends Holder with Selfdocumenting{ 
     val initialized : Boolean = try{
  		this(Config.fromFile(file))
  		true
@@ -86,16 +86,16 @@ println("->> main ")
 	}
  
 
- 
-	/**
-     *  a helper to add documentation to the definition source file 
-     *  that gets serialized by the ConfiggyFile
-     */
-     protected[ConfigurationSchema] class Documentation( override val v : String ) extends DocMember(v)
-	protected trait Doc extends Member {
-	    override protected[configgy] lazy val documentation = Some(new DocMember(doc))
-	    def doc : String
-	}
+// 
+//	/**
+//     *  a helper to add documentation to the definition source file 
+//     *  that gets serialized by the ConfiggyFile
+//     */
+//     protected[ConfigurationSchema] class Documentation( override val v : String ) extends DocMember(v)
+//	protected trait Doc extends Member {
+//	    override protected[configgy] lazy val documentation = Some(new DocMember(doc))
+//	    def doc : String
+//	}
  
     /**
      * key/value pairs of a certain type, we don't just dive into the configgy ConfigMap because we want 
@@ -135,7 +135,8 @@ println("->> main ")
 	  	        
 	  }
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-	      documentation foreach (_ write(sb, indent, prefix))
+//	      documentation foreach (_ write(sb, indent, prefix))
+    	writeDocumentation(sb, indent, prefix)
 		  sb.append(indent+"<"+ name+">\r\n")
 		  for((k,v)<-map.projection) sb.append(indent+"   "+k+" = "+printer(v) +"\r\n")
 		  sb.append(indent+"</"+ name+">\r\n")
@@ -155,7 +156,8 @@ println("->> main ")
 	
 	    override def toString = v.toString
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-	      documentation foreach (_.write(sb, indent, prefix))
+	      //documentation foreach (_.write(sb, indent, prefix))
+	      writeDocumentation(sb, indent, prefix)
 	      def string = v match {
 		    case x:String=> "\""+x+"\""
 		    case x => x
@@ -209,7 +211,7 @@ println("->> main ")
       protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String)=()
 	}
 
-	sealed protected trait Holder extends SelfNaming {
+	sealed protected trait Holder extends SelfNaming with Selfdocumenting {
 		  protected var members : List[Member] = Nil
 		  protected[configgy] lazy val initMembers = {
 			  // reflection magic to make sure all fields are initialized and set up holder in members
@@ -235,6 +237,7 @@ println("->> main ")
 		  }  
 	      override protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String){
 		    initMembers
+		    writeDocumentation(sb, indent, prefix)
 		    val blanks = changeGroup(sb, inPrefix, full)
 		    for(group<-members) group.write(sb, blanks, full)
 		    changeGroup(sb, inPrefix, full)
@@ -262,30 +265,41 @@ println("->> main ")
 			} 
 	
 	}
-	sealed protected trait Member extends SelfNaming {
+	sealed protected trait Member extends SelfNaming with Selfdocumenting  {
 	    protected[configgy] def readConfiggy(in:Config)
-//	    override protected[configgy] def write(sb : scala.StringBuilder, indent : String, prefix : String){
-//println("-> "+ name + ":"+documentation.isDefined)	      
-//	    
-//	      
-//println("<- "+ name + ":"+documentation.isDefined)	         
-//	    }
-	    protected[configgy] lazy val documentation : Option[DocMember]= None
+//	    protected[configgy] lazy val documentation : Option[DocMember]= None
 	    /**
          * override with a string to create documentation, may be multiline  
          */
 //	    protected def doc : String = null
 	} 
-	
-    sealed protected[configgy] class DocMember( val v : String ) extends Member{
-	  override def readConfiggy(in:Config) = ()
-	  override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-	    documentation foreach (_.write(sb, indent, prefix))
-		def comment(line:String) = sb.append(indent.drop(2)+"# "+line+"\r\n")
-        sb.append(indent.drop(1)+"###\r\n")
-	    for(line <- v.lines) comment (line)
-	  }  
+
+	/**
+   * documentation members are var not val, but that is more than acceptable 
+   * (might even be nice sometimes, but documentation content from files is never _read_)
+   * 
+   * the upside is that definitions can simply say 'doc = "bla"'
+   */
+	sealed protected[configgy] trait Selfdocumenting {
+//	  var doc = "" 
+	  protected var doc = "" 
+	  def writeDocumentation(sb : scala.StringBuilder, indent : String, prefix : String){
+			def comment(line:String) = sb.append(indent+"# "+line+"\r\n")
+	    if(doc!=null && !doc.trim.isEmpty){
+        sb.append(indent+" ###\r\n")
+        for(line <- doc.lines) comment (line)
+      }
+	  }
 	}
+//  sealed protected[configgy] class DocMember( val v : String ) extends Member{
+//	  override def readConfiggy(in:Config) = ()
+//	  override def write(sb : scala.StringBuilder, indent : String, prefix : String){
+//	    documentation foreach (_.write(sb, indent, prefix))
+//		def comment(line:String) = sb.append(indent.drop(2)+"# "+line+"\r\n")
+//        sb.append(indent.drop(1)+"###\r\n")
+//	    for(line <- v.lines) comment (line)
+//	  }  
+//	}
 
 object ConfigurationSchema {  
 	   implicit def fieldReadConversionString (in : ConfigurationSchema#Field[String]) : String = in.apply

@@ -4,8 +4,8 @@ import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
 
 class PriceList(file:String) extends ConfigurationSchema(file) {
-	object planes extends Table(0) with Doc {
-	def doc = """ Beispiel:
+	object planes extends Table(0)  {
+	doc = """ Beispiel:
 	<planes>
 	  La-5FN = 50
 	  La-5F = 40
