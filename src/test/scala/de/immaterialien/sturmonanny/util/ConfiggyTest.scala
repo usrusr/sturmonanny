@@ -3,10 +3,12 @@ package de.immaterialien.sturmonanny.util
 import net.lag.configgy._
 
 import de.immaterialien.sturmonanny.core.Configuration
+import de.immaterialien.sturmonanny.util.configgy._
  
 object ConfiggyTest { 
   def main(args : Array[String]) : Unit = {  
-    val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf")
+    val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf") 
+    with LiftSupport
      
     println("names.currency before '"+(c.names.currency)+"'" )
     println("game.refund before "+(c.game.refund) )

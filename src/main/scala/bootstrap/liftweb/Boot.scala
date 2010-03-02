@@ -21,15 +21,17 @@ import _root_.javax.servlet.http.{HttpServletRequest}
   */
 class Boot extends net.liftweb.util.LiftLogger{
   def boot {
+    LiftRules.addToPackages("de.immaterialien.sturmonanny")
+
     if (!DB.jndiJdbcConnAvailable_?)
       DB.defineConnectionManager(DefaultConnectionIdentifier, DBVendor)
 
     // where to search snippet
-    LiftRules.addToPackages("de.immaterialien.sturmonanny.web")
+    //LiftRules.addToPackages("de.immaterialien.sturmonanny.snippet")
     Schemifier.schemify(true, Log.infoF _, de.immaterialien.sturmonanny.model.User)
 
     // Build SiteMap
-    val entries = Menu(Loc("Home", List("index"), "Home")) :: User.sitemap
+    val entries = Menu(Loc("Home", List("index"), "Home")) :: de.immaterialien.sturmonanny.model.User.sitemap 
     LiftRules.setSiteMap(SiteMap(entries:_*))
 
     /*
@@ -47,7 +49,7 @@ class Boot extends net.liftweb.util.LiftLogger{
     LiftRules.early.append{ _.setCharacterEncoding("UTF-8") }
     net.liftweb.util.LogBoot.loggerSetup
 
-      val s = new Server
+//      val s = new Server
                        
     S.addAround(DB.buildLoanWrapper) 
   }

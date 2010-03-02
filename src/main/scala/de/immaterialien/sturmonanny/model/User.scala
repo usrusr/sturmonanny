@@ -19,7 +19,7 @@ object User extends User with MetaMegaProtoUser[User] {
   override def skipEmailValidation = true
 }
 
-/**
+/** 
  * An O-R mapped "User" class that includes first name, last name, password and we add a "Personal Essay" to it
  */
 class User extends MegaProtoUser[User] {

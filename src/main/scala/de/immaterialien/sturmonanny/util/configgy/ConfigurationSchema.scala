@@ -41,7 +41,7 @@ import net.lag.configgy.{Config, ConfigMap}
  *   eats = "the living"
  *  </zombie>
  * 
- * </code>
+ * </code> 
  *
  * possible member object types are:
  *   Group (nesting of other member object types),
@@ -51,7 +51,7 @@ import net.lag.configgy.{Config, ConfigMap}
  * 
  * 
  */
-abstract class ConfigurationSchema(val file : String) extends Holder with Selfdocumenting{ 
+abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting{ 
     val initialized : Boolean = try{
  		this(Config.fromFile(file))
  		true
@@ -81,7 +81,8 @@ println("->> main ")
  	/**
  	 * Groups really are just Holders (of other groups or fields) and Members (of other Groups or ConfiggyFile) 
      */
-	protected[ConfigurationSchema] trait Group extends Holder with Member {
+//	protected[ConfigurationSchema] 
+  trait Group extends Holder with ConfigurationSchema.Member {
 	  override def toString = "group "+name
 	}
  
@@ -101,7 +102,8 @@ println("->> main ")
      * key/value pairs of a certain type, we don't just dive into the configgy ConfigMap because we want 
      * the types, the default values and the ability to merge a new Config into an existing ConfigFile
      */
-	protected[ConfigurationSchema] class Table[T]( var v : T ) extends Member{
+//	protected[ConfigurationSchema] 
+	class Table[T]( var v : T ) extends ConfigurationSchema.Member{
 	  val defaultValue = v
 	  var map = Map[String, T]()
 	  def apply(what:String) : T = map.get(what) getOrElse defaultValue
@@ -144,7 +146,7 @@ println("->> main ")
      override def toString = "table "+name+":"+map
 	} 
 
-    class Field[T]( var v : T ) extends Member{
+    class Field[T]( var v : T ) extends ConfigurationSchema.Member{
 	    def update(t:T)={v = t}
 	    def apply = v
 	
@@ -175,15 +177,19 @@ println("->> main ")
  */
 
  	sealed trait SelfNaming extends Ordered[SelfNaming]{
+ 	  	
+      def configgyName = name
+      def configgyPath = prefix
+      
    	  protected[configgy] lazy val full = {
-	    val tmp = this.getClass.getSimpleName()
-	    val dotsTmp = tmp.replace("$", ".")
-	    if(dotsTmp contains "."){
-	      dotsTmp.substring(0, dotsTmp.length - 1)
-	    }else{
-	      dotsTmp
-	    }
-	  }
+		    val tmp = this.getClass.getSimpleName()
+		    val dotsTmp = tmp.replace("$", ".")
+		    if(dotsTmp contains "."){
+		      dotsTmp.substring(0, dotsTmp.length - 1)
+		    }else{
+		      dotsTmp
+		    }
+   	  }
       protected[configgy]  lazy val prefix = {
         if(full contains "."){
         	full.substring(0, full.lastIndexOf('.')+1)
@@ -191,6 +197,7 @@ println("->> main ")
             ""
         }
       }
+
       protected[configgy]  lazy val name = {
         if(full contains "."){
         	full.substring(full.lastIndexOf('.')+1)
@@ -199,34 +206,52 @@ println("->> main ")
 	    }
       }
    	  protected[configgy] val comparisonKey : String = {
-	     val exception = new Exception()
-		 val trace = exception.getStackTrace
-	     val skipThisFileName = trace(0).getFileName 
-		 val skipped = trace.dropWhile(_.getFileName == skipThisFileName)
-		 val lineNumberString = ""+skipped(0).getLineNumber
-		 val padding = "0000000000".drop(lineNumberString.length)
-		 ""+skipped(0).getFileName+":"+padding + lineNumberString +" -> "+skipped(0)
+   			val exception = new Exception()
+   			val trace = exception.getStackTrace
+	     	val skipThisFileName = trace(0).getFileName 
+		 		val skipped = trace.dropWhile(_.getFileName == skipThisFileName)
+		 		val lineNumberString = ""+skipped(0).getLineNumber
+		 		val padding = "0000000000".drop(lineNumberString.length)
+		 		""+skipped(0).getFileName+":"+padding + lineNumberString +" -> "+skipped(0)
    	  } 
       override def compare(that:SelfNaming) : Int = comparisonKey.compareTo(that.comparisonKey)
       protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String)=()
 	}
 
-	sealed protected trait Holder extends SelfNaming with Selfdocumenting {
-		  protected var members : List[Member] = Nil
+	sealed protected trait Holder extends SelfNaming with ConfigurationSchema.Selfdocumenting {
+		  protected var members : List[ConfigurationSchema.Member] = Nil
+		  def map[B](func:ConfigurationSchema.Member=>B) = {
+		    initMembers
+		    members.map(func)
+      }
+    
 		  protected[configgy] lazy val initMembers = {
 			  // reflection magic to make sure all fields are initialized and set up holder in members
-		      val array = Holder.this.getClass.getDeclaredMethods
-		      val list = array.toList
-		      val found = array foreach {m=>
+		    
+			  // identify the class that has the members
+		   	val cls = if(Holder.this.isInstanceOf[ConfigurationSchema]){
+		   		var c = Holder.this.getClass
+				  var last = c
+				  while(c!=null && c!=classOf[ConfigurationSchema]) {
+				   	last=c
+				   	c=c.getSuperclass
+	//println("moving up from "+last.getSimpleName+" to "+ c.getSimpleName)           
+					}
+				  last
+        } else Holder.this.getClass
+
+		    val found = for(m <- cls.getDeclaredMethods){
 		        val typ = m.getReturnType
-		       if( classOf[Member].isAssignableFrom(m.getReturnType) && m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
-	//println(this.getClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
+		       if( classOf[ConfigurationSchema.Member].isAssignableFrom(m.getReturnType) && m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
+//println(this.getClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
 		           try{
-		       		val member = m.invoke(Holder.this).asInstanceOf[Member]
+		       		val member = m.invoke(Holder.this).asInstanceOf[ConfigurationSchema.Member]
 		       		members = member :: members
 		           }catch{case _ => }
 		       }
-		      }
+//else println(this.getClass.getSimpleName+" does not hold "+ m.getReturnType.getSimpleName + " in "+m.getName)
+		    }
+//println(this.getClass.getSimpleName+" does not hold "+ m.getReturnType.getSimpleName + " in "+m.getName)        
 			  members = members.sort(_ < _)
 	    
 		      true
@@ -265,32 +290,7 @@ println("->> main ")
 			} 
 	
 	}
-	sealed protected trait Member extends SelfNaming with Selfdocumenting  {
-	    protected[configgy] def readConfiggy(in:Config)
-//	    protected[configgy] lazy val documentation : Option[DocMember]= None
-	    /**
-         * override with a string to create documentation, may be multiline  
-         */
-//	    protected def doc : String = null
-	} 
 
-	/**
-   * documentation members are var not val, but that is more than acceptable 
-   * (might even be nice sometimes, but documentation content from files is never _read_)
-   * 
-   * the upside is that definitions can simply say 'doc = "bla"'
-   */
-	sealed protected[configgy] trait Selfdocumenting {
-//	  var doc = "" 
-	  protected var doc = "" 
-	  def writeDocumentation(sb : scala.StringBuilder, indent : String, prefix : String){
-			def comment(line:String) = sb.append(indent+"# "+line+"\r\n")
-	    if(doc!=null && !doc.trim.isEmpty){
-        sb.append(indent+" ###\r\n")
-        for(line <- doc.lines) comment (line)
-      }
-	  }
-	}
 //  sealed protected[configgy] class DocMember( val v : String ) extends Member{
 //	  override def readConfiggy(in:Config) = ()
 //	  override def write(sb : scala.StringBuilder, indent : String, prefix : String){
@@ -306,5 +306,33 @@ object ConfigurationSchema {
 	   implicit def fieldReadConversionBoolean (in : ConfigurationSchema#Field[Boolean]) : Boolean = in.apply
 	   implicit def fieldReadConversionInt (in : ConfigurationSchema#Field[Int]) : Int = in.apply
    	
+    
+    	sealed trait Member extends SelfNaming with Selfdocumenting  {
+	    protected[configgy] def readConfiggy(in:Config)
+//	    protected[configgy] lazy val documentation : Option[DocMember]= None
+	    /**
+         * override with a string to create documentation, may be multiline  
+         */
+//	    protected def doc : String = null
+	} 
+
+	/**
+   * documentation members are var not val, but that is more than acceptable 
+   * (might even be nice sometimes, but documentation content from files is never _read_)
+   * 
+   * the upside is that definitions can simply say 'doc = "bla"'
+   */
+	sealed protected[configgy] trait Selfdocumenting {
+	  def documentationString = doc
+   
+	  protected var doc = "" 
+	  protected def writeDocumentation(sb : scala.StringBuilder, indent : String, prefix : String){
+			def comment(line:String) = sb.append(indent+"# "+line+"\r\n")
+	    if(doc!=null && !doc.trim.isEmpty){
+        sb.append(indent+" ###\r\n")
+        for(line <- doc.lines) comment (line)
+      }
+	  }
+	}
 }
 
