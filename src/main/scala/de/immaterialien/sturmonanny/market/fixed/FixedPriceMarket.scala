@@ -5,7 +5,7 @@ import de.immaterialien.sturmonanny.util._
 
 
 class FixedPriceMarket extends IMarket with Logging{ 
-	var filename : Option[String] = None
+	var filename : Option[String] = None 
 	var priceList : Option[PriceList] = None  
 	var server : Option[Server] = None
 
@@ -21,7 +21,7 @@ class FixedPriceMarket extends IMarket with Logging{
 debug("setting server context: "+srv)		    
 	  server = Some(srv)
     }
-
+ 
 	def setConfiguration(pathToFile : String) = {
 	  if(Some(pathToFile)==filename) true
 	  else {
@@ -34,7 +34,7 @@ debug("initializing market")
 			  for(	srv <- server; 
 			  		l<-priceList; 
 			  		(plane, _) <- l.planes.map){
-			    val planes : Planes = srv.planes
+			    val planes : Planes = srv.planes 
 debug("creating "+plane+" in market -> "+planes.items )		    
 			    planes.create(plane)
 			  }

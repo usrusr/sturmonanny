@@ -22,7 +22,7 @@ class PriceList(file:String) extends ConfigurationSchema(file) {
 	Ju-87D-5=-60
 	Ju-87G-1=-70
 	Ju-88A-4=-70
-
+ 
 	</planes>
 """
 	}

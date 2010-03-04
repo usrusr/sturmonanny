@@ -10,6 +10,10 @@ class GlobalConfig extends configgy.ConfigurationSchema("global.conf") with conf
 	  object user extends Field("") // no internal default! 
 	  object pass extends Field("") {doc = "set this for creating a new password, if the configuration is written by the software it will remain empty, only the hash is stored"}
 	  object hash extends Field("") {doc = """never change this manually, set the "pass" value to change the password"""}
+	  object percent extends Field(10) {
+	    min = -100
+	    max = 100
+   }
 	}  
 //	object instances extends Table("default.conf") { 
 //	  doc = "list paths to configuration files defining the various sturmonanny instances running in this JVM" 

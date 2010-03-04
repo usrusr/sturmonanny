@@ -71,7 +71,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	override def toString = {
 	  initMembers
 	  val sb = new scala.StringBuilder 
-println("->> main ")
+//println("->> main ")
       write(sb, "", "")
 	  sb toString
 	}
@@ -149,6 +149,24 @@ println("->> main ")
     class Field[T]( var v : T ) extends ConfigurationSchema.Member{
 	    def update(t:T)={v = t}
 	    def apply = v
+      
+      /**
+       * applies to string 
+       * plain nullable is easier to setup/define
+       * (only enforced in LiftSupport)
+       */
+	    protected[configgy] var pattern : scala.util.matching.Regex = null
+      /**
+       * applies to string 
+       * (only enforced in LiftSupport)
+       */
+	    protected[configgy] var maxLength : Integer = null
+      /**
+       * apply to int 
+       * (only enforced in LiftSupport)
+       */
+	    protected[configgy] var min : Integer = null
+	    protected[configgy] var max : Integer = null
 	
 	    override def readConfiggy(in:Config) = v match{
 		      case x : String => v = in(full, x).asInstanceOf[T]  
@@ -178,9 +196,10 @@ println("->> main ")
 
  	sealed trait SelfNaming extends Ordered[SelfNaming]{
  	  	
-      def configgyName = name
-      def configgyPath = prefix
-      
+//      def configgyName = name
+//      def configgyPath = prefix
+//      lazy val configgyFullName = prefix+name
+//      
    	  protected[configgy] lazy val full = {
 		    val tmp = this.getClass.getSimpleName()
 		    val dotsTmp = tmp.replace("$", ".")
