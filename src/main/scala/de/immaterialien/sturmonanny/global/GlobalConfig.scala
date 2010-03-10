@@ -15,8 +15,13 @@ class GlobalConfig extends configgy.ConfigurationSchema("global.conf") with conf
 	    max = 100
    }
 	}  
-//	object instances extends Table("default.conf") { 
-//	  doc = "list paths to configuration files defining the various sturmonanny instances running in this JVM" 
-//	}
+	object instances extends Table("default.conf") { 
+	  doc = "list paths to configuration files defining the various sturmonanny instances running in this JVM"
+    maxLength = 5
+	}
+	object ports extends Table(0) { 
+	  doc = "ports to listen on"
+    min = 0
+	} 
 //	println("created globalConfig: "+new Exception().getStackTraceString)
 }

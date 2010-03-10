@@ -13,7 +13,7 @@ import de.immaterialien.sturmonanny.util.configgy._
 class LiftConf {
    def conf(html:NodeSeq)={
  
-	  LiftConf.gc.liftForm
+	  LiftConf.gc.liftForm 
    }  
 }
 object LiftConf {

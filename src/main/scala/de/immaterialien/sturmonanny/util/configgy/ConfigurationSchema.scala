@@ -103,7 +103,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
      * the types, the default values and the ability to merge a new Config into an existing ConfigFile
      */
 //	protected[ConfigurationSchema] 
-	class Table[T]( var v : T ) extends ConfigurationSchema.Member{
+	class Table[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
 	  val defaultValue = v
 	  var map = Map[String, T]()
 	  def apply(what:String) : T = map.get(what) getOrElse defaultValue
@@ -140,33 +140,23 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 //	      documentation foreach (_ write(sb, indent, prefix))
     	writeDocumentation(sb, indent, prefix)
 		  sb.append(indent+"<"+ name+">\r\n")
-		  for((k,v)<-map.projection) sb.append(indent+"   "+k+" = "+printer(v) +"\r\n")
+		  innerTable(sb, indent)
 		  sb.append(indent+"</"+ name+">\r\n")
 	    }
      override def toString = "table "+name+":"+map
+     def innerTable(sb : scala.StringBuilder, indent:String) = for((k,v)<-map.projection) sb.append(indent+"   "+k+" = "+printer(v) +"\r\n")
+     def innerTable : String = {
+       val sb = new scala.StringBuilder()
+       innerTable(sb, "")
+       sb.toString
+     }
 	} 
 
-    class Field[T]( var v : T ) extends ConfigurationSchema.Member{
+    class Field[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
 	    def update(t:T)={v = t}
 	    def apply = v
       
-      /**
-       * applies to string 
-       * plain nullable is easier to setup/define
-       * (only enforced in LiftSupport)
-       */
-	    protected[configgy] var pattern : scala.util.matching.Regex = null
-      /**
-       * applies to string 
-       * (only enforced in LiftSupport)
-       */
-	    protected[configgy] var maxLength : Integer = null
-      /**
-       * apply to int 
-       * (only enforced in LiftSupport)
-       */
-	    protected[configgy] var min : Integer = null
-	    protected[configgy] var max : Integer = null
+
 	
 	    override def readConfiggy(in:Config) = v match{
 		      case x : String => v = in(full, x).asInstanceOf[T]  
@@ -187,7 +177,25 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	  }
 
 
-
+    trait ValidationInfo {
+      /**
+       * applies to string 
+       * plain nullable is easier to setup/define
+       * (only enforced in LiftSupport)
+       */
+	    protected[configgy] var pattern : scala.util.matching.Regex = null
+      /**
+       * applies to string 
+       * (only enforced in LiftSupport)
+       */
+	    protected[configgy] var maxLength : Integer = null
+      /**
+       * apply to int 
+       * (only enforced in LiftSupport)
+       */
+	    protected[configgy] var min : Integer = null
+	    protected[configgy] var max : Integer = null
+    }
  }
  	
 /**

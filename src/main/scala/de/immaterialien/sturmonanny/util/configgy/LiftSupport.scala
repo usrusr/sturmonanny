@@ -19,7 +19,7 @@ trait LiftSupport extends ConfigurationSchema {
 	object intermediates extends SessionVar[configgy.Config](new configgy.Config)
  
 	def  liftForm:NodeSeq={
-println("entrering ilfgForm ")
+//println("entrering ilfgForm ")
 
 
 	  val topName = name
@@ -43,28 +43,34 @@ println("entrering ilfgForm ")
 		      )
 		    }
 		    case table : ConfigurationSchema#Table[_] => {
-		      (<none/>, Nil)
+
+		      val fullName = table.full
+		      val fNode : Elem= new Elem(form, fullName, Null, xml.TopScope)
+		      val binding = table.defaultValue match {
+		        case x:String 	=> {
+		    	    fullName -> new StringTabulator(table.asInstanceOf[ConfigurationSchema#Table[String]])
+            }
+		    	  case x:Boolean 	=> {
+		    	    fullName -> new BooleanTabulator(table.asInstanceOf[ConfigurationSchema#Table[Boolean]])
+		    	  }
+		    	  case x:Int		 	=> {
+							fullName -> new IntegerTabulator(table.asInstanceOf[ConfigurationSchema#Table[Integer]])
+		    	  }
+		      }
+		      val unbound =
+		    		if(table.documentationString==null || table.documentationString.trim.isEmpty)  
+			    		<label class="configgy.label">{table.name}{fNode}</label>
+			    	else
+			    		<label class="configgy.label" title={table.documentationString}>{table.name}{fNode}</label>
+//println("tablulator "+unbound)           
+		      (unbound, binding::Nil)
 		    } 
 		    case field : ConfigurationSchema#Field[_] => {
 		      val fieldVal = field.apply
 		      val fullName = field.full
 		      var attributes : MetaData = Null
-
+		      
 		    	val binding = fieldVal match {
-//		    	  case x:String 	=> {
-//		    	    attributes = new UnprefixedAttribute("title", "Text", attributes)
-//		    	    fullName -> SHtml.text(x, field.asInstanceOf[ConfigurationSchema#Field[String]] () = _)
-//            }
-//		    	  case x:Boolean 	=> {
-//		    	    fullName -> SHtml.checkbox(x, field.asInstanceOf[ConfigurationSchema#Field[Boolean]] () = _)
-//		    	  }
-//		    	  case x:Int		 	=> {
-//		    		  attributes = new UnprefixedAttribute("title", "full number", attributes)
-//							fullName -> SHtml.text(x.toString, {d:String=>
-//		    	    	field.asInstanceOf[ConfigurationSchema#Field[Int]] () = (d.toInt)
-//		    	    })
-//		    	  }
-       
        		  case x:String 	=> {
 		    	    attributes = new UnprefixedAttribute("title", "Text", attributes)
 		    	    fullName -> new StringValidator(field.asInstanceOf[ConfigurationSchema#Field[String]])
@@ -116,8 +122,8 @@ println("entrering ilfgForm ")
         {save}
     </form>
     
-    val paramCopy:List[Validator[_]] = params.map{
-      case TheBindableBindParam(_, x:Validator[_]) => Some(x)
+    val paramCopy:List[Bindator] = params.map{
+      case TheBindableBindParam(_, x:Bindator) => Some(x)
       case _ => None
  		}.filter(_ isDefined).map(_ get).toList
     
@@ -129,7 +135,7 @@ println("entrering ilfgForm ")
 	    		println("did not save, errors\n")
     })
     
-//println("println form "+System.identityHashCode(self)+"\n"+self )       
+//println("println form "+System.identityHashCode(self)+"\n"+self+"\n   paramCopy:"+paramCopy )       
 //println("form: "+formNodes)   
 		var ret = bind(form, formNodes, params :_*)
 		
@@ -137,26 +143,42 @@ println("entrering ilfgForm ")
 //println("ret: "+ret)   
     ret
 	}
-	def updateConfiguration(paramCopy:List[Validator[_]]):Boolean = {
-	  if(paramCopy.exists(_.validate.isDefined)){
-	    false
-	  }else{
+	def updateConfiguration(paramCopy:Seq[Bindator]):Boolean = {
+	  val validationResult = paramCopy.flatMap(_ validate).toList
+	  if(validationResult.isEmpty){
 	    self.apply(intermediates)
 	    true
+	  }else{
+	    false
     }
 	}
+  
+	private trait  Bindator {
+	  def validate : Iterable[String] 
+   
+	  def validationNodes(nodes:NodeSeq) : NodeSeq={
+       
+    	val ret = validate.map{ err : String => 
+    	  <p>{err}</p>
+    	}.toList
+    	
+      if(ret.isEmpty) nodes
+      else <div class="configgy.validation">{nodes}<div class="configgy.validation.msg">{ret}</div></div>
+    }
+   
+	}
  
-	private abstract class Validator[T](receiver : ConfigurationSchema#Field[T] ) extends net.liftweb.util.Bindable{
+	private abstract class Validator[T](receiver : ConfigurationSchema#Field[T] ) extends net.liftweb.util.Bindable with Bindator{
     def updateIntermediates(update:String) = {
       
-println("receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
+//println("receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
       intermediates(receiver.full) = update
-println("interms aft:"+intermediates )
+//println("interms aft:"+intermediates )
     }
     /**
      * return Some("myError") in case of failure
      */
-	 	def validate : Option[String] = None 
+	 	def validate : Iterable[String] = None 
 	 	 
 	 	def current : String = {
 	 	  intermediates(receiver.full, receiver.apply.toString)
@@ -165,18 +187,18 @@ println("interms aft:"+intermediates )
 	 	  intermediates.getString(receiver.full)
     }	
    
-    def validationNodes(nodes:NodeSeq)={
-    	validate match {
-    	  case None => nodes
-    	  case Some(err) => <div class="configgy.validation.msg">{nodes}{err}</div>
-    	}
-      
-    }
+
     if(receiver.apply != null && receiver.apply.toString.trim.length>0) updateIntermediates(current)
 	 	//def asHtml = SHtml.text(current, receiver () = _)
  	}
+	
+                                                                          
+                                                                          
   private class StringValidator(receiver : ConfigurationSchema#Field[String] ) extends Validator[String](receiver){
-    override def asHtml = validationNodes(SHtml.text(current, updateIntermediates _))
+    override def asHtml = {
+//println("asHtml for  "+receiver.full)      
+      validationNodes(SHtml.text(current, updateIntermediates _))
+    }
 
     override def validate = {
       currentOpt match {
@@ -193,9 +215,6 @@ println("interms aft:"+intermediates )
     override def asHtml = validationNodes(SHtml.text(current, updateIntermediates _))
     override def validate = {
       currentOpt match {
-//        case LiftSupport.numberPattern(is) => {
-//          val i:Int = is.toInt  
-//        }
         case Some(is) => {
         	if( ! LiftSupport.numberPattern.unapplySeq(is).isDefined) Some("'"+is+"' is not a full number!")   
         	else {
@@ -225,7 +244,110 @@ println("interms aft:"+intermediates )
       }
     }
   }
+                   
+                                                                                                            
+                                                                                                            
+                                                                                                            
+                                                                                                            
+                                                                                                            
+                                                                                                            
+  private abstract class Tabulator[T](receiver : ConfigurationSchema#Table[T] ) extends net.liftweb.util.Bindable with Bindator{
+    def updateIntermediates(update:String) = {
+      
+//println("tab receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
+			for(line <- update.lines){
+				line match {
+				  case LiftSupport.tablePattern(name, value) => {
+				    intermediates(receiver.full+"."+name) = value
+				  }
+				  case _ => 
+        }
+			}
+//println("tab interms aft:"+intermediates )
+    }
+    /**
+     * return Some("myError") in case of failure
+     */
+	 	def validateSeq : Seq[Option[String]] = {
+	 	  //intermediates.getConfigMap(receiver.full).map(_.asMap.projection.toList.map(_ _2)).map(validate(_))
+	 	  mapKeyValue{(k:String,v:String)=>
+	 	    validate(v).map(k+": "+ _ )
+	 	  }
+	 	}  
+	 	def validate(toValidate : String) : Option[String]
+	  override def validate : Iterable[String] = {
+	    validateSeq.filter(_ isDefined).map(_ get)  
+	  }	 
+   
+	 	def current : String = { 
+   		currentSeq.reverse.mkString("\r\n")
+    }
+	 	def currentSeq : Seq[String] = {
+	 	  mapKeyValue((k:String,v:String)=> ""+ k + " = " + v)
+//	 	  intermediates.getConfigMap(receiver.full).map{x => 
+//   			x.asMap.projection.toList.map(kv=> ""+ kv._1 + " = " + kv._2)
+//      }.getOrElse(Nil)
+    }	
+   	def mapKeyValue[R](func : ((String, String)=>R)):Seq[R] = {
+   	  intermediates.getConfigMap(receiver.full).map{x => 
+   			x.asMap.projection.toList.map(kv=> func(kv._1, kv._2))
+      }.getOrElse(Nil)
+   	}
+   
+   
+    if(receiver.map != null && receiver.map.size>0) {
+      receiver.map.foreach{entry=>
+//println("entry:  "+entry._1+" -> "+entry._2)        
+        intermediates(receiver.full+"."+entry._1) = entry._2.toString
+      }
+      updateIntermediates(current)
+    }
+	 	//def asHtml = SHtml.text(current, receiver () = _)
+    
+    override def asHtml = {
+      validationNodes (
+      	SHtml.textarea(current, x=>updateIntermediates(x)) 
+      )
+    }    
+ 	}
+	                                                                                                        
+
+                                                                           
+  private class StringTabulator(receiver : ConfigurationSchema#Table[String] ) extends Tabulator[String](receiver){
+
+
+    override def validate(x : String) = {
+          if(receiver.maxLength!=null && (x.length > receiver.maxLength.intValue)) Some("'"+x+"' is longer than the allowed maximum of "+receiver.maxLength+"!")
+          else if(receiver.pattern!=null && ! receiver.pattern.unapplySeq(x).isDefined) Some("'"+x+"' does not match the regex pattern "+receiver.pattern+"!")
+          None
+    }
+  }
+  private class IntegerTabulator(receiver : ConfigurationSchema#Table[Integer] ) extends Tabulator[Integer](receiver){
+
+    override def validate(is : String) = {
+    	if( ! LiftSupport.numberPattern.unapplySeq(is).isDefined) Some("'"+is+"' is not a full number!")   
+    	else {
+    		val i = is.toInt
+    	  if(receiver.max!=null && (i > receiver.max.intValue )) Some(""+i+" is greater than the allowed maximum of "+receiver.max+"!")
+    	  else if(receiver.min!=null && (i < receiver.min.intValue )) Some(""+i+" is lower than the allowed minimum of "+receiver.max+"!")
+    	  else None
+      }
+    }
+  }
+  private class BooleanTabulator(receiver : ConfigurationSchema#Table[Boolean] ) extends Tabulator[Boolean](receiver){
+
+    override def validate(toMatch:String) = {
+      toMatch match {
+        case "true" => None 
+        case "false" => None 
+        case x => Some("'"+x+"' is not a valid value true or false!")
+      }
+    }
+  }                                                                           
+                                                                           
+                                                                           
 }
 object LiftSupport {
   val numberPattern = """-?\d+""".r
+  val tablePattern = """^([^=\s]+)\s*=\s*(.*)$""".r
 }
