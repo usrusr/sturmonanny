@@ -10,17 +10,7 @@ import net.liftweb.util.Helpers._
 import scala.xml.{NodeSeq}
 //class Login {  
 object Login {
-  object isLoggedIn extends SessionVar[Boolean](false)
-  def valid(html:NodeSeq) = if(isLoggedIn) html else NodeSeq.Empty
 
-	def form(html:NodeSeq)={ 
-	  var user=""
-	  var pass=""
-	  bind("f", html, 
-        "user" -> text(user, user = _),
-        "pass" -> text(pass, pass = _)
-        )
-	}
 
 // def conf(html:NodeSeq)={
    

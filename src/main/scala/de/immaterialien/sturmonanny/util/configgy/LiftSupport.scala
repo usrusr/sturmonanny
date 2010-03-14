@@ -31,13 +31,15 @@ trait LiftSupport extends ConfigurationSchema {
 	       
 		      val headline : Node = 
 	        if(group.documentationString == null && group.documentationString.trim.isEmpty){
-	          <div class="configgy.group.headline">{group.name}</div>
+	          <div class="configgy_group_headline">{group.name}</div>
 	        }else{
-	          <div class="configgy.group.headline" title={group.documentationString}>{group.name}</div>
+	          <div class="configgy_group_headline" title={group.documentationString}>{group.name}</div>
 	        }
 		      ( // create the tuple 
-		        <div class="configgy.group">{headline}
-	            {internal.map(_ _1)}
+		        <div class="configgy_group">{headline}
+		        	<div>
+		        		{internal.map(_ _1)}
+              </div>
 	          </div>
 		        , internal.flatMap(_ _2)
 		      )
@@ -59,11 +61,11 @@ trait LiftSupport extends ConfigurationSchema {
 		      }
 		      val unbound =
 		    		if(table.documentationString==null || table.documentationString.trim.isEmpty)  
-			    		<label class="configgy.label">{table.name}{fNode}</label>
+			    		(<div class="configgy_label">{table.name}</div><div class="configgy_textarea">{fNode}</div>)
 			    	else
-			    		<label class="configgy.label" title={table.documentationString}>{table.name}{fNode}</label>
+			    		(<div class="configgy_label" title={table.documentationString}>{table.name}</div><div class="configgy_textarea">{fNode}</div>)
 //println("tablulator "+unbound)           
-		      (unbound, binding::Nil)
+		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
 		    case field : ConfigurationSchema#Field[_] => {
 		      val fieldVal = field.apply
@@ -89,10 +91,10 @@ trait LiftSupport extends ConfigurationSchema {
 		    	val fNode : Elem= new Elem(form, fullName, attributes, xml.TopScope)
 		    	val unbound =
 		    		if(field.documentationString==null || field.documentationString.trim.isEmpty)  
-			    		<label class="configgy.label">{field.name}{fNode}</label>
+			    		(<div class="configgy_label">{field.name}</div><div class="configgy_textfield">{fNode}</div>)
 			    	else
-			    		<label class="configgy.label" title={field.documentationString}>{field.name}{fNode}</label>
-		      (unbound, binding::Nil)
+			    		(<div class="configgy_label" title={field.documentationString}>{field.name}</div><div class="configgy_textfield">{fNode}</div>)
+		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
 	  }
 	}
@@ -113,13 +115,15 @@ trait LiftSupport extends ConfigurationSchema {
 		val save = new Elem(form, "submitsave", Null, xml.TopScope)
 		val apply = new Elem(form, "submitapply", Null, xml.TopScope)
 		val title = if(documentationString==null || documentationString.trim.isEmpty) 
-                 <div class="configgy.form">{file}</div>
+                 <div class="configgy_fname">{file}</div>
     else
-                 <div class="configgy.form" title={documentationString}>{file}</div>
-		val formNodes = <form>{title}
+                 <div class="configgy_fname" title={documentationString}>{file}</div>
+		val formNodes = <form class="configgy_form">{title}
        	{createdSeq}
-        {apply}
-        {save}
+        <div class="configgy_controls">
+	        <div class="configgy_apply">{apply}</div>
+	        <div class="configgy_save">{save}</div>
+        </div>
     </form>
     
     val paramCopy:List[Bindator] = params.map{
@@ -163,7 +167,7 @@ trait LiftSupport extends ConfigurationSchema {
     	}.toList
     	
       if(ret.isEmpty) nodes
-      else <div class="configgy.validation">{nodes}<div class="configgy.validation.msg">{ret}</div></div>
+      else <div class="configgy_validation">{nodes}<div class="configgy_validation_msg">{ret}</div></div>
     }
    
 	}
@@ -197,7 +201,12 @@ trait LiftSupport extends ConfigurationSchema {
   private class StringValidator(receiver : ConfigurationSchema#Field[String] ) extends Validator[String](receiver){
     override def asHtml = {
 //println("asHtml for  "+receiver.full)      
-      validationNodes(SHtml.text(current, updateIntermediates _))
+      val attributes = if(receiver.maxLength!=null) {
+        ("size", ""+receiver.maxLength) :: Nil
+      } else {
+        Nil
+      }
+      validationNodes(SHtml.text(current, updateIntermediates _, attributes :_*))
     }
 
     override def validate = {
@@ -212,7 +221,23 @@ trait LiftSupport extends ConfigurationSchema {
     }
   }
   private class IntegerValidator(receiver : ConfigurationSchema#Field[Integer] ) extends Validator[Integer](receiver){
-    override def asHtml = validationNodes(SHtml.text(current, updateIntermediates _))
+    override def asHtml = {
+      val attributes = if(receiver.max!=null || receiver.min!=null) {
+    	  val biggest : Int = if(receiver.max==null){
+    	    receiver.min.intValue
+    	  }else if (receiver.min==null){
+    	    receiver.max.intValue
+    	  }else{ 
+    	    val max : Int = receiver.max.intValue 
+    	    scala.Math.max(max, (-1 * receiver.min.intValue ))
+    	  }
+      	val len = 1 + (""+biggest).length
+        ("size", ""+len) :: Nil
+      } else {
+        Nil
+      }
+      validationNodes(SHtml.text(current, updateIntermediates _, attributes:_*))
+    }
     override def validate = {
       currentOpt match {
         case Some(is) => {

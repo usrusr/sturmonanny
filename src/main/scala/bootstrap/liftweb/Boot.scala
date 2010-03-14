@@ -31,7 +31,9 @@ class Boot extends net.liftweb.util.LiftLogger{
     Schemifier.schemify(true, Log.infoF _, de.immaterialien.sturmonanny.model.User)
 
     // Build SiteMap
-    val entries = Menu(Loc("Home", List("index"), "Home")) :: de.immaterialien.sturmonanny.model.User.sitemap 
+    val entries = Menu(Loc("Home", List("index"), "Home")) ::
+      Menu(Loc("Logout", List("logout"), "Logout")) :: 
+    Nil
     LiftRules.setSiteMap(SiteMap(entries:_*))
 
     /*

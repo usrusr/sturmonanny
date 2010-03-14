@@ -44,6 +44,121 @@
 	background-color: #eee;
 }
 
+.configgy_form {
+	border: 1px solid; 
+	width: 100%;
+}
+
+.configgy_field {
+	border-width: thin;
+	padding-left: 1ex;
+	margin-bottom: 3pt;
+	margin-top: 3pt;
+	position: inherit;
+
+	vertical-align: top;
+}
+
+div.configgy_group {
+	border: thin;
+	border-style: solid;
+	margin: 1ex;
+	display:block;
+}
+
+div.configgy_fname, 
+div.configgy_group_headline{
+	padding-top: 1pt;
+	padding-bottom: 0;
+	padding-left: 1em;
+	margin-bottom: 3pt;
+	font-size: larger;
+	background-color: #CCC;
+}
+
+div.configgy_textarea textarea, 
+div.configgy_textfield input  {
+	border-style: inset;
+	border-width: 2px;
+}
+
+
+div.configgy_controls {
+	padding: 1ex;
+	padding-bottom: 2ex;
+	
+}
+div.configgy_controls input{
+	background-color: #BBB;
+	border-style: outset;
+	border-width: 3px;
+}
+
+div.configgy_apply {
+	padding-left: 2ex;
+	display: inline;
+}
+div.configgy_save {
+	padding-left: 2ex;
+	display: inline;
+}
+div.configgy_label {
+	width: 10em;
+	text-align: left;
+	vertical-align: top;
+	padding-left: 1ex;
+}
+div.configgy_field div{
+	padding-top: 2pt;
+	padding-bottom: 4pt;
+}
+div.configgy_field {
+	display: block;
+	padding: 0;
+	margin: 0;
+}
+div.configgy_label{
+	display:inline-block;
+	width: 20%;
+}
+div.configgy_textfield,
+div.configgy_textarea {
+	display:inline-block;
+	width: 75%;
+}
+div.configgy_validation {
+	border-style: outset;
+	border-color: red;
+	border-width: 2px;
+	background-color: #FAA;
+	padding-right: 1ex;
+	padding-bottom: 0;
+	display: inline-block;
+	width: 100%;
+	padding: 1ex;
+
+}
+div.configgy_validation_msg{
+	padding: 0;
+	margin: 0;
+}
+div.configgy_validation_msg p {
+	margin: 0;
+	padding: 0;
+}
+div.configgy_textarea {
+	width: 75%;
+	display: inline-block;
+	margin: 0;
+}
+div.configgy_textarea textarea {
+	margin-top: 0;
+	height: 5pc;
+	
+	
+	width: 95%;
+	display: inline;
+}
 
   /* ]]> */
   </style>
@@ -51,12 +166,12 @@
   <body>
     <div class="container">
       <div class="column span-12 last" style="text-align: right">
-        <h1 class="alt">lifttest<img id="ajax-loader" style="display:none; margin-bottom: 0px; margin-left: 5px" src="/images/ajax-loader.gif"/></h1>
+        <h1 class="alt">Sturmonanny<img id="ajax-loader" style="display:none; margin-bottom: 0px; margin-left: 5px" src="/images/ajax-loader.gif"/></h1>
       </div>
 
       <hr/>
       
-<!--	<lift:Login.valid>-->
+	<lift:LiftConf.loggedIn>
       <div class="column span-6 colborder sidebar">
         <hr class="space" />
         <lift:Menu.builder />	
@@ -69,12 +184,24 @@
       <div class="column span-17 last">
         <lift:bind name="content" />
       </div>
-<!--</lift:Login.valid>-->
+   </lift:LiftConf.loggedIn>
+   <lift:LiftConf.loggedOut>
+    <h2>Admin login</h2>
+   	<lift:LiftConf.login>
+   	<form>
+   	  <p><div class="configgy_label">Login</div><f:user/></p>
+  	  <p><div class="configgy_label">Password</div><f:pass/></p>
+  	  <f:submit/>
+  	</form>
+	</lift:LiftConf.login>  
+	<lift:snippet type="msgs"/> 		
+   	
+   </lift:LiftConf.loggedOut>
       <hr />
       <div class="column span-23 last" style="text-align: center">
         <h4 class="alt">
-          <a href="http://liftweb.net"><i>Lift</i></a> 
-	  is Copyright 2007-2009 WorldWide Conferencing, LLC.  Distributed under an Apache 2.0 License.</h4>
+          <a href="http://github.com/usrusr/sturmonanny"><i>Sturmonanny</i></a> 
+	  (C) 2010 Ulf Schreiber.  Distributed under an Apache 2.0 License.</h4>
       </div>
       
     </div>

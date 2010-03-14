@@ -1,8 +1,8 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
+import de.immaterialien.sturmonanny.util.configgy
 
-class Configuration(override val file : String) extends ConfigurationSchema(file){   
+class Configuration(override val file : String) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{   
 	doc = "configuration for a single host instance"
 	object server  extends Group{    
 	  object host extends Field( "127.0.0.1")

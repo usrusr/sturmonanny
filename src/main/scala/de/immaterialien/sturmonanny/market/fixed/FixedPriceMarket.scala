@@ -7,7 +7,7 @@ import de.immaterialien.sturmonanny.util._
 class FixedPriceMarket extends IMarket with Logging{ 
 	var filename : Option[String] = None 
 	var priceList : Option[PriceList] = None  
-	var server : Option[Server] = None
+	var server : Option[Server] = None 
 
  	def addAirTime(plane : String, millis : Long) = ()
 	def cycle(name : String) = ()

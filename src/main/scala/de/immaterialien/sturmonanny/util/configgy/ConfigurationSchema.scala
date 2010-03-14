@@ -159,9 +159,9 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 
 	
 	    override def readConfiggy(in:Config) = v match{
-		      case x : String => v = in(full, x).asInstanceOf[T]  
-		      case x : Int => v = in(full, x).asInstanceOf[T]  
-		      case x : Boolean => v = in(full, x).asInstanceOf[T]  
+		      case x : String => Field.this () = in(full, x).asInstanceOf[T]  
+		      case x : Int => Field.this () = in(full, x).asInstanceOf[T]  
+		      case x : Boolean => Field.this () = in(full, x).asInstanceOf[T]  
     	}
 	
 	    override def toString = v.toString
@@ -176,25 +176,41 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	    }
 	  }
 
-
+    /**
+     * some nullable fields 
+     */
     trait ValidationInfo {
       /**
-       * applies to string 
+       * applies to string  
        * plain nullable is easier to setup/define
        * (only enforced in LiftSupport)
        */
-	    protected[configgy] var pattern : scala.util.matching.Regex = null
+	    private var _pattern : scala.util.matching.Regex = null
+	    protected[ValidationInfo] def pattern_=(in:scala.util.matching.Regex) = _pattern=in
+      protected[configgy] def pattern = _pattern
       /**
        * applies to string 
        * (only enforced in LiftSupport)
        */
-	    protected[configgy] var maxLength : Integer = null
+	    private var _maxLength : java.lang.Integer = null
+	    protected[ValidationInfo] def maxLength_=(in:Int) = _maxLength=new java.lang.Integer(in)
+      protected[configgy] def maxLength = _maxLength
+     
       /**
-       * apply to int 
+       * applies to int 
        * (only enforced in LiftSupport)
        */
-	    protected[configgy] var min : Integer = null
-	    protected[configgy] var max : Integer = null
+	    private var _min : java.lang.Integer = null
+	    protected[ValidationInfo] def min_=(in:Int) = _min=new java.lang.Integer(in)
+      protected[configgy] def min = _min
+      
+      /**
+       * applies to int 
+       * (only enforced in LiftSupport)
+       */
+	    private var _max : java.lang.Integer = null
+	    protected[ValidationInfo] def max_=(in:Int) = _max=new java.lang.Integer(in)
+      protected[configgy] def max=_max
     }
  }
  	
