@@ -24,9 +24,9 @@ debug("setting server context: "+srv)
  
 	def setConfiguration(pathToFile : String) = {
 	  if(Some(pathToFile)==filename) true
-	  else {
+	  else try {
 		  val newList = new PriceList(pathToFile)
-		  if(newList.initialized) {
+		  
 debug("initializing market")		    
 			  priceList = Some(newList)
 			  filename = Some(pathToFile)
@@ -38,9 +38,7 @@ debug("initializing market")
 debug("creating "+plane+" in market -> "+planes.items )		    
 			    planes.create(plane)
 			  }
-     
-			  true
-		  } else false
-	  }
+		  true
+	  }catch{case _ => false }
 	} 
 }

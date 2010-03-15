@@ -12,7 +12,7 @@ class GlobalConfig extends configgy.ConfigurationSchema("global.conf") with conf
 	    doc = "login name (case sensitive)"
       override def update(usr:String) = {
         hash() = GlobalConfig.hashPass(usr, pass)
-        super.update(usr)
+        super.update(usr) 
       }	    
 	  }
 	  object pass extends Field("") {

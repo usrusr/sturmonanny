@@ -11,9 +11,11 @@ import Helpers._
 import _root_.net.liftweb.mapper.{DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, ConnectionIdentifier}
 import _root_.java.sql.{Connection, DriverManager}
 
-import _root_.de.immaterialien.sturmonanny.core._;
+import _root_.de.immaterialien.sturmonanny.core._
 import _root_.de.immaterialien.sturmonanny.model._
 import _root_.javax.servlet.http.{HttpServletRequest}
+
+import de.immaterialien.sturmonanny.snippet
 
 /**
   * A class that's instantiated early and run.  It allows the application
@@ -49,6 +51,10 @@ class Boot extends net.liftweb.util.LiftLogger{
       Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
 
     LiftRules.early.append{ _.setCharacterEncoding("UTF-8") }
+    
+    
+    snippet.InstanceConf.registerRules 
+   
     net.liftweb.util.LogBoot.loggerSetup
 
 //      val s = new Server

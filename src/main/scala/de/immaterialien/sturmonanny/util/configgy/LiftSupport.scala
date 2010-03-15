@@ -20,9 +20,13 @@ trait LiftSupport extends ConfigurationSchema {
  
 	def  liftForm:NodeSeq={
 //println("entrering ilfgForm ")
+		for(message <- self.status.messages) message match  {
+		  case ConfigurationSchema.Warning(msg) => S.warning(msg)
+		  case ConfigurationSchema.Error(msg) => S.error(msg)
+		  case ConfigurationSchema.Success(msg) => S.notice(msg)
+		}
 
-
-	  val topName = name
+	  val topName = configgyName
 	  def forMember(member: ConfigurationSchema.Member):(NodeSeq, List[BindParam])={
 		  
 	    member match {
@@ -31,9 +35,9 @@ trait LiftSupport extends ConfigurationSchema {
 	       
 		      val headline : Node = 
 	        if(group.documentationString == null && group.documentationString.trim.isEmpty){
-	          <div class="configgy_group_headline">{group.name}</div>
+	          <div class="configgy_group_headline">{group.configgyName}</div>
 	        }else{
-	          <div class="configgy_group_headline" title={group.documentationString}>{group.name}</div>
+	          <div class="configgy_group_headline" title={group.documentationString}>{group.configgyName}</div>
 	        }
 		      ( // create the tuple 
 		        <div class="configgy_group">{headline}
@@ -61,9 +65,9 @@ trait LiftSupport extends ConfigurationSchema {
 		      }
 		      val unbound =
 		    		if(table.documentationString==null || table.documentationString.trim.isEmpty)  
-			    		(<div class="configgy_label">{table.name}</div><div class="configgy_textarea">{fNode}</div>)
+			    		(<div class="configgy_label">{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
 			    	else
-			    		(<div class="configgy_label" title={table.documentationString}>{table.name}</div><div class="configgy_textarea">{fNode}</div>)
+			    		(<div class="configgy_label" title={table.documentationString}>{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
 //println("tablulator "+unbound)           
 		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
@@ -91,9 +95,9 @@ trait LiftSupport extends ConfigurationSchema {
 		    	val fNode : Elem= new Elem(form, fullName, attributes, xml.TopScope)
 		    	val unbound =
 		    		if(field.documentationString==null || field.documentationString.trim.isEmpty)  
-			    		(<div class="configgy_label">{field.name}</div><div class="configgy_textfield">{fNode}</div>)
+			    		(<div class="configgy_label">{field.configgyName}</div><div class="configgy_textfield">{fNode}</div>)
 			    	else
-			    		(<div class="configgy_label" title={field.documentationString}>{field.name}</div><div class="configgy_textfield">{fNode}</div>)
+			    		(<div class="configgy_label" title={field.documentationString}>{field.configgyName}</div><div class="configgy_textfield">{fNode}</div>)
 		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
 	  }

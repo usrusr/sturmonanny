@@ -399,10 +399,10 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 	}
 }
 object Multiplexer extends Logging{
+	case object interrupt 
 	def daemon(body: => Unit): Then = {
 		new Then(body)
 	}
-	case object interrupt 
 	class Then(body: => Unit) extends Logging{
 
 		def then(fin: => Unit) : Thread = {
@@ -418,6 +418,7 @@ object Multiplexer extends Logging{
 					fin
 				}
 			}
+
 			ret.start
 			ret
 		}

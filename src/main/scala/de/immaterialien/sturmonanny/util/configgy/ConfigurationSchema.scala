@@ -52,20 +52,31 @@ import net.lag.configgy.{Config, ConfigMap}
  * 
  */
 abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting{ 
-    val initialized : Boolean = try{
+//    val initialized : Boolean = try{
  		this(Config.fromFile(file))
- 		true
-	}catch { 
-	  case x => {
-	    println("failed to read configuration file '"+file+"': "+x)
-	    false
-      }
-	}
-    
+// 		true
+//	}catch { 
+//	  case x => {
+//	    println("failed to read configuration file '"+file+"': "+x)
+//	    false
+//      }
+//	}
+  
+  
+  object status {
+	  private var internalMessages : List[ConfigurationSchema.Msg]=Nil  
+  	def messages = internalMessages
+  	def clear = internalMessages = Nil
+		def warning(msg:String) = internalMessages :::= ConfigurationSchema.Warning(msg)::Nil
+  	def error(msg:String) = internalMessages :::= ConfigurationSchema.Error(msg)::Nil
+  	def success(msg:String) = internalMessages :::= ConfigurationSchema.Success(msg)::Nil
+  }
 	def apply(conf : Config) = {
+	  status.clear
 	  initMembers
 	 // members map (_ readConfiggy conf)
-	  for(member<-members) member.readConfiggy(conf)
+	  //for(member<-members) member.readConfiggy(conf)
+	  readConfiggy(conf)
 	}
 
 	override def toString = {
@@ -83,7 +94,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
      */
 //	protected[ConfigurationSchema] 
   trait Group extends Holder with ConfigurationSchema.Member {
-	  override def toString = "group "+name
+	  override def toString = "group "+configgyName
 	}
  
 
@@ -139,11 +150,14 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
 //	      documentation foreach (_ write(sb, indent, prefix))
     	writeDocumentation(sb, indent, prefix)
-		  sb.append(indent+"<"+ name+">\r\n")
+if(configgyName=="anon") {
+  println("bp")
+}     
+		  sb.append(indent+"<"+ configgyName+">\r\n")
 		  innerTable(sb, indent)
-		  sb.append(indent+"</"+ name+">\r\n")
+		  sb.append(indent+"</"+ configgyName+">\r\n")
 	    }
-     override def toString = "table "+name+":"+map
+     override def toString = "table "+configgyName+":"+map
      def innerTable(sb : scala.StringBuilder, indent:String) = for((k,v)<-map.projection) sb.append(indent+"   "+k+" = "+printer(v) +"\r\n")
      def innerTable : String = {
        val sb = new scala.StringBuilder()
@@ -172,7 +186,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 		    case x:String=> "\""+x+"\""
 		    case x => x
 		  }
-		  sb.append(indent+ name+"="+string+"\r\n")
+		  sb.append(indent+ configgyName+"="+string+"\r\n")
 	    }
 	  }
 
@@ -219,19 +233,18 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
  */
 
  	sealed trait SelfNaming extends Ordered[SelfNaming]{
- 	  	
-//      def configgyName = name
-//      def configgyPath = prefix
-//      lazy val configgyFullName = prefix+name
-//      
-   	  protected[configgy] lazy val full = {
-		    val tmp = this.getClass.getSimpleName()
+ 	  	protected def fullNameFromClass(cls : java.lang.Class[_]) = {
+ 	  	  val tmp = cls.getSimpleName()
 		    val dotsTmp = tmp.replace("$", ".")
 		    if(dotsTmp contains "."){
 		      dotsTmp.substring(0, dotsTmp.length - 1)
 		    }else{
 		      dotsTmp
 		    }
+ 	  	}
+      protected def nameGivingClass : java.lang.Class[_] = this.getClass 
+   	  protected[configgy] lazy val full = {
+ 	  		fullNameFromClass(nameGivingClass)
    	  }
       protected[configgy]  lazy val prefix = {
         if(full contains "."){
@@ -241,7 +254,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
         }
       }
 
-      protected[configgy]  lazy val name = {
+      protected[configgy]  lazy val configgyName = {
         if(full contains "."){
         	full.substring(full.lastIndexOf('.')+1)
 	    }else{
@@ -267,32 +280,33 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 		    initMembers
 		    members.map(func)
       }
-    
-		  protected[configgy] lazy val initMembers = {
-			  // reflection magic to make sure all fields are initialized and set up holder in members
-		    
-			  // identify the class that has the members
-		   	val cls = if(Holder.this.isInstanceOf[ConfigurationSchema]){
+			private lazy val processedNameGivingClass = {
+			  if(Holder.this.isInstanceOf[ConfigurationSchema]){
 		   		var c = Holder.this.getClass
 				  var last = c
 				  while(c!=null && c!=classOf[ConfigurationSchema]) {
 				   	last=c
 				   	c=c.getSuperclass
-	//println("moving up from "+last.getSimpleName+" to "+ c.getSimpleName)           
+//println("moving up from "+last.getSimpleName+" to "+ c.getSimpleName)           
 					}
 				  last
         } else Holder.this.getClass
-
-		    val found = for(m <- cls.getDeclaredMethods){
+      }
+     	protected override def nameGivingClass  : java.lang.Class[_] = processedNameGivingClass
+     
+		  protected[configgy] lazy val initMembers = {
+			  // reflection magic to make sure all fields are initialized and set up holder in members
+        
+		    val found = for(m <- nameGivingClass.getDeclaredMethods){
 		        val typ = m.getReturnType
 		       if( classOf[ConfigurationSchema.Member].isAssignableFrom(m.getReturnType) && m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
-//println(this.getClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
+//println(nameGivingClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
 		           try{
 		       		val member = m.invoke(Holder.this).asInstanceOf[ConfigurationSchema.Member]
 		       		members = member :: members
 		           }catch{case _ => }
 		       }
-//else println(this.getClass.getSimpleName+" does not hold "+ m.getReturnType.getSimpleName + " in "+m.getName)
+//else println(nameGivingClass.getSimpleName+" does not hold "+ m.getReturnType.getSimpleName + " in "+m.getName)
 		    }
 //println(this.getClass.getSimpleName+" does not hold "+ m.getReturnType.getSimpleName + " in "+m.getName)        
 			  members = members.sort(_ < _)
@@ -303,9 +317,12 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 		    initMembers
 		  	for(member<-members) member readConfiggy in
 		  }  
-	      override protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String){
+	    override protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String){
 		    initMembers
 		    writeDocumentation(sb, indent, prefix)
+//if(full contains "anon") {
+//  println("bp")
+//}           
 		    val blanks = changeGroup(sb, inPrefix, full)
 		    for(group<-members) group.write(sb, blanks, full)
 		    changeGroup(sb, inPrefix, full)
@@ -377,5 +394,9 @@ object ConfigurationSchema {
       }
 	  }
 	}
+  abstract case class Msg(val msg:String)
+  case class Warning(override val msg:String) extends Msg(msg)
+  case class Error(override val msg:String) extends Msg(msg)
+  case class Success(override val msg:String) extends Msg(msg)
 }
 

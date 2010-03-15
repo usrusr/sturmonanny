@@ -10,10 +10,11 @@ import net.liftweb.util.Helpers._
 
 import de.immaterialien.sturmonanny.util.configgy._
 import de.immaterialien.sturmonanny.global._
+
 class LiftConf {
    def conf(html:NodeSeq)={
  
-	  LiftConf.instances.liftForm 
+	  Instances.configuration.liftForm 
    }  
    def loggedIn(html:NodeSeq) = if(LiftConf.isLoggedIn) html else NodeSeq.Empty
    def loggedOut(html:NodeSeq) = if(LiftConf.isLoggedIn) NodeSeq.Empty else html
@@ -42,10 +43,25 @@ class LiftConf {
         })
     )
 	}	   
+   
+  def instanceLinks(html:NodeSeq):NodeSeq={
+//    for(name <- Instances.nameToInstance.keys){ 
+//    	bind("i", html, 
+//    			"instance" -> <a href={InstanceConf.confLink(name)}>name</a>
+//    	)
+//    }
+		<div>
+			{Instances.nameToInstance.keys.map(name=>
+	    	bind("i", html, 
+	    			"instance" -> <a href={InstanceConf.confLink(name)}>{name}</a>
+	    	)
+			)}
+		</div>
+  }
 }
 object LiftConf {
   val globalConfig = new GlobalConfig()
-  val instances = new Instances()
+//  val instances = new Instances()
 
    
   object isLoggedIn extends SessionVar[Boolean](false)

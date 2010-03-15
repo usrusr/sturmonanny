@@ -174,7 +174,16 @@ div.configgy_textarea textarea {
 	<lift:LiftConf.loggedIn>
       <div class="column span-6 colborder sidebar">
         <hr class="space" />
-        <lift:Menu.builder />	
+        <lift:Menu.builder />
+        <div>	
+         <lift:LiftConf.instanceLinks>
+          <!--<i:repeat>-->
+           <div>
+           	<i:instance/>
+           </div>
+          <!--</i:repeat>-->
+         </lift:LiftConf.instanceLinks>
+        </div>
         <div>
           <lift:snippet type="msgs"/>
           <hr class="space" />

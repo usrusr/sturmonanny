@@ -31,12 +31,12 @@ class PriceListTest {
 		()
 	} 
 } 
-class MyList(file:String) extends ConfigurationSchema(file){
+class MyList(file:String) extends ConfigurationSchema(file) with de.immaterialien.sturmonanny.util.configgy.LiftSupport with de.immaterialien.sturmonanny.util.Logging {
 	object prices extends Group { 
   doc = "inline doc"
   object test extends Field( "StringTest") 
 
-   
+    
 	  object host extends Field( "127.0.0.1")
 	  object il2port extends Field(2001)   	  
 

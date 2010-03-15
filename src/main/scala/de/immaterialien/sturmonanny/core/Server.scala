@@ -4,17 +4,22 @@ import de.immaterialien.sturmonanny.util._
 import de.immaterialien.sturmonanny.core._ 
 import de.immaterialien.sturmonanny.fbdjhosting.FbdjAdapter 
 
-class Server(val initConf : String) extends Logging{  
+class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) extends Logging{
+  def this(initConf:String) = this(initConf, null)
 	def this() = this("default.conf") 
 	private var members : List[UpdatingMember] = Nil
 	this : Server
+ 
 	private var internalconf = new Configuration(initConf) 
 	def conf = internalconf  
 	def conf_= (newConf : Configuration) {  
 		internalconf = newConf
 		members foreach (_ updateConfiguration)
 	}   
-	 
+	def shutdown{
+	  if(threadGroup!=null) threadGroup.interrupt
+   else error("can only shut down if started within a threadgroup")
+	} 
 	
 	val rules = new Rules with Member  
 	val pilots = new Pilots with Member   
@@ -39,7 +44,6 @@ class Server(val initConf : String) extends Logging{
 		override def conf  = server.conf
 		server.members ::= this 
 	}
-
 } 
 trait NonUpdatingMember extends UpdatingMember {
 	override def updateConfiguration=() 
@@ -49,5 +53,39 @@ trait UpdatingMember {
 	val server : Server = null // overridden by Server#Member
 	def conf  : Configuration = Configuration.Default
 }
+
+object Server {
+  def withThreadGroup(conf:String):Server={
+    val notifier = new java.lang.Object
+    var result :Server=null
+    var throwable:Throwable=null
+    val tg = new ThreadGroup("server "+conf)
+    val t = new Thread(tg, "server "+conf+" init"){
+      override def run={
+        try{
+        	result = new Server(conf, tg)
+        }catch{
+          case x => {
+            throwable = x
+          }
+        }finally {
+//println("done "+throwable+" -> "+result)      
+	        notifier.synchronized{
+	          notifier.notifyAll
+	        }
+        }
+      }
+    }
+    t.start
+    notifier.synchronized{
+      notifier.wait
+//println("started in thread group "+throwable+" -> "+throwable.getCause)      
+      if(throwable!=null) throw throwable
+      if(result==null) throw new net.lag.configgy.ParseException("server isntance for "+conf+" could not be created")
+      result
+    }
+  }
+}
+
 
 
