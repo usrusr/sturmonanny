@@ -68,7 +68,7 @@ trait LiftSupport extends ConfigurationSchema {
 			    		(<div class="configgy_label">{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
 			    	else
 			    		(<div class="configgy_label" title={table.documentationString}>{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
-//println("tablulator "+unbound)           
+println("tablulator "+unbound)           
 		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
 		    case field : ConfigurationSchema#Field[_] => {
@@ -179,9 +179,9 @@ trait LiftSupport extends ConfigurationSchema {
 	private abstract class Validator[T](receiver : ConfigurationSchema#Field[T] ) extends net.liftweb.util.Bindable with Bindator{
     def updateIntermediates(update:String) = {
       
-//println("receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
+println("receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
       intermediates(receiver.full) = update
-//println("interms aft:"+intermediates )
+println("interms aft:"+intermediates )
     }
     /**
      * return Some("myError") in case of failure
@@ -283,16 +283,28 @@ trait LiftSupport extends ConfigurationSchema {
   private abstract class Tabulator[T](receiver : ConfigurationSchema#Table[T] ) extends net.liftweb.util.Bindable with Bindator{
     def updateIntermediates(update:String) = {
       
-//println("tab receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
+println("tab receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
+
+			val tempmap : configgy.Config = intermediates.get
+			for(existing <- tempmap.getConfigMap(receiver.full).map( _.keys.toList).getOrElse(List())){
+//			  if(existing.startsWith(receiver.full+".")) {
+			    
+println("removing "+existing)			  
+			    tempmap.remove(receiver.full+"."+existing)
+//			  }
+//else println("keeping "+existing)			  
+			}	
+   
 			for(line <- update.lines){
 				line match {
 				  case LiftSupport.tablePattern(name, value) => {
+println("setting "+name+" -> "+value)						    
 				    intermediates(receiver.full+"."+name) = value
 				  }
 				  case _ => 
         }
 			}
-//println("tab interms aft:"+intermediates )
+println("tab interms aft:"+intermediates )
     }
     /**
      * return Some("myError") in case of failure
@@ -326,7 +338,7 @@ trait LiftSupport extends ConfigurationSchema {
    
     if(receiver.map != null && receiver.map.size>0) {
       receiver.map.foreach{entry=>
-//println("entry:  "+entry._1+" -> "+entry._2)        
+println("tabulator init entry:  "+entry._1+" -> "+entry._2)        
         intermediates(receiver.full+"."+entry._1) = entry._2.toString
       }
       updateIntermediates(current)

@@ -52,16 +52,7 @@ import net.lag.configgy.{Config, ConfigMap}
  * 
  */
 abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting{ 
-//    val initialized : Boolean = try{
- 		this(Config.fromFile(file))
-// 		true
-//	}catch { 
-//	  case x => {
-//	    println("failed to read configuration file '"+file+"': "+x)
-//	    false
-//      }
-//	}
-  
+	this(Config.fromFile(file))
   
   object status {
 	  private var internalMessages : List[ConfigurationSchema.Msg]=Nil  
@@ -74,15 +65,12 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	def apply(conf : Config) = {
 	  status.clear
 	  initMembers
-	 // members map (_ readConfiggy conf)
-	  //for(member<-members) member.readConfiggy(conf)
 	  readConfiggy(conf)
 	}
 
 	override def toString = {
 	  initMembers
 	  val sb = new scala.StringBuilder 
-//println("->> main ")
       write(sb, "", "")
 	  sb toString
 	}
@@ -91,30 +79,17 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 
  	/**
  	 * Groups really are just Holders (of other groups or fields) and Members (of other Groups or ConfiggyFile) 
-     */
-//	protected[ConfigurationSchema] 
-  trait Group extends Holder with ConfigurationSchema.Member {
+   */
+  protected[configgy] trait Group extends Holder with ConfigurationSchema.Member {
 	  override def toString = "group "+configgyName
 	}
  
 
-// 
-//	/**
-//     *  a helper to add documentation to the definition source file 
-//     *  that gets serialized by the ConfiggyFile
-//     */
-//     protected[ConfigurationSchema] class Documentation( override val v : String ) extends DocMember(v)
-//	protected trait Doc extends Member {
-//	    override protected[configgy] lazy val documentation = Some(new DocMember(doc))
-//	    def doc : String
-//	}
- 
     /**
      * key/value pairs of a certain type, we don't just dive into the configgy ConfigMap because we want 
      * the types, the default values and the ability to merge a new Config into an existing ConfigFile
      */
-//	protected[ConfigurationSchema] 
-	class Table[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
+	protected[configgy]  class Table[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
 	  val defaultValue = v
 	  var map = Map[String, T]()
 	  def apply(what:String) : T = map.get(what) getOrElse defaultValue
@@ -136,23 +111,21 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	  override def readConfiggy(in:Config){
 	  	    in.getConfigMap(full) foreach {cMap =>
 	  	    	var nMap = map
-            	for(k <- cMap.keys) {
-            	  val oldV : T = Table.this.map.get(k) getOrElse defaultValue
-            	  val newV = extractor(cMap, k, oldV)
-            	  if(newV != defaultValue){
-            		  nMap = nMap  + ((k, newV))
-            	  }
-            	}
+	  	    	nMap = nMap.filter(cMap.keys.contains(_))
+          	for(k <- cMap.keys) {
+          	  val oldV : T = Table.this.map.get(k) getOrElse defaultValue
+          	  val newV = extractor(cMap, k, oldV)
+          	  if(newV != oldV){
+          		  nMap = nMap  + ((k, newV))
+          	  }
+          	}
 	  	    	map = nMap
 	  	    }
 	  	        
-	  }
+	  	}
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-//	      documentation foreach (_ write(sb, indent, prefix))
     	writeDocumentation(sb, indent, prefix)
-if(configgyName=="anon") {
-  println("bp")
-}     
+  
 		  sb.append(indent+"<"+ configgyName+">\r\n")
 		  innerTable(sb, indent)
 		  sb.append(indent+"</"+ configgyName+">\r\n")
@@ -166,7 +139,7 @@ if(configgyName=="anon") {
      }
 	} 
 
-    class Field[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
+  protected[configgy]  class Field[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
 	    def update(t:T)={v = t}
 	    def apply = v
       
@@ -193,7 +166,7 @@ if(configgyName=="anon") {
     /**
      * some nullable fields 
      */
-    trait ValidationInfo {
+   protected[configgy]  trait ValidationInfo {
       /**
        * applies to string  
        * plain nullable is easier to setup/define
@@ -287,7 +260,6 @@ if(configgyName=="anon") {
 				  while(c!=null && c!=classOf[ConfigurationSchema]) {
 				   	last=c
 				   	c=c.getSuperclass
-//println("moving up from "+last.getSimpleName+" to "+ c.getSimpleName)           
 					}
 				  last
         } else Holder.this.getClass
@@ -296,33 +268,25 @@ if(configgyName=="anon") {
      
 		  protected[configgy] lazy val initMembers = {
 			  // reflection magic to make sure all fields are initialized and set up holder in members
-        
 		    val found = for(m <- nameGivingClass.getDeclaredMethods){
-		        val typ = m.getReturnType
-		       if( classOf[ConfigurationSchema.Member].isAssignableFrom(m.getReturnType) && m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
-//println(nameGivingClass.getSimpleName+" holds "+ m.getReturnType.getSimpleName)	         
-		           try{
-		       		val member = m.invoke(Holder.this).asInstanceOf[ConfigurationSchema.Member]
-		       		members = member :: members
-		           }catch{case _ => }
-		       }
-//else println(nameGivingClass.getSimpleName+" does not hold "+ m.getReturnType.getSimpleName + " in "+m.getName)
+			    val typ = m.getReturnType
+			    if( classOf[ConfigurationSchema.Member].isAssignableFrom(m.getReturnType) && m.getReturnType.getSimpleName.endsWith(m.getName+"$" )){
+			    	try{
+			       	val member = m.invoke(Holder.this).asInstanceOf[ConfigurationSchema.Member]
+			       	members = member :: members
+			    	}catch{case _ => }
+			    }
 		    }
-//println(this.getClass.getSimpleName+" does not hold "+ m.getReturnType.getSimpleName + " in "+m.getName)        
 			  members = members.sort(_ < _)
-	    
-		      true
+	      true
 		  }  
-	   	  protected[configgy] def readConfiggy(in : Config):Unit= {
+   	  protected[configgy] def readConfiggy(in : Config):Unit= {
 		    initMembers
 		  	for(member<-members) member readConfiggy in
 		  }  
 	    override protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String){
 		    initMembers
 		    writeDocumentation(sb, indent, prefix)
-//if(full contains "anon") {
-//  println("bp")
-//}           
 		    val blanks = changeGroup(sb, inPrefix, full)
 		    for(group<-members) group.write(sb, blanks, full)
 		    changeGroup(sb, inPrefix, full)
@@ -331,7 +295,6 @@ if(configgyName=="anon") {
 			  var oldS = List.fromString(oldP, '.')
 			  var newS = List.fromString(newP, '.')
 			  var count = -1
-	//println("changegroup "+oldP+" -> "+newP + " \n   in "+full)    
 			  while (newS != Nil && oldS!=Nil &&  oldS.head == newS.head ){
 			    newS = newS.tail
 			    oldS = oldS.tail
@@ -351,29 +314,14 @@ if(configgyName=="anon") {
 	
 	}
 
-//  sealed protected[configgy] class DocMember( val v : String ) extends Member{
-//	  override def readConfiggy(in:Config) = ()
-//	  override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-//	    documentation foreach (_.write(sb, indent, prefix))
-//		def comment(line:String) = sb.append(indent.drop(2)+"# "+line+"\r\n")
-//        sb.append(indent.drop(1)+"###\r\n")
-//	    for(line <- v.lines) comment (line)
-//	  }  
-//	}
 
 object ConfigurationSchema {  
-	   implicit def fieldReadConversionString (in : ConfigurationSchema#Field[String]) : String = in.apply
-	   implicit def fieldReadConversionBoolean (in : ConfigurationSchema#Field[Boolean]) : Boolean = in.apply
-	   implicit def fieldReadConversionInt (in : ConfigurationSchema#Field[Int]) : Int = in.apply
+	implicit def fieldReadConversionString (in : ConfigurationSchema#Field[String]) : String = in.apply
+	implicit def fieldReadConversionBoolean (in : ConfigurationSchema#Field[Boolean]) : Boolean = in.apply
+	implicit def fieldReadConversionInt (in : ConfigurationSchema#Field[Int]) : Int = in.apply
    	
-    
-    	sealed trait Member extends SelfNaming with Selfdocumenting  {
-	    protected[configgy] def readConfiggy(in:Config)
-//	    protected[configgy] lazy val documentation : Option[DocMember]= None
-	    /**
-         * override with a string to create documentation, may be multiline  
-         */
-//	    protected def doc : String = null
+  sealed trait Member extends SelfNaming with Selfdocumenting  {
+		protected[configgy] def readConfiggy(in:Config)
 	} 
 
 	/**

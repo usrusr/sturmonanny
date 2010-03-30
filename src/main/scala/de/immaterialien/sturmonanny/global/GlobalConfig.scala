@@ -22,7 +22,8 @@ class GlobalConfig extends configgy.ConfigurationSchema("global.conf") with conf
       }
 	  }
 	  object hash extends Field("") {doc = """never change this manually, set the "pass" value to change the password"""}
-	}  
+	} 
+  println("instances configuration loaded")
 }
 object GlobalConfig {
   private val messageDigestInstance = java.security.MessageDigest.getInstance("SHA-1")

@@ -11,11 +11,12 @@ import Helpers._
 import _root_.net.liftweb.mapper.{DB, ConnectionManager, Schemifier, DefaultConnectionIdentifier, ConnectionIdentifier}
 import _root_.java.sql.{Connection, DriverManager}
 
-import _root_.de.immaterialien.sturmonanny.core._
-import _root_.de.immaterialien.sturmonanny.model._
+//import _root_.de.immaterialien.sturmonanny.core._
+//import _root_.de.immaterialien.sturmonanny.model._
 import _root_.javax.servlet.http.{HttpServletRequest}
 
 import de.immaterialien.sturmonanny.snippet
+import _root_.de.immaterialien.sturmonanny._
 
 /**
   * A class that's instantiated early and run.  It allows the application
@@ -58,6 +59,7 @@ class Boot extends net.liftweb.util.LiftLogger{
     net.liftweb.util.LogBoot.loggerSetup
 
 //      val s = new Server
+    val instances = global.Instances.configuration
                        
     S.addAround(DB.buildLoanWrapper) 
   }

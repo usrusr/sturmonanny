@@ -95,7 +95,8 @@
     <dependency>
       <groupId>net.lag</groupId>
       <artifactId>configgy</artifactId>
-      <version>1.5</version> 
+<!--      <version>1.5</version> -->
+      <version>1.5.2-usr</version> 
     </dependency>
     <!--  temporarily replaced with a custom 2.7.7 build
     <dependency>

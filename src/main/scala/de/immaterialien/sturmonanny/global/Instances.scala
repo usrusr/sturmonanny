@@ -13,7 +13,7 @@ class Instances extends configgy.ConfigurationSchema("instances.conf") with conf
 example: 
 server1 = server1.conf
 server2 = server2.conf 
-"""
+""" 
 	}
   override def readConfiggy(in:net.lag.configgy.Config)={
     super.readConfiggy(in)
@@ -35,9 +35,14 @@ println("dropping "+k)
 println("created server for "+name+": "+server)        
         Instances.nameToInstance.put(name, server)
       }catch {
-        case x : java.io.FileNotFoundException => status.error("file "+conf+" for "+name+" was not found ("+new java.io.File(conf).getAbsolutePath+")")
-        case x : java.io.IOException => status.error("could not read "+conf+" for "+name)
-        case x => status.error("error reading "+conf+" for "+name+": "+x)
+        case x : java.io.FileNotFoundException => status.error(name+": file "+conf+" was not found ("+new java.io.File(conf).getAbsolutePath+")")
+        case x : java.io.IOException => status.error(name+": could not read "+conf)
+        case pe : net.lag.configgy.ParseException => pe.getCause match {
+	        case x : java.io.FileNotFoundException => status.error(name+": "+conf+" was not found ("+new java.io.File(conf).getAbsolutePath+")")
+	        case x : java.io.IOException => status.error(name+": could not read "+conf)
+	        case x => status.error(name+": parse exception "+pe)
+        }
+        case x => status.error(name+": error reading "+conf)
       }
     }
     for((k, v) <- instances.map){
