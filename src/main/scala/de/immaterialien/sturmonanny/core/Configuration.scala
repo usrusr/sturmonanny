@@ -96,6 +96,28 @@ if the path with . it will be relative to the FBDj installation,
 otherwise it will be relative to sturmonanny installation (or absolute)
 """	    
 	  }   
+
+   object headless extends Field(false){
+	   doc = """set true to keep the FBDj window from appearing (default: false)"""	       
+   }
+   
+   object stats extends Field(true){
+	   doc = """start FBDj with the stats automatically started (default: true)"""	       
+   }
+   
+   object DCG extends Group {
+     doc = "configure the DCG compatibility addon for FBDj (using the SC mode of DCG, not the FBD mode)"
+     object minutesPerMission extends Field(60){
+       doc="duration of a single DCG mission, the FBDj mission will run a little longer, waiting for DCG to create the next mission"
+     }
+
+     object dcgCommand extends Field("il2dcg.exe /netdogfight") {
+       doc="""Command line to execute for creating the next SC mission, must not return before the mission is created. 
+After the command returns the latest new .mis file from the mission directory of the current mission will be started by FBDj
+example: "C:\myDcgInstallation\il2dcg.exe /netdogfight" """
+       
+     }
+   }
 	}
 }
 object Configuration {

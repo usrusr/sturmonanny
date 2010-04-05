@@ -113,11 +113,15 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	  	    	var nMap = map
 	  	    	nMap = nMap.filter(cMap.keys.contains(_))
           	for(k <- cMap.keys) {
-          	  val oldV : T = Table.this.map.get(k) getOrElse defaultValue
-          	  val newV = extractor(cMap, k, oldV)
-          	  if(newV != oldV){
-          		  nMap = nMap  + ((k, newV))
-          	  }
+          	  val oldV : Option[T] = Table.this.map.get(k)
+          	  if(oldV.isDefined){
+	          	  val newV = extractor(cMap, k, oldV.get)
+	          	  if(newV != oldV.get){
+	          		  nMap = nMap  + ((k, newV))
+	          	  }
+              }else{
+                nMap = nMap + ((k, extractor(cMap, k, defaultValue)))
+              }
           	}
 	  	    	map = nMap
 	  	    }

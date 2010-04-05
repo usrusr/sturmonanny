@@ -4,16 +4,19 @@ package de.immaterialien.sturmonanny.fbdjhosting
 import de.immaterialien.sturmonanny.util.Logging
 
 
-class FbdjHost(val fbdjInstallation : String, overridesPath : String, configurationPath:String)  extends Logging {
+class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  extends Logging {
 		var outList : java.util.LinkedList[String] = null
 		var inList : java.util.LinkedList[String] = null
   
-		private val jarFile = new java.io.File(fbdjInstallation+"/FBDj.jar")
+  //, conf.fbdj.overridesJar, conf.fbdj.fbdjConfiguration.apply
+  
+		private val jarFile = new java.io.File(conf.fbdj.installationPath+"/FBDj.jar")
   	private val jarUrl = jarFile.toURL
    
     
-  	private val overrideFile = new java.io.File(overridesPath)
+  	private val overrideFile = new java.io.File(conf.fbdj.overridesJar)
   	private val overrideUrl = overrideFile.toURL
+    private val configurationPath:String = conf.fbdj.fbdjConfiguration
 
    	if( ! jarFile.canRead || ! overrideFile.canRead ){
    	  var list : List[String] = Nil
@@ -40,7 +43,12 @@ class FbdjHost(val fbdjInstallation : String, overridesPath : String, configurat
     }catch{
       case _:ClassNotFoundException => // check passed, no FBDj.jar on classpath
     }
-  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent)
+  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent){
+  	  override def loadClass(s:String, b:Boolean) = {
+debug("fbdj classloader loading withh "+b+": "+s )  	    
+  	    super.loadClass(s, b)
+  	  }
+  	}
    
   	try{
   		val connClass = classLoader.loadClass("utility.SocketConnection")
@@ -64,18 +72,38 @@ debug("FbdjHost: inList  : "+System.identityHashCode(inList))
     }
 		val mainMethod = mainClass.getMethod("main", classOf[Array[String]])
   
+		private def arg(name:String, value:String) = name+"=\""+value+"\"" 
+  
 		val parameters :Array[Array[String]]= Array(Array(
-				    "config="+configurationPath, 
-				    "installationPath="+fbdjInstallation
+//	"missionCreationCommandLine";
+//	"dcgScMissionTimeMinutes";
+//	"headless";
+//	"installationPath";
+//	"stats";		  
+				    arg("missionCreationCommandLine", conf.fbdj.DCG.dcgCommand), 
+				    arg("dcgScMissionTimeMinutes", ""+conf.fbdj.DCG.minutesPerMission.apply), 
+				    arg("headless", ""+conf.fbdj.headless.apply), 
+				    arg("stats", ""+conf.fbdj.stats.apply), 
+		  
+				    arg("config", configurationPath), 
+				    arg("installationPath", conf.fbdj.installationPath) 
 		))
-		val thread = new Thread("FBDj with "+parameters(0).mkString(" ")) {
+  
+		val threadName = "FBDj with "+parameters(0).mkString(" ")
+  
+		val tg = new ThreadGroup("group for "+threadName)
+		val thread = new Thread(tg, threadName) {
 		  override def run = {
-debug("starting "+this.getName)
+debug("starting "+this.getName + " with\n "+parameters(0).mkString("\n "))
 				  mainMethod.invoke(null, parameters:_*)
 	//			  mainMethod.invoke(null, Array(args):_* )
       }
 		}
-		thread run
+  
+  
+		
+		thread.setContextClassLoader(classLoader)
+		thread.start
     
     def stop = {
       if(thread!=null) thread interrupt

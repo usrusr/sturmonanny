@@ -19,7 +19,6 @@ trait LiftSupport extends ConfigurationSchema {
 	object intermediates extends SessionVar[configgy.Config](new configgy.Config)
  
 	def  liftForm:NodeSeq={
-//println("entrering ilfgForm ")
 		for(message <- self.status.messages) message match  {
 		  case ConfigurationSchema.Warning(msg) => S.warning(msg)
 		  case ConfigurationSchema.Error(msg) => S.error(msg)
@@ -68,7 +67,6 @@ trait LiftSupport extends ConfigurationSchema {
 			    		(<div class="configgy_label">{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
 			    	else
 			    		(<div class="configgy_label" title={table.documentationString}>{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
-println("tablulator "+unbound)           
 		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
 		    case field : ConfigurationSchema#Field[_] => {
@@ -107,7 +105,6 @@ println("tablulator "+unbound)
 	
 	  val params = new mutable.ListBuffer[BindParam]
 		val tuples : Seq[(NodeSeq, List[BindParam])]= self.map{m =>
-//println("fo member "+m)		  
 		  forMember(m)
 		}
                                 
@@ -143,12 +140,7 @@ println("tablulator "+unbound)
 	    		println("did not save, errors\n")
     })
     
-//println("println form "+System.identityHashCode(self)+"\n"+self+"\n   paramCopy:"+paramCopy )       
-//println("form: "+formNodes)   
 		var ret = bind(form, formNodes, params :_*)
-		
-//println("println ret")       
-//println("ret: "+ret)   
     ret
 	}
 	def updateConfiguration(paramCopy:Seq[Bindator]):Boolean = {
@@ -178,10 +170,7 @@ println("tablulator "+unbound)
  
 	private abstract class Validator[T](receiver : ConfigurationSchema#Field[T] ) extends net.liftweb.util.Bindable with Bindator{
     def updateIntermediates(update:String) = {
-      
-println("receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
       intermediates(receiver.full) = update
-println("interms aft:"+intermediates )
     }
     /**
      * return Some("myError") in case of failure
@@ -204,7 +193,6 @@ println("interms aft:"+intermediates )
                                                                           
   private class StringValidator(receiver : ConfigurationSchema#Field[String] ) extends Validator[String](receiver){
     override def asHtml = {
-//println("asHtml for  "+receiver.full)      
       val attributes = if(receiver.maxLength!=null) {
         ("size", ""+receiver.maxLength) :: Nil
       } else {
@@ -282,29 +270,19 @@ println("interms aft:"+intermediates )
                                                                                                             
   private abstract class Tabulator[T](receiver : ConfigurationSchema#Table[T] ) extends net.liftweb.util.Bindable with Bindator{
     def updateIntermediates(update:String) = {
-      
-println("tab receiver.full:"+receiver.full+" update:"+update+"\ninterms bef:"+intermediates )
-
 			val tempmap : configgy.Config = intermediates.get
 			for(existing <- tempmap.getConfigMap(receiver.full).map( _.keys.toList).getOrElse(List())){
-//			  if(existing.startsWith(receiver.full+".")) {
-			    
-println("removing "+existing)			  
-			    tempmap.remove(receiver.full+"."+existing)
-//			  }
-//else println("keeping "+existing)			  
+		    tempmap.remove(receiver.full+"."+existing)
 			}	
    
 			for(line <- update.lines){
 				line match {
 				  case LiftSupport.tablePattern(name, value) => {
-println("setting "+name+" -> "+value)						    
 				    intermediates(receiver.full+"."+name) = value
 				  }
 				  case _ => 
         }
 			}
-println("tab interms aft:"+intermediates )
     }
     /**
      * return Some("myError") in case of failure
@@ -325,9 +303,6 @@ println("tab interms aft:"+intermediates )
     }
 	 	def currentSeq : Seq[String] = {
 	 	  mapKeyValue((k:String,v:String)=> ""+ k + " = " + v)
-//	 	  intermediates.getConfigMap(receiver.full).map{x => 
-//   			x.asMap.projection.toList.map(kv=> ""+ kv._1 + " = " + kv._2)
-//      }.getOrElse(Nil)
     }	
    	def mapKeyValue[R](func : ((String, String)=>R)):Seq[R] = {
    	  intermediates.getConfigMap(receiver.full).map{x => 
@@ -338,12 +313,10 @@ println("tab interms aft:"+intermediates )
    
     if(receiver.map != null && receiver.map.size>0) {
       receiver.map.foreach{entry=>
-println("tabulator init entry:  "+entry._1+" -> "+entry._2)        
         intermediates(receiver.full+"."+entry._1) = entry._2.toString
       }
       updateIntermediates(current)
     }
-	 	//def asHtml = SHtml.text(current, receiver () = _)
     
     override def asHtml = {
       validationNodes (
