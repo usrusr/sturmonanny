@@ -5,7 +5,7 @@ import de.immaterialien.sturmonanny.util.Logging
 
 
 class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  extends Logging {
-		var outList : java.util.LinkedList[String] = null
+		var outList : java.util.LinkedList[String] = null 
 		var inList : java.util.LinkedList[String] = null
   
   //, conf.fbdj.overridesJar, conf.fbdj.fbdjConfiguration.apply
@@ -43,12 +43,7 @@ class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  exte
     }catch{
       case _:ClassNotFoundException => // check passed, no FBDj.jar on classpath
     }
-  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent){
-  	  override def loadClass(s:String, b:Boolean) = {
-debug("fbdj classloader loading withh "+b+": "+s )  	    
-  	    super.loadClass(s, b)
-  	  }
-  	}
+  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent)
    
   	try{
   		val connClass = classLoader.loadClass("utility.SocketConnection")

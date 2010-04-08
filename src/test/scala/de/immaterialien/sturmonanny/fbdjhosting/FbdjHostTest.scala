@@ -14,8 +14,13 @@ class FbdjHostTest {
 //			  case x => x
 //			}
 //			assertTrue(exception.getClass == classOf[java.io.FileNotFoundException])
-   
-			val existing = new FbdjHost("C:\\Users\\ulf\\Desktop\\fbdj", "C:\\Users\\ulf\\.m2\\repository\\de\\immaterialien\\FBDj-overrides\\0.0.1-SNAPSHOT\\FBDj-overrides-0.0.1-SNAPSHOT.jar", "confPath")
+   	  
+   	  val conf = new de.immaterialien.sturmonanny.core.Configuration("default.conf") 
+      conf.fbdj.overridesJar() = "C:\\Users\\ulf\\.m2\\repository\\de\\immaterialien\\FBDj-overrides\\0.0.1-SNAPSHOT\\FBDj-overrides-0.0.1-SNAPSHOT.jar"
+      conf.fbdj.installationPath() = "C:\\Users\\ulf\\Desktop\\fbdj"
+      conf.fbdj.fbdjConfiguration() = "Default"
+      conf.fbdj.headless() = false
+			val existing = new FbdjHost(conf) 
     
    
 			() 

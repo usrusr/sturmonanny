@@ -144,7 +144,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	} 
 
   protected[configgy]  class Field[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
-	    def update(t:T)={v = t}
+      def update(t:T)={v = t}
 	    def apply = v
       
 
@@ -157,7 +157,6 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	
 	    override def toString = v.toString
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-	      //documentation foreach (_.write(sb, indent, prefix))
 	      writeDocumentation(sb, indent, prefix)
 	      def string = v match {
 		    case x:String=> "\""+x+"\""
