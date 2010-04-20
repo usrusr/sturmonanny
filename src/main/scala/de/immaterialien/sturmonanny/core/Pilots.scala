@@ -127,7 +127,7 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
 					}
 				}          
 			}
-			def planeNotEmpty = planeName==null || planeName==""
+			def planeNotEmpty = ! (planeName==null || planeName=="")
 			def planeNotLostPlane = lastPlaneName==null || lastPlaneName=="" || planeName != lastPlaneName
 			def updatePlaneName(what:String){
 				if(what==null || what.trim.isEmpty){

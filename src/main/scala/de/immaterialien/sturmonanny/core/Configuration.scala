@@ -102,7 +102,10 @@ otherwise it will be relative to sturmonanny installation (or absolute)
    }
    
    object stats extends Field(true){
-	   doc = """start FBDj with the stats automatically started (default: true)"""	       
+	   doc = """start FBDj with the stats automatically started (default: true, true overrides FBDj autostats)"""	       
+   }
+   object autoconnect extends Field(true){
+	   doc = """start FBDj with the stats automatically started (default: true, always true when headless, true overrides FBDj autoconnect)"""	       
    }
    
    object DCG extends Group {
@@ -117,6 +120,11 @@ After the command returns the latest new .mis file from the mission directory of
 example: "C:\myDcgInstallation\il2dcg.exe /netdogfight" """
        
      }
+     object dcgPath extends Field("") {
+       doc="""path to the DCG installation, 
+required to localize the DCG.ini (if empty, FBDj will assume that the DCG.ini resides in the mission directory)"""
+       
+     }     
    }
 	}
 }

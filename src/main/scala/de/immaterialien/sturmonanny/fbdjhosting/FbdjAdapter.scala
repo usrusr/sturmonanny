@@ -7,11 +7,12 @@ class FbdjAdapter extends UpdatingMember with Logging {
   private var fbdjPath = ""
   private var confPath = ""
   private var overridesPath = ""
-  private var stats = true
+  private var stats = false
   private var headless = true
   private var minutesPerMission = 0
   private var dcgCommand = ""
-  
+  private var autoconnect = false
+  private var dcgPath = ""
   
   var fbdj : Option[FbdjHost] = None
   
@@ -26,8 +27,10 @@ debug("beginning to set up FBDj at '"+conf.fbdj.installationPath.apply+"'")
      ||	conf.fbdj.overridesJar.apply!=overridesPath
      || conf.fbdj.headless.apply != headless
      || conf.fbdj.stats.apply != stats
+     || conf.fbdj.autoconnect.apply != autoconnect
      || conf.fbdj.DCG.minutesPerMission.apply != minutesPerMission
      || conf.fbdj.DCG.dcgCommand.apply != dcgCommand
+     || conf.fbdj.DCG.dcgPath.apply != dcgPath
      || ! fbdj.isDefined
 	  	)
 	  ) {
@@ -39,8 +42,10 @@ debug("FBDj configuratoin changing!")
 		  		confPath = conf.fbdj.fbdjConfiguration
 		  		headless=conf.fbdj.headless
 		  		stats=conf.fbdj.stats
+		  		autoconnect=conf.fbdj.stats
 		  		minutesPerMission=conf.fbdj.DCG.minutesPerMission 
 		  		dcgCommand=conf.fbdj.DCG.dcgCommand 
+		  		dcgPath=conf.fbdj.DCG.dcgPath 
       
       
 		  		overridesPath = conf.fbdj.overridesJar

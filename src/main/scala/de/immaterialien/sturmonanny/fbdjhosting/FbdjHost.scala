@@ -79,6 +79,8 @@ debug("FbdjHost: inList  : "+System.identityHashCode(inList))
 				    arg("dcgScMissionTimeMinutes", ""+conf.fbdj.DCG.minutesPerMission.apply), 
 				    arg("headless", ""+conf.fbdj.headless.apply), 
 				    arg("stats", ""+conf.fbdj.stats.apply), 
+				    arg("autoconnect", ""+conf.fbdj.autoconnect.apply), 
+		  	    arg("dcgPath", ""+conf.fbdj.DCG.dcgPath.apply), 
 		  
 				    arg("config", configurationPath), 
 				    arg("installationPath", conf.fbdj.installationPath) 
