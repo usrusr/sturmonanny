@@ -67,7 +67,7 @@ println("created server for "+name+": "+server)
 object Instances {
   var nameToInstance = new mutable.HashMap[String, core.Server]()
   val configuration = {
-new Exception("lazy val creation stack:").printStackTrace    
+//new Exception("lazy val creation stack:").printStackTrace    
     new Instances()
   }
 }

@@ -7,6 +7,7 @@ import net.liftweb.http._
 import net.liftweb.util.Helpers._
 import net.liftweb.util.NamedPF
 import net.liftweb.http.LiftRules
+import net.liftweb.sitemap._
  
 import de.immaterialien.sturmonanny.util.configgy._
 import de.immaterialien.sturmonanny.global._
@@ -26,8 +27,15 @@ object InstanceConf {
     				"instance/name/conf" :: Nil, Map("name" -> instanceName)  // Use webapp/instance/name/conf.html
     		)
 	  })
+
+var tmp = LiftRules 
+println("LiftRules.statelessRewrite updated: "+tmp.statelessRewrite)   
   }
+//  def siteMapEntry = {
+//    Menu(Loc("Configurations", ))
+//  }
   def confLink(name:String):String={
-    "instance/"+java.net.URLEncoder.encode(name)+"/conf"
+    "/instance/"+java.net.URLEncoder.encode(name)+"/conf"
+    //java.net.URLEncoder.encode(name)
   }
 }

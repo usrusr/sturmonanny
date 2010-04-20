@@ -36,6 +36,7 @@ class Boot extends net.liftweb.util.LiftLogger{
     // Build SiteMap
     val entries = Menu(Loc("Home", List("index"), "Home")) ::
       Menu(Loc("Logout", List("logout"), "Logout")) :: 
+      Menu(Loc("InstanceConf", List("instance/name/conf"), "InstanceConf", Hidden))::
     Nil
     LiftRules.setSiteMap(SiteMap(entries:_*))
 

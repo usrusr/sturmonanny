@@ -13,9 +13,20 @@ import de.immaterialien.sturmonanny.global._
 
 class LiftConf {
    def conf(html:NodeSeq)={
- 
-	  Instances.configuration.liftForm 
+	   Instances.configuration.liftForm 
+   }
+   def instanceConf(html:NodeSeq):NodeSeq={
+     val name = {
+       S.param("name").openOr("")
+
+     }
+     val server = Instances.nameToInstance(name)
+	   server.conf.liftForm
    }  
+   def serverName(html:NodeSeq):NodeSeq={
+     Text(S.param("name").openOr(""))
+   }
+   
    def loggedIn(html:NodeSeq) = if(LiftConf.isLoggedIn) html else NodeSeq.Empty
    def loggedOut(html:NodeSeq) = if(LiftConf.isLoggedIn) NodeSeq.Empty else html
    def logout(html:NodeSeq)={
