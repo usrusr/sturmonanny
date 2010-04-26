@@ -203,11 +203,15 @@ class Pilots extends Domain[Pilots] with NonUpdatingMember with Logging{
   
 		override def messageHandler = new PartialFunction[Any, Unit]{
 			override def isDefinedAt(x:Any) = {
-debug("pilot "+name +" <- "+x)		    
+//debug("pilot "+name +" <- "+x)		    
 				ImessageHandler isDefinedAt x
 				
 			}
-			override def apply(x:Any) = ImessageHandler.apply(x)
+			override def apply(x:Any) = {
+			  if( ! conf.game.homeAlone){
+				  ImessageHandler.apply(x)
+				}
+      }
 		}
 
 		def ImessageHandler : PartialFunction[Any, Unit] = { 

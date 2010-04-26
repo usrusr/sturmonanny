@@ -18,7 +18,10 @@ class Configuration(override val file : String) extends configgy.ConfigurationSc
 	  } 
 	}
 	object game extends Group { 
-
+		object homeAlone extends Field(false) { doc = """disables most sturmonanny features, 
+use this to host a plain DCG-enabled FBDj session within sturmonanny without aircraft cost, recruiting
+"""
+		}
    
 	  object planeWarningsSeconds extends Field(20)  { doc = """ time before a pilot gets kicked for flying a forbidden plane """ }
    
@@ -46,16 +49,16 @@ class Configuration(override val file : String) extends configgy.ConfigurationSc
 """
 	  object time extends Field(120) {
 	    doc = """ this number defines the seconds after start that players are allowed to recruit others into their group
-****** NOT YET IMPLEMENTED *******
 """
 	  }
 
 	  object recruitshare extends Field(50) {
 	    doc = """ recruiting pilots have to pay a part of the starting fee for their recruits
-****** NOT YET IMPLEMENTED *******
   0:   recruit pays all
   100: recruiter pays all
-  50:  50:50 """
+  50:  50:50 
+landing refund should be distributed in the same ratio but this is not implemented yet
+"""
 	  }
 	}
 	object pilots extends Group {
@@ -105,7 +108,12 @@ otherwise it will be relative to sturmonanny installation (or absolute)
 	   doc = """start FBDj with the stats automatically started (default: true, true overrides FBDj autostats)"""	       
    }
    object autoconnect extends Field(true){
-	   doc = """start FBDj with the stats automatically started (default: true, always true when headless, true overrides FBDj autoconnect)"""	       
+	   doc = """start FBDj with the stats automatically started 
+(default: true, 
+always true when headless, 
+true overrides FBDj autoconnect, 
+FBDj Auto Start setting might be working better
+)"""	       
    }
    
    object DCG extends Group {
