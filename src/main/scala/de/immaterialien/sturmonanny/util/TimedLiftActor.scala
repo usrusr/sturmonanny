@@ -116,21 +116,33 @@ trait TimedLiftActor extends LiftActor {
     this ! Reevaluate // force reevaluation of mailbox
     
   }
-//val debugFile = new java.io.FileWriter("actor."+this.getClass.getSimpleName+".log")    
-//  override final val messageHandler : PartialFunction[Any, Unit]  = new PartialFunction[Any, Unit]{
-//    def isDefinedAt(x:Any):Boolean={
+val debugFile = new java.io.FileWriter("actor."+this.getClass.getSimpleName+".log")
+
+  final def messageHandlerDef() = messageHandlerFunction
+  override final val messageHandler : PartialFunction[Any, Unit]  = new PartialFunction[Any, Unit]{
+    def isDefinedAt(x:Any):Boolean={
 //debugFile.write("isdef?"+x+"\n <- "+messageHandlerFunction+"\n")
 //debugFile.flush
+    
 //      messageHandlerFunction.isDefinedAt(x)
-//    }
-//  
-//    def apply(x:Any){
+val ret = messageHandlerDef().isDefinedAt(x)  
+//debugFile.write("isdef?"+x+"\n <- "+messageHandlerFunction + " || "+messageHandlerDef()+" -> "+ret+" \n")
+//debugFile.flush
+ret    
+    }
+  
+    def apply(x:Any){
 //debugFile.write("apply:"+x+"\n <- "+messageHandlerFunction+"\n")
 //debugFile.flush
 //      messageHandlerFunction.apply(x)
-//    }
-//  }
-  final def messageHandler = messageHandlerFunction
+   
+val ret = messageHandlerDef().apply(x)
+//debugFile.write("apply:"+x+"\n <- "+messageHandlerFunction + " || "+messageHandlerDef()+" -> "+ret+" \n")
+//debugFile.flush
+ret      
+    }
+  }
+//  final def messageHandler = messageHandlerFunction
   
   final def messageHandlerFunction : PartialFunction[Any, Unit]  = {
     if(internalTemporaryMessageHandler == null) internalTemporaryMessageHandler = new TemporaryHandlerFunction(-1, defaultMessageHandler,-1, "base handler")
