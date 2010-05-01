@@ -81,7 +81,12 @@ debug("FbdjHost: inList  : "+System.identityHashCode(inList))
 				    arg("stats", ""+conf.fbdj.stats.apply), 
 				    arg("autoconnect", ""+conf.fbdj.autoconnect.apply), 
 		  	    arg("dcgPath", ""+conf.fbdj.DCG.dcgPath.apply), 
-		  
+ 
+            arg("minSortiesBigger", ""+conf.fbdj.DCG.campaignProgress.minSorties.bigger.apply),
+            arg("minSortiesSmaller", ""+conf.fbdj.DCG.campaignProgress.minSorties.smaller.apply),
+            arg("minPilotsBigger", ""+conf.fbdj.DCG.campaignProgress.minPilots.bigger.apply),
+            arg("minPilotsSmaller", ""+conf.fbdj.DCG.campaignProgress.minPilots.smaller.apply),
+
 				    arg("config", configurationPath), 
 				    arg("installationPath", conf.fbdj.installationPath) 
 		))

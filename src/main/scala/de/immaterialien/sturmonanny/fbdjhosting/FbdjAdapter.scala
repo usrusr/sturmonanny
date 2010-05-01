@@ -14,6 +14,12 @@ class FbdjAdapter extends UpdatingMember with Logging {
   private var autoconnect = false
   private var dcgPath = ""
   
+  private var minSortiesBigger = 0
+  private var minSortiesSmaller = 0
+  private var minPilotsBigger = 0
+  private var minPilotsSmaller = 0
+  
+  
   var fbdj : Option[FbdjHost] = None
   
 	def updateConfiguration {
@@ -31,6 +37,14 @@ debug("beginning to set up FBDj at '"+conf.fbdj.installationPath.apply+"'")
      || conf.fbdj.DCG.minutesPerMission.apply != minutesPerMission
      || conf.fbdj.DCG.dcgCommand.apply != dcgCommand
      || conf.fbdj.DCG.dcgPath.apply != dcgPath
+
+     || conf.fbdj.DCG.dcgPath.apply != dcgPath
+     ||   conf.fbdj.DCG.campaignProgress.minSorties.bigger.apply != minSortiesBigger
+     ||   conf.fbdj.DCG.campaignProgress.minSorties.smaller.apply != minSortiesSmaller
+     ||   conf.fbdj.DCG.campaignProgress.minPilots.bigger.apply != minPilotsBigger
+     ||   conf.fbdj.DCG.campaignProgress.minPilots.smaller.apply != minPilotsSmaller
+     
+     
      || ! fbdj.isDefined
 	  	)
 	  ) {
@@ -46,7 +60,10 @@ debug("FBDj configuratoin changing!")
 		  		minutesPerMission=conf.fbdj.DCG.minutesPerMission 
 		  		dcgCommand=conf.fbdj.DCG.dcgCommand 
 		  		dcgPath=conf.fbdj.DCG.dcgPath 
-      
+		  		minSortiesBigger=conf.fbdj.DCG.campaignProgress.minSorties.bigger
+		  		minSortiesSmaller=conf.fbdj.DCG.campaignProgress.minSorties.smaller
+		  		minPilotsBigger=conf.fbdj.DCG.campaignProgress.minPilots.bigger
+		  		minPilotsSmaller=conf.fbdj.DCG.campaignProgress.minPilots.smaller      
       
 		  		overridesPath = conf.fbdj.overridesJar
 	  	    debug("initialized FBDj: \n  "+fbdjPath+"\n  "+overridesPath+"\n  "+confPath+"\n   in:"+System.identityHashCode(fbdj.get.inList)+"   out:"+System.identityHashCode(fbdj.get.outList))

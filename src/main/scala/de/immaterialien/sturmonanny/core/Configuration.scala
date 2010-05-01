@@ -113,7 +113,8 @@ otherwise it will be relative to sturmonanny installation (or absolute)
 always true when headless, 
 true overrides FBDj autoconnect, 
 FBDj Auto Start setting might be working better
-)"""	       
+)"""
+    
    }
    
    object DCG extends Group {
@@ -132,8 +133,30 @@ example: "C:\myDcgInstallation\il2dcg.exe /netdogfight" """
        doc="""path to the DCG installation, 
 required to localize the DCG.ini (if empty, FBDj will assume that the DCG.ini resides in the mission directory)"""
        
-     }     
+     }
+     
+     object campaignProgress extends Group{
+   	  doc = """here you can define some criteria that have to be met for campaign progress, 
+if they are not met the same map will be repeated over and over again.
+a minimum value for the "bigger" side means that at least one army has to reach the minimum, 
+a minimum value for the "smaller" side means that both armies have to reach the minimum to make the DCG campaign progress. 
+(default values are all 0 wich means that the campaign will even progress if no human pilots are flying)"""
+      object minSorties extends Group {
+        doc="""counts total sorties, use this instead of minPilots to enable single pilots to progress the campaign"""
+        object bigger extends Field(0)
+        object smaller extends Field(0)
+      }
+      object minPilots extends Group {
+        doc="""only counts individual pilots, use this instead of minSorties to keep single pilots from progressing the campaign alone"""
+        object bigger extends Field(0)
+        object smaller extends Field(0)
+      }
+     }
+
+     
+     
    }
+   
 	}
 }
 object Configuration {
