@@ -12,8 +12,8 @@ class Instances(val fname:String) extends configgy.ConfigurationSchema(fname) wi
 	object instances extends Table("default.conf") { 
 	  doc = """list paths to configuration files defining the various sturmonanny instances running in this JVM
 example: 
-server1 = server1.conf
-server2 = server2.conf 
+server1 = "server1.conf"
+server2 = "server2.conf" 
 """ 
 	}
   override def readConfiggy(in:net.lag.configgy.Config)={

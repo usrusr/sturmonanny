@@ -33,7 +33,7 @@ class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) exten
 //	debug("conf is initialized from '"+initConf+"'\n================\n"+conf)
  
 	for(m <- members){
-		debug("initializing configuratoin for "+m.getClass.getSuperclass.getSimpleName+" <- "+m.getClass.getInterfaces.map(x=>{x.getSimpleName}).foldLeft("")((a, b)=>a+"-" + b))      
+//		debug("initializing configuratoin for "+m.getClass.getSuperclass.getSimpleName+" <- "+m.getClass.getInterfaces.map(x=>{x.getSimpleName}).foldLeft("")((a, b)=>a+"-" + b))      
 		m.updateConfiguration
 	} 
 	/**

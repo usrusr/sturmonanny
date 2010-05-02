@@ -1,1 +1,1 @@
-java -jar sturmonanny-${version}-jar-with-debendencies.jar
+java -jar sturmonanny-${version}-jar-with-dependencies.jar

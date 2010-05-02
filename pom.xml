@@ -248,7 +248,27 @@
 				</executions>
 			</plugin>
 
-
+    <plugin>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>wagon-maven-plugin</artifactId>
+      <version>1.0-beta-3</version>
+      <dependencies>
+       <dependency>
+       	<groupId>org.apache.maven.wagon</groupId>
+       	<artifactId>wagon-ftp</artifactId>
+       	<version>1.0-beta-6</version>
+       </dependency>
+      </dependencies>
+      <configuration>
+        <fromDir>target</fromDir>
+        
+        <includes>*.zip</includes>
+        <!-- <excludes>pom.xml</excludes> -->
+        <url>ftp://${ftpUsername}:${ftpPassword}@immaterialien.de</url>
+        
+        <toDir>/htdocs/il2/</toDir>
+      </configuration>
+    </plugin> 
 		</plugins>
 	</build>
 	<reporting>

@@ -152,7 +152,9 @@ example: "C:\myDcgInstallation\il2dcg.exe /netdogfight" """
      }
      object dcgPath extends Field("C:/DCG") {
        doc="""path to the DCG installation, 
-required to find the DCG.ini (if empty, FBDj may assume that the DCG.ini resides in the mission directory - or simply fail)"""
+required to find the DCG.ini (if empty, FBDj may assume that the DCG.ini resides in the mission directory
+ - this can only work if the dcgCommand uses an absolute path or something else that works from the mission directory, 
+and may need additional DCG files to reside there)"""
        
      }
      

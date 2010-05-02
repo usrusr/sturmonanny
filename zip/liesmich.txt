@@ -16,10 +16,10 @@ il2port anpassen (Konsolenport vom Il2-Server siehe confs.ini: [Console]\nIP=Por
 consoleport anpassen (einen freien Port auswählen, der dann für weitere Konsolenclients zur Verfügung steht)
 
 unter <fbdj>..:
-installationPath auf eine FBDj-Installation mit Version 1.5b verweisen, ggf. / statt \ verwenden
+installationPath auf eine FBDj-Installation mit Version 1.5b verweisen, ggf. / statt \ verwenden, sonst gibt's kein FBDj
 
 unter <fbdj><DCG>..:
-minutesPerMission anpassen
+dcgPath setzen
 
 unter <game> ist homeAlone=true eingestellt, dadurch werden sämtliche experimentellen Sturmonanny Funktionen 
 in Sachen Minutenkonto, Deathkick-ersatz (deathpause) etc. deaktiviert, relevant sind dann nur die Einstellungen 
