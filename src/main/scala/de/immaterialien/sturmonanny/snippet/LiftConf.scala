@@ -71,7 +71,7 @@ class LiftConf {
   }
 }
 object LiftConf {
-  val globalConfig = new GlobalConfig()
+  def globalConfig = GlobalConfig.singleton
 //  val instances = new Instances()
 
    

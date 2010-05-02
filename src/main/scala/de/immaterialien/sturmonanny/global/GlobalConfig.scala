@@ -3,7 +3,8 @@ package de.immaterialien.sturmonanny.global
 import de.immaterialien.sturmonanny.util.Logging
 import de.immaterialien.sturmonanny.util.configgy
  
-class GlobalConfig extends configgy.ConfigurationSchema("global.conf") with configgy.LiftSupport { 
+class GlobalConfig(private val fname:String) extends configgy.ConfigurationSchema(fname) with configgy.LiftSupport {
+  def this()=this("global.conf")
   doc = "some configuration that applies to the whole Sturmonanny installation"
 
 	object admin extends Group{
@@ -23,9 +24,15 @@ class GlobalConfig extends configgy.ConfigurationSchema("global.conf") with conf
 	  }
 	  object hash extends Field("") {doc = """never change this manually, set the "pass" value to change the password"""}
 	} 
+  object jetty extends Group{
+    object port extends Field(8080){
+      doc="""port for the internal configuration web interface"""
+    }
+  }
   println("instances configuration loaded")
 }
 object GlobalConfig {
+  lazy val singleton = new GlobalConfig
   private val messageDigestInstance = java.security.MessageDigest.getInstance("SHA-1")
   private val pwdSalt = "/=V"
   def hashPass(_user:String, _pass:String)={

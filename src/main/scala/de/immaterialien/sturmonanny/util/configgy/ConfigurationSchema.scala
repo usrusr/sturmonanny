@@ -52,7 +52,11 @@ import net.lag.configgy.{Config, ConfigMap}
  * 
  */
 abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting{ 
-	this(Config.fromFile(file))
+	this({
+//println("parsing file "+file)	  
+	  if(file==null) new Config 
+    else Config.fromFile(file)
+	})
   
   object status {
 	  private var internalMessages : List[ConfigurationSchema.Msg]=Nil  
@@ -94,6 +98,10 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 	  var map = Map[String, T]()
 	  def apply(what:String) : T = map.get(what) getOrElse defaultValue
 	  def update(what:String, value:T) = map = map + ((what, value))
+    def toList : List[T] = {
+      val it = map.values
+      it.toList
+    }
 	  val extractor = v match {
      	case x:Int => (cMap : ConfigMap, k:String, oldValue:T)=>cMap(k,oldValue.asInstanceOf[Int]).asInstanceOf[T]
      	case x:String => (cMap : ConfigMap, k:String, oldValue:T)=>cMap(k,oldValue.asInstanceOf[String]).asInstanceOf[T]

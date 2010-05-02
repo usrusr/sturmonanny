@@ -165,7 +165,7 @@ if(until==0) println("0 until from "+new Exception().getStackTraceString)
   /**
    * inner class for the temporary handler function, used to identify messageHandlers that were set by previous, unfinished calls to temporarily
    */  
-  private case class TemporaryHandlerFunction(val waitFor : Int, val body : PartialFunction[Any, Unit], val matchCount:Int, val name:String) extends PartialFunction[Any, Unit] with Logging{
+  protected case class TemporaryHandlerFunction(val waitFor : Int, val body : PartialFunction[Any, Unit], val matchCount:Int, val name:String) extends PartialFunction[Any, Unit] with Logging{
     // interface for calling andThen
 	  var andThen : Function0[Unit] = _
 	  

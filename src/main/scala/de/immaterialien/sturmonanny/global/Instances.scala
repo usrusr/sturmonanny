@@ -6,8 +6,9 @@ import scala.collection.mutable
 import scala.collection.immutable
 import de.immaterialien.sturmonanny.core 
 
-class Instances extends configgy.ConfigurationSchema("instances.conf") with configgy.LiftSupport { 
-  doc = """list of the internal sturmonanny instances"""
+class Instances(val fname:String) extends configgy.ConfigurationSchema(fname) with configgy.LiftSupport {
+  def this()=this("instances.conf") 
+  doc = """list of the internal sturmonanny instances""" 
 	object instances extends Table("default.conf") { 
 	  doc = """list paths to configuration files defining the various sturmonanny instances running in this JVM
 example: 

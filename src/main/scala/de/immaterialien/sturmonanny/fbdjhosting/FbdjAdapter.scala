@@ -9,7 +9,7 @@ class FbdjAdapter extends UpdatingMember with Logging {
   private var overridesPath = ""
   private var stats = false
   private var headless = true
-  private var minutesPerMission = 0
+//  private var minutesPerMission = 0
   private var dcgCommand = ""
   private var autoconnect = false
   private var dcgPath = ""
@@ -29,12 +29,12 @@ debug("beginning to set up FBDj at '"+conf.fbdj.installationPath.apply+"'")
 			  &&	
      (	  
 			  conf.fbdj.installationPath.apply!=fbdjPath
-     || conf.fbdj.fbdjConfiguration.apply!=confPath
+     || conf.fbdj.fbdjConfigurationDirectory.apply!=confPath
      ||	conf.fbdj.overridesJar.apply!=overridesPath
      || conf.fbdj.headless.apply != headless
      || conf.fbdj.stats.apply != stats
      || conf.fbdj.autoconnect.apply != autoconnect
-     || conf.fbdj.DCG.minutesPerMission.apply != minutesPerMission
+//     || conf.fbdj.DCG.minutesPerMission.apply != minutesPerMission
      || conf.fbdj.DCG.dcgCommand.apply != dcgCommand
      || conf.fbdj.DCG.dcgPath.apply != dcgPath
 
@@ -53,11 +53,11 @@ debug("FBDj configuratoin changing!")
 		  		val created = new FbdjHost(conf)
 		  		fbdj = Some(created)
 		  		fbdjPath = conf.fbdj.installationPath
-		  		confPath = conf.fbdj.fbdjConfiguration
+		  		confPath = conf.fbdj.fbdjConfigurationDirectory
 		  		headless=conf.fbdj.headless
 		  		stats=conf.fbdj.stats
 		  		autoconnect=conf.fbdj.stats
-		  		minutesPerMission=conf.fbdj.DCG.minutesPerMission 
+//		  		minutesPerMission=conf.fbdj.DCG.minutesPerMission 
 		  		dcgCommand=conf.fbdj.DCG.dcgCommand 
 		  		dcgPath=conf.fbdj.DCG.dcgPath 
 		  		minSortiesBigger=conf.fbdj.DCG.campaignProgress.minSorties.bigger

@@ -5,11 +5,21 @@ import de.immaterialien.sturmonanny.util.configgy
 class Configuration(override val file : String) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{   
 	doc = "configuration for a single host instance"
 	object server  extends Group{    
-	  object host extends Field( "127.0.0.1")
-	  object il2port extends Field(2001)   	   
-	  object consoleport extends Field(2011)
+	  object host extends Field( "127.0.0.1") {doc="host for the console connection"}
+	  object il2port extends Field(2001) {doc="""console port of the IL2-server that should be connected
+if your confs.ini looks like this:
+...
+[Console]
+IP=123
+...
+then your il2port is 123
+"""}  	   
+	  object consoleport extends Field(2011) {doc="""exposed console port of sturmonanny instance, chose an otherwise unused port
+(this can be used to connect an external tool like IL2 SC or a manual console like il2wconsole.exe, the extneral console 
+client will not see the console traffic between sturmonanny and the il2-server, which includes any traffic created by an embedded FBDj)
+"""}  	
       
-	  object serverName extends Field("testserver") 
+//	  object serverName extends Field("testserver") 
 	  object pollMillis extends Field(1000)  {
 	    doc = "SC pilots listing is too slow to be useful, set (minimum) number of milliseconds to pass between polls"
 	  }
@@ -62,13 +72,17 @@ landing refund should be distributed in the same ratio but this is not implement
 	  }
 	}
 	object pilots extends Group {
-	  object highestBalance extends Field(1000)
-	  object lowestBalance extends Field(0)
-	  object startBalance extends Field(10)
+	  object highestBalance extends Field(1000){
+	    doc="""upper limit for the amount of "cash" a pilot can stockpile, everything gains above this will be ignored"""
+	  }
+	  object lowestBalance extends Field(-500){
+	    doc="""lower limit for the amount of "cash" a pilot can lose, payments below this limit are ignored"""
+	  }
+//	  object startBalance extends Field(10)
    
-   	  object deathpenalty extends Field(60)  {
-   	    doc = """ seconds of death penalty, pilots will not be allowed to board a plane during this time"""
-   	  }
+ 	  object deathpenalty extends Field(90)  {
+ 	    doc = """ seconds of death penalty, pilots will not be allowed to board a plane during this time"""
+ 	  }
 	}
 
 	object market extends Group {
@@ -82,7 +96,9 @@ landing refund should be distributed in the same ratio but this is not implement
 	  object currency extends Field("%s")
 	} 
 	object fbdj extends Group {
-	  doc = "sturmonanny can host an FBDj internally, keep empty if you don't want this to happen"
+	  doc = """sturmonanny can host an FBDj internally, keep empty if you don't want this to happen
+
+"""
 	  object installationPath extends Field("")  {
 		  doc = """a (relative) path to your FBDj installation, 
 should contain FBDj.jar and all the other stuff
@@ -91,11 +107,15 @@ note: the FBDj.jar must not be on your regular classpath for sturmonanny"""
 	  }
 	  object overridesJar extends Field("FBDj-overrides.jar")  {
 doc = """a (relative) path to your FBDj-overrides jar,
-which is required for FBDj embedding"""	    
+which is required for FBDj embedding.
+
+note: The version of the FBDj installation referenced above has to be exactly the version the FBDj-overrides jar was made for 
+(at time of this writing: 1.5b)
+"""	    
 	  }
-	  object fbdjConfiguration extends Field("fbdjConf.ser")  {
+	  object fbdjConfigurationDirectory extends Field("./Default")  {
 		  doc = """path to the FBDj configuration for this instance
-if the path with . it will be relative to the FBDj installation, 
+if the path starts with . it will be relative to the FBDj installation, 
 otherwise it will be relative to sturmonanny installation (or absolute)
 """	    
 	  }   
@@ -119,9 +139,10 @@ FBDj Auto Start setting might be working better
    
    object DCG extends Group {
      doc = "configure the DCG compatibility addon for FBDj (using the SC mode of DCG, not the FBD mode)"
-     object minutesPerMission extends Field(60){
-       doc="duration of a single DCG mission, the FBDj mission will run a little longer, waiting for DCG to create the next mission"
-     }
+// ignored, uses DCG setting   
+//     object minutesPerMission extends Field(60){
+//       doc="duration of a single DCG mission, the FBDj mission will run a little longer, waiting for DCG to create the next mission"
+//     }
 
      object dcgCommand extends Field("il2dcg.exe /netdogfight") {
        doc="""Command line to execute for creating the next SC mission, must not return before the mission is created. 
@@ -129,9 +150,9 @@ After the command returns the latest new .mis file from the mission directory of
 example: "C:\myDcgInstallation\il2dcg.exe /netdogfight" """
        
      }
-     object dcgPath extends Field("") {
+     object dcgPath extends Field("C:/DCG") {
        doc="""path to the DCG installation, 
-required to localize the DCG.ini (if empty, FBDj will assume that the DCG.ini resides in the mission directory)"""
+required to find the DCG.ini (if empty, FBDj may assume that the DCG.ini resides in the mission directory - or simply fail)"""
        
      }
      

@@ -4,17 +4,15 @@ import org.mortbay.jetty.Connector
 import org.mortbay.jetty.Server
 import org.mortbay.jetty.webapp.WebAppContext
 
-class Start {
 
-//object RunWebApp 
-//{
-//	extends Application {
-	
+object Start {
+System.err.println("INIT START OBJ")  
+  def main(args : Array[String]) : Unit = {
+
 	
   val server = new Server(8080)
   val context = new WebAppContext()
   
-  def main(args : List[String]) : Unit = { 
   context.setServer(server)
   context.setContextPath("/")
   context.setWar("src/main/webapp") 
@@ -36,10 +34,7 @@ class Start {
       exc.printStackTrace() 
       System.exit(100) 
     }
-//  }
-//  }
   }
   
   }
 }
-

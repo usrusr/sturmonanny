@@ -1,0 +1,1 @@
+java -jar sturmonanny-${version}-jar-with-debendencies.jar

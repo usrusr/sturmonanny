@@ -1,240 +1,281 @@
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>immaterialien.de</groupId>
-  <artifactId>sturmonanny</artifactId>
-  <version>0.0.3-SNAPSHOT</version>
-  <packaging>jar</packaging>
-  <inceptionYear>2010</inceptionYear>
-  <properties>
-    <scala.version>2.7.7</scala.version>
-<!--<scala.version>2.8.0.Beta1-RC1</scala.version>--> 
-  </properties>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>immaterialien.de</groupId>
+	<artifactId>sturmonanny</artifactId>
+	<version>0.0.3-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<inceptionYear>2010</inceptionYear>
+	<properties>
+		<scala.version>2.7.7</scala.version>
+		<!--<scala.version>2.8.0.Beta1-RC1</scala.version>-->
+	</properties>
 
-  <repositories>
-      <repository>
-          <id>maven</id>
-          <name>Maven2 Repository</name>
-          <url>http://repo1.maven.org/maven2</url>
-      </repository>
-      <repository>
-        <id>scala-tools.org</id>
-        <name>Scala-Tools Maven2 Repository</name>
-        <url>http://scala-tools.org/repo-releases</url>
-      </repository>
-      <repository>
-       <id>net.lag</id>
-       <name>net.lag home of configgy</name>
-       <url>http://www.lag.net/repo</url>
-      </repository>
-  </repositories>
+	<repositories>
+		<repository>
+			<id>maven</id>
+			<name>Maven2 Repository</name>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+		<repository>
+			<id>scala-tools.org</id>
+			<name>Scala-Tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</repository>
+		<repository>
+			<id>net.lag</id>
+			<name>net.lag home of configgy</name>
+			<url>http://www.lag.net/repo</url>
+		</repository>
+	</repositories>
 
-  <pluginRepositories>
-    <pluginRepository>
-      <id>maven</id>
-      <name>Maven2 Repository</name>
-      <url>http://repo1.maven.org/maven2</url>
-    </pluginRepository>
-    <pluginRepository>
-      <id>scala-tools.org</id>
-      <name>Scala-Tools Maven2 Repository</name>
-      <url>http://scala-tools.org/repo-releases</url>
-    </pluginRepository>
-  </pluginRepositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>maven</id>
+			<name>Maven2 Repository</name>
+			<url>http://repo1.maven.org/maven2</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>scala-tools.org</id>
+			<name>Scala-Tools Maven2 Repository</name>
+			<url>http://scala-tools.org/repo-releases</url>
+		</pluginRepository>
+	</pluginRepositories>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-library</artifactId>
-      <version>${scala.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>net.liftweb</groupId>
-      <artifactId>lift-core</artifactId>
-      <version>1.1-M8</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.derby</groupId>
-      <artifactId>derby</artifactId>
-      <version>10.4.2.0</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>servlet-api</artifactId>
-      <version>2.5</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.5</version>
-      <scope>test</scope>
-    </dependency>
-     <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>6.1.19</version>
-<!--      <scope>test</scope>-->
-    </dependency>
-    <!-- for LiftConsole -->
-    <dependency>
-      <groupId>org.scala-lang</groupId>
-      <artifactId>scala-compiler</artifactId>
-      <version>${scala.version}</version>
-      <scope>test</scope>
-    </dependency>
-    
-<!--    <dependency>-->
-<!--    	 closed FBDj integration module, created for improved integration with permission from the FBDj author -->
-<!--    	<groupId>de.immaterialien</groupId>-->
-<!--  		<artifactId>FBDj-overrides</artifactId>-->
-<!--  		<version>0.0.1-SNAPSHOT</version>-->
-<!--  		<scope>compile</scope>-->
-<!--    </dependency>-->
-    
-    <dependency>
-      <groupId>net.lag</groupId>
-      <artifactId>configgy</artifactId>
-<!--      <version>1.5</version> -->
-      <version>1.5.2-usr</version> 
-    </dependency>
-    <!--  temporarily replaced with a custom 2.7.7 build
-    <dependency>
-      <groupId>net.lag</groupId>
-      <artifactId>configgy</artifactId>
-      <version>1.4.7</version> 
-      <scope>compile</scope>
-    </dependency>
-    -->
-    <!-- return to official release     
-    <dependency>
-  <groupId>net.lag</groupId>
-  <artifactId>configgy-2.7.7</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-    </dependency>
- -->
-  </dependencies>
-  <build>
-    <sourceDirectory>src/main/scala</sourceDirectory>
-    <testSourceDirectory>src/test/scala</testSourceDirectory>
-    <plugins>
-      <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-<!--        <version>2.13.1</version>-->
-<version>2.13.1</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <scalaVersion>${scala.version}</scalaVersion>
-          <javaRebelPath>E:/java/javarebel/javarebel.jar</javaRebelPath>
-          
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <configuration>
-          <contextPath>/</contextPath>
-          <scanIntervalSeconds>5</scanIntervalSeconds>
-          <reload>manual</reload> 
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>net.sf.alchim</groupId>
-        <artifactId>yuicompressor-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compress</goal>
-            </goals>
-          </execution>
-        </executions>
-        <configuration>
-          <nosuffix>true</nosuffix>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-eclipse-plugin</artifactId>
-        <configuration>
-          <downloadSources>true</downloadSources>
-          <excludes>
-            <exclude>org.scala-lang:scala-library</exclude>
-          </excludes>
-          <classpathContainers>
-            <classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
-          </classpathContainers>
-          <projectnatures>
-            <java.lang.String>ch.epfl.lamp.sdt.core.scalanature</java.lang.String>
-            <java.lang.String>org.eclipse.jdt.core.javanature</java.lang.String>
-          </projectnatures>
-          <buildcommands>
-            <java.lang.String>ch.epfl.lamp.sdt.core.scalabuilder</java.lang.String>
-          </buildcommands>
-        </configuration>
-      </plugin>
-<plugin>
-  <artifactId>maven-assembly-plugin</artifactId>
-  <version>2.2-beta-5</version>
+	<dependencies>
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>${scala.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.liftweb</groupId>
+			<artifactId>lift-core</artifactId>
+			<version>1.1-M8</version>
+			<exclusions>
+				<exclusion>
+					<groupId>net.liftweb</groupId>
+					<artifactId>lift-facebook</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.liftweb</groupId>
+					<artifactId>lift-amqp</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>net.liftweb</groupId>
+					<artifactId>lift-xmpp</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!--    <dependency>-->
+		<!--      <groupId>org.apache.derby</groupId>-->
+		<!--      <artifactId>derby</artifactId>-->
+		<!--      <version>10.4.2.0</version>-->
+		<!--    </dependency>-->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>2.5</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mortbay.jetty</groupId>
+			<artifactId>jetty</artifactId>
+			<version>6.1.19</version>
+			<!--      <scope>test</scope>-->
+		</dependency>
+		<!-- for LiftConsole -->
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-compiler</artifactId>
+			<version>${scala.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-  <configuration>
-    <appendAssemblyId>false</appendAssemblyId>
-    <descriptorRefs>
-      <descriptorRef>jar-with-dependencies</descriptorRef>
-    </descriptorRefs>
-    <archive>
-            <manifest>
-              <mainClass>de.immaterialien.sturmonanny.Start</mainClass>
-            </manifest>
-          </archive>
-    
-  </configuration>
-  <executions>
-    <execution>
-      <id>make-assembly</id>
-      <phase>package</phase>
-      <goals>
-        <goal>assembly</goal>
-      </goals>
-    </execution>
-  </executions>
-</plugin>
+		<!--    <dependency>-->
+		<!--
+			closed FBDj integration module, created for improved integration with
+			permission from the FBDj author
+		-->
+		<!--    	<groupId>de.immaterialien</groupId>-->
+		<!--  		<artifactId>FBDj-overrides</artifactId>-->
+		<!--  		<version>0.0.1-SNAPSHOT</version>-->
+		<!--  		<scope>compile</scope>-->
+		<!--    </dependency>-->
+
+		<dependency>
+			<groupId>net.lag</groupId>
+			<artifactId>configgy</artifactId>
+			<version>1.5.2-usr</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<sourceDirectory>src/main/scala</sourceDirectory>
+		<testSourceDirectory>src/test/scala</testSourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/main/webapp</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.scala-tools</groupId>
+				<artifactId>maven-scala-plugin</artifactId>
+				<version>2.13.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<scalaVersion>${scala.version}</scalaVersion>
+					<javaRebelPath>E:/java/javarebel/javarebel.jar</javaRebelPath>
+
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+				<configuration>
+					<contextPath>/</contextPath>
+					<scanIntervalSeconds>5</scanIntervalSeconds>
+					<reload>manual</reload>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>net.sf.alchim</groupId>
+				<artifactId>yuicompressor-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compress</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<nosuffix>true</nosuffix>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<excludes>
+						<exclude>org.scala-lang:scala-library</exclude>
+					</excludes>
+					<classpathContainers>
+						<classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
+					</classpathContainers>
+					<projectnatures>
+						<java.lang.String>ch.epfl.lamp.sdt.core.scalanature</java.lang.String>
+						<java.lang.String>org.eclipse.jdt.core.javanature</java.lang.String>
+					</projectnatures>
+					<buildcommands>
+						<java.lang.String>ch.epfl.lamp.sdt.core.scalabuilder</java.lang.String>
+					</buildcommands>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2-beta-5</version>
+						<configuration>
+						
+							<appendAssemblyId>true</appendAssemblyId> 
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+<!--				<descriptors>-->
+<!--					<descriptor>assembly.xml</descriptor>-->
+<!--				</descriptors>							-->
+							<archive>
+								<manifest>
+									<mainClass>de.immaterialien.sturmonanny.StartAssembly</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+
+				<executions>
+<!--					<execution>-->
+<!--						<id>package</id>-->
+<!--						<phase>package</phase>-->
+<!--						<goals>-->
+<!--							<goal>assembly</goal>-->
+<!--						</goals>-->
+<!--						-->
+<!--					</execution>-->
+ 
+ 					<execution>
+						<id>zip</id>
+						<phase>install</phase>
+						<configuration>
+							<descriptors>
+								<descriptor>assembly.xml</descriptor>
+							</descriptors>
+						</configuration>
+						<goals>
+							<goal>assembly</goal>
+						</goals>
+					</execution>
+<!-- -->
+ 
+<!--					<execution>-->
+<!--						<id>zip</id>-->
+<!--						<phase>install</phase>-->
+<!--						<configuration>-->
+<!--						-->
+<!--							<appendAssemblyId>true</appendAssemblyId>-->
+<!--							<descriptors>-->
+<!--								<descriptor>assembly.xml</descriptor>-->
+<!--							</descriptors>-->
+<!--						</configuration>-->
+<!--						<goals>-->
+<!--							<goal>assembly</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+
+				</executions>
+			</plugin>
 
 
-    </plugins>
-  </build>
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <configuration>
-          <scalaVersion>${scala.version}</scalaVersion>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>maven-jetty-plugin</artifactId>
-        <configuration>
-          <!-- http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin -->
-          <scanIntervalSeconds>10</scanIntervalSeconds>
-          <connectors>
-            <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
-              <port>8081</port>
-              <maxIdleTime>60000</maxIdleTime>
-            </connector>
-          </connectors>
-          <stopKey>stop</stopKey>
-          <stopPort>22110</stopPort>
-        </configuration>
-      </plugin>
-    </plugins>
-  </reporting>
+		</plugins>
+	</build>
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.scala-tools</groupId>
+				<artifactId>maven-scala-plugin</artifactId>
+				<configuration>
+					<scalaVersion>${scala.version}</scalaVersion>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.mortbay.jetty</groupId>
+				<artifactId>maven-jetty-plugin</artifactId>
+				<configuration>
+					<!-- http://docs.codehaus.org/display/JETTY/Maven+Jetty+Plugin -->
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<connectors>
+						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+							<port>8081</port>
+							<maxIdleTime>60000</maxIdleTime>
+						</connector>
+					</connectors>
+					<stopKey>stop</stopKey>
+					<stopPort>22110</stopPort>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
 </project>

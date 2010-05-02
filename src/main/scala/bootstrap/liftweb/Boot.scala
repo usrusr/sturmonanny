@@ -31,7 +31,7 @@ class Boot extends net.liftweb.util.LiftLogger{
 
     // where to search snippet
     //LiftRules.addToPackages("de.immaterialien.sturmonanny.snippet")
-    Schemifier.schemify(true, Log.infoF _, de.immaterialien.sturmonanny.model.User)
+//    Schemifier.schemify(true, Log.infoF _, de.immaterialien.sturmonanny.model.User)
 
     // Build SiteMap
     val entries = Menu(Loc("Home", List("index"), "Home")) ::
@@ -60,7 +60,10 @@ class Boot extends net.liftweb.util.LiftLogger{
     net.liftweb.util.LogBoot.loggerSetup
 
 //      val s = new Server
+println("starting sturmonanny instances")    
     val instances = global.Instances.configuration
+//println("sturmonanny "+global.Instances.nameToInstance.size+" instances created")    
+println("sturmonanny "+instances.instances.toList.size+" instances created")
                        
     S.addAround(DB.buildLoanWrapper) 
   }

@@ -16,7 +16,7 @@ class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  exte
     
   	private val overrideFile = new java.io.File(conf.fbdj.overridesJar)
   	private val overrideUrl = overrideFile.toURL
-    private val configurationPath:String = conf.fbdj.fbdjConfiguration
+    private val configurationPath:String = conf.fbdj.fbdjConfigurationDirectory
 
    	if( ! jarFile.canRead || ! overrideFile.canRead ){
    	  var list : List[String] = Nil
@@ -76,7 +76,7 @@ debug("FbdjHost: inList  : "+System.identityHashCode(inList))
 //	"installationPath";
 //	"stats";		  
 				    arg("missionCreationCommandLine", conf.fbdj.DCG.dcgCommand), 
-				    arg("dcgScMissionTimeMinutes", ""+conf.fbdj.DCG.minutesPerMission.apply), 
+//				    arg("dcgScMissionTimeMinutes", ""+conf.fbdj.DCG.minutesPerMission.apply), 
 				    arg("headless", ""+conf.fbdj.headless.apply), 
 				    arg("stats", ""+conf.fbdj.stats.apply), 
 				    arg("autoconnect", ""+conf.fbdj.autoconnect.apply), 
