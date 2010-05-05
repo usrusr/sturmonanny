@@ -113,7 +113,7 @@ note: The version of the FBDj installation referenced above has to be exactly th
 (at time of this writing: 1.5b)
 """	    
 	  }
-	  object fbdjConfigurationDirectory extends Field("./Default")  {
+	  object fbdjConfigurationDirectory extends Field("./config/Default")  {
 		  doc = """path to the FBDj configuration for this instance
 if the path starts with . it will be relative to the FBDj installation, 
 otherwise it will be relative to sturmonanny installation (or absolute)

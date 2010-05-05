@@ -51,13 +51,30 @@ import net.lag.configgy.{Config, ConfigMap}
  * 
  * 
  */
-abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting{ 
-	this({
-//println("parsing file "+file)	  
+abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting with Log{ 
+	val fileReference = this({
+log.debug("parsing file "+file)	  
 	  if(file==null) new Config 
     else Config.fromFile(file)
 	})
-  
+
+  def writeToFilesystemOrMessage() : Option[String] = { 
+    fileReference match {
+      case None => Some("transient configuration")
+      case Some(f) => {
+        try {
+          val w = new java.io.FileWriter(f)
+          w.write(this.toString)
+          w.close
+          None
+        }catch{
+          case e:java.io.IOException => Some(e.getMessage)
+        }
+      } 
+    } 
+    
+  } 
+ 
   object status {
 	  private var internalMessages : List[ConfigurationSchema.Msg]=Nil  
   	def messages = internalMessages
@@ -66,10 +83,15 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
   	def error(msg:String) = internalMessages :::= ConfigurationSchema.Error(msg)::Nil
   	def success(msg:String) = internalMessages :::= ConfigurationSchema.Success(msg)::Nil
   }
-	def apply(conf : Config) = {
+	def apply(conf : Config) : Option[java.io.File]= {
 	  status.clear
+
 	  initMembers
 	  readConfiggy(conf)
+    if(conf.importer!=null && conf.importer.isInstanceOf[net.lag.configgy.FilesystemImporter]){
+      val fsImporter = conf.importer.asInstanceOf[net.lag.configgy.FilesystemImporter]
+      Some(new java.io.File(fsImporter.baseFolder, file))
+    }else None
 	}
 
 	override def toString = {

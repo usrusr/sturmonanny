@@ -116,7 +116,7 @@ trait TimedLiftActor extends LiftActor {
     this ! Reevaluate // force reevaluation of mailbox
     
   }
-val debugFile = new java.io.FileWriter("actor."+this.getClass.getSimpleName+".log")
+//val debugFile = new java.io.FileWriter("actor."+this.getClass.getSimpleName+".log")
 
   final def messageHandlerDef() = messageHandlerFunction
   override final val messageHandler : PartialFunction[Any, Unit]  = new PartialFunction[Any, Unit]{

@@ -22,8 +22,11 @@ import _root_.de.immaterialien.sturmonanny._
   * A class that's instantiated early and run.  It allows the application
   * to modify lift's environment
   */
-class Boot extends net.liftweb.util.LiftLogger{
+class Boot extends util.Log{// extends net.liftweb.util.LiftLogger{
   def boot {
+	  de.immaterialien.sturmonanny.StartAssembly.log.debug("initialized log")
+    log.ifDebug("booting lift...")
+    
     LiftRules.addToPackages("de.immaterialien.sturmonanny")
 
 //    if (!DB.jndiJdbcConnAvailable_?)
@@ -60,10 +63,10 @@ class Boot extends net.liftweb.util.LiftLogger{
     net.liftweb.util.LogBoot.loggerSetup
 
 //      val s = new Server
-println("starting sturmonanny instances")    
+log.warning("starting sturmonanny instances")    
     val instances = global.Instances.configuration
 //println("sturmonanny "+global.Instances.nameToInstance.size+" instances created")    
-println("sturmonanny "+instances.instances.toList.size+" instances created")
+log.ifDebug("sturmonanny "+instances.instances.toList.size+" instances created")
                        
 //    S.addAround(DB.buildLoanWrapper) 
   }

@@ -1,1 +1,1 @@
-java -jar sturmonanny-${version}-jar-with-dependencies.jar
+java -cp sturmonanny-core.jar;sturmonanny-dependencies.jar de.immaterialien.sturmonanny.StartAssembly

@@ -17,17 +17,31 @@
       <filtered>true</filtered>
     </fileSet>
     
-    <fileSet>
-      <directory>${basedir}/target</directory>
-      <includes><include>*-with-dependencies.jar</include></includes>
-      <outputDirectory>/</outputDirectory>
-    </fileSet>
+<!--    <fileSet>-->
+<!--      <directory>${basedir}/target</directory>-->
+<!--      <includes>-->
+<!--      	<include>*-SNAPSHOT.jar</include>-->
+<!--      	<include>*-dependencies.jar</include>-->
+<!--      </includes>-->
+<!--      -->
+<!--      <outputDirectory>/</outputDirectory>-->
+<!--    </fileSet>-->
   </fileSets>
   <files>
     <file>
       <source>C:/Users/ulf/.m2/repository/de/immaterialien/FBDj-overrides/0.0.1-SNAPSHOT/FBDj-overrides-0.0.1-SNAPSHOT.jar</source>
       <outputDirectory>/</outputDirectory>
       <destName>FBDj-overrides.jar</destName> 
+    </file>
+    <file>
+      <source>${basedir}/target/sturmonanny-${version}.jar</source>
+      <outputDirectory>/</outputDirectory>
+      <destName>sturmonanny-core.jar</destName> 
+    </file>    
+    <file>
+      <source>${basedir}/target/sturmonanny-${version}-dependencies.jar</source>
+      <outputDirectory>/</outputDirectory>
+      <destName>sturmonanny-dependencies.jar</destName> 
     </file>
   </files>
 </assembly>

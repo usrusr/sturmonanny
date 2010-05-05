@@ -134,10 +134,14 @@ trait LiftSupport extends ConfigurationSchema {
     
     params += "submitapply" -> SHtml.submit("Apply", () => updateConfiguration(paramCopy) )
     params += "submitsave" -> SHtml.submit("Save", () => {
-	      if(updateConfiguration(paramCopy)) 
-	    	  println("saved "+System.identityHashCode(self)+"\n"+self)
-	    	else
-	    		println("did not save, errors\n")
+	      if(updateConfiguration(paramCopy)){ 
+	    	  //println("saved "+System.identityHashCode(self)+"\n"+self)
+          self.writeToFilesystemOrMessage() foreach {msg=>
+          	S.error("did not save:"+msg)
+          } 
+	    	}else{
+	    		S.error("did not save, invalid data")
+        }
     })
     
 		var ret = bind(form, formNodes, params :_*)
