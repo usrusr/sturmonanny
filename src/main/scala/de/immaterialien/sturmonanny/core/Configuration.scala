@@ -14,11 +14,14 @@ IP=123
 ...
 then your il2port is 123
 """}  	   
-	  object consoleport extends Field(2011) {doc="""exposed console port of sturmonanny instance, chose an otherwise unused port
+	  object consoleport extends Field(2011) {doc="""exposed console port of sturmonanny instance, chose an otherwise unused port (or null, to avoid any console connections)
 (this can be used to connect an external tool like IL2 SC or a manual console like il2wconsole.exe, the extneral console 
 client will not see the console traffic between sturmonanny and the il2-server, which includes any traffic created by an embedded FBDj)
 """}  	
-      
+   object IPS extends Field("127.0.0.1, 0:0:0:0:0:0:0:1") {doc="""comma-separated IP whitelist for the console interface, 
+works like the IPS item in the [Console] section of confs.ini"""
+} 
+   
 //	  object serverName extends Field("testserver") 
 	  object pollMillis extends Field(1000)  {
 	    doc = "SC pilots listing is too slow to be useful, set (minimum) number of milliseconds to pass between polls"

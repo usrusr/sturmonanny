@@ -174,7 +174,7 @@ log.debug("parsing file "+file)
 	} 
 
   protected[configgy]  class Field[T]( var v : T ) extends ConfigurationSchema.Member with ValidationInfo{
-      def update(t:T)={v = t}
+      def update(t:T)={if(t!=null)v = t}
 	    def apply = v
       
 

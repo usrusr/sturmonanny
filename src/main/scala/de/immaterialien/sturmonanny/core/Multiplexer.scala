@@ -34,7 +34,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		}
 		if(conf.server.consoleport != scport){
 			scport = conf.server.consoleport
-			serverThread interrupt
+			if(serverThread!=null)serverThread interrupt
 		}
 	} 
 
@@ -296,20 +296,39 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 	var listenersocket : Option[ServerSocket] = None
 
 	var serverThread : Thread = newServerThread 
-	def newServerThread  : Thread = Multiplexer.daemon{
+	def newServerThread  : Thread = if(scport==0) null else Multiplexer.daemon{
+	  
 		try{
 			val actualListenersocket : ServerSocket = listenersocket.getOrElse{
+				debug("console listening on "+scport)
 				listenersocket = Some(new ServerSocket(scport))
 				listenersocket.get
 			}
 			val clientconnection : Socket = actualListenersocket.accept
+			Thread.interrupted // accept interrupted us, that's ok, clear
 			val remote = clientconnection.getRemoteSocketAddress.asInstanceOf[InetSocketAddress]
-			debug("new client connecting from "+remote.getHostName+" on "+clientconnection.getLocalPort)
-			val addMessage = addClient(new Console(clientconnection))
-			Multiplexer.this ! addMessage 
+      val whitelist = conf.server.IPS.apply
+      
+      if( ! whitelist.trim.isEmpty){
+      	val remoteAdd = remote.getAddress.getHostAddress
+      
+        if( ! whitelist.contains(remoteAdd)){
+      	  warn("deniying client connection from "+remoteAdd+", adress is not whitelisted in configuration/server/ips")
+      	  val stream = clientconnection.getOutputStream
+      	  stream.write(("your ip "+remoteAdd+" is not whitelisted in configuration/server/ips, closing connection").getBytes )
+      	  stream.flush
+          clientconnection.close
+        }
+      } 
+      
+			if( ! clientconnection.isClosed){
+				debug("new client connecting from "+remote.getHostName+" on "+clientconnection.getLocalPort)
+				val addMessage = addClient(new Console(clientconnection))
+				Multiplexer.this ! addMessage
+			}
 		}catch{
 			case e : IOException => {
-				debug("client listener connection on port "+scport+" failed, retrying ")
+				debug("client listener connection on port "+scport+" failed, retrying "+e)
 				Thread.sleep(1000)
 				listenersocket = None
 			}
@@ -413,7 +432,7 @@ object Multiplexer extends Logging{
 							body
 						}
 					}catch{
-						case e:Exception => debug("Exception in daemon thread: "+e.getClass.getSimpleName+"\n"+e.getMessage+"\n"+e.getStackTraceString)
+						case e:Throwable => debug("Exception in daemon thread: "+e.getClass.getSimpleName+"\n"+e.getMessage+"\n"+e.getStackTraceString)
 					}
 					fin
 				}

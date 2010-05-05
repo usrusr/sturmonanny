@@ -27,7 +27,11 @@ class GlobalConfig(private val fname:String) extends configgy.ConfigurationSchem
   object jetty extends Group{
     object port extends Field(8080){
       doc="""port for the internal configuration web interface"""
-    }
+    } 
+    object IPS extends Field("127.0.0.1, 0:0:0:0:0:0:0:1"){
+      doc="""comma-separated IP whitelist for the web interface, 
+works like the IPS item in the [Console] section of confs.ini"""
+    }    
   }
   println("instances configuration loaded")
 }
