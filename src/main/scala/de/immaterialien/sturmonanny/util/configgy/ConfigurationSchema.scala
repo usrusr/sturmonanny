@@ -19,7 +19,7 @@ import net.lag.configgy.{Config, ConfigMap}
  * <code>
  * class MyConfig(file:String) extends ConfiggyFile(file){
  *	object myFirstGroup extends Group{ 
- *	  object hostExample extends Field( "127.0.0.1") 
+ *	  object hostExample extends Field( "127.0.0") 
  *	  object portExample extends Field(2001)   	  
  *	}
  *	object zombie extends Group{ 
@@ -53,11 +53,20 @@ import net.lag.configgy.{Config, ConfigMap}
  */
 abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting with Log{ 
 	val fileReference = this({
-log.debug("parsing file "+file)	  
+		log.trace("parsing file "+file)	  
 	  if(file==null) new Config 
-    else Config.fromFile(file)
+    else {
+      Config.fromFile(file)
+    }
 	})
-
+//	if(logging.isTraceEnabled){
+	  if(fileReference.isDefined){
+	    log.debug("======\nraw file "+file+":\n" + scala.io.Source.fromFile(fileReference.get.getAbsoluteFile).mkString)
+    }
+	  log.debug("--->\nresult for "+file+":\n" + this.toString)
+	  
+//	}
+ 
   def writeToFilesystemOrMessage() : Option[String] = { 
     fileReference match {
       case None => Some("transient configuration")
@@ -88,9 +97,10 @@ log.debug("parsing file "+file)
 
 	  initMembers
 	  readConfiggy(conf)
-    if(conf.importer!=null && conf.importer.isInstanceOf[net.lag.configgy.FilesystemImporter]){
+    if(file!=null && conf.importer!=null && conf.importer.isInstanceOf[net.lag.configgy.FilesystemImporter]){
       val fsImporter = conf.importer.asInstanceOf[net.lag.configgy.FilesystemImporter]
-      Some(new java.io.File(fsImporter.baseFolder, file))
+      if(fsImporter.baseFolder!=null) Some(new java.io.File(fsImporter.baseFolder, file))
+      else None
     }else None
 	}
 
@@ -158,7 +168,7 @@ log.debug("parsing file "+file)
 	  	        
 	  	}
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-    	writeDocumentation(sb, indent, prefix)
+    	writeDocumentation(sb, indent, full)
   
 		  sb.append(indent+"<"+ configgyName+">\r\n")
 		  innerTable(sb, indent)
@@ -187,7 +197,7 @@ log.debug("parsing file "+file)
 	
 	    override def toString = v.toString
 	    override def write(sb : scala.StringBuilder, indent : String, prefix : String){
-	      writeDocumentation(sb, indent, prefix)
+	      writeDocumentation(sb, indent, full)
 	      def string = v match {
 		    case x:String=> "\""+x+"\""
 		    case x => x
@@ -319,12 +329,12 @@ log.debug("parsing file "+file)
 		  }  
 	    override protected[configgy] def write(sb : scala.StringBuilder, indent : String, inPrefix:String){
 		    initMembers
-		    writeDocumentation(sb, indent, prefix)
+		    writeDocumentation(sb, indent, full)
 		    val blanks = changeGroup(sb, inPrefix, full)
 		    for(group<-members) group.write(sb, blanks, full)
-		    changeGroup(sb, inPrefix, full)
+		    changeGroup(sb, full, inPrefix)
 		  }
-	      private def changeGroup(sb : StringBuilder, oldP : String, newP : String):String = {
+	    private def changeGroup(sb : StringBuilder, oldP : String, newP : String):String = {
 			  var oldS = List.fromString(oldP, '.')
 			  var newS = List.fromString(newP, '.')
 			  var count = -1
@@ -367,10 +377,21 @@ object ConfigurationSchema {
 	  def documentationString = doc
    
 	  protected var doc = "" 
-	  protected def writeDocumentation(sb : scala.StringBuilder, indent : String, prefix : String){
-			def comment(line:String) = sb.append(indent+"# "+line+"\r\n")
+	  protected def writeDocumentation(sb : scala.StringBuilder, indent : String, full : String){
+	    val prefix = full.replace(".", "/")
+			def comment(line:String) = sb.append(
+					" "+
+					indent+"# "+line+"\r\n"
+			)
 	    if(doc!=null && !doc.trim.isEmpty){
-        sb.append(indent+" ###\r\n")
+        sb.append(
+      		  " "+
+//          "\r\n"+
+                    indent+" ### "
+          +prefix
+//        +":"
+          +" ###"
+         	 +"\r\n")
         for(line <- doc.lines) comment (line)
       }
 	  }

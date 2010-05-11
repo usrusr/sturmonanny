@@ -9,14 +9,15 @@ class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  exte
 		var inList : java.util.LinkedList[String] = null
   
   //, conf.fbdj.overridesJar, conf.fbdj.fbdjConfiguration.apply
-  
-		private val jarFile = new java.io.File(conf.fbdj.installationPath+"/FBDj.jar")
+  	val isntallationPath = conf.fbdj.installationPath.apply
+    private val configurationPath:String = conf.fbdj.fbdjConfigurationDirectory.apply
+  debug("initializing fbdj container @ '"+isntallationPath +"' configured at '"+configurationPath+"'")
+		private val jarFile = new java.io.File(isntallationPath+"/FBDj.jar")
   	private val jarUrl = jarFile.toURL
-   
+    
     
   	private val overrideFile = new java.io.File(conf.fbdj.overridesJar)
   	private val overrideUrl = overrideFile.toURL
-    private val configurationPath:String = conf.fbdj.fbdjConfigurationDirectory
 
    	if( ! jarFile.canRead || ! overrideFile.canRead ){
    	  var list : List[String] = Nil
@@ -78,8 +79,8 @@ debug("FbdjHost: inList  : "+System.identityHashCode(inList))
 				    arg("missionCreationCommandLine", conf.fbdj.DCG.dcgCommand), 
 //				    arg("dcgScMissionTimeMinutes", ""+conf.fbdj.DCG.minutesPerMission.apply), 
 				    arg("headless", ""+conf.fbdj.headless.apply), 
-				    arg("stats", ""+conf.fbdj.stats.apply), 
-				    arg("autoconnect", ""+conf.fbdj.autoconnect.apply), 
+//				    arg("stats", ""+conf.fbdj.stats.apply), 
+//				    arg("autoconnect", ""+conf.fbdj.autoconnect.apply), 
 		  	    arg("dcgPath", ""+conf.fbdj.DCG.dcgPath.apply), 
  
             arg("minSortiesBigger", ""+conf.fbdj.DCG.campaignProgress.minSorties.bigger.apply),

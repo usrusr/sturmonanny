@@ -21,7 +21,7 @@ class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) exten
    else error("can only shut down if started within a threadgroup")
 	} 
 	
-	val rules = new Rules with Member  
+	val rules = new Rules with Member   
 	val pilots = new Pilots with Member   
 	val planes = new Planes with Member     
 	val market = new MarketActor(conf.market.implementation, conf.market.configuration) with Member

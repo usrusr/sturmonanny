@@ -124,21 +124,21 @@ otherwise it will be relative to sturmonanny installation (or absolute)
 	  }   
 
    object headless extends Field(false){
-	   doc = """set true to keep the FBDj window from appearing (default: false)"""	       
+	   doc = """set true to keep the FBDj window from appearing (default: false, only set to true if you know exactly that the configuration will do what you want)"""	       
    }
    
-   object stats extends Field(true){
-	   doc = """start FBDj with the stats automatically started (default: true, true overrides FBDj autostats)"""	       
-   }
-   object autoconnect extends Field(true){
-	   doc = """start FBDj with the stats automatically started 
-(default: true, 
-always true when headless, 
-true overrides FBDj autoconnect, 
-FBDj Auto Start setting might be working better
-)"""
-    
-   }
+//   object stats extends Field(true){
+//	   doc = """start FBDj with the stats automatically started (default: true, true overrides FBDj autostats)"""	       
+//   }
+//   object autoconnect extends Field(true){
+//	   doc = """start FBDj with the stats automatically started 
+//(default: true, 
+//always true when headless, 
+//true overrides FBDj autoconnect, 
+//FBDj Auto Start setting might be working better
+//)"""
+//    
+//   }
    
    object DCG extends Group {
      doc = "configure the DCG compatibility addon for FBDj (using the SC mode of DCG, not the FBD mode)"

@@ -4,14 +4,14 @@ import de.immaterialien.sturmonanny.core.UpdatingMember
 import de.immaterialien.sturmonanny.util.Logging
 
 class FbdjAdapter extends UpdatingMember with Logging {
-  private var fbdjPath = ""
+  private var fbdjPath = "."
   private var confPath = ""
   private var overridesPath = ""
-  private var stats = false
+//  private var stats = false
   private var headless = true
 //  private var minutesPerMission = 0
   private var dcgCommand = ""
-  private var autoconnect = false
+//  private var autoconnect = false
   private var dcgPath = ""
   
   private var minSortiesBigger = 0
@@ -32,8 +32,8 @@ debug("beginning to set up FBDj at '"+conf.fbdj.installationPath.apply+"'")
      || conf.fbdj.fbdjConfigurationDirectory.apply!=confPath
      ||	conf.fbdj.overridesJar.apply!=overridesPath
      || conf.fbdj.headless.apply != headless
-     || conf.fbdj.stats.apply != stats
-     || conf.fbdj.autoconnect.apply != autoconnect
+//     || conf.fbdj.stats.apply != stats
+//     || conf.fbdj.autoconnect.apply != autoconnect
 //     || conf.fbdj.DCG.minutesPerMission.apply != minutesPerMission
      || conf.fbdj.DCG.dcgCommand.apply != dcgCommand
      || conf.fbdj.DCG.dcgPath.apply != dcgPath
@@ -55,8 +55,8 @@ debug("FBDj configuratoin changing!")
 		  		fbdjPath = conf.fbdj.installationPath
 		  		confPath = conf.fbdj.fbdjConfigurationDirectory
 		  		headless=conf.fbdj.headless
-		  		stats=conf.fbdj.stats
-		  		autoconnect=conf.fbdj.stats
+//		  		stats=conf.fbdj.stats
+//		  		autoconnect=conf.fbdj.stats
 //		  		minutesPerMission=conf.fbdj.DCG.minutesPerMission 
 		  		dcgCommand=conf.fbdj.DCG.dcgCommand 
 		  		dcgPath=conf.fbdj.DCG.dcgPath 
@@ -74,6 +74,8 @@ debug("FBDj configuratoin changing!")
 		  	  }
 		  	}
 	    
+	  	}else{
+	  		debug("no reason found to set up FBDj : \n  "+fbdjPath+"\n  "+overridesPath+"\n  "+confPath+"\n   in:"+System.identityHashCode(fbdj.get.inList)+"   out:"+System.identityHashCode(fbdj.get.outList))
 	  	}
 	}
   

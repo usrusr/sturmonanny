@@ -3,7 +3,7 @@ package de.immaterialien.sturmonanny.core
 import scala.collection.mutable
 import de.immaterialien.sturmonanny.util.Logging
  
-class Rules extends NonUpdatingMember with Logging {
+class Rules extends NonUpdatingMember with Logging { 
 	def startCost(price:Double) = price * conf.game.startcost 
 	def startCostCheck(price:Double, balance:Double) :Rules.CostResult = {
 		if(price>0){

@@ -20,7 +20,7 @@ class InstanceConf {
  
  
 object InstanceConf {
-  def registerRules{
+  def registerRules{ 
 	  LiftRules.statelessRewrite.prepend(NamedPF("InstanceConf") {
     	case RewriteRequest(ParsePath("instance" :: instanceName :: "conf" :: Nil, _, _,_), _, _) => 
     		RewriteResponse(
