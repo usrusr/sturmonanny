@@ -3,7 +3,26 @@ package de.immaterialien.sturmonanny.fbdjhosting
 
 import de.immaterialien.sturmonanny.util.Logging
 
-
+object FbdjHost {
+  var count = 0
+  object loaderstatus {
+	  val loaders = new java.util.WeakHashMap[java.net.URLClassLoader, Boolean]
+	  def registerLoader(loader:java.net.URLClassLoader) = loaders.put(loader, true)
+	  def unregisterLoader(loader:java.net.URLClassLoader) = loaders.put(loader, false)
+	  override def toString = { 
+	    var actives = 0
+	    var zombies = 0
+	    val it = loaders.entrySet.iterator
+      while(it.hasNext){
+        val entry = it.next
+        val ref = entry.getKey
+        val active = entry.getValue
+        if(active) actives=1+actives else zombies=1+zombies 
+      }
+      ("\n   (of "+(zombies+actives)+" created classloaders, "+zombies+" are zombies)")
+	  }
+  }
+}
 class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  extends Logging {
 		var outList : java.util.LinkedList[String] = null 
 		var inList : java.util.LinkedList[String] = null
@@ -11,7 +30,7 @@ class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  exte
   //, conf.fbdj.overridesJar, conf.fbdj.fbdjConfiguration.apply
   	val isntallationPath = conf.fbdj.installationPath.apply
     private val configurationPath:String = conf.fbdj.fbdjConfigurationDirectory.apply
-  debug("initializing fbdj container @ '"+isntallationPath +"' configured at '"+configurationPath+"'")
+  debug("initializing fbdj container @ '"+isntallationPath +"' configured at '"+configurationPath+"'\n  "+FbdjHost.loaderstatus)
 		private val jarFile = new java.io.File(isntallationPath+"/FBDj.jar")
   	private val jarUrl = jarFile.toURL
     
@@ -44,8 +63,9 @@ class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  exte
     }catch{
       case _:ClassNotFoundException => // check passed, no FBDj.jar on classpath
     }
+    
   	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent)
-   
+   FbdjHost.loaderstatus.registerLoader(classLoader)
   	try{
   		val connClass = classLoader.loadClass("utility.SocketConnection")
   		val inQueueField = connClass.getField("inQueue")
@@ -53,8 +73,8 @@ class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  exte
   		
   		outList = inQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
   		inList = outQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
-debug("FbdjHost: outList : "+System.identityHashCode(outList))    
-debug("FbdjHost: inList  : "+System.identityHashCode(inList))    
+trace("FbdjHost: outList : "+System.identityHashCode(outList))    
+trace("FbdjHost: inList  : "+System.identityHashCode(inList))    
   		()
     }catch{
       case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
@@ -92,9 +112,18 @@ debug("FbdjHost: inList  : "+System.identityHashCode(inList))
 				    arg("installationPath", conf.fbdj.installationPath) 
 		))
   
-		val threadName = "FBDj with "+parameters(0).mkString(" ")
+		FbdjHost.count+=1
+		val threadName = "FBDj "+FbdjHost.count+" with "+parameters(0).mkString(" ")
   
-		val tg = new ThreadGroup("group for "+threadName)
+		val tg = new ThreadGroup("group for "+threadName+" "+FbdjHost.count) {
+		  override def uncaughtException(t:Thread , e:Throwable ) {
+		    if(classOf[java.lang.ThreadDeath].isInstance(e)){
+debug("thread death in "+t.getName)		      
+		    }else{
+		      super.uncaughtException(t, e)
+		    }
+		  }
+		}
 		val thread = new Thread(tg, threadName) {
 		  override def run = {
 debug("starting "+this.getName + " with\n "+parameters(0).mkString("\n "))
@@ -109,7 +138,32 @@ debug("starting "+this.getName + " with\n "+parameters(0).mkString("\n "))
 		thread.start
     
     def stop = {
-      if(thread!=null) thread interrupt
+debug("shutting down FBDj!!! "+FbdjHost.loaderstatus)
+tg.list
+      val parameters :Array[Array[String]]= Array(Array(
+        arg("disconnect", ""+true),
+		    arg("config", configurationPath), 
+		    arg("installationPath", conf.fbdj.installationPath)         
+      ))
+      try{
+      	mainMethod.invoke(null, parameters:_*)
+      }catch{
+        case i:java.lang.reflect.InvocationTargetException if
+          (i.getCause!=null 
+           && i.getCause.getClass == classOf[java.util.concurrent.RejectedExecutionException] 
+           && i.getCause.getMessage.contains("disconnect")) => ()
+      }
+//      if(tg!=null) {
+//        
+//        while(tg.activeCount>0){
+//        tg.interrupt
+//        try{Thread.sleep(1000)}catch{case _=>()}
+//debug("active threads in group:  "+tg.activeCount)        
+////      	  tg.stop
+//        }
+//      }
+      FbdjHost.loaderstatus.unregisterLoader(classLoader)
+debug("shutting down FBDj, classloader unregistered "+FbdjHost.loaderstatus)
     }
 
 	

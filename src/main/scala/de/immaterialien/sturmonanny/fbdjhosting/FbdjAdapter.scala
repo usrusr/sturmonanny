@@ -1,9 +1,10 @@
 package de.immaterialien.sturmonanny.fbdjhosting;
 
-import de.immaterialien.sturmonanny.core.UpdatingMember
+import de.immaterialien.sturmonanny.core
 import de.immaterialien.sturmonanny.util.Logging
+import de.immaterialien.sturmonanny.util.event
 
-class FbdjAdapter extends UpdatingMember with Logging {
+class FbdjAdapter extends core.UpdatingMember with Logging {
   private var fbdjPath = "."
   private var confPath = ""
   private var overridesPath = ""
@@ -22,7 +23,19 @@ class FbdjAdapter extends UpdatingMember with Logging {
   
   var fbdj : Option[FbdjHost] = None
   
-	def updateConfiguration {
+	def updateConfiguration = {
+	  if(registration.isDefined) newHost
+    else registration = Some(server.multi.il2ConnectionNotifier subscribe {connect =>
+debug("FBDJ connect "+connect+" with "+fbdj.isDefined)
+      fbdj foreach (_ stop)
+      fbdj = None
+      if(connect) newHost
+    })
+  } 
+	
+	var registration : Option[event.Subscription] = None
+ 
+	def newHost {
 debug("beginning to set up FBDj at '"+conf.fbdj.installationPath.apply+"'")	  
 	  if( 
 		   ( ! conf.fbdj.installationPath.apply.isEmpty) 
@@ -50,6 +63,8 @@ debug("beginning to set up FBDj at '"+conf.fbdj.installationPath.apply+"'")
 	  ) {
 debug("FBDj configuratoin changing!")	  
 		  	try{
+
+		  	  
 		  		val created = new FbdjHost(conf)
 		  		fbdj = Some(created)
 		  		fbdjPath = conf.fbdj.installationPath

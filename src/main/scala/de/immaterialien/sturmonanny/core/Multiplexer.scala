@@ -6,7 +6,9 @@ import java.io._
 import net.liftweb.actor._
 import net.liftweb.common._
 
+
 import de.immaterialien.sturmonanny.util._
+
 
 
 /**
@@ -38,6 +40,15 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		}
 	} 
 
+  object il2ConnectionNotifier extends event.Publication[Boolean,Unit]{
+    override def subscribe(func:(Boolean=>Unit))={
+      if(il2socket.isDefined) func.apply(true)
+      super.subscribe(func) 
+    }
+  }
+//  il2ConnectionNotifier.subscribe(_=>
+//    println("connection!")
+//  )
 	case class DownMessage(val lines: Seq[String]){
 		override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(lines).mkString
 	}
@@ -45,7 +56,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		def asMessage() = DownMessage(line::Nil)
 		override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(line :: Nil).mkString
 	}  
-
+	
 	case class DownInternal(val msg: String) extends DownLine(conf.names.tool +": "+msg)
 
 	case class DownPromptLine(override val line : String) extends DownLine(line)
@@ -153,7 +164,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		case removeClient(client) => clients.remove(x => client eq x)
 		case x : Any => debug("unknown "+x)
 	}
-
+	
 
 	/**
 *  a client connection, defined with a socket and an accompanying thread listening on the socket's input stream
@@ -381,6 +392,7 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 				}
 			}then{
 				warn ("lost connection to IL2 instance on port "+il2port+", restarting Multiplexer!")
+				il2ConnectionNotifier.send(false)    
 				il2in = None
 				il2out = None
 				il2socket.map(_.close)
@@ -395,8 +407,10 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 						il2in = Some(new InputStreamReader(socket.getInputStream))
 						il2out = Some(new OutputStreamWriter(socket.getOutputStream))
 						il2socket = Some(socket)
+						
 						// thread has done its job
 						debug("connected to IL2 server on  "+host+":"+il2port+"")
+						il2ConnectionNotifier.send(true)
 						pilotsLister.requery
 						clients foreach (_ ! DownInternal("connected to IL2 server on  "+host+":"+il2port+""))
 						Thread.currentThread.interrupt
