@@ -23,6 +23,7 @@ object FbdjHost {
 	  }
   }
 }
+@Deprecated
 class FbdjHost(val conf : de.immaterialien.sturmonanny.core.Configuration)  extends Logging {
 		var outList : java.util.LinkedList[String] = null 
 		var inList : java.util.LinkedList[String] = null
@@ -79,7 +80,7 @@ trace("FbdjHost: inList  : "+System.identityHashCode(inList))
     }catch{
       case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
     }
-   
+    /*
   	// load main class
   	val mainClass = try{
   		classLoader.loadClass("main.FBDj")
@@ -131,13 +132,37 @@ debug("starting "+this.getName + " with\n "+parameters(0).mkString("\n "))
 	//			  mainMethod.invoke(null, Array(args):_* )
       }
 		}
+		*/
+  // load main class
+  	val mainClass = try{
+  		classLoader.loadClass("de.immaterialien.sturmonanny.fbdjinterface.StartStopInterface")
+    }catch{
+      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load FBDj.jar from "+jarUrl+" ")
+    }
+		val interface = mainClass.newInstance.asInstanceOf[javax.xml.ws.Provider[String]]
+ 
   
-  
-		
-		thread.setContextClassLoader(classLoader)
-		thread.start
-    
+//  "CONNECT="+conf.fbdj) 
+		interface.invoke("MISSION_CREATION_COMMAND_LINE="+conf.fbdj.DCG.dcgCommand.apply)
+		interface.invoke("HEADLESS="+conf.fbdj.headless.apply)
+		interface.invoke("INSTALLATION_PATH="+conf.fbdj.installationPath.apply)
+		interface.invoke("MIN_SORTIES_SMALLER="+conf.fbdj.DCG.campaignProgress.minSorties.smaller.apply)
+		interface.invoke("MIN_SORTIES_BIGGER="+conf.fbdj.DCG.campaignProgress.minSorties.bigger.apply)
+		interface.invoke("MIN_PILOTS_SMALLER="+conf.fbdj.DCG.campaignProgress.minPilots.smaller.apply)
+		interface.invoke("MIN_PILOTS_BIGGER="+conf.fbdj.DCG.campaignProgress.minPilots.bigger.apply)
+		interface.invoke("DCGPATH="+conf.fbdj.DCG.dcgPath.apply)
+		interface.invoke("CONFIGURATION="+conf.fbdj.fbdjConfigurationDirectory.apply)
+//		interface.invoke("LAUNCH="+conf.fbdj..apply)
+//		interface.invoke("DISCONNECT="+conf.fbdj..apply)
+//		interface.invoke("CONNECT="+conf.fbdj..apply)
+//		interface.invoke("RESET="+conf.fbdj..apply)
+                     
+		interface.invoke("CONNECT=true")
+		interface.invoke("LAUNCH=true")
+                     
     def stop = {
+      interface.invoke("DISCONNECT=true")
+      /*
 debug("shutting down FBDj!!! "+FbdjHost.loaderstatus)
 tg.list
       val parameters :Array[Array[String]]= Array(Array(
@@ -164,6 +189,7 @@ tg.list
 //      }
       FbdjHost.loaderstatus.unregisterLoader(classLoader)
 debug("shutting down FBDj, classloader unregistered "+FbdjHost.loaderstatus)
+      */
     }
 
 	

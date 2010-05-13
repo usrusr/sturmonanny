@@ -21,7 +21,7 @@ class FbdjAdapter extends core.UpdatingMember with Logging {
   private var minPilotsSmaller = 0
   
   
-  var fbdj : Option[FbdjHost] = None
+  var fbdj : Option[FbdjContainer] = None
   
 	def updateConfiguration = {
 	  if(registration.isDefined) newHost
@@ -65,7 +65,14 @@ debug("FBDj configuratoin changing!")
 		  	try{
 
 		  	  
-		  		val created = new FbdjHost(conf)
+		  		//val created = new FbdjHost(conf)
+		  	  
+		  	  val created = ContainerPool.getContainer(conf.fbdj.installationPath, conf.fbdj.overridesJar)
+		  	  
+		  	  created.changeConfiguration(conf)
+		  	  created.start 
+       
+       
 		  		fbdj = Some(created)
 		  		fbdjPath = conf.fbdj.installationPath
 		  		confPath = conf.fbdj.fbdjConfigurationDirectory
