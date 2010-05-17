@@ -24,11 +24,13 @@ class FbdjAdapter extends core.UpdatingMember with Logging {
   var fbdj : Option[FbdjContainer] = None
   
 	def updateConfiguration = {
-	  if(registration.isDefined) newHost
+	  if( ! fbdj.isDefined ) newHost
+	  if(registration.isDefined) ()//newHost
     else registration = Some(server.multi.il2ConnectionNotifier subscribe {connect =>
 debug("FBDJ connect "+connect+" with "+fbdj.isDefined)
+			if( ! fbdj.isDefined) newHost
       if(connect){
-        newHost
+        
         fbdj foreach (_.connect(connect))
       }else{
         fbdj foreach (_.connect(connect))
@@ -106,7 +108,7 @@ debug("FBDj configuratoin changing!")
 	  	}
    		if(conf.fbdj.autoconnect.apply != autoconnect){
    		  autoconnect = conf.fbdj.autoconnect.apply
-        fbdj.foreach(_ connect autoconnect)
+//        fbdj.foreach(_ connect autoconnect)
    		}
 
 	}

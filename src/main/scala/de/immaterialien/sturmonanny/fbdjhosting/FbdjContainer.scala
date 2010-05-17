@@ -193,6 +193,7 @@ debug("emerged from threadwall return "+ret.getOrElse(null))
 			def STOP = interface.invoke("STOP=true")
 			def DISCONNECT = interface.invoke("DISCONNECT=true")
 			def CONNECT = interface.invoke("CONNECT=true")
+     
 			def RESET = interface.invoke("RESET=true")
 		}                                                 
 		                                                   
