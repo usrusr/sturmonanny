@@ -64,19 +64,14 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
 		var inList : java.util.LinkedList[String] = null
   
 		private var conf : de.immaterialien.sturmonanny.core.Configuration = null
+		private var name:String = "def"
   
-  
-		def changeConfiguration(nConf : core.Configuration){
+		def changeConfiguration(nConf : core.Configuration, nName:String){
 		  if(nConf ne conf){
 		    conf = nConf
-		    
 		  }
+		  name=nName
 		}
-  	
-  	def kill {
-  		ContainerPool.returnToPool(this)
-  	}
-  
 
   debug("initializing fbdj container @ '"+info.installationPath +"' \n  "+FbdjHost.loaderstatus)
 		private val jarFile = new java.io.File(info.installationPath+"/FBDj.jar")
@@ -192,8 +187,10 @@ debug("emerged from threadwall return "+ret.getOrElse(null))
 			def MIN_PILOTS_BIGGER(arg:String) = interface.invoke("MIN_PILOTS_BIGGER="+arg)
 			def DCGPATH(arg:String) = interface.invoke("DCGPATH="+arg)
 			def CONFIGURATION(arg:String) = interface.invoke("CONFIGURATION="+arg)
-	  
-			def LAUNCH = interface.invoke("LAUNCH=true")
+	    def NAME(arg:String) = interface.invoke("NAME="+arg)
+     
+			def START = interface.invoke("START=true")
+			def STOP = interface.invoke("STOP=true")
 			def DISCONNECT = interface.invoke("DISCONNECT=true")
 			def CONNECT = interface.invoke("CONNECT=true")
 			def RESET = interface.invoke("RESET=true")
@@ -217,13 +214,18 @@ debug("emerged from threadwall return "+ret.getOrElse(null))
 			send MIN_PILOTS_BIGGER ""+conf.fbdj.DCG.campaignProgress.minPilots.bigger.apply
 			send DCGPATH ""+conf.fbdj.DCG.dcgPath.apply
 			send CONFIGURATION ""+conf.fbdj.fbdjConfigurationDirectory.apply
+			send NAME name
 			
-			send.LAUNCH
+			send.START
     }
-                     
+               
+		def connect(onoff : Boolean){
+		  if(onoff) send.CONNECT
+		  else send.DISCONNECT
+		}
+  
     def stop = {
-      send.DISCONNECT 
-      send.HEADLESS("true")
+			send.STOP
       ContainerPool.returnToPool(this)
       /*
 debug("shutting down FBDj!!! "+FbdjHost.loaderstatus)

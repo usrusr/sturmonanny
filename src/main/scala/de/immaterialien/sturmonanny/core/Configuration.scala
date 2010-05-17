@@ -130,15 +130,16 @@ otherwise it will be relative to sturmonanny installation (or absolute)
 //   object stats extends Field(true){
 //	   doc = """start FBDj with the stats automatically started (default: true, true overrides FBDj autostats)"""	       
 //   }
-//   object autoconnect extends Field(true){
-//	   doc = """start FBDj with the stats automatically started 
-//(default: true, 
-//always true when headless, 
-//true overrides FBDj autoconnect, 
-//FBDj Auto Start setting might be working better
-//)"""
-//    
-//   }
+   object autoconnect extends Field(true){
+	   doc = """start FBDj with the stats automatically started 
+(default: true, 
+always true when headless, 
+overrides FBDj autoconnect 
+)"""
+    
+   }
+   
+   
    
    object DCG extends Group {
      doc = "configure the DCG compatibility addon for FBDj (using the SC mode of DCG, not the FBD mode)"
