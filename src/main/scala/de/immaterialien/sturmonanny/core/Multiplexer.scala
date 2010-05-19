@@ -78,8 +78,10 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 	private[this] def outWrite(line:String):Unit= outWrite(line::Nil)
 	private[this] def outWrite(lines:Seq[String]){
 		for(out<-il2out){
-			for(line<-lines) out.append( line )
-			out.flush
+			for(line<-lines) {
+			  out.append( line.trim+"\n" )
+			  out.flush
+      }
 		}
 	}
 //val handlerLog = new java.io.FileWriter("handler.log")
@@ -266,8 +268,17 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 					  		  while( ! list.isEmpty) {
 					  		    val line = list.removeFirst
 debug("from fbdj line '"+line+"'")
-					  		    
-					  		    Multiplexer.this ! UpMessage(line::Nil, internalConnection)
+
+					  		    Multiplexer.this ! UpMessage(""::line::""::Nil, internalConnection)
+
+
+//					  		    Multiplexer.this ! UpMessage(line::Nil, internalConnection)
+					  		    if(line.toLowerCase startsWith "mission "){
+					  		      val millis = 1000
+debug("waiting.. "+millis+" after sending "+line)
+					  		    	Thread.sleep(millis)
+debug("...waited "+millis+" after sending "+line)
+					  		    }
 					  		  }
 					  		  list.wait(1000)
 					  		}

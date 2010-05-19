@@ -2,7 +2,17 @@ Ganz allgemein, um Verwirrung zu vermeiden: Sturmonanny oder FBDj starten den Se
 den muss man vorher per Hand starten (oder per HL) und sollte ggf. erst mal warten bis er komplett 
 hochgefahren ist.
 
+schnelle Inbetriebnahme:
+----------------------- 
+in instance.conf und global.conf alle Zeilen mit " #<-CHANGEME" durchgehen und die f¸r 
+das eigene System passenden Werte eintragen!
+
+Sturmonanny startet keine IL2-Server, wenn ein automatischer Start erw¸nscht ist kann 
+start.bat entsprechend erweitert werden. (mit Configuration/fbdj/autoconnect auf true
+sollte ein eingebundener FBDj automatisch erst dann verbinden wenn IL2 bereit ist)
+
 Setup "ohne Flugminutenkonto":
+==============================
 
 in global.conf:
 ---------------
@@ -11,6 +21,8 @@ password ‰ndern
 
 unter <jetty>..:
 port auf einen freien Port einstellen, auf diesem ist eine rudiment‰re Web-Verwaltungsoberfl‰che erreichbar 
+
+IPS leeren (oder um die entsprechenden IPs erweitern), wenn das web-Interface von auﬂen zug‰nglich sein soll
 
 in default.conf:
 ----------------
@@ -24,7 +36,7 @@ unter <fbdj>..:
 installationPath auf eine FBDj-Installation mit Version 1.5b verweisen, ggf. / statt \ verwenden, sonst gibt's kein FBDj
 
 unter <fbdj><DCG>..:
-dcgPath setzen
+dcgPath setzen - dadurch wird auch automatisch ein Mapcycle mit der aktuellsten DCG-Mission geladen
 
 unter <game> ist homeAlone=true eingestellt, dadurch werden s‰mtliche experimentellen Sturmonanny Funktionen 
 in Sachen Minutenkonto, Deathkick-ersatz (deathpause) etc. deaktiviert, relevant sind dann nur die Einstellungen 
