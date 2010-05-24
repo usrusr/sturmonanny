@@ -21,9 +21,9 @@ import de.immaterialien.sturmonanny.util._
 */  
 
 class Multiplexer(var host : String, var il2port : Int , var scport : Int) extends TimedLiftActor with Logging with UpdatingMember{  
-
-	//  override val messageHandler : PartialFunction[Any, Unit] = {	case x : Any=> debug("ignore"+x)}  
-
+	val timeout = 5000
+  object stateFilter extends StateFilter(this)
+  
 	def this(il2port : Int , scport : Int) = this("127.0.0.1", il2port, scport)
 	def this(conf : Configuration) = this(conf.server.host, conf.server.il2port, conf.server.consoleport)
 	override def updateConfiguration {
@@ -61,8 +61,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 
 	case class DownPromptLine(override val line : String) extends DownLine(line)
 	
-	case class UpMessage(val lines: List[String], val from : AbstractConsole){
-		override def toString() = this.getClass.getSimpleName +": "+ Multiplexer.linesListsToStrings(lines).mkString
+	case class UpMessage(val line: String, val from : AbstractConsole){
+		override def toString() = this.getClass.getSimpleName +": "+ line.trim
 	}
 	case class addClient(val client : AbstractConsole)
 	case class removeClient(val client : AbstractConsole)
@@ -75,13 +75,33 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 	case class ChatArmy(val what : String, val army : Armies.Armies) extends UpCommand("chat "+what+" ARMY "+army)
 	case class Kick(val who : String) extends UpCommand("kick \""+who+"\"")  
 
-	private[this] def outWrite(line:String):Unit= outWrite(line::Nil)
-	private[this] def outWrite(lines:Seq[String]){
+  object promptNotifier
+ 
+//	private[this] def outWrite(line:String):Unit= outWrite(line::Nil)
+	private[this] def outWrite(line : String){
+	  outWriteLoadFiltered(stateFilter.loadLine(line))
+	}
+	private[this] def outWriteLoadFiltered(line : String){
+	  
+	  
 		for(out<-il2out){
-			for(line<-lines) {
-			  out.append( line.trim+"\n" )
+		  var now = System.currentTimeMillis
+		  while(promptTime>now){
+println("OUT: waiting for "+(promptTime-now)+"ms... '"+line+"'")
+
+				promptNotifier.synchronized {
+				  promptNotifier.wait(timeout)
+				}
+		    now = System.currentTimeMillis
+			}
+		  promptTime = timeout+now
+println("OUT: '"+line+"'")		    
+	  
+//			for(line<-lines) {
+			  //out.append( line.trim+"\n" )
+			  out.println( line.trim)
 			  out.flush
-      }
+//      }
 		}
 	}
 //val handlerLog = new java.io.FileWriter("handler.log")
@@ -105,8 +125,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 			for(client <- clients) {
 				client ! msg//.asMessage
 			}
-		}
-		case msg : UpMessage => {
+		} 
+		case msg : UpMessage => if( stateFilter pass msg ){
 //handlerLog.write("beginning processing for "+msg)			
 //handlerLog.flush
 			var collectedLines : List[DownLine] = Nil
@@ -122,7 +142,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 					}
 				}
 			}
-			outWrite(msg.lines)
+			outWrite(msg.line)
 			
 			// wait for response for 500 ms, after that (or after receiving DownPromptLine) 
 			// go back to accepting new UpMessages and broadcasting any unexpected downmessages
@@ -183,7 +203,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 				case x if x<0 => Thread.currentThread.interrupt
 				case Multiplexer.LF if clientline.last== Multiplexer.CR => {
 					clientline append Multiplexer.LF.toChar
-					Multiplexer.this ! UpMessage( List(clientline.toString), Console.this)
+					Multiplexer.this ! UpMessage( clientline.toString, Console.this)
 					clientline clear
 				}
 				case x if x<65536  => {
@@ -222,8 +242,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		private object Requery
 		override def messageHandler = {
 			case Requery => {
-				Multiplexer.this ! UpMessage( "user\r\n"::Nil, this)
-				Multiplexer.this ! UpMessage( "user STAT\r\n"::Nil, this)
+				Multiplexer.this ! UpMessage( "user", this)
+//				Multiplexer.this ! UpMessage( "user STAT", this)
 				requery(conf.server.pollMillis.apply)
 			}
 			case DownLine(line) => {
@@ -269,7 +289,8 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 					  		    val line = list.removeFirst
 debug("from fbdj line '"+line+"'")
 
-					  		    Multiplexer.this ! UpMessage(""::line::""::Nil, internalConnection)
+					  		   // Multiplexer.this ! UpMessage(""::line::""::Nil, internalConnection)
+					  		   	Multiplexer.this ! UpMessage(line, internalConnection)
 
 
 //					  		    Multiplexer.this ! UpMessage(line::Nil, internalConnection)
@@ -313,8 +334,12 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 
 	var clients : List[AbstractConsole] = internalConnection :: pilotsLister :: Nil
 	var il2socket : Option[Socket] = None
-	var il2out : Option[Writer] = None
+	//var il2out : Option[Writer] = None
+  var il2out : Option[PrintWriter] = None
 	var il2in : Option[Reader] = None
+ 
+  @volatile var promptTime = 0L
+ 
 	var listenersocket : Option[ServerSocket] = None
 
 	var serverThread : Thread = newServerThread 
@@ -388,6 +413,10 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 						il2line.clear
 						createdLine match {
 							case Multiplexer.consoleNPattern(n) => { 
+							  promptTime = System.currentTimeMillis
+							  Multiplexer.this.promptNotifier.synchronized{
+							    Multiplexer.this.promptNotifier.notifyAll
+							  }
 								Multiplexer.this ! DownPromptLine(createdLine)
 							}
 							case _ =>  {
@@ -416,7 +445,8 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 					try{
 						val socket = new Socket(host, il2port)
 						il2in = Some(new InputStreamReader(socket.getInputStream))
-						il2out = Some(new OutputStreamWriter(socket.getOutputStream))
+						//il2out = Some(new OutputStreamWriter(socket.getOutputStream))
+						il2out = Some(new PrintWriter(socket.getOutputStream, true))
 						il2socket = Some(socket)
 						
 						// thread has done its job
