@@ -87,24 +87,20 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		for(out<-il2out){
 		  var now = System.currentTimeMillis
 		  while(promptTime>now){
-println("OUT: waiting for "+(promptTime-now)+"ms... '"+line+"'")
+debug("OUT: waiting for "+(promptTime-now)+"ms... '"+line+"'")
 
 				promptNotifier.synchronized {
 				  promptNotifier.wait(timeout)
+debug("OUT: ...send after "+(System.currentTimeMillis-now)+"ms '"+line+"'")
 				}
 		    now = System.currentTimeMillis
 			}
 		  promptTime = timeout+now
-println("OUT: '"+line+"'")		    
-	  
-//			for(line<-lines) {
-			  //out.append( line.trim+"\n" )
-			  out.println( line.trim)
-			  out.flush
-//      }
+
+		  out.println( line.trim)
+		  out.flush
 		}
 	}
-//val handlerLog = new java.io.FileWriter("handler.log")
 	
 	val defaultMessageHandler : PartialFunction[Any, Unit] = {
 		// default: broadcast as lines 
@@ -188,9 +184,9 @@ println("OUT: '"+line+"'")
 	}
 	
 
-	/**
-*  a client connection, defined with a socket and an accompanying thread listening on the socket's input stream
-*/
+	 /**
+		*  a client connection, defined with a socket and an accompanying thread listening on the socket's input stream
+		*/
 	class Console(val socket : Socket) extends AbstractConsole{
 		private lazy val stream = new OutputStreamWriter(socket.getOutputStream)
 		val reader = new InputStreamReader(socket.getInputStream)
@@ -233,9 +229,9 @@ println("OUT: '"+line+"'")
 			}
 		}
 	}
-	/**
-* either a client console or an internal console
-*/
+	 /**
+		* either a client console or an internal console
+		*/
 	sealed abstract class AbstractConsole extends LiftActor{
 	}
 	object pilotsLister extends AbstractConsole {
@@ -243,11 +239,10 @@ println("OUT: '"+line+"'")
 		override def messageHandler = {
 			case Requery => {
 				Multiplexer.this ! UpMessage( "user", this)
-//				Multiplexer.this ! UpMessage( "user STAT", this)
+				Multiplexer.this ! UpMessage( "user STAT", this)
 				requery(conf.server.pollMillis.apply)
 			}
 			case DownLine(line) => {
-				//debug("to dispatcher line '"+line+"'")
 				server.dispatcher ! DispatchLine(line)
 			}
 			case DownMessage(msg) => {
@@ -282,24 +277,12 @@ println("OUT: '"+line+"'")
 				  inQueue.foreach{ list => 
 					  thread = Some(
 					  	Multiplexer.daemon{
-//debug("fbdj reader '"+System.identityHashCode(list)+"'")
-					  	  
 					  		list.synchronized{
 					  		  while( ! list.isEmpty) {
 					  		    val line = list.removeFirst
-debug("from fbdj line '"+line+"'")
+debug("from fbdj line '"+line.trim+"'")
 
-					  		   // Multiplexer.this ! UpMessage(""::line::""::Nil, internalConnection)
 					  		   	Multiplexer.this ! UpMessage(line, internalConnection)
-
-
-//					  		    Multiplexer.this ! UpMessage(line::Nil, internalConnection)
-					  		    if(line.toLowerCase startsWith "mission "){
-					  		      val millis = 1000
-debug("waiting.. "+millis+" after sending "+line)
-					  		    	Thread.sleep(millis)
-debug("...waited "+millis+" after sending "+line)
-					  		    }
 					  		  }
 					  		  list.wait(1000)
 					  		}
@@ -320,7 +303,7 @@ debug("to fbdj line '"+line+"'")
 				}
 			}
 			case DownMessage(msg) => {
-debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
+debug("to fbdj msg:\n'"+msg.mkString("'\n'")+"'")
 				outQueue.foreach{list=>
 					list.synchronized{
 					  msg.foreach(list add _)
@@ -334,7 +317,6 @@ debug("to fbdj msg:\\\n"+msg.mkString("\n")+"")
 
 	var clients : List[AbstractConsole] = internalConnection :: pilotsLister :: Nil
 	var il2socket : Option[Socket] = None
-	//var il2out : Option[Writer] = None
   var il2out : Option[PrintWriter] = None
 	var il2in : Option[Reader] = None
  
