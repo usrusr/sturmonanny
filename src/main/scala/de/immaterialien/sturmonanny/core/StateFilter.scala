@@ -8,6 +8,7 @@ class StateFilter(multi:TimedLiftActor) extends Log {
   var pending : Set[String] = Set()
   var blocked = false
 	def pass(msg:Multiplexer#UpMessage):Boolean = {
+//log.debug("upmessage: " + msg)	  
 	  var pass = ! blocked
     val lowerLine = msg.line.trim.toLowerCase
 	  

@@ -1,8 +1,18 @@
 package de.immaterialien.sturmonanny.core
 
 import de.immaterialien.sturmonanny.util.configgy
-
-class Configuration(override val file : String) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{   
+ 
+class Configuration(override val file : String, val serverInstance:de.immaterialien.sturmonanny.core.Server) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{
+  
+  override def apply(conf : net.lag.configgy.Config) : Option[java.io.File]= {
+    val ret = super.apply(conf)
+    
+    if(server!=null) serverInstance.conf = this
+    
+    ret
+  }
+  
+  
 	doc = "configuration for a single host instance"
 	object server  extends Group{    
 	  object host extends Field( "127.0.0.1") {doc="host for the console connection"}
@@ -187,7 +197,7 @@ a minimum value for the "smaller" side means that both armies have to reach the 
 	}
 }
 object Configuration {
-   object Default extends Configuration("default.conf")
+   def default(serverInstance:Server) = new Configuration("default.conf", serverInstance)
 }
 
 

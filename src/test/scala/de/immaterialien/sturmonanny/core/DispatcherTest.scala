@@ -17,7 +17,7 @@ class DispatcherTest {
 	@Test  
 	def testRegex() : Unit ={
 		val d = new LocalizedDispatcher(){
-		  override def conf = new Configuration("default.conf")
+		  override def conf = new Configuration("default.conf", null)
 		  override def pilotMessageSend(who:String, what:Is.Event) = debug("would have sent to "+who+"<-"+what) 
 		} 
 		d.updateConfiguration

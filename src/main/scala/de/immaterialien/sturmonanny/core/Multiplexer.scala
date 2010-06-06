@@ -87,11 +87,11 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		for(out<-il2out){
 		  var now = System.currentTimeMillis
 		  while(promptTime>now){
-debug("OUT: waiting for "+(promptTime-now)+"ms... '"+line+"'")
+//debug("OUT: waiting for "+(promptTime-now)+"ms... '"+line+"'")
 
 				promptNotifier.synchronized {
 				  promptNotifier.wait(timeout)
-debug("OUT: ...send after "+(System.currentTimeMillis-now)+"ms '"+line+"'")
+//debug("OUT: ...send after waiting "+(System.currentTimeMillis-now)+"ms '"+line+"'")
 				}
 		    now = System.currentTimeMillis
 			}
@@ -294,7 +294,7 @@ debug("from fbdj line '"+line.trim+"'")
 				}
 			}
 			case DownLine(line) => {
-debug("to fbdj line '"+line+"'")
+//debug("to fbdj line '"+line+"'")
 				outQueue.foreach{list=>
 					list.synchronized{
 					  list.add(line)
@@ -303,7 +303,7 @@ debug("to fbdj line '"+line+"'")
 				}
 			}
 			case DownMessage(msg) => {
-debug("to fbdj msg:\n'"+msg.mkString("'\n'")+"'")
+//debug("to fbdj msg:\n'"+msg.map(_ trim).mkString("'\n'")+"'")
 				outQueue.foreach{list=>
 					list.synchronized{
 					  msg.foreach(list add _)

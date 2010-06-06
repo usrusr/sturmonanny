@@ -3,14 +3,14 @@ package de.immaterialien.sturmonanny.core
 import de.immaterialien.sturmonanny.util._
 import de.immaterialien.sturmonanny.core._ 
 import de.immaterialien.sturmonanny.fbdjhosting.FbdjAdapter 
-
+  
 class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) extends Logging{
   def this(initConf:String) = this(initConf, null)
 	def this() = this("default.conf") 
 	private var members : List[UpdatingMember] = Nil
 	this : Server
  
-	private var internalconf = new Configuration(initConf) 
+	private var internalconf = new Configuration(initConf, this) 
 	def conf = internalconf  
 	def conf_= (newConf : Configuration) {  
 		internalconf = newConf
@@ -51,7 +51,7 @@ trait NonUpdatingMember extends UpdatingMember {
 trait UpdatingMember { 
 	def updateConfiguration : Unit 
 	val server : Server = null // overridden by Server#Member
-	def conf  : Configuration = Configuration.Default
+	def conf  : Configuration = Configuration.default(server)
 }
 
 object Server {
