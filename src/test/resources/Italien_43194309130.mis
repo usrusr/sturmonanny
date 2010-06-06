@@ -1,0 +1,139 @@
+[MAIN]
+  MAP Italy_DF/load.ini
+  TIME 13.0
+  CloudType 1
+  CloudHeight 1447
+  playerNum 0
+[WING]
+[Chiefs]
+[Stationary]
+[NStationary]
+[Rocket]
+[Buildings]
+[Target]
+[StaticCamera]
+  122435 47679 100
+  145086 40406 100
+  120726 25089 100
+  144306 27232 100
+  128900 37498 1
+  128900 37498 2
+[BornPlace]
+  1 3000 149599 17000
+  2 3000 127399 76800
+  1 3000 127099 27899
+[BornPlace0]
+  HurricaneMkIIc 
+  P-38J 
+  SpitfireMkIXe 
+  P-47D-10 
+  A-20C 
+[BornPlace1]
+  Bf-109G-6_Late 
+  MC-205_III 
+  Bf-110G-2 
+  Ju-87G-1 
+  Fw-190A-5165ATA 
+  Ju-87D-5 
+  Ju-88A-4 
+  He-111H-6 
+[BornPlace2]
+  P-47D-10 
+  P-38J 
+  BeaufighterMk21 
+  F6F-3 
+  P-40M 
+[RespawnTime]
+  Bigship      1000000
+  Ship         1000000
+  Aeroanchored 1000000
+  Artillery    1000000
+  Searchlight  1000000
+[Bridge]
+[House]
+[FrontMarker]
+  FrontMarker0 999.56 158999.64 2
+  FrontMarker1 12999.76 157999.56 2
+  FrontMarker2 26299.99 147499.80 2
+  FrontMarker3 41800.03 142299.84 2
+  FrontMarker4 61200.62 144600.38 2
+  FrontMarker5 69101.59 127999.91 2
+  FrontMarker6 72199.77 107009.64 2
+  FrontMarker7 96399.41 115299.10 2
+  FrontMarker8 109310.02 113799.50 2
+  FrontMarker9 116601.06 109700.00 2
+  FrontMarker10 134500.45 114300.14 2
+  FrontMarker11 128100.30 129099.95 2
+  FrontMarker12 142100.53 128499.80 2
+  FrontMarker13 143699.88 115998.64 2
+  FrontMarker14 144499.73 97700.07 2
+  FrontMarker15 143700.06 87498.92 2
+  FrontMarker16 137100.09 75099.74 2
+  FrontMarker17 140900.02 61899.10 2
+  FrontMarker18 143900.11 47199.23 2
+  FrontMarker19 145098.31 40498.32 1
+  FrontMarker20 145098.31 40498.32 2
+  FrontMarker21 144301.78 27300.35 1
+  FrontMarker22 149599.34 17000.55 1
+  FrontMarker23 143500.02 25101.01 1
+  FrontMarker24 141099.95 21797.86 1
+  FrontMarker25 124100.30 8900.55 1
+  FrontMarker26 110000.32 7400.20 1
+  FrontMarker27 100899.37 4099.65 1
+  FrontMarker28 87599.55 13199.98 1
+  FrontMarker29 82399.99 6899.44 1
+  FrontMarker30 81698.27 9299.61 1
+  FrontMarker31 18099.82 141500.47 2
+  FrontMarker32 20599.59 133900.84 2
+  FrontMarker33 41800.06 129299.86 2
+  FrontMarker34 65299.76 135699.92 2
+  FrontMarker35 70800.63 139000.28 2
+  FrontMarker36 76300.17 140699.78 2
+  FrontMarker37 91699.84 139799.73 2
+  FrontMarker38 109099.35 137300.50 2
+  FrontMarker39 120100.11 140999.91 2
+  FrontMarker40 139400.14 142300.11 2
+  FrontMarker41 67499.98 114099.82 2
+  FrontMarker42 78000.51 102010.04 2
+  FrontMarker43 93200.62 106899.95 2
+  FrontMarker44 118100.16 122499.95 2
+  FrontMarker45 101500.13 94299.66 2
+  FrontMarker46 87009.79 93998.60 2
+  FrontMarker47 85400.81 90299.76 2
+  FrontMarker48 87899.95 91499.65 2
+  FrontMarker49 99699.62 86100.25 2
+  FrontMarker50 111600.91 86800.08 2
+  FrontMarker51 121800.02 83300.41 2
+  FrontMarker52 127399.94 76800.10 2
+  FrontMarker53 128299.76 62599.98 2
+  FrontMarker54 126099.89 53999.95 2
+  FrontMarker55 123999.93 49199.74 2
+  FrontMarker56 122200.02 48000.30 1
+  FrontMarker57 128900.07 37498.21 2
+  FrontMarker58 120699.20 25100.15 1
+  FrontMarker59 106498.31 25500.07 1
+  FrontMarker60 92997.60 20100.10 1
+  FrontMarker61 116039.66 17199.52 1
+  FrontMarker62 127099.96 27899.77 1
+  FrontMarker63 23599.80 130299.98 2
+  FrontMarker64 33400.14 126099.90 2
+  FrontMarker65 54099.67 115699.99 2
+  FrontMarker66 54599.25 101500.27 2
+  FrontMarker67 64699.89 101509.73 2
+  FrontMarker68 61800.16 107300.59 2
+  FrontMarker69 97699.79 123099.90 2
+  FrontMarker70 109299.91 104500.51 2
+  FrontMarker71 111199.72 90500.48 2
+  FrontMarker72 127700.32 92899.74 2
+  FrontMarker73 76999.63 17000.79 1
+  FrontMarker74 30998.32 14399.91 1
+  FrontMarker75 22999.25 14999.63 1
+  FrontMarker76 76926.25 11522.99 1
+  FrontMarker77 77999.73 12000.71 1
+  FrontMarker78 16130.61 15100.67 1
+  FrontMarker102 24052.62 125916.94 2
+  FrontMarker103 121188.26 48308.21 1
+  FrontMarker104 116989.02 50196.34 1
+  FrontMarker105 99349.91 39377.43 1
+  FrontMarker106 71088.88 25624.68 1
+  FrontMarker107 54177.35 -100000.43 1
