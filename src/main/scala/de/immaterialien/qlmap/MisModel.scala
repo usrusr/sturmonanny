@@ -5,6 +5,7 @@ import scala.xml._
 import scala.swing
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
+import java.io
 
 class MisModel {
 	var front : List[(Double, Double, Int)] = Nil
@@ -12,7 +13,11 @@ class MisModel {
 	var bfront : List[(Double, Double)] = Nil
 	var width = 160000.
 	var height = 160000.
+	var widthOffset  = 0.
+	var heightOffset = 0.
+	var imageFile : io.File = null
 	def frontMarker(x:Double, y:Double, a:Int) {
+println("frontmarker: "+x+" / "+y +" for "+a)	  
 	  front = (x,y,a)::front
 	  if(a==1) rfront = (x,y)::rfront
 	  if(a==2) bfront = (x,y)::bfront
@@ -20,13 +25,23 @@ class MisModel {
  	def bornPlace(a:Integer, x:Double, y:Double) {
  	  
  	}
+ 	def baseInfo(baseInfo:Option[MapInfo]) {
+ 	  for(in<-baseInfo) {
+ 	    imageFile = in.image.get
+ 	    width = in.width.getOrElse(10.)*10000.
+ 	    height = in.height.getOrElse(10.)*10000.
+ 	    widthOffset = in.widthOffset.getOrElse(0.)*10000.
+ 	    heightOffset = in.heightOffset.getOrElse(0.)*10000.
+ 	  }
+ 	   
+ 	}
 
    def sideVal (x:Double, y:Double, markers:List[(Double, Double)]) : Double = {
      val zero:(Double, Double)=(0,0)
      val ret = markers.foldLeft(zero)(  ((acc:(Double, Double), coord:(Double, Double))=>{
        val (px, py) = coord
-       val xd = (x*width-px)
-       val yd = (y*height-py)
+       val xd = (x*width-(px-widthOffset))
+       val yd = (y*height-(py-heightOffset))
        val dist = Math.sqrt(xd*xd + yd*yd)
        val dimension = width+height
        val add = (Math.pow(dimension/dist, 3))/dist       
@@ -38,6 +53,26 @@ class MisModel {
    	(ret._1/markers.size)*1 + ret._2                                     
    }
   
+   def paint(forMission:io.File):Unit={
+     
+     var format:String = null
+     
+// reanimate to enable PNG output...    
+//     val iis = ImageIO.createImageInputStream(imageFile)
+//     val readers = ImageIO.getImageReaders(iis)
+//     while(format==null && readers.hasNext) {
+//       val reader = readers.next
+//       format = reader.getFormatName 
+//     }
+//     iis.close
+     if(format==null) format = "JPG"
+     val in = ImageIO.read(imageFile)
+     
+ 
+     paint(in)
+     
+     ImageIO.write(in, format, new java.io.File(forMission.getParentFile, forMission.getName+"."+format))
+   }
    def paint(in:BufferedImage):BufferedImage={
      paint(in, 4, 3)
      hatch(in)
@@ -69,8 +104,12 @@ class MisModel {
      }
      
      def differentSides(vals : Double*) : Boolean = {
-       val sig = Math.signum(vals.first)
-       vals.exists(x => Math.signum(x) != sig)
+       def signum(d:Double):Double={
+         if(d.isNaN || Double.NaN==d) 0
+         else Math.signum(d)
+       }
+       val sig = signum(vals.first)
+       vals.exists(x => signum(x) != sig)
 //       var sig = Math.signum(vals.first)
 //       vals.exists(x => {
 //         val nSig = Math.signum(x)

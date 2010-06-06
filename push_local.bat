@@ -1,1 +1,1 @@
-git push /cygdrive/g/gitbak/qlmap
+git push backup
