@@ -210,7 +210,7 @@ debug("no parseResult: None from '"+line+"'")
      * a dynamic token set (with recently-used timeout) that happens to 
      * 
      */
-  	object pilotNameParser extends Parser[String] {
+  object pilotNameParser extends Parser[String] {
 		private val noNamesParser = literal("")
 		private var namesParser : Parser[String]= noNamesParser
 		private val namesSet = new mutable.LinkedHashMap[String, TimeOutingLiteral]()
@@ -371,7 +371,7 @@ debug("no parseResult: None from '"+line+"'")
 		  }
 		  ret
 		}
-		private def selectLine(name:String, event:Is.Event):Parser[PilotMessage]={
+		private def selectLine(name:String, event:Is.Individual):Parser[PilotMessage]={
 		  mergeLineOptions(name) ^^ (PilotMessage(_, event))
 		}
 	 

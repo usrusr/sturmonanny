@@ -53,7 +53,31 @@ debug("container pool returning -> "+overridesToPool)
   }
   
 	case class InstallationInfo(installationPath:String, overridesJar : String)
+ 
+ 
+	object LoaderStatus {
+	  var count = 0
+	  object loaderstatus {
+		  val loaders = new java.util.WeakHashMap[java.net.URLClassLoader, Boolean]
+		  def registerLoader(loader:java.net.URLClassLoader) = loaders.put(loader, true)
+		  def unregisterLoader(loader:java.net.URLClassLoader) = loaders.put(loader, false)
+		  override def toString = { 
+		    var actives = 0
+		    var zombies = 0
+		    val it = loaders.entrySet.iterator
+	      while(it.hasNext){
+	        val entry = it.next
+	        val ref = entry.getKey
+	        val active = entry.getValue
+	        if(active) actives=1+actives else zombies=1+zombies 
+	      }
+	      ("\n   (of "+(zombies+actives)+" created classloaders, "+zombies+" are zombies)")
+		  }
+	  }
+	}
 }
+
+
 
 class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
 		val overrideUrl = new java.io.File(info.overridesJar).toURL
@@ -62,6 +86,7 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
   
 		var outList : java.util.LinkedList[String] = null 
 		var inList : java.util.LinkedList[String] = null
+		var eventList : java.util.LinkedList[String] = null
   
 		private var conf : de.immaterialien.sturmonanny.core.Configuration = null
 		private var name:String = "def"
@@ -73,7 +98,7 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
 		  name=nName
 		}
 
-  debug("initializing fbdj container @ '"+info.installationPath +"' \n  "+FbdjHost.loaderstatus)
+  debug("initializing fbdj container @ '"+info.installationPath +"' \n  "+ContainerPool.LoaderStatus.loaderstatus)
 		private val jarFile = new java.io.File(info.installationPath+"/FBDj.jar")
   	private val jarUrl = jarFile.toURL
     
@@ -108,23 +133,23 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
     }
     
   	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent)
-   FbdjHost.loaderstatus.registerLoader(classLoader)
-  	try{
-  		val connClass = classLoader.loadClass("utility.SocketConnection")
-  		val inQueueField = connClass.getField("inQueue")
-  		val outQueueField = connClass.getField("outQueue")
-  		
-  		outList = inQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
-  		inList = outQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
-trace("FbdjHost: outList : "+System.identityHashCode(outList))    
-trace("FbdjHost: inList  : "+System.identityHashCode(inList))    
-  		()
-    }catch{
-      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
-    }
+   ContainerPool.LoaderStatus.loaderstatus.registerLoader(classLoader)
+//  	try{
+//  		val connClass = classLoader.loadClass("utility.SocketConnection")
+//  		val inQueueField = connClass.getField("inQueue")
+//  		val outQueueField = connClass.getField("outQueue")
+//  		
+//  		outList = inQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
+//  		inList = outQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
+//trace("ContainerPool.LoaderStatus: outList : "+System.identityHashCode(outList))    
+//trace("ContainerPool.LoaderStatus: inList  : "+System.identityHashCode(inList))    
+//  		()
+//    }catch{
+//      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
+//    }
 
    	val threadName = "FBDj container"
-    val tg = new ThreadGroup("group for "+threadName+" "+FbdjHost.count) {
+    val tg = new ThreadGroup("group for "+threadName+" "+ContainerPool.LoaderStatus.count) {
 		  override def uncaughtException(t:Thread , e:Throwable ) {
 		    if(classOf[java.lang.ThreadDeath].isInstance(e)){
 debug("thread death in "+t.getName)		      
@@ -133,12 +158,33 @@ debug("thread death in "+t.getName)
 		    }
 		  }
 		}
-  	val mainClass = try{
-  		classLoader.loadClass("de.immaterialien.sturmonanny.fbdjinterface.StartStopInterface")
+//  	val mainClass = try{
+//  		classLoader.loadClass("de.immaterialien.sturmonanny.fbdjinterface.StartStopInterface")
+//    }catch{
+//      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load FBDj.jar from "+jarUrl+" ")
+//    }
+//		val internalInterface = mainClass.newInstance.asInstanceOf[javax.xml.ws.Provider[String]]
+
+    val internalInterface = try{
+  		val connClass = classLoader.loadClass("de.immaterialien.sturmonanny.fbdjinterface.CallbackHolder")
+  		val consoleInQueueField = connClass.getField("consoleInQueue")
+  		val consoleOutQueueField = connClass.getField("consoleOutQueue")
+  		val eventlogOutQueue = connClass.getField("eventlogOutQueue")
+  		val startStopInterface = connClass.getField("startStopInterface")
+
+      val newMissionCallback = connClass.getField("startStopInterface")
+
+    
+  		outList = consoleInQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
+  		inList = consoleOutQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
+  		eventList = eventlogOutQueue.get(null).asInstanceOf[java.util.LinkedList[String]]
+    
+    	newMissionCallback.set(null, new NextMissionProvider(conf))
+
+  		startStopInterface.get(null).asInstanceOf[javax.xml.ws.Provider[String]]
     }catch{
-      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load FBDj.jar from "+jarUrl+" ")
-    }
-		val internalInterface = mainClass.newInstance.asInstanceOf[javax.xml.ws.Provider[String]]
+      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
+    }  
   
 		val interface = new Thread(tg, threadName) with javax.xml.ws.Provider[String]{
 		  val nIn = new Object
@@ -229,7 +275,7 @@ debug("emerged from threadwall return "+ret.getOrElse(null))
 			send.STOP
       ContainerPool.returnToPool(this)
       /*
-debug("shutting down FBDj!!! "+FbdjHost.loaderstatus)
+debug("shutting down FBDj!!! "+ContainerPool.LoaderStatus.loaderstatus)
 tg.list
       val parameters :Array[Array[String]]= Array(Array(
         arg("disconnect", ""+true),
@@ -253,8 +299,8 @@ tg.list
 ////      	  tg.stop
 //        }
 //      }
-      FbdjHost.loaderstatus.unregisterLoader(classLoader)
-debug("shutting down FBDj, classloader unregistered "+FbdjHost.loaderstatus)
+      ContainerPool.LoaderStatus.loaderstatus.unregisterLoader(classLoader)
+debug("shutting down FBDj, classloader unregistered "+ContainerPool.LoaderStatus.loaderstatus)
       */
     }
 

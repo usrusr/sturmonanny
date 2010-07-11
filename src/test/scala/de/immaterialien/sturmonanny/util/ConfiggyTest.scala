@@ -10,7 +10,7 @@ class ConfiggyTest {
 }
 object ConfiggyTest { 
   def main(args : Array[String]) : Unit = {  
-    val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf") 
+    val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf", null) 
     with LiftSupport
      
     println("names.currency before '"+(c.names.currency)+"'" )

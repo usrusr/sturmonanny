@@ -29,7 +29,7 @@
   </fileSets>
   <files>
     <file>
-      <source>C:/Users/ulf/.m2/repository/de/immaterialien/FBDj-overrides/0.0.2-SNAPSHOT/FBDj-overrides-0.0.2-SNAPSHOT.jar</source>
+      <source>C:/Users/ulf/.m2/repository/de/immaterialien/FBDj-overrides/0.0.6-SNAPSHOT/FBDj-overrides-0.0.6-SNAPSHOT.jar</source>
       <outputDirectory>/</outputDirectory>
       <destName>FBDj-overrides.jar</destName> 
     </file>

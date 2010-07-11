@@ -1,16 +1,35 @@
 package de.immaterialien.sturmonanny.core
 
 
-case class PilotMessage(who: String, event : Is.Event)
+
+case class Message()
+case class PilotMessage(who: String, event : Is.Individual) extends Message
+case class PilotMessageAt(override val who : String, override val event : Is.Individual, where:At.Location) extends PilotMessage(who, event)
+
+case class GlobalMessage(event : Is.Global) extends Message
+
 case class DispatchLine(line:String)
 case class DispatchMessage(message:String) {
 //	val stack = new Exception().getStackTraceString
 }
+
+object At {
+   case class Location(x:Double, y:Double)
+}
+
 object Is {  
     
-	sealed trait Event 
-	trait PlaneEvent extends Event
-	trait PilotEvent extends Event
+	sealed trait Event
+	sealed trait Global extends Event
+ 	
+  case object MissionBegin extends Global
+  case object MissionEnd extends Global
+  case class MissionChanging(mis:String) extends Global
+	
+ 
+	sealed trait Individual extends Event
+	trait PlaneEvent extends Individual
+	trait PilotEvent extends Individual
 	trait Positive extends Event
 	trait Negative extends Event
 	trait PlaneLost extends PlaneEvent with Negative
@@ -28,7 +47,9 @@ object Is {
 	case class Flying(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
 	  def this(plane:String, side:String) = this(plane, Armies.forName(side )) 
 	}
-	 
+  case class TakingSeat(plane : String) extends PilotEvent
+  case class Loading(plane : String, weapon:String, fuel:Double) extends PilotEvent
+  
  
 	case class Chatting(val msg : String) extends PilotEvent 
  
@@ -36,13 +57,14 @@ object Is {
  	case object Returning extends PlaneSafe with PilotSafe
 	case object Crashing extends PlaneLost
    	case object Dying extends PilotLost with PlaneLost
+    
 
 
    	case object Joining extends PilotEvent 
    	case object Leaving extends PilotEvent
 
-    case object Unknown extends Event 
-    case object Ignored extends Event 
+    case object Unknown extends Individual with Global 
+    case object Ignored extends Individual with Global 
    
 //	case object Destroyed extends PlaneLost with PilotLost
 	case class Informed(val text : String) extends PilotEvent

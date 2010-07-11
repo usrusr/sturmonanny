@@ -7,7 +7,7 @@ class Configuration(override val file : String, val serverInstance:de.immaterial
   override def apply(conf : net.lag.configgy.Config) : Option[java.io.File]= {
     val ret = super.apply(conf)
     
-    if(server!=null) serverInstance.conf = this
+    if(server!=null) serverInstance.conf = this 
     
     ret
   }
@@ -190,8 +190,48 @@ a minimum value for the "smaller" side means that both armies have to reach the 
       }
      }
 
-     
-     
+     object addons extends Table(0){
+       doc = """optional pre- or postprocessing for the mission generator script inside of the JVM
+
+purpose: while processing with command-line tools can easily be included in a script referenced by the dcgCommand parameter, 
+processing implemented in a JVM-language (e.g. java) would suffer from JVM startup times if set up that way. To solve this 
+JVM-processing should better be invoked inside the sturmonanny JVM.
+
+example configuration:
+<addons>
+my.package.Preprocessor = -10
+my.package.Postprocessor = 1
+my.other.package.AnotherPostprocessor = 10
+</addons>
+
+Keys (left of the equals sign) have to be fully qualified class names of classes present on the classpath. 
+Values (right of the equals sign) have to be unique numbers: 
+	* negative values for preprocessors (called before the script invokation)
+  * positive values for postprocessors (called after the script invokation)
+The exact value of the numbers defines the order in which the processors are called, ascending from lowest negative 
+value to highest positive values, with the DCG console command at position 0 
+
+Implementation notes: the processor classes have to implement javax.xml.ws.Provider<java.io.File> 
+(used as a simple File -> File filter interface). 
+The processors form a filter chain: the invoke method of the first processor 
+(a preprocessor or the implicit CLI script at position 0) is called with a File 
+object pointing at the current .mis file, all further processors are called with 
+the result of the last processor invoke call. In case of a thrown exception or an 
+invalid return value the last input is used. Processor objects are either created 
+from the default constructor or from a single String argument constructor, if available. 
+Use the <addonArguments> configuration for setup through this String argument constructor.  
+"""
+     }
+     object addonArguments extends Table(""){
+       doc = """optional configuration for processors defined in <addons>
+ 
+example configuration:
+<addonArguments>
+my.package.Postprocessor = "this will be used as argument for a String argument constructor of my.package.Postprocessor, if available"
+</addonArguments>
+"""
+       
+     }
    }
    
 	}

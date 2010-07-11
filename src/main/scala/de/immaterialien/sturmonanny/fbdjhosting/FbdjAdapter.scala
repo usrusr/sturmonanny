@@ -20,6 +20,9 @@ class FbdjAdapter extends core.UpdatingMember with Logging {
   private var minPilotsBigger = 0
   private var minPilotsSmaller = 0
   
+  private var addons = Map[String, Int]()
+  private var addonArguments = Map[String, String]() 
+  private var nextMissionProvider : NextMissionProvider = null
   
   var fbdj : Option[FbdjContainer] = None
   
@@ -64,6 +67,8 @@ debug("beginning to set up FBDj at '"+conf.fbdj.installationPath.apply+"'")
      ||   conf.fbdj.DCG.campaignProgress.minPilots.bigger.apply != minPilotsBigger
      ||   conf.fbdj.DCG.campaignProgress.minPilots.smaller.apply != minPilotsSmaller
      
+     ||   conf.fbdj.DCG.addons.map != addons
+     ||   conf.fbdj.DCG.addonArguments.map != addonArguments
      
      || ! fbdj.isDefined
 	  	)
@@ -94,6 +99,12 @@ debug("FBDj configuratoin changing!")
 		  		minPilotsBigger=conf.fbdj.DCG.campaignProgress.minPilots.bigger
 		  		minPilotsSmaller=conf.fbdj.DCG.campaignProgress.minPilots.smaller      
       
+          addons = conf.fbdj.DCG.addons.map 
+          addonArguments = conf.fbdj.DCG.addonArguments.map
+      
+          
+          nextMissionProvider = new NextMissionProvider(conf) 
+          
 		  		overridesPath = conf.fbdj.overridesJar
 	  	    debug("initialized FBDj: \n  "+fbdjPath+"\n  "+overridesPath+"\n  "+confPath+"\n   in:"+System.identityHashCode(fbdj.get.inList)+"   out:"+System.identityHashCode(fbdj.get.outList))
 		  		server.multi.internalConnection ! server.multi.internalConnection.UpdatedQueues 

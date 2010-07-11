@@ -10,7 +10,7 @@ class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) exten
 	private var members : List[UpdatingMember] = Nil
 	this : Server
  
-	private var internalconf = new Configuration(initConf, this) 
+	private var internalconf = new Configuration(initConf, this)  
 	def conf = internalconf  
 	def conf_= (newConf : Configuration) {  
 		internalconf = newConf
