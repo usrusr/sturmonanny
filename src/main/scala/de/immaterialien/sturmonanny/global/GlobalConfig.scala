@@ -10,7 +10,7 @@ class GlobalConfig(private val fname:String) extends configgy.ConfigurationSchem
 	object admin extends Group{
 	  doc = "login data for the web configuration interface"
 	  object user extends Field("") { // no internal default!
-	    doc = "login name (case sensitive)"
+doc = "login name (case sensitive)"
       override def update(usr:String) = {
         hash() = GlobalConfig.hashPass(usr, pass)
         super.update(usr) 

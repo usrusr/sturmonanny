@@ -64,7 +64,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		       }
         case None => {
-debug("no parseResult: None from '"+line+"'")		        
+        	debug("no parseResult: None from '"+line+"'")		        
         }
           
         case Is.Ignored =>
