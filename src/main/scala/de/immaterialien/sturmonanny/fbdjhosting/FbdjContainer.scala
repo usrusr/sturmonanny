@@ -80,7 +80,7 @@ debug("container pool returning -> "+overridesToPool)
 
 
 class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
-		val overrideUrl = new java.io.File(info.overridesJar).toURL
+		val overrideUrl = new java.io.File(info.overridesJar).toURI
   
   override def toString = "FBDj container @ "+info.installationPath+" from "+info.overridesJar
   
@@ -100,7 +100,7 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
 
   debug("initializing fbdj container @ '"+info.installationPath +"' \n  "+ContainerPool.LoaderStatus.loaderstatus)
 		private val jarFile = new java.io.File(info.installationPath+"/FBDj.jar")
-  	private val jarUrl = jarFile.toURL
+  	private val jarUrl = jarFile.toURI
     
     
   	private val overrideFile = new java.io.File(info.overridesJar)
@@ -132,7 +132,7 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
       case _:ClassNotFoundException => // check passed, no FBDj.jar on classpath
     }
     
-  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent)
+  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl.toURL, jarUrl.toURL), parent)
    ContainerPool.LoaderStatus.loaderstatus.registerLoader(classLoader)
 //  	try{
 //  		val connClass = classLoader.loadClass("utility.SocketConnection")

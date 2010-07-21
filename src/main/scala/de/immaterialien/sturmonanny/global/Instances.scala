@@ -23,7 +23,7 @@ server2 = "server2.conf"
 println("instances read: "+this+"\n---from---"+in)
     if(instancesMapToLoad!=null) instancesMapToLoad.retain((k,v)=>{
 println("found in map: "+k+" is "+v)
-      if((instancesMapToLoad!=null) && (instancesMapToLoad.keys contains k)){
+      if((instancesMapToLoad!=null) && (instancesMapToLoad contains k)){
 println("keeping "+k)
         true
       }else{

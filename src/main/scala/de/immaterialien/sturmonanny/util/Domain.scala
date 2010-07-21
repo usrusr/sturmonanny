@@ -25,7 +25,7 @@ trait Domain[D <: Domain[D]]  extends  Logging{
 //debug("domainactor adding  "+p.name)		     
 		    items.put(p.name, p)
 		  }
-		  case unregister(p) => items.removeKey(p.name)
+		  case unregister(p) => items.remove(p.name)
 	   
     	  case forMatches(pat, body) => {
     	    val founds = find(pat)

@@ -277,7 +277,7 @@ debug(name + " sending chat "+msg)
 		}
 			
 
-		private def chat(msg:String) = server.multi ! server.multi.ChatTo(name, msg) 
+		private def chat(msg:String) = server.multi ! new server.multi.ChatTo(name, msg) 
 		
 	}
 }

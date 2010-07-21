@@ -57,9 +57,9 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //log.write("\n<-------\n")
 //log.flush
 		parseResult.getOrElse(None) match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+line+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored,_) => // ignore
+		      case PilotMessage(who, Is.Unknown,_) => debug("unkown message: '"+line+"'")
+		      case PilotMessage(who, what ,_) => {
 		    	  pilotMessageSend(who, what)
 //debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		       }
@@ -85,9 +85,9 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //log.flush  
 		for (res <- resList) { 
 		  res match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+lines+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored,_) => // ignore
+		      case PilotMessage(who, Is.Unknown,_) => debug("unkown message: '"+lines+"'")
+		      case PilotMessage(who, what ,_) => {
 		    	  pilotMessageSend(who, what)
 //debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
 		       }

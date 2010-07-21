@@ -1,7 +1,7 @@
 package de.immaterialien.sturmonanny.util.configgy
 
 import net.lag.configgy.{Config, ConfigMap}
-
+import de.immaterialien.sturmonanny.util._
  
 /**
  * 
@@ -53,7 +53,7 @@ import net.lag.configgy.{Config, ConfigMap}
  */
 abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting with Log{ 
 	val fileReference = this({
-		log.trace("parsing file "+file)	  
+		log.trace("parsing file "+file)	   
 	  if(file==null) new Config 
     else {
       Config.fromFile(file)
@@ -320,7 +320,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 			    	}catch{case _ => }
 			    }
 		    }
-			  members = members.sort(_ < _)
+			  members = members.sortWith(_ < _)
 	      true
 		  }  
    	  protected[configgy] def readConfiggy(in : Config):Unit= {
@@ -335,8 +335,8 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 		    changeGroup(sb, full, inPrefix)
 		  }
 	    private def changeGroup(sb : StringBuilder, oldP : String, newP : String):String = {
-			  var oldS = List.fromString(oldP, '.')
-			  var newS = List.fromString(newP, '.')
+			  var oldS = oldP.split('.').toList
+			  var newS = newP.split('.').toList
 			  var count = -1
 			  while (newS != Nil && oldS!=Nil &&  oldS.head == newS.head ){
 			    newS = newS.tail
@@ -396,8 +396,8 @@ object ConfigurationSchema {
       }
 	  }
 	}
-  abstract case class Msg(val msg:String)
-  case class Warning(override val msg:String) extends Msg(msg)
+  abstract class Msg(val msg:String)
+  case class Warning(override val msg:String) extends Msg(msg) 
   case class Error(override val msg:String) extends Msg(msg)
   case class Success(override val msg:String) extends Msg(msg)
 }

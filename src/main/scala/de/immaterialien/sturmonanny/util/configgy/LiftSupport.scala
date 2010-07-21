@@ -59,7 +59,7 @@ trait LiftSupport extends ConfigurationSchema {
 		    	    fullName -> new BooleanTabulator(table.asInstanceOf[ConfigurationSchema#Table[Boolean]])
 		    	  }
 		    	  case x:Int		 	=> {
-							fullName -> new IntegerTabulator(table.asInstanceOf[ConfigurationSchema#Table[Integer]])
+							fullName -> new IntTabulator(table.asInstanceOf[ConfigurationSchema#Table[Int]])
 		    	  }
 		      }
 		      val unbound =
@@ -84,7 +84,7 @@ trait LiftSupport extends ConfigurationSchema {
 		    	  }
 		    	  case x:Int		 	=> {
 		    		  attributes = new UnprefixedAttribute("title", "full number", attributes)
-							fullName -> new IntegerValidator(field.asInstanceOf[ConfigurationSchema#Field[Integer]])
+							fullName -> new IntValidator(field.asInstanceOf[ConfigurationSchema#Field[Int]])
 		    	  }
        
 		    	}
@@ -128,8 +128,16 @@ trait LiftSupport extends ConfigurationSchema {
     </form>
     
     val paramCopy:List[Bindator] = params.map{
-      case TheBindableBindParam(_, x:Bindator) => Some(x)
-      case _ => None
+//      case TheBindableBindParam(_, x:Bindator) => Some(x)
+//    	case BindParam(_ , x:Bindator) => Some(x)
+//      case _ => None
+    	
+    	param => 
+    	if(param.isInstanceOf[net.liftweb.util.BindHelpers.TheBindParam]) {
+    		val theParamValue = param.asInstanceOf[net.liftweb.util.BindHelpers.TheBindParam].value
+    		if(theParamValue.isInstanceOf[Bindator]) Some(theParamValue.asInstanceOf[Bindator])
+    		else None
+    	}else None
  		}.filter(_ isDefined).map(_ get).toList
     
     params += "submitapply" -> SHtml.submit("Apply", () => updateConfiguration(paramCopy) )
@@ -216,7 +224,7 @@ trait LiftSupport extends ConfigurationSchema {
       }
     }
   }
-  private class IntegerValidator(receiver : ConfigurationSchema#Field[Integer] ) extends Validator[Integer](receiver){
+  private class IntValidator(receiver : ConfigurationSchema#Field[Int] ) extends Validator[Int](receiver){
     override def asHtml = {
       val attributes = if(receiver.max!=null || receiver.min!=null) {
     	  val biggest : Int = if(receiver.max==null){
@@ -225,7 +233,7 @@ trait LiftSupport extends ConfigurationSchema {
     	    receiver.max.intValue
     	  }else{ 
     	    val max : Int = receiver.max.intValue 
-    	    scala.Math.max(max, (-1 * receiver.min.intValue ))
+    	    math.max(max, (-1 * receiver.min.intValue ))
     	  }
       	val len = 1 + (""+biggest).length
         ("size", ""+len) :: Nil
@@ -310,7 +318,7 @@ trait LiftSupport extends ConfigurationSchema {
     }	
    	def mapKeyValue[R](func : ((String, String)=>R)):Seq[R] = {
    	  intermediates.getConfigMap(receiver.full).map{x => 
-   			x.asMap.projection.toList.map(kv=> func(kv._1, kv._2))
+   			x.asMap.view.toList.map(kv=> func(kv._1, kv._2))
       }.getOrElse(Nil)
    	}
    
@@ -340,7 +348,7 @@ trait LiftSupport extends ConfigurationSchema {
           None
     }
   }
-  private class IntegerTabulator(receiver : ConfigurationSchema#Table[Integer] ) extends Tabulator[Integer](receiver){
+  private class IntTabulator(receiver : ConfigurationSchema#Table[Int] ) extends Tabulator[Int](receiver){
 
     override def validate(is : String) = {
     	if( ! LiftSupport.numberPattern.unapplySeq(is).isDefined) Some("'"+is+"' is not a full number!")   

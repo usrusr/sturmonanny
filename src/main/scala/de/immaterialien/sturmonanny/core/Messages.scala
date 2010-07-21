@@ -2,9 +2,13 @@ package de.immaterialien.sturmonanny.core
 
 
 
-case class Message()
-case class PilotMessage(who: String, event : Is.Individual) extends Message
-case class PilotMessageAt(override val who : String, override val event : Is.Individual, where:At.Location) extends PilotMessage(who, event)
+class Message
+case class PilotMessage(who: String, event : Is.Individual, where:At.Location) extends Message
+object PilotMessage {
+	def apply(who: String, event : Is.Individual):PilotMessage = apply(who, event, At.Nowhere)
+}
+//case class PilotMessageAt(override val who : String, override val event : Is.Individual, where:At.Location) extends PilotMessage(who, event)
+
 
 case class GlobalMessage(event : Is.Global) extends Message
 
@@ -14,7 +18,9 @@ case class DispatchMessage(message:String) {
 }
 
 object At {
-   case class Location(x:Double, y:Double)
+	trait Location
+   case class Coordinate(x:Double, y:Double) extends Location
+   case object Nowhere extends Location
 }
 
 object Is {  

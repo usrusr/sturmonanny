@@ -38,7 +38,7 @@ class Rules extends NonUpdatingMember with Logging {
 		val remaining = ( conf.game.planeWarningsSeconds * 1000 ) - difference
 		if(remaining < 0) {
 //			kick(who)
-			multi ! multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+what)
+			multi ! new multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+what)
 		}else{
 			lazy val startPrice = server.market.getPrice(what) * conf.game.startcost
 			val seconds : Long = remaining / 1000
@@ -69,12 +69,12 @@ class Rules extends NonUpdatingMember with Logging {
 			}else{
 				who+", if you want to live, jump!"
 			}
-			multi ! multi.ChatTo(who, message)
+			multi ! new multi.ChatTo(who, message)
 		}
 	}
 	def kick(who : String){
 	  if(true) debug("NOT KICKING "+who)else 
-	  server.multi ! server.multi.Kick(who)
+	  server.multi ! new server.multi.Kick(who)
    }
 	def warnDeath(who:String, what:String, since:Long, pauseUntil:Long, invitations:mutable.Map[String, Pilots.Invitation] ){
 		val multi = server.multi
@@ -90,11 +90,11 @@ class Rules extends NonUpdatingMember with Logging {
 		
 		if(what==null||what.trim.isEmpty){
 			
-			multi ! multi.ChatTo(who, who+", you can fly "+inviteString.map(_+" or wait ").getOrElse("again in ")+seconds+" seconds")
+			multi ! new multi.ChatTo(who, who+", you can fly "+inviteString.map(_+" or wait ").getOrElse("again in ")+seconds+" seconds")
 		}else{
 			if(remaining < 0) {
 				kick(who)
-				multi ! multi.ChatBroadcast(who + " has been kicked: hit refly too fast")
+				multi ! new multi.ChatBroadcast(who + " has been kicked: hit refly too fast")
 			}else{
 				val ratio = remaining.toDouble/(remaining+difference).toDouble
 				val message = if(ratio>0.7) {
@@ -113,7 +113,7 @@ class Rules extends NonUpdatingMember with Logging {
 					who+", if you want to live, jump!"
 				}
 				
-				multi ! multi.ChatTo(who, message)
+				multi ! new multi.ChatTo(who, message)
 			}
 		}
 	}

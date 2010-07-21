@@ -60,7 +60,7 @@ class Boot extends util.Log{// extends net.liftweb.util.LiftLogger{
     
     snippet.InstanceConf.registerRules 
    
-    net.liftweb.util.LogBoot.loggerSetup
+//    net.liftweb.util.LogBoot.loggerSetup
 
 //      val s = new Server
 log.warning("starting sturmonanny instances")    

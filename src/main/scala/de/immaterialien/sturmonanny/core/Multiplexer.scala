@@ -8,6 +8,7 @@ import net.liftweb.common._
 
 
 import de.immaterialien.sturmonanny.util._
+import de.immaterialien.sturmonanny.util.event
 
 
 
@@ -41,7 +42,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 	} 
 
   object il2ConnectionNotifier extends event.Publication[Boolean,Unit]{
-    override def subscribe(func:(Boolean=>Unit))={
+    override def subscribe(func:(Boolean=>Unit))={ 
       if(il2socket.isDefined) func.apply(true)
       super.subscribe(func) 
     }
@@ -57,9 +58,9 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		override def toString() = this.getClass.getSimpleName +": "+Multiplexer.linesListsToStrings(line :: Nil).mkString
 	}  
 	
-	case class DownInternal(val msg: String) extends DownLine(conf.names.tool +": "+msg)
+	class DownInternal(val msg: String) extends DownLine(conf.names.tool +": "+msg)
 
-	case class DownPromptLine(override val line : String) extends DownLine(line)
+	class DownPromptLine(override val line : String) extends DownLine(line)
 	
 	case class UpMessage(val line: String, val from : AbstractConsole){
 		override def toString() = this.getClass.getSimpleName +": "+ line.trim
@@ -70,10 +71,10 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 
 	case class SwitchConnection(val host : String, val port : Int)
 	case class UpCommand(cms:String)
-	case class ChatTo(val who : String, val what : String) extends UpCommand("chat "+what+" TO \""+ who+"\"")
-	case class ChatBroadcast(val what : String) extends UpCommand("chat "+what+" ALL")
-	case class ChatArmy(val what : String, val army : Armies.Armies) extends UpCommand("chat "+what+" ARMY "+army)
-	case class Kick(val who : String) extends UpCommand("kick \""+who+"\"")  
+	class ChatTo(val who : String, val what : String) extends UpCommand("chat "+what+" TO \""+ who+"\"")
+	class ChatBroadcast(val what : String) extends UpCommand("chat "+what+" ALL")
+	class ChatArmy(val what : String, val army : Armies.Armies) extends UpCommand("chat "+what+" ARMY "+army)
+	class Kick(val who : String) extends UpCommand("kick \""+who+"\"")  
 
   object promptNotifier
  
@@ -106,7 +107,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		// default: broadcast as lines 
 		case SwitchConnection(newhost, newport) => {
 			debug("acting conntexction switch")	      
-			clients foreach ( _ ! DownInternal("disconnecting IL-2 instance on "+host+":"+il2port+" and switching to "+newhost+":"+newport))
+			clients foreach ( _ ! new DownInternal("disconnecting IL-2 instance on "+host+":"+il2port+" and switching to "+newhost+":"+newport))
 			debug("il2socket:"+il2socket)	      
 			il2socket foreach (_.close)
 			debug("il2waiter:"+il2waiter)	      
@@ -179,7 +180,7 @@ class Multiplexer(var host : String, var il2port : Int , var scport : Int) exten
 		case addClient(client) => {
 			clients = clients ::: client :: Nil
 		}
-		case removeClient(client) => clients.remove(x => client eq x)
+		case removeClient(client) => clients.filterNot(client eq _)
 		case x : Any => debug("unknown "+x)
 	}
 	
@@ -399,7 +400,7 @@ debug("from fbdj line '"+line.trim+"'")
 							  Multiplexer.this.promptNotifier.synchronized{
 							    Multiplexer.this.promptNotifier.notifyAll
 							  }
-								Multiplexer.this ! DownPromptLine(createdLine)
+								Multiplexer.this ! new DownPromptLine(createdLine)
 							}
 							case _ =>  {
 								Multiplexer.this ! DownLine(createdLine)  
@@ -414,7 +415,7 @@ debug("from fbdj line '"+line.trim+"'")
 				}
 			}then{
 				warn ("lost connection to IL2 instance on port "+il2port+", restarting Multiplexer!")
-				il2ConnectionNotifier.send(false)    
+				il2ConnectionNotifier.publish(false)    
 				il2in = None
 				il2out = None
 				il2socket.map(_.close)
@@ -433,9 +434,9 @@ debug("from fbdj line '"+line.trim+"'")
 						
 						// thread has done its job
 						debug("connected to IL2 server on  "+host+":"+il2port+"")
-						il2ConnectionNotifier.send(true)
+						il2ConnectionNotifier.publish(true)
 						pilotsLister.requery
-						clients foreach (_ ! DownInternal("connected to IL2 server on  "+host+":"+il2port+""))
+						clients foreach (_ ! new DownInternal("connected to IL2 server on  "+host+":"+il2port+""))
 						Thread.currentThread.interrupt
 					}catch{
 						case e : IOException => {

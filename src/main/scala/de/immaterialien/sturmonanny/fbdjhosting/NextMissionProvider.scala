@@ -4,20 +4,22 @@ import java.io.File
 import de.immaterialien.sturmonanny.core
 import de.immaterialien.sturmonanny.util
 import javax.xml.ws.Provider
-import scala.collection.jcl
+import scala.collection.JavaConversions
 
-object NextMissionProvider extends util.Log{
+object NextMissionProvider 
+//	extends de.immaterialien.sturmonanny.util.Log 
+	{   
   def makeList(conf:core.Configuration):List[Provider[File]]={
     val ret = new java.util.TreeMap[Int, Provider[File]]
     
     ret.put(0, new DcgMissionProvider(conf))
     
-    for(nameNum <- conf.fbdj.DCG.addons.map.projection){
+    for(nameNum <- conf.fbdj.DCG.addons.map){
       val num = nameNum._2
       val cName = nameNum._1
       
       if(ret.containsKey(num)){
-        log.error("A mission processor ("+ret.get(0).getClass.getCanonicalName+") already exists at position "+num+", ignoring "+cName)
+//        log.error("A mission processor ("+ret.get(0).getClass.getCanonicalName+") already exists at position "+num+", ignoring "+cName)
       }else{
         var instance:Provider[File] = null
         val arg = conf.fbdj.DCG.addonArguments(cName)
@@ -36,12 +38,13 @@ object NextMissionProvider extends util.Log{
       	  
       	  if(instance!=null) ret.put(num, instance)
         }catch{
-          case x => log.error("could not load mission processor "+cName+" for processor position "+num+":", x)
+//          case x => log.error("could not load mission processor "+cName+" for processor position "+num+":", x)
+      	case _ =>
         }
       }
     }
 
-  	jcl.Buffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
+  	JavaConversions.asBuffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
   }
 }
 
@@ -55,7 +58,8 @@ class NextMissionProvider(filters:List[Provider[File]]) extends javax.xml.ws.Pro
       	val next = filter.invoke(ret)
       	if(next!=null) ret = next
       }catch{
-        case x => log.error("error in mission processor "+filter.getClass.getCanonicalName+", skipping ", x)
+//        case x => log.error("error in mission processor "+filter.getClass.getCanonicalName+", skipping ", x)
+      	case _ =>
       }
     }
     

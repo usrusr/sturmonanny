@@ -1,7 +1,7 @@
 package de.immaterialien.sturmonanny
 import org.junit.Test
 
-object WriteDefaultConfigurations {
+object WriteDefaultConfigurations2 { 
   def main(args : Array[String]) : Unit = {
 println("default...")    
 		write("default", new core.Configuration(null))

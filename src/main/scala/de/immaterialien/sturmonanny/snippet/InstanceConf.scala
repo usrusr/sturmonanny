@@ -35,7 +35,7 @@ println("LiftRules.statelessRewrite updated: "+tmp.statelessRewrite)
 //    Menu(Loc("Configurations", ))
 //  }
   def confLink(name:String):String={
-    "/instance/"+java.net.URLEncoder.encode(name)+"/conf"
+    "/instance/"+java.net.URLEncoder.encode(name, "UTF-8")+"/conf"
     //java.net.URLEncoder.encode(name)
   }
 }

@@ -46,9 +46,9 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 //log.write("\n<-------\n")
 //log.flush
 		parseResult.getOrElse(None) match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+line+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored, _) => // ignore
+		      case PilotMessage(who, Is.Unknown, _) => debug("unkown message: '"+line+"'")
+		      case PilotMessage(who, what, _ ) => {
 		    	  pilotMessageSend(who, what)
 debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		      }
@@ -77,9 +77,9 @@ debug("no parseResult: None from '"+line+"'")
 //log.flush  
 		for (res <- resList) { 
 		  res match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+lines+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored,_) => // ignore
+		      case PilotMessage(who, Is.Unknown,_) => debug("unkown message: '"+lines+"'")
+		      case PilotMessage(who, what ,_) => {
 		    	  pilotMessageSend(who, what)
 //debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
 		       }
@@ -141,11 +141,11 @@ debug("no parseResult: None from '"+line+"'")
         | refly
         | disconnecting
  	)
-//    lazy val pilotMessageAtParser : Parser[PilotMessageAt] = {
+//    lazy val PilotMessageParser : Parser[PilotMessage] = {
 //      ( 
 //      ) ~ atLocationParser ^^ 
 //      {
-//        case what ~ where => PilotMessageAt(what.who, what.event, where) 
+//        case what ~ where => PilotMessage(what.who, what.event, where) 
 //      }
 //
 //  }
@@ -184,10 +184,10 @@ debug("no parseResult: None from '"+line+"'")
   lazy val planeNumber : Parser[Int] = {
     "(" ~> """\d+""".r <~ ")" ^^ (_ toInt)
   }
-  lazy val seatOccupied : Parser[PilotMessageAt] = {
+  lazy val seatOccupied : Parser[PilotMessage] = {
     pilotNameParser ~ ":" ~ """\S+""".r ~ planeNumber~" seat occupied by " ~ pilotNameParser ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ planeNum ~ _ ~ p2 ~ at if pilot==p2 => {
-        PilotMessageAt(pilot, Is.TakingSeat(plane), at) 
+        PilotMessage(pilot, Is.TakingSeat(plane), at) 
       }
     }
   }
@@ -200,17 +200,17 @@ debug("no parseResult: None from '"+line+"'")
     }
   }
 
-  lazy val inFlight : Parser[PilotMessageAt] = {
+  lazy val inFlight : Parser[PilotMessage] = {
     pilotNameParser ~ ":" ~ """\S+""".r ~ " in flight "  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ at => {
-        PilotMessageAt(pilot, Is.InFlight, at) 
+        PilotMessage(pilot, Is.InFlight, at) 
       }
     }
   }
-  lazy val landed : Parser[PilotMessageAt] = {
+  lazy val landed : Parser[PilotMessage] = {
     pilotNameParser ~ ":" ~ """\S+""".r ~ " landed "  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ at => {
-        PilotMessageAt(pilot, Is.Returning, at) 
+        PilotMessage(pilot, Is.Returning, at) 
       }
     }
   }
@@ -222,17 +222,18 @@ debug("no parseResult: None from '"+line+"'")
     pilotNameParser <~ " entered refly menu" ^^ (PilotMessage(_, Is.Selecting)) 
   }
   
-  lazy val wasKilled : Parser[PilotMessageAt] = {
+  lazy val wasKilled : Parser[PilotMessage] = {
     pilotNameParser ~ ":" ~ """\S+""".r ~ planeNumber ~ " was killed "  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ _ ~ at => {
-        PilotMessageAt(pilot, Is.Dying, at) 
+        PilotMessage(pilot, Is.Dying, at) 
       }
     }
   }  
 
 	lazy val atLocationParser : Parser[At.Location] = {
 	  " at " ~ simpleDouble ~" "~ simpleDouble ^^ {
-	    case _ ~ x ~ _ ~ y => At.Location(x,y)
+	    case _ ~ x ~ _ ~ y => At.Coordinate(x,y)
+	    case _ => At.Nowhere
 	  }
 	} 
   lazy val simpleDouble : Parser[Double] = {

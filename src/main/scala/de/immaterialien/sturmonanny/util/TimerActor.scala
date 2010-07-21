@@ -30,7 +30,7 @@ class TimerActor(var pause : Long) extends Thread with LiftActor  {
 	   this ! passed(pause)
     }
 //    var pause : Int = 60*1000 
-    val multiplexers :mutable.Set[LiftActor]= (new jcl.WeakHashMap(new java.util.WeakHashMap)).keySet
+    val multiplexers :mutable.Set[LiftActor]=  JavaConversions.asSet(new java.util.WeakHashMap[LiftActor, Void]().keySet)
     def messageHandler = {
       case SetInterval(mil) => pause=mil
       case add(who) => multiplexers += who
