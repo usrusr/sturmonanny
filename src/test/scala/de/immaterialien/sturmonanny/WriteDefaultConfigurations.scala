@@ -1,10 +1,13 @@
 package de.immaterialien.sturmonanny
 import org.junit.Test
+import de.immaterialien.sturmonanny.util
+import de.immaterialien.sturmonanny.core
+import de.immaterialien.sturmonanny.global
 
-object WriteDefaultConfigurations2 { 
+object WriteDefaultConfigurations { 
   def main(args : Array[String]) : Unit = {
 println("default...")    
-		write("default", new core.Configuration(null))
+		write("default", new core.Configuration(null, null))
 //    new java.io.FileWriter("zip/default.conf").write(
 //				new core.Configuration(null).toString
 //	  )
@@ -17,7 +20,7 @@ println("global...")
 //	  )
 	  
 println("instances...")    
-		write("instances", new global.Instances(null)) 
+		write("instances", new global.Instances(null, null)) 
 //	  new java.io.FileWriter("zip/instances.conf").write(
 //				new global.Instances(null).toString
 //	  )

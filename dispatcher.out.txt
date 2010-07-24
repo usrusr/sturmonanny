@@ -1,0 +1,2 @@
+'socket channel '1' start creating: 192.168.0.1:21000\n'
+'socket channel '1', ip 192.168.0.1:21000, entrop regulation, is complete created\n'

@@ -158,7 +158,7 @@
 <addArgs><addArg>-deprecation</addArg></addArgs>
 <args><arg>-deprecation</arg></args>
 					<displayCmd>true</displayCmd>
-					<fork>false</fork>
+					<fork>true</fork>
 					<recompileMode>all</recompileMode>
 					<verbose>true</verbose>
 <!--					<args></args>-->

@@ -1,0 +1,349 @@
+[21 Feb, 2010 14:51:52] ConfigurationController.configLoad: Could not find default config file. Creating new default config.
+[21 Feb, 2010 14:51:52] *******************************************************************
+[21 Feb, 2010 14:51:52] *******************************************************************
+[21 Feb, 2010 14:51:52] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 14:51:52] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 14:51:52] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 14:51:52] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 14:51:52] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 14:51:52] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 14:51:52] Loaded (0) Air Classes
+[21 Feb, 2010 14:51:52] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 14:51:52] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 14:51:52] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 15:00:58] ConfigurationController.configLoad: Configuration Loaded ( ./config/Default/ )
+[21 Feb, 2010 15:00:58] *******************************************************************
+[21 Feb, 2010 15:00:58] *******************************************************************
+[21 Feb, 2010 15:00:58] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 15:00:58] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 15:00:58] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 15:00:58] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 15:00:58] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 15:00:58] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 15:00:58] Loaded (0) Air Classes
+[21 Feb, 2010 15:00:58] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 15:00:58] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 15:00:58] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 15:02:35] ConfigurationController.configLoad: Configuration Loaded ( ./config/Default/ )
+[21 Feb, 2010 15:02:35] *******************************************************************
+[21 Feb, 2010 15:02:35] *******************************************************************
+[21 Feb, 2010 15:02:35] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 15:02:35] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 15:02:35] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 15:02:35] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 15:02:35] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 15:02:35] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 15:02:35] Loaded (0) Air Classes
+[21 Feb, 2010 15:02:35] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 15:02:35] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 15:02:35] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 15:04:13] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 15:04:13] *******************************************************************
+[21 Feb, 2010 15:04:13] *******************************************************************
+[21 Feb, 2010 15:04:13] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 15:04:13] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 15:04:13] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 15:04:13] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 15:04:13] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 15:04:13] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 15:04:13] Loaded (0) Air Classes
+[21 Feb, 2010 15:04:13] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 15:04:13] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 15:04:13] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 15:53:05] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 15:53:05] *******************************************************************
+[21 Feb, 2010 15:53:05] *******************************************************************
+[21 Feb, 2010 15:53:05] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 15:53:05] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 15:53:05] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 15:53:05] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 15:53:05] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 15:53:05] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 15:53:05] Loaded (0) Air Classes
+[21 Feb, 2010 15:53:05] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 15:53:05] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 15:53:05] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 15:53:40] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 15:53:40] *******************************************************************
+[21 Feb, 2010 15:53:40] *******************************************************************
+[21 Feb, 2010 15:53:40] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 15:53:40] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 15:53:40] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 15:53:40] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 15:53:40] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 15:53:40] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 15:53:40] Loaded (0) Air Classes
+[21 Feb, 2010 15:53:40] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 15:53:40] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 15:53:40] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 15:54:40] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 15:54:40] *******************************************************************
+[21 Feb, 2010 15:54:40] *******************************************************************
+[21 Feb, 2010 15:54:40] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 15:54:40] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 15:54:40] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 15:54:40] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 15:54:40] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 15:54:40] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 15:54:40] Loaded (0) Air Classes
+[21 Feb, 2010 15:54:40] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 15:54:40] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 15:54:40] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 15:54:56] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 15:54:56] *******************************************************************
+[21 Feb, 2010 15:54:56] *******************************************************************
+[21 Feb, 2010 15:54:56] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 15:54:56] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 15:54:56] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 15:54:56] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 15:54:56] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 15:54:56] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 15:54:56] Loaded (0) Air Classes
+[21 Feb, 2010 15:54:56] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 15:54:56] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 15:54:56] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:05:45] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:05:45] *******************************************************************
+[21 Feb, 2010 16:05:45] *******************************************************************
+[21 Feb, 2010 16:05:45] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:05:45] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:05:45] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:05:45] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:05:45] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:05:45] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:05:45] Loaded (0) Air Classes
+[21 Feb, 2010 16:05:45] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:05:45] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:05:45] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:07:34] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:07:34] *******************************************************************
+[21 Feb, 2010 16:07:34] *******************************************************************
+[21 Feb, 2010 16:07:34] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:07:34] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:07:34] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:07:34] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:07:34] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:07:34] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:07:34] Loaded (0) Air Classes
+[21 Feb, 2010 16:07:34] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:07:34] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:07:34] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:10:44] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:10:44] *******************************************************************
+[21 Feb, 2010 16:10:44] *******************************************************************
+[21 Feb, 2010 16:10:44] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:10:44] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:10:44] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:10:44] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:10:44] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:10:44] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:10:44] Loaded (0) Air Classes
+[21 Feb, 2010 16:10:44] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:10:44] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:10:44] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:11:14] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:11:14] *******************************************************************
+[21 Feb, 2010 16:11:14] *******************************************************************
+[21 Feb, 2010 16:11:14] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:11:14] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:11:14] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:11:14] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:11:14] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:11:14] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:11:14] Loaded (0) Air Classes
+[21 Feb, 2010 16:11:14] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:11:14] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:11:14] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:11:40] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:11:40] *******************************************************************
+[21 Feb, 2010 16:11:40] *******************************************************************
+[21 Feb, 2010 16:11:40] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:11:40] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:11:40] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:11:40] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:11:40] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:11:40] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:11:40] Loaded (0) Air Classes
+[21 Feb, 2010 16:11:40] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:11:40] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:11:40] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:11:57] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:11:57] *******************************************************************
+[21 Feb, 2010 16:11:57] *******************************************************************
+[21 Feb, 2010 16:11:57] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:11:57] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:11:57] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:11:57] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:11:57] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:11:57] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:11:57] Loaded (0) Air Classes
+[21 Feb, 2010 16:11:57] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:11:57] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:11:57] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:12:26] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:12:26] *******************************************************************
+[21 Feb, 2010 16:12:26] *******************************************************************
+[21 Feb, 2010 16:12:26] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:12:26] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:12:26] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:12:26] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:12:26] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:12:26] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:12:26] Loaded (0) Air Classes
+[21 Feb, 2010 16:12:26] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:12:26] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:12:26] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:13:20] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:13:20] *******************************************************************
+[21 Feb, 2010 16:13:20] *******************************************************************
+[21 Feb, 2010 16:13:20] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:13:20] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:13:20] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:13:20] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:13:20] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:13:20] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:13:20] Loaded (0) Air Classes
+[21 Feb, 2010 16:13:20] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:13:20] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:13:20] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:13:39] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:13:39] *******************************************************************
+[21 Feb, 2010 16:13:39] *******************************************************************
+[21 Feb, 2010 16:13:39] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:13:39] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:13:39] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:13:39] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:13:39] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:13:39] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:13:39] Loaded (0) Air Classes
+[21 Feb, 2010 16:13:39] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:13:39] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:13:39] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:14:16] ConfigurationController.configLoad: Default config Loaded ( ./config/confPath/ )
+[21 Feb, 2010 16:14:16] *******************************************************************
+[21 Feb, 2010 16:14:16] *******************************************************************
+[21 Feb, 2010 16:14:16] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:14:16] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:14:16] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:14:16] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:14:16] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:14:16] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:14:16] Loaded (0) Air Classes
+[21 Feb, 2010 16:14:16] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:14:16] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:14:16] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:15:05] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:15:05] *******************************************************************
+[21 Feb, 2010 16:15:05] *******************************************************************
+[21 Feb, 2010 16:15:05] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:15:05] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:15:05] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:15:05] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:15:05] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:15:05] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:15:05] Loaded (0) Air Classes
+[21 Feb, 2010 16:15:05] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:15:05] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:15:05] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:37:45] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:37:45] *******************************************************************
+[21 Feb, 2010 16:37:45] *******************************************************************
+[21 Feb, 2010 16:37:45] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:37:45] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:37:45] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:37:45] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:37:45] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:37:45] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:37:45] Loaded (0) Air Classes
+[21 Feb, 2010 16:37:45] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:37:45] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:37:45] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:38:20] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:38:20] *******************************************************************
+[21 Feb, 2010 16:38:20] *******************************************************************
+[21 Feb, 2010 16:38:20] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:38:20] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:38:20] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:38:20] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:38:20] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:38:20] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:38:20] Loaded (0) Air Classes
+[21 Feb, 2010 16:38:20] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:38:20] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:38:20] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:38:47] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:38:47] *******************************************************************
+[21 Feb, 2010 16:38:47] *******************************************************************
+[21 Feb, 2010 16:38:47] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:38:47] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:38:47] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:38:47] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:38:47] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:38:47] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:38:47] Loaded (0) Air Classes
+[21 Feb, 2010 16:38:47] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:38:47] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:38:47] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 16:43:43] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:43:43] *******************************************************************
+[21 Feb, 2010 16:43:43] *******************************************************************
+[21 Feb, 2010 16:43:43] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:46:13] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:51:04] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:51:04] *******************************************************************
+[21 Feb, 2010 16:51:04] *******************************************************************
+[21 Feb, 2010 16:51:04] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:51:05] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:51:10] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:58:32] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 16:58:32] *******************************************************************
+[21 Feb, 2010 16:58:32] *******************************************************************
+[21 Feb, 2010 16:58:32] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 16:58:32] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 16:58:32] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 16:58:32] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 16:58:32] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 16:58:32] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 16:58:32] Loaded (0) Air Classes
+[21 Feb, 2010 16:58:32] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 16:58:32] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 16:58:32] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 17:12:34] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 17:12:34] *******************************************************************
+[21 Feb, 2010 17:12:34] *******************************************************************
+[21 Feb, 2010 17:12:34] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 17:12:34] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 17:12:34] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 17:12:34] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 17:12:34] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 17:12:34] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 17:12:34] Loaded (0) Air Classes
+[21 Feb, 2010 17:12:34] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 17:12:34] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 17:12:34] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 17:12:38] ConfigurationController.configLoad: Default config Loaded ( ./test/confPath/ )
+[21 Feb, 2010 17:12:38] *******************************************************************
+[21 Feb, 2010 17:12:38] *******************************************************************
+[21 Feb, 2010 17:12:38] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 17:12:38] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 17:12:38] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 17:12:38] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 17:12:38] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 17:12:38] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 17:12:38] Loaded (0) Air Classes
+[21 Feb, 2010 17:12:38] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 17:12:38] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 17:12:38] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
+[21 Feb, 2010 17:12:54] ConfigurationController.configLoad: Default config Loaded ( confPath/ )
+[21 Feb, 2010 17:12:54] *******************************************************************
+[21 Feb, 2010 17:12:54] *******************************************************************
+[21 Feb, 2010 17:12:54] FBDj Started with Configuration ( Default )
+[21 Feb, 2010 17:12:54] IL2MapController.loadIL2Maps Loaded data for (0) Maps
+[21 Feb, 2010 17:12:54] IL2DataLoadController.loadStaticObjects Loaded data for (0) Static Objects
+[21 Feb, 2010 17:12:54] IL2DataLoadController.loadMultiVehicleObjects Loaded data for (0) Multi Vehicle Objects and (0) new Static Objects
+[21 Feb, 2010 17:12:54] IL2PlaneLoadoutController.loadPlaneLoadouts Loaded data for (0) Weapons
+[21 Feb, 2010 17:12:54] Loaded (0) Red Regiments & (0) Blue Regiments
+[21 Feb, 2010 17:12:54] Loaded (0) Air Classes
+[21 Feb, 2010 17:12:54] AdminController.loadAdmins: No Admin File Found! Creating new Admin File
+[21 Feb, 2010 17:12:54] ReservedName.loadReservedName: could not find ReservedName file! Creating new list.
+[21 Feb, 2010 17:12:54] PilotBanController.pilotBansLoad: Could not find ban list. Creating new list.
