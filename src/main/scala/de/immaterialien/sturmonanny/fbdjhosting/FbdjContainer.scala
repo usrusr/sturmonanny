@@ -172,7 +172,7 @@ debug("thread death in "+t.getName)
   		val eventlogOutQueue = connClass.getField("eventlogOutQueue")
   		val startStopInterface = connClass.getField("startStopInterface")
 
-      val newMissionCallback = connClass.getField("startStopInterface")
+      val newMissionCallback = connClass.getField("newMissionCallback")
 
     
   		outList = consoleInQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
@@ -183,7 +183,10 @@ debug("thread death in "+t.getName)
 
   		startStopInterface.get(null).asInstanceOf[javax.xml.ws.Provider[String]]
     }catch{
-      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
+      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from" +
+      		"\n fbdj jar URL: "+jarUrl+" "+
+      		"\n overrides jar URL: "+overrideUrl+"" +
+      		"\n", c)
     }  
   
 		val interface = new Thread(tg, threadName) with javax.xml.ws.Provider[String]{

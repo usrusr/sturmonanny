@@ -9,12 +9,14 @@ import scala.collection.JavaConversions
 object NextMissionProvider 
 //	extends de.immaterialien.sturmonanny.util.Log 
 	{   
-  def makeList(conf:core.Configuration):List[Provider[File]]={
+  def makeList(conf:core.Configuration):List[Provider[File]] = if(conf==null) Nil else{
+  	 
     val ret = new java.util.TreeMap[Int, Provider[File]]
     
     ret.put(0, new DcgMissionProvider(conf))
-    
-    for(nameNum <- conf.fbdj.DCG.addons.map){
+    val addons = conf.fbdj.DCG.addons
+    val allAddons = addons.map
+    for(nameNum <- allAddons){
       val num = nameNum._2
       val cName = nameNum._1
       
@@ -48,8 +50,10 @@ object NextMissionProvider
   }
 }
 
-class NextMissionProvider(filters:List[Provider[File]]) extends javax.xml.ws.Provider[File] with util.Log{
+class NextMissionProvider(private var filters:List[Provider[File]]) extends javax.xml.ws.Provider[File] with util.Log{ 
 	def this(conf:core.Configuration)=this(NextMissionProvider.makeList(conf))
+	def updateConfiguration(conf:core.Configuration) = filters=NextMissionProvider.makeList(conf)
+
   override def invoke(oldMissionPath:File):File = {
     var ret = oldMissionPath
     
