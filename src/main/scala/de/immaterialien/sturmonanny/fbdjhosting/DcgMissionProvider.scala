@@ -1,7 +1,7 @@
 package de.immaterialien.sturmonanny.fbdjhosting
 import java.io.File
-import de.immaterialien.sturmonanny.core
-import de.immaterialien.sturmonanny.util
+import _root_.de.immaterialien.sturmonanny.core
+import _root_.de.immaterialien.sturmonanny.util
 
 object DcgMissionProvider {
   val misFilter = new java.io.FilenameFilter(){

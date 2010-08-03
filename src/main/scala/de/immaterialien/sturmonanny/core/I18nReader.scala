@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.Logging
+import _root_.de.immaterialien.sturmonanny.util.Logging
 import scala.io._
 import scala.collection.mutable
 

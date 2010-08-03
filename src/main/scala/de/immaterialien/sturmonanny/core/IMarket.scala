@@ -7,9 +7,25 @@ package de.immaterialien.sturmonanny.core
  * implementations receive a custom configuration file path as their configuration after construction 
  *  but possibly also at other times
  */
-trait IMarket {
-	def getPrice(plane : String) : Double 
-	def addAirTime(plane : String, millis : Long) : Unit
+trait IMarket { import IMarket._
+	
+	final def getPrice(plane:String) : Double = getPrice(plane, None)
+	final def getPrice(plane:String, load:String) : Double = getPrice(plane, Some(load))
+	final def getPrice(plane:String, load:Option[String]) : Double = getPrice(Loadout(plane, load))
+	def getPrice(loadout:Loadout) : Double = loadout match {
+		case Loadout(_, None) => tryPrice(loadout) getOrElse 0
+		case Loadout(plane, Some(_)) => tryPrice(loadout) getOrElse getPrice(Loadout(plane, None))
+	}
+	
+	protected def tryPrice(loadout:Loadout) : Option[Double]
+	
+
+	
+	/**
+	 * @param plane
+	 * @param millis
+	 */
+	def addAirTime(plane : Loadout, millis : Long) : Unit
 	/**
 	 * return true for a successful configuration update 
 	 */  
@@ -18,4 +34,8 @@ trait IMarket {
 	def setServerContext(server : Server) : Unit
 	def cycle(name : String) : Unit   
 }   
- 
+object IMarket {
+	case class Loadout(plane:String, load:Option[String]) {
+		override def toString = load map (plane+" "+_) getOrElse plane 
+	}
+}

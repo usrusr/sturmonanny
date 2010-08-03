@@ -2,13 +2,13 @@ package de.immaterialien.sturmonanny.core
 
 import net.liftweb.actor._
 import net.liftweb.common._
-import de.immaterialien.sturmonanny.util._
-import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema._
-import de.immaterialien.sturmonanny.core._
+import _root_.de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema._
+import _root_.de.immaterialien.sturmonanny.core._
  
 class MarketActor(val initClassName :String, val initConfigurationPath:String) extends IMarket with LiftActor with UpdatingMember with Logging{     
 	var internal : Option[IMarket] = None
-	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket" 
+	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket"  
 	var configurationPath : String = "/dev/null"
 	var mission = ""
 	def setServerContext(server:Server) = (this ! Msg.updateConfiguration) 
@@ -78,12 +78,18 @@ debug(cls + " new instance not configured!")
 	  case Msg.updateConfiguration => internalUpdateConfiguration
 	  case _ =>
 	}
-	def getPrice(plane : String) : Double = { 
-	  !!(Msg.getPrice(plane), 500)
+	override def getPrice(plane : IMarket.Loadout) : Double = {
+		!!(Msg.getPrice(plane), 500)
 	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
 	  		.price
 	}
-	def addAirTime(plane : String, millis : Long) {
+	override def tryPrice(plane : IMarket.Loadout) : Option[Double] = { 
+	  !!(Msg.getPrice(plane), 500)
+//	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
+//	  		.price
+	  		.asA[Msg.getPriceResult] map (_ price)
+	}
+	def addAirTime(plane : IMarket.Loadout, millis : Long) {
 	  this ! Msg.addAirTime(plane, millis)
 	}
 	def setConfiguration(pathToFile : String) : Boolean ={
@@ -102,9 +108,9 @@ debug(cls + " new instance not configured!")
     }
 } 
 object Msg {
-	case class getPrice(plane : String)
+	case class getPrice(plane : IMarket.Loadout)
 	case class getPriceResult(price : Double)
-	case class addAirTime(plane : String, millis : Long) 
+	case class addAirTime(plane : IMarket.Loadout, millis : Long) 
 	case class setConfiguration(pathToFile : String) 
 	case class setConfigurationResult(success : Boolean)
 	case class cycle(mission : String)  

@@ -15,7 +15,7 @@ import _root_.java.sql.{Connection, DriverManager}
 //import _root_.de.immaterialien.sturmonanny.model._
 import _root_.javax.servlet.http.{HttpServletRequest}
 
-import de.immaterialien.sturmonanny.snippet
+import _root_.de.immaterialien.sturmonanny.snippet
 import _root_.de.immaterialien.sturmonanny._
 
 /**

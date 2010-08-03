@@ -1,8 +1,8 @@
 package de.immaterialien.sturmonanny
 import org.junit.Test
-import de.immaterialien.sturmonanny.util
-import de.immaterialien.sturmonanny.core
-import de.immaterialien.sturmonanny.global
+import _root_.de.immaterialien.sturmonanny.util
+import _root_.de.immaterialien.sturmonanny.core
+import _root_.de.immaterialien.sturmonanny.global
 
 object WriteDefaultConfigurations { 
   def main(args : Array[String]) : Unit = {

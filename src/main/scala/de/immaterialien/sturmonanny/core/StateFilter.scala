@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
 import net.liftweb._
 
 

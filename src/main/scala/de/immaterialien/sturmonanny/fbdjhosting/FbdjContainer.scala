@@ -1,7 +1,7 @@
 package de.immaterialien.sturmonanny.fbdjhosting
 
-import de.immaterialien.sturmonanny.core
-import de.immaterialien.sturmonanny.util.Logging
+import _root_.de.immaterialien.sturmonanny.core
+import _root_.de.immaterialien.sturmonanny.util.Logging
 import scala.collection.immutable
 import java.net.URL
 import net.liftweb.actor.LiftActor

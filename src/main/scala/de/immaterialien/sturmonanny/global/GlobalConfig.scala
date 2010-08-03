@@ -1,7 +1,7 @@
 package de.immaterialien.sturmonanny.global
 
-import de.immaterialien.sturmonanny.util.Logging
-import de.immaterialien.sturmonanny.util.configgy
+import _root_.de.immaterialien.sturmonanny.util.Logging
+import _root_.de.immaterialien.sturmonanny.util.configgy
  
 class GlobalConfig(private val fname:String) extends configgy.ConfigurationSchema(fname) with configgy.LiftSupport {
   def this()=this("global.conf")
@@ -12,14 +12,14 @@ class GlobalConfig(private val fname:String) extends configgy.ConfigurationSchem
 	  object user extends Field("") { // no internal default!
 doc = "login name (case sensitive)"
       override def update(usr:String) = {
-        hash() = GlobalConfig.hashPass(usr, pass)
-        super.update(usr) 
+        hash() = GlobalConfig.hashPass(usr, pass.apply) 
+        super.update(usr)  
       }	    
 	  }
 	  object pass extends Field("") {
 	    doc = "set this for creating a new password, if the configuration is written by the software it will remain empty, only the hash is stored"
       override def update(pwd:String) = {
-        hash() = GlobalConfig.hashPass(user, pwd)
+        hash() = GlobalConfig.hashPass(user.apply, pwd)
       }
 	  }
 	  object hash extends Field("") {doc = """never change this manually, set the "pass" value to change the password"""}

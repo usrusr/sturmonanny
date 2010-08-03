@@ -1,8 +1,8 @@
 package de.immaterialien.sturmonanny.fbdjhosting
 
 import java.io.File
-import de.immaterialien.sturmonanny.core
-import de.immaterialien.sturmonanny.util
+import _root_.de.immaterialien.sturmonanny.core
+import _root_.de.immaterialien.sturmonanny.util
 import javax.xml.ws.Provider
 import scala.collection.JavaConversions
 
@@ -59,7 +59,9 @@ class NextMissionProvider(private var filters:List[Provider[File]]) extends java
     
     for(filter<-filters){
       try{
+log.debug("invoking "+filter.getClass.getSimpleName+" with input "+ret)      	
       	val next = filter.invoke(ret)
+log.debug("got "+next+" from "+filter.getClass.getSimpleName)      	
       	if(next!=null) ret = next
       }catch{
 //        case x => log.error("error in mission processor "+filter.getClass.getCanonicalName+", skipping ", x)

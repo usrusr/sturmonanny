@@ -2,7 +2,7 @@ package de.immaterialien.sturmonanny.market.fixed
 import org.junit.Test
 import org.junit.Assert._
 import net.lag.configgy
-import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
+import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
 
 

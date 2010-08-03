@@ -1,7 +1,7 @@
 package de.immaterialien.sturmonanny.util.configgy
 
 import net.lag.configgy.{Config, ConfigMap}
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
  
 /**
  * 
@@ -51,6 +51,7 @@ import de.immaterialien.sturmonanny.util._
  * 
  * 
  */
+
 abstract class ConfigurationSchema(val file : String) extends Holder with ConfigurationSchema.Selfdocumenting with Log{ 
 	val fileReference = this({
 		log.trace("parsing file "+file)	   
@@ -204,6 +205,7 @@ abstract class ConfigurationSchema(val file : String) extends Holder with Config
 		  }
 		  sb.append(indent+ configgyName+"="+string+"\r\n")
 	    }
+	    
 	  }
 
     /**

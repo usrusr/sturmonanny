@@ -8,8 +8,8 @@ import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.util.Helpers._ 
 
-import de.immaterialien.sturmonanny.util.configgy._
-import de.immaterialien.sturmonanny.global._
+import _root_.de.immaterialien.sturmonanny.util.configgy._
+import _root_.de.immaterialien.sturmonanny.global._
 
 class LiftConf {
    def conf(html:NodeSeq)={

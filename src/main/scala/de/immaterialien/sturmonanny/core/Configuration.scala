@@ -1,8 +1,9 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.configgy
+import _root_.de.immaterialien.sturmonanny.util.configgy
+import _root_.de.immaterialien.sturmonanny
  
-class Configuration(override val file : String, val serverInstance:de.immaterialien.sturmonanny.core.Server) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{
+class Configuration(override val file : String, val serverInstance : sturmonanny.core.Server) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{
   
   override def apply(conf : net.lag.configgy.Config) : Option[java.io.File]= {
     val ret = super.apply(conf)
@@ -13,7 +14,7 @@ class Configuration(override val file : String, val serverInstance:de.immaterial
   }
   
   
-	doc = "configuration for a single host instance"
+	doc = "configuration for a single host instance" 
 	object server  extends Group{    
 	  object host extends Field( "127.0.0.1") {doc="host for the console connection"}
 	  object il2port extends Field(2001) {doc="""console port of the IL2-server that should be connected
@@ -36,7 +37,7 @@ works like the IPS item in the [Console] section of confs.ini"""
 	  object pollMillis extends Field(1000)  {
 	    doc = "SC pilots listing is too slow to be useful, set (minimum) number of milliseconds to pass between polls"
 	  }
-	  object serverPath extends Field("..")  {
+	  object serverPath extends Field("..")  { 
 	    doc = "path to the IL-2 server directory (used e.g. to access the i18n files)"
 	  } 
 	}

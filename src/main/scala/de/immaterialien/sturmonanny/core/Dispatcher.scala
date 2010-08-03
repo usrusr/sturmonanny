@@ -1,7 +1,7 @@
 //package de.immaterialien.sturmonanny.core
 //
 //import net.liftweb.actor.LiftActor
-//import de.immaterialien.sturmonanny.util._
+//import _root_.de.immaterialien.sturmonanny.util._
 //
 ///**
 // * a place for message parsing to grow and evolve without being disturbed by the necessities of console connections, game logic or configuration

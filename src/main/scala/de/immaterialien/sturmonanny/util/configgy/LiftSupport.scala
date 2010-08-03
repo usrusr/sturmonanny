@@ -12,7 +12,7 @@ import net.lag.configgy
  * with bindings for "apply" and "save"
  */
 
-trait LiftSupport extends ConfigurationSchema {
+trait LiftSupport extends ConfigurationSchema { 
 	private val self : ConfigurationSchema = this
 	private val form = "cfg"
  

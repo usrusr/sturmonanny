@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.Logging
+import _root_.de.immaterialien.sturmonanny.util.Logging
 /**
  * Armies object provides methods to create holders for variables and values with separate content for each side
  * 

@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.util
 
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
 import scala.collection.mutable 
 
  

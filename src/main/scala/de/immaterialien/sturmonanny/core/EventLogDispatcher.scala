@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
 import scala.util.parsing.combinator._
 import net.liftweb.actor.LiftActor
 import scala.io._
@@ -24,7 +24,8 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 			case e@Error(_,_) => e
 		}
 	}
- 
+
+	
  	def updateConfiguration = {
 
 	}
@@ -32,12 +33,12 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
  	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
-	  case DispatchMessage(x) => processMessage(x)
+	  case DispatchMessage(x) => processMessage(x) 
 	  case _ => // ignore 
 	}
-
+ 	def parseOneLine(line:String) : ParseResult[_] = parse(rootLineParser, line.stripLineEnd) 
 	def processLine(line:String) : Unit = {
-		val parseResult : ParseResult[_] = parse(rootLineParser, line.stripLineEnd+"\n")
+		val parseResult : ParseResult[_] = parseOneLine( line )
 //debug("-------------------------\nparsing line '"+line+"' \n  -> '"+parseResult+"'")  
 //log.write("/===line:===\n")
 //log.write(line)
@@ -104,7 +105,7 @@ debug("no parseResult: None from '"+line+"'")
 	  	  val x:java.util.Date = day
 	  	  val offs : Int = amPm
 	  	  val ret = Calendar.getInstance
-	  	  ret setTime day
+	  	  if(day!=null) ret setTime day
 	  	  ret set(Calendar.HOUR, hour + amPm)
 	  	  ret set(Calendar.MINUTE, minute)
 	  	  ret set(Calendar.SECOND, second)
@@ -123,7 +124,7 @@ debug("no parseResult: None from '"+line+"'")
  	}
 
 	lazy val hmsParser : Parser[Int] = {
-	  """\d\d""".r ^^ (_ toInt)
+	  """\d\d?""".r ^^ (_ toInt)
 	}
 	lazy val fuelParser : Parser[Int] = {
 	  "fuel "~> """\d+""".r <~"%" ^^ (_ toInt)
@@ -138,6 +139,7 @@ debug("no parseResult: None from '"+line+"'")
         | inFlight
         | landed  
         | wasKilled  
+        | ejected
         | refly
         | disconnecting
  	)
@@ -156,7 +158,7 @@ debug("no parseResult: None from '"+line+"'")
 //    server.dispatcher.pilotNameParser 
 //  }
   
-  object pilotNameParser extends Parser[String] {
+  object pilotNameParserObj extends Parser[String] {
     def apply(in:Input)={
 			val ret =  server.dispatcher.pilotNameParser.apply(in)
 			
@@ -166,9 +168,36 @@ debug("no parseResult: None from '"+line+"'")
 			  Failure("not a known pilot name", ret.next)
 			}
     }
-    def learnNewName(pilotName:String) = server.dispatcher.pilotNameParser.learnNewName(pilotName)
+ 	}
+ 	def pilotNameParser :  Parser[String] = pilotNameParserObj
+ 	object memorizingPilotNameParserObj extends Parser[String] {
+ 		var state = ""
+ 		def apply(in:Input)={
+			val ret =  pilotNameParser.apply(in)
+			
+			if(ret.successful) {
+				state = ret.asInstanceOf[{def result:String}].result
+println("memoing pilot "+state)				
+				ret
+			}else{
+println("did not find a pilot for memoing")				
+				state = ""
+			  ret
+			}
+    }
+ 	}
+ 	def memorizingPilotNameParser :  Parser[String] = memorizingPilotNameParserObj
+ 	def memoedName :  Parser[String] = {
+ 		memorizingPilotNameParserObj.state ^^ {memoed =>
+println("identified memoed "+memoed) 		
+ 			memoed
+ 		}
+ 	}
+ 	
+ 	
+  def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.learnNewName(pilotName)
     
-  }
+ 	
   /**
    * teaches pilot names to dispatcherparser...
    */
@@ -176,18 +205,30 @@ debug("no parseResult: None from '"+line+"'")
     ".* has connected".r ^^ {all=>
       val pilotName = all.substring(0, all.length-14)
       
-      pilotNameParser.learnNewName(pilotName)
+      learnNewName(pilotName)
 //      pilotNameParser.learnNewName(pilotName)
       PilotMessage(pilotName, Is.Joining)
  	} 
   
-  lazy val planeNumber : Parser[Int] = {
-    "(" ~> """\d+""".r <~ ")" ^^ (_ toInt)
+  case class PlaneAndSeat (plane:String, seat: Int)
+  lazy val planeAndSeat : Parser[PlaneAndSeat] = {
+  	regexMatch("""\:(\S+)\((\d+)\)""") ^^ { both=>
+  		val plane = both.group(1)
+  		val num = both.group(2).toInt
+  		PlaneAndSeat(plane, num)
+  	}
   }
   lazy val seatOccupied : Parser[PilotMessage] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ planeNumber~" seat occupied by " ~ pilotNameParser ~ atLocationParser ^^ {
-      case pilot ~ _ ~ plane ~ planeNum ~ _ ~ p2 ~ at if pilot==p2 => {
-        PilotMessage(pilot, Is.TakingSeat(plane), at) 
+    memorizingPilotNameParser ~ planeAndSeat ~" seat occupied by " ~ memoedName ~ atLocationParser ^^ {
+    	case pilot ~ both ~ _ ~ _ ~ at => {
+      	PilotMessage(pilot, Is.TakingSeat(both.plane), at)
+      }
+    }
+  }
+  lazy val ejected : Parser[PilotMessage] = {
+    pilotNameParser ~ planeAndSeat ~" bailed out " ~ atLocationParser ^^ {
+    	case pilot ~ _ ~ _ ~ at => {
+      	PilotMessage(pilot, Is.Ejecting, at)
       }
     }
   }
@@ -223,8 +264,8 @@ debug("no parseResult: None from '"+line+"'")
   }
   
   lazy val wasKilled : Parser[PilotMessage] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ planeNumber ~ " was killed "  ~ atLocationParser ^^ {
-      case pilot ~ _ ~ plane ~ _ ~ _ ~ at => {
+    pilotNameParser ~ planeAndSeat ~ " was killed "  ~ atLocationParser ^^ {
+      case pilot ~ plane ~ _ ~ at => {
         PilotMessage(pilot, Is.Dying, at) 
       }
     }

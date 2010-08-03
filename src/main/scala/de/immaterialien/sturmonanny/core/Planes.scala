@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.Domain
+import _root_.de.immaterialien.sturmonanny.util.Domain
 
 class Planes extends Domain[Planes] with NonUpdatingMember{ 
 	override def newElement(name:String) = new Plane(name)

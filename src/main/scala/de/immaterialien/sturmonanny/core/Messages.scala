@@ -53,6 +53,9 @@ object Is {
 	case class Flying(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
 	  def this(plane:String, side:String) = this(plane, Armies.forName(side )) 
 	}
+	/**
+	 * either coming from refly menu or switching seats inside a plane
+	 */
   case class TakingSeat(plane : String) extends PilotEvent
   case class Loading(plane : String, weapon:String, fuel:Double) extends PilotEvent
   

@@ -1,7 +1,7 @@
 package de.immaterialien.sturmonanny.market.fixed
 
-import de.immaterialien.sturmonanny.core._
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.core._
+import _root_.de.immaterialien.sturmonanny.util._
 
 
 class FixedPriceMarket extends IMarket with Logging{ 
@@ -9,13 +9,18 @@ class FixedPriceMarket extends IMarket with Logging{
 	var priceList : Option[PriceList] = None  
 	var server : Option[Server] = None 
 
- 	def addAirTime(plane : String, millis : Long) = ()
+ 	def addAirTime(plane : IMarket.Loadout, millis : Long) = ()
 	def cycle(name : String) = ()
-	 
+	
+	
   
-	override def getPrice(plane : String) : Double = {
-	  val res = priceList.map(_.planes(plane)) map (_ toDouble)
-	  res getOrElse 0
+	override def tryPrice(loadout : IMarket.Loadout) : Option[Double] = {
+	  //val res = priceList.map(_.planes(plane)) map (_ toDouble)
+		
+		val res = for(list <- priceList) yield list.planes(loadout.toString)
+		
+		
+	  res map (_ toDouble)
 	}
 	override def setServerContext(srv:Server){
 debug("setting server context: "+srv)		    

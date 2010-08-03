@@ -9,8 +9,8 @@ import net.liftweb.util.NamedPF
 import net.liftweb.http.LiftRules
 import net.liftweb.sitemap._
  
-import de.immaterialien.sturmonanny.util.configgy._
-import de.immaterialien.sturmonanny.global._
+import _root_.de.immaterialien.sturmonanny.util.configgy._
+import _root_.de.immaterialien.sturmonanny.global._
 
  
 

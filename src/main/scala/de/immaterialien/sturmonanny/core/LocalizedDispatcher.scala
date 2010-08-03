@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
 import scala.util.parsing.combinator._
 import net.liftweb.actor.LiftActor
 import scala.io._
@@ -26,7 +26,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	}
  
  	def updateConfiguration = {
-	  val newPath = conf.server.serverPath
+	  val newPath :String= conf.server.serverPath.apply
    
 	  if(newPath!=serverPath){
 	    init(newPath)
