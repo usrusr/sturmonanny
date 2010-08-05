@@ -32,6 +32,12 @@ trait IMarket { import IMarket._
 	def setConfiguration(pathToFile : String) : Boolean
 	
 	def setServerContext(server : Server) : Unit
+	
+	/**
+	 * notify market of a new map
+	 * 
+	 * @param name
+	 */
 	def cycle(name : String) : Unit   
 }   
 object IMarket {

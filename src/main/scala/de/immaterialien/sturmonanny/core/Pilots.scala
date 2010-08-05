@@ -105,7 +105,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			def commitPlanePrice(){
 			  if(planeVerified){
 					val now = System.currentTimeMillis
-					
+
 					val millis = System.currentTimeMillis - lastPlanePriceCommit
 					val difference = planePrice * millis / (-60000) 
 					debug("price update for "+millis+" with raw price"+ planePrice+ " -> difference "+difference )       
@@ -287,7 +287,9 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				state.updatePlaneName(plane)
 				state.updateLoadout(load)
 			}
-			
+			case Is.MissionEnd => {
+				state.commitPlanePrice()
+			}
 			
     	case Is.InFlight => {
 debug(name + " Is.InFlight "+state)    	  
