@@ -8,7 +8,7 @@ class Configuration(override val file : String, val serverInstance : sturmonanny
   override def apply(conf : net.lag.configgy.Config) : Option[java.io.File]= {
     val ret = super.apply(conf)
     
-    if(server!=null) serverInstance.conf = this 
+    if(serverInstance!=null) serverInstance.conf = this  
     
     ret
   }
@@ -103,6 +103,15 @@ landing refund should be distributed in the same ratio but this is not implement
 	  object implementation extends Field("de.immaterialien.sturmonanny.core.AllPlanesEqualMarket")
 	  object configuration extends Field("planes.lst")
 	} 
+	object persistence extends Group {
+		doc="pluggable storage for pilot balance state, e.g. connecting to a database, flat text file or simply storing/forgetting in RAM"
+		object implementation extends Field("de.immaterialien.sturmonanny.persistence.InMemoryBackend") {
+			doc="fully qualified class name of a class implementing trait de.immaterialien.sturmonanny.persistence.IBalanceDao"
+		}
+		object properties extends Table("") {
+			doc="configuration properties for the IBalanceDao implementation, e.g. filename, JDBC driver, URL and credentials or something similar"
+		}
+	}
  
 	object names extends Group {
 	  doc = "a few strings you can set to customize messages"
