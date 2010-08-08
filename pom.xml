@@ -2,11 +2,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>de.immaterialien</groupId>
   <artifactId>qlmap</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
   <name>qlmap</name>
   	<properties>
-		<scala.version>2.7.7</scala.version>
+<!--		<scala.version>2.7.7</scala.version>-->
 		<!--<scala.version>2.8.0.Beta1-RC1</scala.version>-->
+		<scala.version>2.8.0</scala.version>
 	</properties>
   
   	<dependencies>
@@ -16,20 +17,21 @@
 			<version>${scala.version}</version>
 		</dependency>
 		<dependency>
+		    <groupId>commons-lang</groupId>
+		    <artifactId>commons-lang</artifactId>
+		    <version>2.5</version>
+
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>4.5</version> 
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>net.lag</groupId>
-			<artifactId>configgy</artifactId>
-			<version>1.5.2-usr</version>
-		</dependency>
-		<dependency>
 	<groupId>de.immaterialien</groupId>
 	<artifactId>sturmonanny</artifactId>
-	<version>0.0.4-SNAPSHOT</version>		
+	<version>0.0.7-SNAPSHOT</version>		
 		</dependency>
 	</dependencies>
 	<build>
