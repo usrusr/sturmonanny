@@ -174,7 +174,10 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
  	  (what+""": """)~rep1("""\t""") ~> regexMatch("""(\S(.*\S)?)\\n\n""".r)^^(_.group(1))
 	}
  	def stringToState : PartialFunction[String, Is.PilotState] = {
- 	  case """In Flight""" => Is.InFlight 
+ 	  case """In Flight""" => {
+ 	  	Is.InFlight
+// 	 not necessary, InFlight handled only if a plane is known  	Is.Ignored // because the stats lists displays "In Flight" while a pilot is connecting... 
+ 	  }
  	  case """Landed at Airfield""" => Is.LandedAtAirfield
  	  case """KIA""" => Is.KIA
  	  case """Hit the Silk""" => Is.HitTheSilk  

@@ -9,7 +9,8 @@ import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 class PriceListTest {
 	@Test 
 	def testFile() : Unit ={ 
-		val p = new MyList("E:/eclipseworkspace/sturmonanny/src/test/scala/de/immaterialien/sturmonanny/market/fixed/test.conf")
+//		val p = new MyList("src/test/scala/de/immaterialien/sturmonanny/market/fixed/test.conf")
+		val p = new MyList("./src/test/scala/de/immaterialien/sturmonanny/market/fixed/test.conf")
 
 		println("price list is \n"+ p )
 		println("host is is "+ p.prices.host )
@@ -19,10 +20,10 @@ class PriceListTest {
 		println("Porsches: "+ p.prices.planes("Porsche"))
 		p.prices.planes("Spit") = 3
 		println("changed Spit: "+ p.prices.planes("Spit"))
-		p.prices.planes("P51") = 2
-		p.aliases.planes("P51") = "Mustang"
+		p.prices.planes("P51") = 2 
+		p.aliases.planes("P51") = "Mustang" 
 		p.aliases.pilots("usrusr") = "Ulf"
-//		p.prices.planes("String") = "geht nicht"
+//		p.prices.planes("String") = "geht nicht" 
 		 
   		p.aliases.group.subgroup.test() = "na sowas!"
   		p.prices.pricegroup.subgroup.test() = "so ein pries"
@@ -31,7 +32,14 @@ class PriceListTest {
 		()
 	} 
 } 
-class MyList(file:String) extends ConfigurationSchema(file) with de.immaterialien.sturmonanny.util.configgy.LiftSupport with de.immaterialien.sturmonanny.util.Logging {
+object PriceListTest {
+	def main(args: Array[String]) = try{
+		new PriceListTest().testFile
+	}catch{case e => println("failed:"+e)}
+}
+class MyList(file:String) extends ConfigurationSchema(file) with 
+//	de.immaterialien.sturmonanny.util.configgy.LiftSupport with 
+	de.immaterialien.sturmonanny.util.Logging {
 	object prices extends Group { 
   doc = "inline doc"
   object test extends Field( "StringTest") 
@@ -42,7 +50,7 @@ class MyList(file:String) extends ConfigurationSchema(file) with de.immaterialie
 
 
 	  object planes extends  Table(0)
-	  object consoleport extends Field(2011)
+	  object consoleport extends Field(2011) 
       object pricegroup extends Group {
         doc = """ oh wie schön """
    	    object subgroup extends Group{

@@ -19,6 +19,7 @@ class FixedPriceMarket extends IMarket with Logging{
 		
 		val res = for(list <- priceList) yield list.planes(loadout.toString)
 		
+println("price for "+loadout+" -> " +res);
 		
 	  res map (_ toDouble)
 	}
@@ -44,6 +45,11 @@ debug("creating "+plane+" in market -> "+planes.items )
 			    planes.create(plane)
 			  }
 		  true
-	  }catch{case _ => false }
+	  }catch{
+	  	case e => {
+warn("market configuration failed ", e)	  		
+		  	false 
+		  }
+	  }
 	} 
 }

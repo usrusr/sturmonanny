@@ -5,6 +5,13 @@ import util.configgy
 
 import java.net.URLEncoder
 
+
+/**
+ * 
+ * @author ulf
+ *
+ */
+@deprecated("most pilot names would not be valid configgy keys!")
 class ConfiggyBackend extends IBalanceDao with util.Log { 
 	var store : Option[ConfiggyBackend.BalanceStore] = None
 	var file : Option[String] = None

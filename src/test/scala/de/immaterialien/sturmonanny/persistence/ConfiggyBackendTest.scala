@@ -8,7 +8,7 @@ class ConfiggyBackendTest {
 	@Test
 	def test {
 		val first = new ConfiggyBackend()
-		first.open(Map(), (msg=>println("info: "+msg)), (msg=>fail("test error: "+msg)))
+		first.open(Map(), (msg=>println("info: "+msg)), (msg=>fail("test error: "+msg))) 
 		val f = new java.io.File("test.balance")
 		assertTrue("file should either not exist or be deleted",(! f.exists)||f.delete)
 		first.open(Map("file"->"test.balance"), (msg=>println("info: "+msg)), (msg=>assertEquals("file Some(test.balance) does not exist",msg)))

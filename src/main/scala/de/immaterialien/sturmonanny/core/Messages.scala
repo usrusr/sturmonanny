@@ -47,6 +47,8 @@ object Is {
  	case object LandedAtAirfield extends PilotState 
  	case object KIA extends PilotState with PilotLost
  	case object InFlight extends PilotState
+
+ 	
  	case object HitTheSilk extends PilotState with PlaneLost
  	case object Selecting extends PilotState  
  
@@ -73,7 +75,7 @@ object Is {
    	case object Leaving extends PilotEvent
 
     case object Unknown extends Individual with Global 
-    case object Ignored extends Individual with Global 
+    case object Ignored extends PilotState with Global 
    
 //	case object Destroyed extends PlaneLost with PilotLost
 	case class Informed(val text : String) extends PilotEvent

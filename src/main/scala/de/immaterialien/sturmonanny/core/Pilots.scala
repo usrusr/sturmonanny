@@ -20,6 +20,14 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 		val balance = Army Var 0D
 		val refund = Army Var 0D
 		val invitations = Army Val (new mutable.HashMap[IMarket.Loadout, Pilots.Invitation]())
+		
+		for(loaded <- server.balance.load(name)){
+			balance(Armies.RedSide) = loaded.red
+			balance(Armies.BlueSide) = loaded.blue
+			val currency = conf.names.currency
+			chat("your balance: "+loaded.red.toInt+currency+" on red and "+loaded.blue.toInt+currency+" on blue")
+		}
+		
 
 		object state{
 		  override def toString = {
@@ -71,7 +79,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			}
 			private def planeLost() : Option[String] = {
 				flying=false
-			  if(planeVerified && ! deathPause && somePlane) commitPlanePrice// finish balance
+			  if(planeVerified && ! deathPause && somePlane) commitPlanePrice()// finish balance
 
 				
 				val result =server.rules.startCostCheck(planePrice, balance) match {
@@ -111,6 +119,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 					debug("price update for "+millis+" with raw price"+ planePrice+ " -> difference "+difference )       
 					balance () = server.rules.updateBalance(balance, difference)
 					lastPlanePriceCommit = now
+					persist()
 			  }
 			}
 			// call when it is definitely known that the pilot is fresh in a plane
@@ -189,11 +198,13 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			}
 
 			def returns(){
+				commitPlanePrice()
 				if(refund.value>0) {
 					chat("Awarded a refund of "+refund.value+conf.names.currency+" for returning the "+planeName)
 					balance () = server.rules.updateBalance(balance, refund)
 					refund () = 0
 				}
+				persist()
 				clear()
 			} 
 			def clear(){
@@ -206,6 +217,11 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				load = None
 				lastBalance = None
 			}
+			def persist() {
+debug("persisting "+name)				
+				server.balance .store(name, Some(balance(Armies.RedSide)), Some(balance(Armies.BlueSide)))
+			}
+			
 		}
   
 		def priceMessages(which:String, all:Boolean){
@@ -260,9 +276,10 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				}
       }
 		}
-
+				
+		
 		def ImessageHandler : PartialFunction[Any, Unit] = { 
-			case Is.Persisted =>  
+			case Is.Persisted => state.persist()
 
 			case Is.Flying(plane, army) => {
 				currentSide_=( army )
@@ -292,9 +309,11 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			}
 			
     	case Is.InFlight => {
-debug(name + " Is.InFlight "+state)    	  
-    	  state.flying = true
-    	  state.commitPlanePrice()
+				if(state.somePlane){
+debug(name + " Is.InFlight "+state) 
+	    	  state.flying = true
+	    	  state.commitPlanePrice()
+				}else debug("ignored Is.InFlight for "+name)
     	}
       case Is.LandedAtAirfield => {
 debug(name + " Is.LandedAtAirfield "+state) 
@@ -330,6 +349,7 @@ debug(name + " Is.TakingSeat "+state)
 					 server.multi ! new server.multi.ChatBroadcast(this.name + " leaving, counted as a lost plane")
 					state.crashes()
 				}else{
+					state.persist()
 					state.clear()
 				}
     	}

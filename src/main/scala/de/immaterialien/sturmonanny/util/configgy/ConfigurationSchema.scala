@@ -57,7 +57,9 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
     log.trace("parsing file " + file)
     if (file == null) new Config
     else {
-      Config.fromFile(file)
+    	val f = new java.io.File(file)
+    	Config.fromFile(f.getAbsolutePath)
+//      Config.fromFile(file)
     }
   })
   //	if(logging.isTraceEnabled){
@@ -66,7 +68,7 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
   }
   log.debug("--->\nresult for " + file + ":\n" + this.toString)
 
-  //	}
+  //	} 
 
   def writeToFilesystemOrMessage(): Option[String] = {
     fileReference match {
@@ -168,9 +170,9 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
     override def write(sb: scala.StringBuilder, indent: String, prefix: String) {
       writeDocumentation(sb, indent, full)
 
-      sb.append(indent + "<" + configgyName + ">\r\n")
+      if( ! configgyName.isEmpty) sb.append(indent + "<" + configgyName + ">\r\n")
       innerTable(sb, indent)
-      sb.append(indent + "</" + configgyName + ">\r\n")
+      if( ! configgyName.isEmpty) sb.append(indent + "</" + configgyName + ">\r\n")
     }
     override def toString = "table " + configgyName + ":" + map
     def innerTable(sb: scala.StringBuilder, indent: String) = for ((k, v) <- map.projection) sb.append(indent + "   " + k + " = " + printer(v) + "\r\n")
@@ -342,12 +344,12 @@ sealed protected trait Holder extends SelfNaming with ConfigurationSchema.Selfdo
     }
     count += oldS.length
     for (close <- oldS.reverse) {
-      sb append ("   " * count) + "</" + close + ">\r\n"
+      if( ! close.isEmpty) sb append ("   " * count) + "</" + close + ">\r\n"
       count -= 1
     }
     for (open <- newS) {
       count += 1
-      sb append ("   " * count) + "<" + open + ">\r\n"
+      if( ! open.isEmpty) sb append ("   " * count) + "<" + open + ">\r\n"
     }
     "   " * (1 + count)
   }

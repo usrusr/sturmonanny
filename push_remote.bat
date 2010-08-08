@@ -1,2 +1,2 @@
-git push origin master
+git push origin scala2.8
 pause

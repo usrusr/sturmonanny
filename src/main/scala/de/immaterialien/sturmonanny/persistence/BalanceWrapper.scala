@@ -9,7 +9,10 @@ class BalanceWrapper extends IBalanceDao with core.UpdatingMember with util.Log{
   	val ret = actor !! (Msg.LoadReq(pilot), 500)
   	ret.asA[Msg.LoadRes].flatMap(_.res)
   }
-	def store(pilot:String, balanceRed:Option[Double], balanceBlue:Option[Double]) =actor ! Msg.Store(pilot, balanceRed, balanceBlue)
+	def store(pilot:String, balanceRed:Option[Double], balanceBlue:Option[Double]) {
+println(" wrapper storing "+pilot+" -> r:"+balanceRed+" b:"+balanceBlue+ " in "+last);			
+		actor ! Msg.Store(pilot, balanceRed, balanceBlue)
+	}
 	def open(props:Map[String, String], info:String=>Unit, error:String=>Unit) = actor ! Msg.Open(props)
 	def close(info:String=>Unit, error:String=>Unit) = actor ! Msg.Close
 	

@@ -177,10 +177,10 @@ debug("no parseResult: None from '"+line+"'")
 			
 			if(ret.successful) {
 				state = ret.asInstanceOf[{def result:String}].result
-println("memoing pilot "+state)				
+//println("memoing pilot "+state)				
 				ret
 			}else{
-println("did not find a pilot for memoing")				
+debug("did not find a pilot for memoing: "+in.source)				
 				state = ""
 			  ret
 			}
@@ -244,6 +244,7 @@ println("identified memoed "+memoed)
   lazy val inFlight : Parser[PilotMessage] = {
     pilotNameParser ~ ":" ~ """\S+""".r ~ " in flight "  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ at => {
+debug("inflight event "+new Exception)      	
         PilotMessage(pilot, Is.InFlight, at) 
       }
     }

@@ -10,7 +10,7 @@ trait IBalanceDao {
 	 * @param info dont store!
 	 * @param error dont store!
 	 */
-	def open(props:Map[String, String], info:String=>Unit, error:String=>Unit)
+	def open( props:Map[String, String], info:String=>Unit, error:String=>Unit) 
 	def close(info:String=>Unit, error:String=>Unit)
 }
 
@@ -22,7 +22,9 @@ object IBalanceDao {
  */
 class InMemoryBackend extends IBalanceDao { 
 	def load(pilot:String):Option[IBalanceDao.BalanceRB] = None
-	def store(pilot:String, balanceRed:Option[Double], balanceBlue:Option[Double]){}
+	def store(pilot:String, balanceRed:Option[Double], balanceBlue:Option[Double]){
+println(" dummy storing "+pilot+" -> r:"+balanceRed+" b:"+balanceBlue);		
+	}
 	def open(props:Map[String, String], info:String=>Unit, error:String=>Unit){}
 	def close(info:String=>Unit, error:String=>Unit){}
 }

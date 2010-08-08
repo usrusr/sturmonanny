@@ -48,7 +48,7 @@ class Rules extends NonUpdatingMember with Logging {
 			val message = if(ratio>0.8) {
 				who+", please fly something more common than a "+loadout
 			}else if(ratio>0.65){
-				loadout+" requires "+startPrice+"% but you only have "+balance+"%"
+				loadout+" requires "+startPrice+"% but you only have "+balance.toInt+conf.names.currency
 			}else if(ratio>0.56){
 				"You can check your "+conf.names.currency+" by chatting \"! balance\" to Server"
 			}else if(ratio>0.48){

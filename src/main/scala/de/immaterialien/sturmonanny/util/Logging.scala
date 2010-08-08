@@ -40,7 +40,7 @@ trait Logging {
 
   def isEnabledFor(level: net.lag.logging.Level): Boolean = logger.isLoggable(level)
 }
-trait Log {  
+trait Log {    
    
   object logging extends Logging {
     override def initLog = Logger.get(Log.this.getClass)

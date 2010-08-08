@@ -79,9 +79,13 @@ debug(cls + " new instance not configured!")
 	  case _ =>
 	}
 	override def getPrice(plane : IMarket.Loadout) : Double = {
+println("get Price "+plane+ " from "+internal)
+val ret =
 		!!(Msg.getPrice(plane), 500)
 	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
 	  		.price
+println("got "+ret)	  		
+ret	  		
 	}
 	override def tryPrice(plane : IMarket.Loadout) : Option[Double] = { 
 	  !!(Msg.getPrice(plane), 500)

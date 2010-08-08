@@ -42,6 +42,6 @@ trait IMarket { import IMarket._
 }   
 object IMarket {
 	case class Loadout(plane:String, load:Option[String]) {
-		override def toString = load map (plane+" "+_) getOrElse plane 
+		override def toString = load map (plane+"_"+_) getOrElse plane 
 	}
 }
