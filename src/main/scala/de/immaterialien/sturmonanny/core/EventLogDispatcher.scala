@@ -24,13 +24,14 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 			case e@Error(_,_) => e
 		}
 	}
-
-	
+	var maxAge = 10 
+ 	
  	def updateConfiguration = {
-
-	}
+			
+	} 
 
  	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
+ 	def allPilotMessageSend(what: Is.Event) = server.pilots.forMatches("")(_!what) 
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
 	  case DispatchMessage(x) => processMessage(x) 
@@ -53,8 +54,16 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 		    	  pilotMessageSend(who, what)
 debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		      }
-        case GlobalMessage(Is.MissionChanging(mis)) => {
+		      
+		    case GlobalMessage(Is.MissionChanging(mis)) => {
           server.market.cycle(mis)
+        	allPilotMessageSend(Is.MissionChanging(mis))
+		    }
+        case GlobalMessage(Is.MissionEnd) => {
+        	allPilotMessageSend(Is.MissionEnd)
+        }
+        case GlobalMessage(Is.MissionBegin) => {
+          allPilotMessageSend(Is.MissionBegin)
         } 
 		      case None => {
 debug("no parseResult: None from '"+line+"'")		        
@@ -98,6 +107,19 @@ debug("no parseResult: None from '"+line+"'")
 	lazy val lineParser : Parser[Message]= (
 	  dateTimeParser ~> eventParser
 	)
+	
+	lazy val maxAgeLineParser : Parser[Message]= (
+	  (dateTimeParser ~ eventParser) ^^ {
+	  	case date ~ msg => {
+	  		val age = System.currentTimeMillis - date.getTimeInMillis 
+	  		if( age > maxAge*1000) {
+debug("skipping "+msg+" because it is too old: "+(age/1000)+"s")	  			
+	  			GlobalMessage(Is.Ignored)
+	  		}else msg
+	  	}
+	  }
+	)
+	
 	lazy val dateTimeParser : Parser[java.util.Calendar] = (
 	  "[" ~ dayParser  ~ hmsParser ~ ":" ~ hmsParser~":" ~ hmsParser ~ (" AM" ^^^ 0 | " PM" ^^^ 12) ~ "] " 
 	  	^^ { case  _ ~ day ~ hour ~_~ minute ~_~ second ~ amPm ~ _  =>  
@@ -180,7 +202,7 @@ debug("no parseResult: None from '"+line+"'")
 //println("memoing pilot "+state)				
 				ret
 			}else{
-debug("did not find a pilot for memoing: "+in.source)				
+//debug("did not find a pilot for memoing: "+in.source)				
 				state = ""
 			  ret
 			}
@@ -234,7 +256,7 @@ println("identified memoed "+memoed)
   }
   
   lazy val loading : Parser[PilotMessage] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ " loaded weapons '" ~ """\S+""".r ~ "'" ~ fuelParser ^^ {
+    pilotNameParser ~ ":" ~ """\S+""".r ~ " loaded weapons '" ~ """[^']+""".r ~ "' " ~ fuelParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ loadout ~ _ ~ fuel => {
         PilotMessage(pilot, Is.Loading(plane, loadout, fuel/100)) 
       }

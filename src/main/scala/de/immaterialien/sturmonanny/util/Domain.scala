@@ -59,7 +59,7 @@ trait Domain[D <: Domain[D]]  extends  Logging{
     private def find(pat:String) : Iterable[this.Element] = {
      if(( pat eq null) || pat.trim.isEmpty){
        items map (_ _2)
-     }else{
+     }else{ 
     	def regexMatchings(reg : scala.util.matching.Regex) = items filterKeys (reg findFirstIn _ isDefined) map (_ _2)
     	 
       	val content = """(\Q"""+pat.replaceAll("""\*""", """\\E.*\\Q""")+"""\E)"""

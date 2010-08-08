@@ -52,7 +52,7 @@ object Is {
  	case object HitTheSilk extends PilotState with PlaneLost
  	case object Selecting extends PilotState  
  
-	case class Flying(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
+	case class InPlaneForSide(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
 	  def this(plane:String, side:String) = this(plane, Armies.forName(side )) 
 	}
 	/**

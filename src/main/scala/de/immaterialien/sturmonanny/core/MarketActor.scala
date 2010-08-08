@@ -80,6 +80,8 @@ debug(cls + " new instance not configured!")
 	}
 	override def getPrice(plane : IMarket.Loadout) : Double = {
 println("get Price "+plane+ " from "+internal)
+if(plane.load.isEmpty)
+new Exception().printStackTrace()
 val ret =
 		!!(Msg.getPrice(plane), 500)
 	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))

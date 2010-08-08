@@ -275,7 +275,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
 					  		list.synchronized{
 					  		  while( ! list.isEmpty) {
 					  		    val line = list.removeFirst
-debug("from event log line '"+line.trim+"'")
+//debug("from event log line '"+line.trim+"'")
 
 					  		   	server.eventlog ! DispatchLine(line)
 					  		  }

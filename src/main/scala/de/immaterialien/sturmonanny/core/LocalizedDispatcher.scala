@@ -35,7 +35,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	}
  	override def updateTranslations(translations:mutable.Map[String, List[String]]){
     	  localizedMessageParser = new LocalizedParserInstance(translations)
-	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
+//	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
     }
 
  	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
@@ -314,8 +314,8 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 						case idPilotPingPoints(rpo, rpi, rpilot) => {
 							val pilot=rpilot.reverse
 							after match {
-								case sideNone(side) => Some(PilotMessage(pilot, Is.Flying("", Armies.forName(side))))
-								case sidePlane(side, plane) => Some(PilotMessage(pilot, Is.Flying(plane, Armies.forName(side))))
+								case sideNone(side) => Some(PilotMessage(pilot, Is.InPlaneForSide("", Armies.forName(side))))
+								case sidePlane(side, plane) => Some(PilotMessage(pilot, Is.InPlaneForSide(plane, Armies.forName(side))))
 								case _ => null
 							}
 						}

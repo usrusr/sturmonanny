@@ -375,6 +375,7 @@ object ConfigurationSchema {
     def documentationString = doc
 
     protected var doc = ""
+
     protected def writeDocumentation(sb: scala.StringBuilder, indent: String, full: String) {
       val prefix = full.replace(".", "/")
       def comment(line: String) = sb.append(

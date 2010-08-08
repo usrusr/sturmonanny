@@ -37,7 +37,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
         (if(landed) " landed" else "") +
         " plane:" +planeName+" @ "+planePrice + 
         (if(planeVerified) " verified" else " unchecked") +
-        (if(lastPlaneName!="") " lost:"+lastPlaneName else "") +
+        (if(lostPlaneName!="") " lost:"+lostPlaneName else "") +
         ""
 		  }
 		  
@@ -51,7 +51,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			var planeName = ""
 			var lastPlanePriceCommit = System.currentTimeMillis
 			var planeVerified = true
-			var lastPlaneName = ""
+			var lostPlaneName = ""
 			var planePrice : Double = 0
 			var load : Option[String] = None
 			var lastBalance : Option[Double] = None
@@ -71,7 +71,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				      chat(name+": death pause for "+seconds+"s and "+msg)
 				    }
 				    case None => {
-				      chat(name+": death pause for "+seconds+"s, then clear to refly "+lastPlaneName)
+				      chat(name+": death pause for "+seconds+"s, then clear to refly "+lostPlaneName)
 				    } 
 				  }
 				}
@@ -89,7 +89,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				  case _ => None
 				}
 			  refund () = 0    
-				lastPlaneName = planeName
+				lostPlaneName = planeName
 				planeVerified = false
 				planeName = ""
 				planePrice = 0
@@ -112,6 +112,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			
 			def commitPlanePrice(){
 			  if(planeVerified){
+println("commit plane price "+state)			  	
 					val now = System.currentTimeMillis
 
 					val millis = System.currentTimeMillis - lastPlanePriceCommit
@@ -127,7 +128,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				refund () =0
 				invitations.retain(((x,y) => y.until > System.currentTimeMillis))
 				planePrice = server.market.getPrice(planeName, load)
-				lastPlaneName = ""
+				lostPlaneName = ""
 				val now = System.currentTimeMillis
 				lastPlanePriceCommit = now
 				
@@ -157,7 +158,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				}          
 			}
 			def planeNotEmpty = ! (planeName==null || planeName=="")
-			def planeNotLostPlane = lastPlaneName==null || lastPlaneName=="" || planeName != lastPlaneName
+			def planeNotLostPlane = lostPlaneName==null || lostPlaneName=="" || planeName != lostPlaneName
 			
 			def updateLoadout(what:String){
 				
@@ -168,7 +169,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 						if(lastBalance.isDefined){
 							balance () = lastBalance.get
 							refund () = 0
-							chat("resetting balance due to updated loadout information")
+							chat("balance rollback due to updated loadout information")
 							definitelyInPlane()
 						}else{
 							debug("lastBalance is undefined while plane is verified")
@@ -180,18 +181,19 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				if(what==null || what.trim.isEmpty){
 					planeVerified = false
 					planeName = ""
-					lastPlaneName = ""
+					lostPlaneName = ""
 					refund () =0
-				}else what match {   
-					case existingPlane if(existingPlane==planeName) => { // plane name did not change
-						if(( ! planeVerified) && planeNotLostPlane) definitelyInPlane() // once planeNotLostPlane is reset (e.g. by getting a flying None message) we run into this line
-					}
-					case newPlane => {
-					  planeVerified = false
-						lastPlaneName = ""
-						planeName = newPlane
-						definitelyInPlane()
-					}
+				}else if(what==planeName) { // plane name did not change
+//						if(( ! planeVerified) && planeNotLostPlane) {
+//							lostPlaneName = ""
+//							definitelyInPlane() // once planeNotLostPlane is reset (e.g. by getting a flying None message) we run into this line
+//						}
+				}else{
+debug("update plane name '"+planeName+"' to '"+what+"'")						
+				  planeVerified = false
+					lostPlaneName = ""
+					planeName = what
+					definitelyInPlane()
 				}
 				if(deathPause && planeNotEmpty) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invitations.value)
 				else if(planeNotEmpty && planeNotLostPlane && ! planeVerified ) server.rules.warnPlane(Pilot.this.name, planeName, load, lastPlanePriceCommit, balance)
@@ -208,7 +210,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				clear()
 			} 
 			def clear(){
-				lastPlaneName = ""
+				lostPlaneName = ""
 				planeVerified = false
 				flying=false
 				planeName = ""
@@ -218,7 +220,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				lastBalance = None
 			}
 			def persist() {
-debug("persisting "+name)				
+//debug("persisting "+name)				
 				server.balance .store(name, Some(balance(Armies.RedSide)), Some(balance(Armies.BlueSide)))
 			}
 			
@@ -281,10 +283,11 @@ debug("persisting "+name)
 		def ImessageHandler : PartialFunction[Any, Unit] = { 
 			case Is.Persisted => state.persist()
 
-			case Is.Flying(plane, army) => {
+			case Is.InPlaneForSide(plane, army) => {
 				currentSide_=( army )
 				state.updatePlaneName(plane)
 			}
+			
 
 			case Is.Returning => {
 				state.returns()
@@ -306,9 +309,16 @@ debug("persisting "+name)
 			}
 			case Is.MissionEnd => {
 				state.commitPlanePrice()
+				state.clear()
 			}
-			
+			case Is.MissionChanging => {
+				state.clear()
+			}
+			case Is.MissionBegin => {
+				state.clear()
+			}
     	case Is.InFlight => {
+    		
 				if(state.somePlane){
 debug(name + " Is.InFlight "+state) 
 	    	  state.flying = true
@@ -342,7 +352,7 @@ debug(name + " Is.TakingSeat "+state)
     		state.updatePlaneName(plane)
     	}
     	case Is.Joining => {
-					state.lastPlaneName = ""
+					state.lostPlaneName = ""
     	}
     	case Is.Leaving => {
     		if(state.flying) {

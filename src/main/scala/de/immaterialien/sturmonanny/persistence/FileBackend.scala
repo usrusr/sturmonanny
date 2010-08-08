@@ -10,7 +10,7 @@ class FileBackend  extends IBalanceDao with util.Log { import FileBackend._
 	var map = new mutable.HashMap[String, BalanceRB]
 	var file : Option[String] = None
 	var lastSave = System.currentTimeMillis
-	var writeInterval = 10
+	var writeInterval = 3
 	
 	def load(pilot:String):Option[IBalanceDao.BalanceRB] = {
 			map.get(pilot)
@@ -18,11 +18,12 @@ class FileBackend  extends IBalanceDao with util.Log { import FileBackend._
 
 	def store(pilot:String, balanceRed:Option[Double], balanceBlue:Option[Double]){
 			val existing = map.get(pilot)
+			
 			var updated = existing map { sides =>
-				(balanceRed map (_ != sides.red) getOrElse false) &&
+				(balanceRed map (_ != sides.red) getOrElse false) ||
 				(balanceBlue map (_ != sides.blue) getOrElse false)
 			} getOrElse true
-			
+//log debug("store existing "+existing+" vs new "+balanceRed+"/"+balanceBlue+" updated? "+updated )			
 			if(updated) {
 				map.put(pilot, BalanceRB(
 						(balanceRed getOrElse 0d), 
@@ -30,6 +31,8 @@ class FileBackend  extends IBalanceDao with util.Log { import FileBackend._
 				))
 				if(System.currentTimeMillis > (lastSave + (writeInterval*1000))){
 					save({x:String=>log.error("autosave: " + x)})
+				}else{
+//					log.debug("waiting to save "+(System.currentTimeMillis-(lastSave + (writeInterval*1000))) +" ms missing")
 				}
 			}
 	}
@@ -158,12 +161,14 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 
 		def write(fname:String, input:mutable.Map[String, BalanceRB], error:String=>Unit){ 
 			val f = new File(fname)
+println("writing to "+f)			
 			val last = new File(fname+".bak")
 			if(last.exists && ! last.delete) error("backup "+last.getAbsolutePath+" could not be deleted")
 			if(f.exists && ! f.renameTo(last)) {
 				error("could not move to backup "+last.getAbsolutePath+", deleting "+f.getAbsolutePath)
 				if( ! f.delete) error("failed to delete "+f.getAbsolutePath)
 			}
+println("writing... "+f)			
 			val fos = new FileOutputStream(fname)
 			val ow = new OutputStreamWriter(fos, utf8)
 			try for(item<-input){
@@ -174,7 +179,10 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 				ow append "\"" append pilot append "\" =" append 
 					" red: " append (rb.red.toString) append
 					" blue: " append (rb.blue.toString) append "\n"
-			} finally {
+println("written to "+f)			
+			} catch{
+				case e=> error("failed to write balances to "+f.getAbsolutePath+" "+e.getMessage)
+			}finally {
 				try ow.close
 				try fos.close
 			}

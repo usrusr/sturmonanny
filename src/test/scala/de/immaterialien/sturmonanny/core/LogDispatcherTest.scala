@@ -39,18 +39,20 @@ class LogDispatcherTest {
     
     test(dispatch.atLocationParser, " at 73896.164 72082.55")
     test(dispatch.pilotNameParser, "blackjack_89")
-
+test(dispatch.fuelParser, "fuel 50%")
+test(dispatch.loading, "blackjack_89:Ju-88A-4 loaded weapons '28xSC50_2xSC250' fuel 50%")
     
     one("[6:37:56 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 73896.164 72082.55")
+    one("[6:37:57 PM] blackjack_89:Ju-88A-4 loaded weapons '28xSC50_2xSC250' fuel 50%")
 
-    val fUrl = this.getClass.getResource("Afrika_42194205120-log.txt")
-    println("using "+fUrl)
-    val stream = this.getClass.getResourceAsStream("Afrika_42194205120-log.txt")
-    val source = io.Source.fromInputStream(stream)
-
-    for (line <- source.getLines) {
-      one(line)
-    }
+//    val fUrl = this.getClass.getResource("Afrika_42194205120-log.txt")
+//    println("using "+fUrl)
+//    val stream = this.getClass.getResourceAsStream("Afrika_42194205120-log.txt")
+//    val source = io.Source.fromInputStream(stream)
+//
+//    for (line <- source.getLines) {
+//      one(line)
+//    }
 
     println(".done.")
   }

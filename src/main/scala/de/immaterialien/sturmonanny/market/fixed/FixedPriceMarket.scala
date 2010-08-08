@@ -17,9 +17,13 @@ class FixedPriceMarket extends IMarket with Logging{
 	override def tryPrice(loadout : IMarket.Loadout) : Option[Double] = {
 	  //val res = priceList.map(_.planes(plane)) map (_ toDouble)
 		
-		val res = for(list <- priceList) yield list.planes(loadout.toString)
+		val name = loadout.toString
+			.replace("*", "x")
+			.replace("+", "")
+			.replace(" ", "")
+		val res = for(list <- priceList) yield list.planes(name)
 		
-println("price for "+loadout+" -> " +res);
+println("price for "+loadout+" aka "+name+" -> " +res);
 		
 	  res map (_ toDouble)
 	}
