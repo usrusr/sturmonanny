@@ -113,29 +113,8 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 			}
 //println("read: "+scala.io.Source.fromFile(fname).map((x=>""+x+"")).mkString);			
 			
-			val s = scala.io.Source.fromFile(fname)
-//			val parsed = s.getLines.map(parseAll(possiblyLine, _)) 
-//			val parsed = s.getLines.map(parseAll(possiblyLine, _))
-//			val parsed = parseAll(allLines, s.reader)
-//			val pr = for(p<-parsed){
-//				if(p.successful){
-//					val got = p.get
-//					got
-//				}
-//				yield(got)
-//			}
-//			val someRes = parsed map { p => 
-//				if(p.successful) {
-//					p.get
-//					if()
-//				}else{
-//					l.error("failed to parse: "+p)
-//					None
-//				}
-//			}
-//			val toAdd = someRes.filter(_ isDefined).map(_ get)
-////			val toAdd = parsed.filter(_ successful).map(_.get).filter(_ isDefined).map(_ get)
-//			target ++= toAdd 
+			val s = scala.io.Source.fromFile(fname, utf8)
+			
 			for(ln<-s.getLines){
 //				println("parsing '"+ln+"'")
 				val pr = parseAll(line, ln.trim)

@@ -32,7 +32,6 @@ class FileBackendTest {
 		
 		val second = new FileBackend()  
 		second.open(Map("file"->"test.balance"), (msg=>println("info: "+msg)), (msg=>assertEquals("file Some(test.balance) does not exist",msg)))
-		val p3 = second load pilot1
 		def checkLine(parser:FileBackend.Parser.Parser[_], text:String){
 			val psed = FileBackend.Parser.parse(parser , text)			
 			val res = psed.successful
@@ -45,8 +44,9 @@ checkLine(FileBackend.Parser.floatingPointNumber , "1.0d")
 checkLine(FileBackend.Parser.line , """"pilot p1" = red: 1.0 blue: 0.0""")
 checkLine(FileBackend.Parser.possiblyLine , """"pilot p1" = red : 1.0 blue: 0.0""")
 
+		val p3 = second load pilot1
 
-		assertEquals("p3 should be defined", true, p3.isDefined)
+		assertEquals("p3 '"+pilot1+"' should be defined in "+f.getAbsolutePath+"\nmap:"+second.map, true, p3.isDefined)
 		assertEquals(0d, p3.get.blue, 0.0000000001d)
 		assertEquals(1d, p3.get.red, 0.0000000001d)
 		

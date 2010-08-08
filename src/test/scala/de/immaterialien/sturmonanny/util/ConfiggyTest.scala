@@ -6,11 +6,13 @@ import _root_.de.immaterialien.sturmonanny.core.Configuration
 import _root_.de.immaterialien.sturmonanny.util.configgy._
  
 class ConfiggyTest {
-  
+  @org.junit.Test
+  def test()=ConfiggyTest.main(null)
 }
 object ConfiggyTest { 
+	
   def main(args : Array[String]) : Unit = {  
-    val c = new Configuration("E:/eclipseworkspace/sturmonanny/src/test/resources/example.conf", null) 
+    val c = new Configuration("./src/test/resources/example.conf", null) 
     with LiftSupport
      
     println("names.currency before '"+(c.names.currency)+"'" )

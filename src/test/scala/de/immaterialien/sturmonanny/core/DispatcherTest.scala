@@ -34,8 +34,7 @@ class DispatcherTest {
     d processLine """Chat: --- Pilot(entrop regulation) was killed.\n"""
     
     println("direct parse result: "+ d.parseAll(d.statusChat, """Chat: --- Pilot(1) was killed.\n""")) 
-    println("direct parse result newline: "+ d.parseAll(d.statusChat, """Chat: --- Pilot(2) was killed.\n
-""")) 
+    println("direct parse result newline: "+ d.parseAll(d.statusChat, """Chat: --- Pilot(2) was killed.\n""")) 
 
   		d.pilotNameParser learnNewName "Mad"
 //  		d.pilotNameParser learnNewName "entrop regulationabcdefg"
