@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils
 
 
 class GroundClasses(fbdjPath:String) extends util.Log { import java.io.File
-  val (multi, static) : (Map[String, GroundClass.Value],Map[String, GroundClass.Value]) = {
+  val (multi, static) : (Map[String, GroundClass.GC],Map[String, GroundClass.GC]) = {
     val path = new File(fbdjPath)
     if( ! path.exists){
       log error "expecting csv files in " + path.getAbsolutePath + " but it does not exist, cannot paint ground units"
@@ -81,20 +81,25 @@ object CsvParser extends RegexParsers with util.Log {
 }
 
 object GroundClass extends Enumeration with util.Log {
-  type GroundClass = Value
   
-  val Tank = Value
-  val Ship = Value 
-  val  Car = Value 
-  val  Fuel = Value // a special type of car, handled in checkDescription
-  val  Wagon = Value 
-  val  AAA = Value 
-  val  Artillery = Value 
-  val  Bridge = Value 
-  val  Ground = Value 
-  val  Misc = Value 
-  val  Plane = Value 
-  val  Unidentified = Value
+  case class GC(weight:Double, name:String) extends Val {
+    override def toString = name
+  }
+  //type GroundClass = GC
+//type Value
+  
+ val Tank = GC(10, "Tank")
+ val Ship = GC(10, "Ship") 
+ val Car = GC(5, "Car")
+ val Fuel = GC(50, "Fuel") // a special type of car, handled in checkDescription
+ val Wagon = GC(5, "Wagon") 
+ val AAA = GC(6, "AAA") 
+ val Artillery = GC(7, "Artillery") 
+ val Bridge = GC(0, "Bridge") 
+ val Ground = GC(0, "Ground") 
+ val Misc = GC(0, "Misc") 
+ val Plane = GC(0, "Plane") 
+ val Unidentified = GC(1, "Unidentified")
   
 
   def parse(in: String): Value = if (in == null) Unidentified else try {
@@ -102,7 +107,7 @@ object GroundClass extends Enumeration with util.Log {
     GroundClass.withName(in.trim)
   } catch {
     case nse: java.util.NoSuchElementException => {
-      var best = Unidentified
+      var best:Value = Unidentified
       var bestDist: Int = 5 // defines the minimum hit quality to beat Unidentified
       val lower = in.toLowerCase
       try {
