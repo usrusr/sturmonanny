@@ -38,8 +38,66 @@ class MisModel {
   def groundUnit(cls:GroundClass.Value, side:Int, x:Double, y:Double) {
     rawGroundUnits = (cls, x, y, side) :: rawGroundUnits
   }
-
+  
+  val svr = 50
+  val svrs :Array[Array[Array[Double]]]=Array.fromFunction{(_,_,_)=>
+    Double.NaN
+  }(2,svr+2,svr+2)
+    
+  /**
+   * 
+   * @param x 0..1
+   * @param y 0..1
+   * @param markers
+   * @return
+   */
   def sideVal(x: Double, y: Double, markers: List[(Double, Double)]): Double = {
+    val side = if(markers eq rfront) 0 else 1
+    
+    def buffered(ix:Int, iy:Int):Double = {
+      
+      val ret = svrs(side)(ix)(iy)
+      //if(ret!=Double.NaN) ret else {
+      if( ! ret.isNaN) ret else {
+        val tmp = preciseSideVal(ix.toDouble/svr.toDouble, iy.toDouble/svr.toDouble, markers)
+        svrs(side)(ix)(iy) = tmp
+        tmp
+      }
+    }
+    
+    val ix=Math.floor(x*svr).toInt
+    val iy=Math.floor(y*svr).toInt
+    
+    val ll = buffered(ix, iy)
+    val hl = buffered(ix+1, iy)
+    val lh = buffered(ix, iy+1)
+    val hh = buffered(ix+1, iy+1)
+    
+    def interpolate(c1:Double, c2:Double, c:Double, v1:Double, v2:Double):Double = {
+      val (lc, hc, lv, hv) = if(c1<c2)(c1, c2, v1, v2) else (c2, c1, v2, v1)
+      val dist = hc-lc
+      ((c-lc)*hv + (hc-c)*lv)/dist
+    }
+//    val wl = interpolate(ix.toDouble/svr.toDouble, (ix+1).toDouble/svr.toDouble, x, ll, hl) 
+//    val wh = interpolate(ix.toDouble/svr.toDouble, (ix+1).toDouble/svr.toDouble, x, lh, hh) 
+//    
+//    val ww = interpolate(iy.toDouble/svr.toDouble, (iy+1).toDouble/svr.toDouble, y, wh, wh)
+//    
+    val lw = interpolate(iy.toDouble/svr.toDouble, (iy+1).toDouble/svr.toDouble, y, ll, lh) 
+    val hw = interpolate(iy.toDouble/svr.toDouble, (iy+1).toDouble/svr.toDouble, y, hl, hh) 
+    
+    val ww = interpolate(ix.toDouble/svr.toDouble, (ix+1).toDouble/svr.toDouble, x, lw, hw)
+    
+    ww  
+  }
+  /**
+   * 
+   * @param x 0..1
+   * @param y 0..1
+   * @param markers in game coords
+   * @return
+   */
+  def preciseSideVal(x: Double, y: Double, markers: List[(Double, Double)]): Double = {
     val zero: (Double, Double) = (0, 0)
     val ret = markers.foldLeft(zero)(((acc: (Double, Double), coord: (Double, Double)) => {
       val (px, py) = coord
@@ -71,22 +129,37 @@ class MisModel {
     if (format == null) format = "JPG"
     val in = ImageIO.read(imageFile)
 
-    paint(in)
+    sequence(in)
 
     ImageIO.write(in, format, new java.io.File(forMission.getParentFile, forMission.getName + "." + format))
   }
-  def paint(in: BufferedImage): BufferedImage = {
-    paint(in, 4, 3)
-//    hatch(in)
+  def sequence(in: BufferedImage): BufferedImage = {
+    veil(in)
+    front(in, 4, 3)
+    hatch(in)
     units(in)
+  }
+  def veil(in: BufferedImage): BufferedImage = {
+    var ih = in.getHeight
+    var iw = in.getWidth
+    val ig2 = in.createGraphics();
+    
+    val darkness = 90
+    val light = 255-darkness
+    val background = 150 // higher -> more base image
+    
+    ig2.setColor(new java.awt.Color(light, light, light, 255-background))
+    ig2.fillRect(0, 0, iw, ih)
+    
+    ig2.dispose
+    in
   }
   def units(in: BufferedImage): BufferedImage = {
     var ih = in.getHeight
     var iw = in.getWidth
     val ig2 = in.createGraphics();
-    
     def atMarker(mx:Double, my:Double, mside:Int):Option[(GroundClass.Value, Double)] = {
-      val radius = 500d
+      val radius = 5000d
       def dist(ax:Double, ay:Double) = {
         val dx=ax-mx
         val dy=ay-my
@@ -136,42 +209,69 @@ class MisModel {
         Some(ret._1, ret._2.i)
       }
     }
-    def forSide(markers:List[(Double, Double)], side:Int){
+    def forSide(side:Int){
+      val markers = if(side==1) rfront else bfront
+      val other = if(side==1) bfront else rfront
       val sd = if(side==1) "red" else if(side==2) "blue" else "???"
+      
 import java.awt._
       ig2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-      RenderingHints.VALUE_ANTIALIAS_ON);
-      val font = new Font("SansSerif", Font.PLAIN, 10);
+      RenderingHints.VALUE_ANTIALIAS_OFF);
+      val font = new Font("SansSerif", Font.PLAIN, 12);
       val cd = if(side==1) Color.red else if(side==2) Color.blue else Color.black
       ig2.setColor(cd)
       ig2.setFont(font);  
       
       for(marker<-markers) {
         val (x, y) = (marker._1, marker._2)
-        val at=atMarker(x, y, side)
-        for((cls, weight) <- at){
-          val px = (x-widthOffset)/width * iw
-          val py = (1d-(y-heightOffset)/height) * ih
-println(sd +" "+weight.toInt+" "+cls+" at ", x.toInt+","+ y.toInt + "("+px+","+py+")")   
-          
-          ig2.drawString(weight.toInt+" "+sd+" "+cls, px.toInt, py.toInt)
-        }
+        val ox = x-widthOffset
+        val oy = y-heightOffset 
         
+        if(ox>=0 && ox<=width && oy>=0 && oy<=height){
+          val at=atMarker(x, y, side)
+          for((cls, weight) <- at){
+            val px = ox/width * iw
+            val py = (1d-oy/height) * ih
+  //          val their = 1 / (sideVal(px/iw, py/ih, other)- sideVal(px/iw, py/ih, markers))
+  //          val their = sideVal(px/iw, py/ih, other)
+  //          val ours = sideVal(px/iw, py/ih, markers)
+  
+  val their = sideVal(px/iw, py/ih, other)
+  val ours = sideVal(px/iw, py/ih, bfront)
+            println(sd +" "+weight+" "+cls+" at ", x.toInt+","+ y.toInt + "("+px+","+py+") "+their)
+  
+  val max=70
+  val min=0
+  var deep = max - ((max - min) * Math.pow((ours - their) / (ours + ours * their), 1)).toInt
+  
+  val depth = Math.max(0, Math.min(255,(5000/Math.abs(deep)).toInt))
+        val cr = if(side==1) new Color(255,0, 0, depth) else if(side==2) new Color(0, 0, 255, depth) else Color.black
+  //      ig2.setColor(cr)    
+            
+            if(weight> -3 ){
+              ig2.drawString(weight.toInt+" "+cls+ " ("+deep+")", px.toInt, py.toInt)
+            }
+          }
+        }
       }
     }
-    forSide(rfront, 1)
-    forSide(bfront, 2)
+    forSide(1)
+    forSide(2)
     
     ig2.dispose
     in
   }
-  def paint(in: BufferedImage, steps: Int, aa: Int): BufferedImage = {
+  def front(in: BufferedImage, steps: Int, aa: Int): BufferedImage = {
     var ih = in.getHeight
     var iw = in.getWidth
 
     val dimension = ih + iw
     val ig2 = in.createGraphics();
     val scale = 1 << aa
+    
+    // set true to allow uninterpolated values for front calculation  
+    var precise = false 
+//precise = true    
 
     //ig2.transform(java.awt.geom.AffineTransform.getScaleInstance(1.1,1.1))
     //ig2.transform(java.awt.geom.AffineTransform.getScaleInstance(1.toDouble/scale.toDouble,1.toDouble/scale.toDouble))
@@ -181,12 +281,17 @@ println(sd +" "+weight.toInt+" "+cls+" at ", x.toInt+","+ y.toInt + "("+px+","+p
     iw = iw * scale
     // has to be 2^x !
     val initialStep = scale << (steps);
-
+    
     def dif(x: Int, y: Int): Double = {
-      val px: Double = x.toDouble / iw.toDouble
-      val py: Double = 1 - y.toDouble / ih.toDouble
-      val r = sideVal(px, py, rfront)
-      val b = sideVal(px, py, bfront)
+      val px: Double = (x.toDouble-widthOffset) / iw.toDouble
+      val py: Double = 1 - (y.toDouble-heightOffset) / ih.toDouble
+      val (r, b) = if(precise)(
+            preciseSideVal(px, py, rfront),
+            preciseSideVal(px, py, bfront)
+          )else(
+            sideVal(px, py, rfront),
+            sideVal(px, py, bfront)
+          )
       r - b
     }
 
