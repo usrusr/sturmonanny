@@ -1,9 +1,9 @@
 package de.immaterialien.qlmap
 
-import de.immaterialien.sturmonanny.util
+
 import scala.util.parsing.combinator._
 
-class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) extends RegexParsers with util.Logging {
+class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) extends RegexParsers with Log {
   val file = new java.io.FileReader(misFile)
 
   val out = new MisModel

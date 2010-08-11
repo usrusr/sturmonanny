@@ -1,10 +1,10 @@
 package de.immaterialien.qlmap
 import scala.util.parsing.combinator._
-import de.immaterialien.sturmonanny.util
+
 import org.apache.commons.lang.StringUtils
 
 
-class GroundClasses(fbdjPath:String) extends util.Log { import java.io.File
+class GroundClasses(fbdjPath:String) extends Log { import java.io.File
   val (multi, static) : (Map[String, GroundClass.GC],Map[String, GroundClass.GC]) = {
     val path = new File(fbdjPath)
     if( ! path.exists){
@@ -26,7 +26,7 @@ class GroundClasses(fbdjPath:String) extends util.Log { import java.io.File
   def get(name:String) = multi.get(name) map(Some(_)) getOrElse static.get(name)
 }
 
-object CsvParser extends RegexParsers with util.Log {
+object CsvParser extends RegexParsers with Log {
   lazy val cell = {
     "\"((\"\")|[^\"])*\"".r ^^ { text =>
       text.substring(1, text.length - 1).replace("\"\"", "\"")
@@ -73,14 +73,14 @@ object CsvParser extends RegexParsers with util.Log {
       for(line<-s.getLines) {
 //println ("in: "+ line )        
         val parsed = parseAll(parser, line)
-        parsed.map(tmp += _).getOrElse(log warning "failed to parse '"+line++"' from "+f.getAbsolutePath)
+        parsed.map(tmp += _).getOrElse(log warn "failed to parse '"+line++"' from "+f.getAbsolutePath)
       }
       Map() ++ tmp
     }
   }
 }
 
-object GroundClass extends Enumeration with util.Log {
+object GroundClass extends Enumeration with Log {
   
   case class GC(weight:Double, name:String) extends Val {
     override def toString = name
@@ -121,7 +121,7 @@ object GroundClass extends Enumeration with util.Log {
         }
       } catch {
         case cnfe: ClassNotFoundException => {
-          log warning "did not find commons-lang stringutils for levenshtein distance"
+          log warn "did not find commons-lang stringutils for levenshtein distance"
           Unidentified
         }
       }

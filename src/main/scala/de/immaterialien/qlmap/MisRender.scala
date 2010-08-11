@@ -128,8 +128,8 @@ private class MisRender(
   def sequence(in: BufferedImage) {
     veil()
 //    veil()
-        front(4, 3)
-        hatch() 
+//        front(4, 3)
+//        hatch() 
     units()
   }
   def veil() {
@@ -263,10 +263,10 @@ private class MisRender(
       val (randx, randy) = randomizeLocations(x, y, 1D/colDepth.toDouble)
   
       val scale = {
-        var s = 0.6
+        var s = 0.4
         var d = count.toDouble
         while(d/2>2){
-          s+=0.1
+          s+=0.03
           d=d/2
         }
         s
@@ -275,10 +275,14 @@ private class MisRender(
       
       
       //ig2.drawString(count + " " + cls+"s ("+(randx -x)+", "+(randy-y) +")" , randx, randy)
-      val image = sprites.Sprites.forClass(cls, side)
-      for(img<- image ){
-        val h2 = (scale * img.getHeight / 2).toInt
-        val w2 = (scale * img.getWidth / 2).toInt
+//      val image = sprites.Sprites.forClass(cls, side)
+//      for(img<- image ){
+//        val h2 = (scale * img.getHeight / 2).toInt
+//        val w2 = (scale * img.getWidth / 2).toInt
+      for(img <- sprites.Sprites.paintable(cls, side)){
+        val (width, height) =  img.dimensions
+        val h2 = (scale * height / 2).toInt
+        val w2 = (scale * width / 2).toInt
 //        new BufferedImageOp()
         //val op = new RescaleOp(scale.toFloat, 0f , null)
         //ig2.drawImage(img, op, randx-w2, randy-h2)
@@ -286,7 +290,8 @@ private class MisRender(
         t.setToIdentity
         t.translate(randx-w2, randy-h2)
         t.scale(scale, scale)
-        ig2.drawImage(img, t, null)
+        img.paint(t, colDepth.toDouble/255D, ig2)
+//        ig2.drawImage(img, t, null)
 //        val vpadding = 16
 //        val hpadding = 3
 //        ig2.setColor(Color.black)

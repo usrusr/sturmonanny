@@ -1,39 +1,31 @@
 package de.immaterialien.qlmap.sprites
 
-import de.immaterialien.sturmonanny.util
+
 import de.immaterialien.qlmap._
 import java.awt.image._
 import javax.imageio.ImageIO
 import GroundClass._
 import scala.collection._
+import java.awt.geom._
 
-object Sprites extends util.Log{ 
-  val map = new mutable.HashMap[String, Option[BufferedImage]]
-  def forClass(cls:GC, side:Int):Option[BufferedImage]={
-    val infix = if(side==1) ".Red" else if(side==2) ".Blue" else ""
-    val fname : String = (cls match {
-      case Artillery => Car.toString
-      case Plane => "Airfield"
-      case x => x toString
-    })+infix+".png"
-    
-    val ret = map.get(fname).getOrElse{
-println("getting "+fname)
-//Sprites.getClass.classPathResource(fname)
-      val stram = Sprites.getClass.getResourceAsStream("/de/immaterialien/qlmap/sprites/"+fname)
-println("stream "+stram)      
-      val iio = try {
-        Some(ImageIO.read(stram))
-      }catch{
-        case _ => {
-          log.debug("not found: "+fname)
-          None
-        }
-      }
-      map put (fname, iio)
-      iio
+
+object Sprites extends Log{ 
+  val map = new mutable.HashMap[String, Option[Paintable]]
+
+  def paintable(cls:GC, side:Int):Option[Paintable]={
+    val key=""+cls+side
+    map.get(key).getOrElse{
+      val ret = memPaintable(cls:GC, side:Int)
+      map.put(key, ret)
+      ret
     }
-println("got "+fname+"->"+ret)      
-    ret
   }
+  def memPaintable(cls:GC, side:Int):Option[Paintable]={
+    
+    val scalable = ScalableSprite.create(cls, side)
+    scalable.map(x=>Some(x)).getOrElse(
+      BitmapSprite.create(cls, side)
+    )
+  }
+  
 }
