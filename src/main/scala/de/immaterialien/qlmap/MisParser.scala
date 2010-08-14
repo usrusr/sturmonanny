@@ -64,7 +64,9 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
       case a ~ h ~ x ~ y => {
         println("bp:" + a + "@" + x + "/" + y); 
         out.bornPlace(a, x, y)
-        out.groundUnit(GroundClass.Airfield, a, x, y) 
+        out.airfield(a, x, y)
+        // notify ground units of airfield presence
+        out.groundUnit(GroundClass.Airfield, a, x, y)
       }
     } 
   }

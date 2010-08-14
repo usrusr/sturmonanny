@@ -99,8 +99,8 @@ object GroundClass extends Enumeration with Log {
  val Bridge = GC (0, "Bridge") 
  val Ground = GC (0, "Ground") 
  val Misc = GC (0, "Misc") 
- val Plane = GC (20, "Plane")
-  val Airfield = GC (10000, "Airfield") 
+ val Plane = GC (0, "Plane")
+  val Airfield = GC (1, "Airfield") 
  val Unidentified = GC (1, "Unidentified")
   
  implicit def vtogc(v: Value): GC = v.asInstanceOf[GC]

@@ -131,6 +131,7 @@ private class MisRender(
         front(4, 3)
         hatch() 
     units()
+    airfields()
   }
   def veil() {
 
@@ -140,6 +141,18 @@ private class MisRender(
 
     ig2.setColor(new java.awt.Color(light, light, light, 255 - background))
     ig2.fillRect(0, 0, iw, ih)
+  }
+  def airfields(){
+    for((gx, gy, side)<-model.rawAirFields ){
+        val ox = gx - model.widthOffset
+        val oy = gy - model.heightOffset
+        val rx = ox / model.width
+        val ry = oy / model.height
+        val px = rx * iw
+        val py = ih - ry * ih
+        
+        drawObject(px.toInt, py.toInt, 1000, side, 1, GroundClass.Airfield )
+    }
   }
   def units() {
     /**
@@ -193,11 +206,19 @@ private class MisRender(
             if (v1 > v2) 1 else if (v2 > v1) -1 else 0
           }
         }
-        val ret = map.max(order)
-
-        println("  identified " + ret._1 + " from " + map)
-
-        Some(ret._1, ret._2.i, ret._2.num )
+        
+        
+        val isAirfield = map.get(GroundClass.Airfield ).map(counter=>
+            counter.num > 0
+         ).getOrElse(false)
+         
+         if(isAirfield) None
+         else{
+           val ret = map.max(order)
+           println("  identified " + ret._1 + " from " + map)
+           Some(ret._1, ret._2.i, ret._2.num )
+         }
+      
       }
     }
     def forSide(side: Int) {
@@ -219,20 +240,6 @@ private class MisRender(
         if (ox >= 0 && ox <= model.width && oy >= 0 && oy <= model.height) {
           val at = atMarker(x, y, side)
           for ((cls, weight, number) <- at) {
-
-//            //          val their = 1 / (sideVal(px/iw, py/ih, other)- sideVal(px/iw, py/ih, markers))
-//            //          val their = sideVal(px/iw, py/ih, other)
-//            //          val ours = sideVal(px/iw, py/ih, markers)
-//
-//            val their = sideVal(px / iw, py / ih, other)
-//            val ours = sideVal(px / iw, py / ih, markers)
-//            println(sd + " " + weight + " " + cls + " at (" + x.toInt + "|" + y.toInt + ")(" + px + "|" + py + ") " + their)
-//
-//            val max = 70
-//            val min = 0
-//            var deep = max - ((max - min) * Math.pow((ours - their) / (ours + ours * their), 1)).toInt
-//
-//            val depth = Math.max(0, Math.min(255, (5000 / Math.abs(deep)).toInt))
             val (who, depth) = whoAndDeepness(rx, ry, 1000)
             if (cls.weight*cls.weight * weight + weight*depth*depth > 100000) {
               
@@ -281,12 +288,12 @@ private class MisRender(
 //        val w2 = (scale * img.getWidth / 2).toInt
       for(img <- sprites.Sprites.paintable(cls, side)){
         val (width, height) =  img.dimensions
-        
-        val factor :Double= cls match {
-          case GroundClass.Airfield => 2
-          case GroundClass.Plane => 1
-          case _ => 1
-        }
+        val factor = 1D
+//        val factor :Double= cls match {
+//          case GroundClass.Airfield => 2
+//          case GroundClass.Plane => 1
+//          case _ => 1
+//        }
 
         val h2 = (factor*scale * height / 2).toInt
         val w2 = (factor*scale * width / 2).toInt
