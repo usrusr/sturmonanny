@@ -24,9 +24,9 @@ object DomHelper {
       val ll = for (i <- 0 until l) yield {
         val n = cs.item(i)
         if (n.getNodeType == Node.ELEMENT_NODE) {
-          val e = n.asInstanceOf[Element]
-          if (name(e)) Some(e) else None
-        } else None
+          val ne = n.asInstanceOf[Element]
+          if (name(ne)) Some(ne) else None
+        } else None 
       }
       ll flatten 
     }
@@ -39,8 +39,12 @@ object DomHelper {
 
     def append(name: String, args: (String, String)*) = {
       val c = element(name, args: _*)
-      e.appendChild(c)
+      e.appendChild(c) 
       c
+    }
+    def appended[T<:Element](e:T):T={
+      append(e)
+      e
     }
 
     def firstElement(name: (Element => Boolean)): Option[Element] = {
@@ -63,19 +67,20 @@ object DomHelper {
     }
   }
 
-  def element(doc: SVGDocument, nsName: (String, String), args: (String, String)*) = {
-    val e = doc.createElementNS(nsName._1, nsName._2)
+  def element(doc: SVGDocument, nsName: (String, String), args: (String, String)*):Element = {
+    val e = doc.createElementNS(nsName._1, nsName._2).asInstanceOf[Element]
     for ((n, v) <- args) e.setAttribute(n, v)
     e
   }
   def element(doc: SVGDocument, name: String, args: (String, String)*) = {
-    val e = doc.createElement(name)
+    val e = doc.createElementNS(svg.SVGDOMImplementation.SVG_NAMESPACE_URI, name).asInstanceOf[Element]
     for ((n, v) <- args) e.setAttribute(n, v)
     e
   }
 
   implicit def nameFunc(name: String): (Element => Boolean) = _.getNodeName == name
   implicit def wrapElement(e: Element)(implicit doc: SVGDocument) = new WrapElement(e, doc)
+  implicit def wrapElement(e: SVGElement)(implicit doc: SVGDocument) = new WrapElement(e, doc)
   implicit def unwrapElement(w: WrapElement): Element = w.domElement
   implicit def wrapDoc(doc: SVGDocument): DomHelper = new DomHelper(doc)
   //  implicit

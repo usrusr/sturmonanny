@@ -1,4 +1,5 @@
 package de.immaterialien.qlmap.sprites
+import org.apache.batik.dom.svg._
 
 import de.immaterialien.qlmap._
 
@@ -21,7 +22,11 @@ import DomHelper._
 object ScalableSprite {
   import org.apache.batik.ext.awt.image.renderable._
   val parser = batik.util.XMLResourceDescriptor.getXMLParserClassName
+  
+  val domImpl = svg.SVGDOMImplementation.getDOMImplementation
+  
   val factory = new svg.SAXSVGDocumentFactory(parser, false)
+  
   factory.setValidating(false)
   val hueRotation = Math.Pi.toFloat / 3f
 
@@ -40,58 +45,83 @@ object ScalableSprite {
       log debug ("stream " + stram)
       try {
         import batik.bridge._
-        //val doc = factory.createDocument("http://immaterialien.de/uri/qlmap/sprites#" + fname, stram)
-        implicit val doc:SVGDocument = factory.createSVGDocument(null, stram)
-
+        implicit val doc = factory.createDocument(null, stram).asInstanceOf[SVGDocument]
+//        implicit val doc:SVGDocument = domImpl.createDocument(svg.SVGDOMImplementation.SVG_NAMESPACE_URI, "svg" , null).asInstanceOf[SVGDocument]
+        
+        
+        val defs : SVGDefsElement= doc.getDocumentElement.asInstanceOf[SVGSVGElement].firstElement("defs").map(_.asInstanceOf[SVGOMDefsElement]).getOrElse{
+          new SVGOMDefsElement(null, doc.asInstanceOf[batik.dom.AbstractDocument])
+        }
+        val fi:SVGFilterElement = new SVGOMFilterElement(null, doc.asInstanceOf[batik.dom.AbstractDocument])
+        defs.append(fi)
+        fi.setId("MyFilter")
+        println("defs:"+defs.getClass.getSimpleName)
+        val fecol = fi.appended(new SVGOMFEColorMatrixElement(null, doc.asInstanceOf[batik.dom.AbstractDocument]))
+        fecol.setAttribute("type", "matrix")
+//      {
+//          val t = factory.createSVGDocument(null, stram).asInstanceOf[SVGDocument]
+//
+//          val tdn = doc.importNode(t.getDocumentElement, true).asInstanceOf[SVGElement]
+//          val sdn = doc.getDocumentElement.asInstanceOf[SVGSVGElement]
+//          for(c<-t.getDocumentElement.children(_=>true)) sdn.append(doc.importNode(c, true).asInstanceOf[Element])
+//        }
         val matrix = {
-          val a = "0.3"
+          val a = "0.2"
           def r = if(side==1) " 1 " else " 0 "
           def b = if(side==2) " 1 " else " 0 "
           val o = " 0 "
           val l = " 1 "
 //          ""  
-//          b+r+o+o+a+ "\n" +
-//          r+o+b+o+a+ "\n" +
-//          o+b+r+o+a+ "\n" +
-//          o+o+o+l+o+ "\n" +
+//          b+r+o+o+a+ "  " +
+//          r+o+b+o+a+ "  " +
+//          o+b+r+o+a+ "  " +
+//          o+o+o+l+o+ "  " +
 //          ""
             
                       ""  
           b+r+o+" 0    "+a+ " " +
-          r+o+b+" -0.2 "+a+ " " +
+          r+o+b+" 0    "+a+ " " +
           o+b+r+" 0    "+a+ " " +
-          "1 -1 1 1 0" +
+//          "1 -2 1 1      0" +
+          "0 -2 0 1.4      0" +
           ""
+          
+//          "1 0 0 0 0 " +
+//          "0 1 0 0 0 " +
+//          "0 0 1 0 0 " +
+//          "0 0 0 1 0"
         }
+        fecol.setAttribute("values", matrix);
         {
           val d = doc.getDocumentElement
-          var n :SVGSVGElement = doc.getRootElement
-//          val children : NodeList = n.getChildNodes
-//          val defs = doc.createElement("defs")
-//          val len = children.getLength
-//          val fs = children.item(1)
-println("n children: "+n.children("g").length)
-          val defs = n.firstElement("defs").getOrElse{
-            val d=doc.element("defs")
-            n.appendBefore("g", d) 
-            d
-          }
-          defs.append(
-                  doc.element("filter",
-//                      "filterUnits"-> "userSpaceOnUse",
-//                      "x"-> "0",
-//                      "y"-> "0",
-//                      "height"-> "64",
-//                      "width"-> "64",
-                      "id"->"MyFilter"
-                  ).append(
-                      doc.element(
-                          "feColorMatrix", 
-                          "type"->"matrix",
-                          "values"->matrix 
-                      )
-                  )
-              )
+          var n :SVGElement = doc.getRootElement
+////          val children : NodeList = n.getChildNodes
+////          val defs = doc.createElement("defs")
+////          val len = children.getLength
+////          val fs = children.item(1) 
+//println("n children: "+n.children("g").length)
+//          val defs = n.children("defs").firstOption.getOrElse{
+//            val d=doc.element("defs")  
+//            n.appendBefore("g", d) 
+//            d
+//          }
+//         
+//          defs.append(
+//                  doc.element("filter",
+////                      "filterUnits"-> "userSpaceOnUse",
+////                      "x"-> "0",
+////                      "y"-> "0",
+////                      "height"-> "64",
+////                      "width"-> "64",
+//                      "id"->"MyFilter"
+//                  ).append(
+//                      doc.element(
+//                          "feColorMatrix", 
+//                          "type"->"matrix",
+//                          "values"->matrix 
+//                      )
+//                  )
+//              )
           
           
           //children.
