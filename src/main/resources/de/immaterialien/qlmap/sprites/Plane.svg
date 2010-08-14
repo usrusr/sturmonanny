@@ -151,44 +151,6 @@
          stdDeviation="1.4531268"
          id="feGaussianBlur3696" />
     </filter>
-    <inkscape:perspective
-       id="perspective3619"
-       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
-       inkscape:vp_z="1 : 0.5 : 1"
-       inkscape:vp_y="0 : 1000 : 0"
-       inkscape:vp_x="0 : 0.5 : 1"
-       sodipodi:type="inkscape:persp3d" />
-    <inkscape:perspective
-       id="perspective3647"
-       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
-       inkscape:vp_z="1 : 0.5 : 1"
-       inkscape:vp_y="0 : 1000 : 0"
-       inkscape:vp_x="0 : 0.5 : 1"
-       sodipodi:type="inkscape:persp3d" />
-    <filter
-       inkscape:collect="always"
-       id="filter3677">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.31008941"
-         id="feGaussianBlur3679" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter3681">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="0.31003833"
-         id="feGaussianBlur3683" />
-    </filter>
-    <filter
-       inkscape:collect="always"
-       id="filter3701">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="1.2393686"
-         id="feGaussianBlur3703" />
-    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -197,9 +159,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="14.234375"
-     inkscape:cx="32"
-     inkscape:cy="23.472064"
+     inkscape:zoom="10.065223"
+     inkscape:cx="17.593961"
+     inkscape:cy="32"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -224,7 +186,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -233,6 +195,19 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-988.3622)">
+    <path
+       sodipodi:type="arc"
+       style="opacity:0.57352941000000002;fill:#55aa55;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;filter:url(#filter3694)"
+       id="path3650"
+       sodipodi:cx="42"
+       sodipodi:cy="18.5"
+       sodipodi:rx="23"
+       sodipodi:ry="23.5"
+       d="m 64.985932,19.321792 a 23,23.5 0 1 1 0.0027,-0.08449"
+       transform="matrix(1.0872242,0,0,1.0851071,-13.657259,999.78774)"
+       sodipodi:start="0.034976993"
+       sodipodi:end="6.3145649"
+       sodipodi:open="true" />
     <path
        sodipodi:type="arc"
        style="stroke:#000000;stroke-width:2.40944886;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
@@ -245,56 +220,13 @@
        transform="translate(0,1036.3622)" />
     <path
        sodipodi:type="arc"
-       style="opacity:0.83823528999999986;fill:none;stroke:#55aa55;stroke-width:9.15319756;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;filter:url(#filter3701)"
-       id="path2836"
-       sodipodi:cx="16"
-       sodipodi:cy="18"
-       sodipodi:rx="16"
-       sodipodi:ry="15"
-       d="m 31.990214,18.524548 a 16,15 0 1 1 0.0019,-0.05393"
-       transform="matrix(1.3753385,0,0,1.4666667,10,993.9622)"
-       sodipodi:start="0.034976993"
-       sodipodi:end="6.3145649"
-       sodipodi:open="true" />
-    <path
-       sodipodi:type="arc"
-       style="opacity:0.83823529;fill:none;stroke:#55aa55;stroke-width:4.63248491;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:4.63248514, 9.26497028;stroke-dashoffset:0;filter:url(#filter3677)"
-       id="path2836-4"
-       sodipodi:cx="16"
-       sodipodi:cy="18"
-       sodipodi:rx="16"
-       sodipodi:ry="15"
-       d="m 31.990214,18.524548 a 16,15 0 1 1 0.0019,-0.05393"
-       transform="matrix(1.1072392,-0.32654486,0.35175708,1.2631323,191.2289,1023.7975)"
-       sodipodi:start="0.034976993"
-       sodipodi:end="6.3145649"
-       sodipodi:open="true"
-       inkscape:transform-center-x="177.72364"
-       inkscape:transform-center-y="-11.05301" />
-    <path
-       sodipodi:type="arc"
-       style="opacity:0.83800001;fill:none;stroke:#55aa55;stroke-width:4.63273335;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:4.63273357, 9.26546715;stroke-dashoffset:0;filter:url(#filter3681)"
-       id="path2836-4-0"
-       sodipodi:cx="16"
-       sodipodi:cy="18"
-       sodipodi:rx="16"
-       sodipodi:ry="15"
-       d="m 31.990214,18.524548 a 16,15 0 1 1 0.0019,-0.05393"
-       transform="matrix(0.64683004,-0.36872454,0.40843366,0.72443973,196.17241,1034.3553)"
-       sodipodi:start="0.034976993"
-       sodipodi:end="6.3145649"
-       sodipodi:open="true"
-       inkscape:transform-center-x="4.6639508"
-       inkscape:transform-center-y="-10.074707" />
-    <path
-       sodipodi:type="arc"
        style="fill:#55aa55;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path2854"
        sodipodi:cx="16"
        sodipodi:cy="31.5"
        sodipodi:rx="25"
        sodipodi:ry="25"
-       d="m 38.916185,21.507579 c 2.751025,6.309082 2.779271,13.473256 0.07808,19.803834 L 16,31.5 z"
+       d="m 38.916185,21.507579 a 25,25 0 0 1 0.07808,19.803834 L 16,31.5 z"
        transform="matrix(0.9765698,-0.21520089,0.21520089,0.9765698,12.628008,992.37853)"
        sodipodi:start="5.8719992"
        sodipodi:end="6.6864862" />
@@ -306,7 +238,7 @@
        sodipodi:cy="31.5"
        sodipodi:rx="25"
        sodipodi:ry="25"
-       d="m 38.916185,21.507579 c 2.751025,6.309082 2.779271,13.473256 0.07808,19.803834 L 16,31.5 z"
+       d="m 38.916185,21.507579 a 25,25 0 0 1 0.07808,19.803834 L 16,31.5 z"
        transform="matrix(-0.9765698,0.21520089,-0.21520089,-0.9765698,51.450071,1048.1497)"
        sodipodi:start="5.8719992"
        sodipodi:end="6.6864862" />

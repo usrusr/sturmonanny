@@ -40,7 +40,7 @@ private class MisRender(
   ih: Int,
   iw: Int) {
 
-  val randomize = true //&& false
+  val randomize = true && false
   val interpolate = 20
   //  var xsvr = 100
   //  var ysvr = 100
@@ -128,15 +128,15 @@ private class MisRender(
   def sequence(in: BufferedImage) {
     veil()
 //    veil()
-//        front(4, 3)
-//        hatch() 
+        front(4, 3)
+        hatch() 
     units()
   }
   def veil() {
 
-    val darkness = 40
+    val darkness = 30
     val light = 255 - darkness
-    val background = 100 // higher -> more base image
+    val background = 120 // higher -> more base image
 
     ig2.setColor(new java.awt.Color(light, light, light, 255 - background))
     ig2.fillRect(0, 0, iw, ih)
@@ -187,7 +187,7 @@ private class MisRender(
       if (map.isEmpty) None else {
         val order = new Ordering[(GroundClass.GC, Counter)] {
           override def compare(o1: (GroundClass.GC, Counter), o2: (GroundClass.GC, Counter)) = {
-            val v1 = (o1._2.i)*o1._1.weight
+            val v1 = (o1._2.i)*o1._1.weight 
             val v2 = (o2._2.i)*o2._1.weight
 
             if (v1 > v2) 1 else if (v2 > v1) -1 else 0
@@ -234,7 +234,7 @@ private class MisRender(
 //
 //            val depth = Math.max(0, Math.min(255, (5000 / Math.abs(deep)).toInt))
             val (who, depth) = whoAndDeepness(rx, ry, 1000)
-            if (weight*depth > 100) {
+            if (cls.weight*cls.weight * weight + weight*depth*depth > 100000) {
               
               drawObject(px.toInt, py.toInt, number, side, depth, cls)
             }
@@ -256,17 +256,17 @@ private class MisRender(
     drawInit
     
     val colDepth = Math.max(0, Math.min(depth/2, 255))
-//    val cr = if (side == 1) new Color(255, 0, 0, colDepth) else if (side == 2) new Color(0, 0, 255, colDepth) else Color.black
-//    ig2.setColor(cr)    
-    if(colDepth>10){
+    
+    // set criteria to > 0 for disabling long range visibility of fuel etc
+    if(colDepth>=0){
 //      ig2.setColor(Color.black)
       val (randx, randy) = randomizeLocations(x, y, 1D/colDepth.toDouble)
   
       val scale = {
-        var s = 0.4
+        var s = 0.3
         var d = count.toDouble
         while(d/2>2){
-          s+=0.03
+          s+=0.05
           d=d/2
         }
         s
@@ -281,15 +281,22 @@ private class MisRender(
 //        val w2 = (scale * img.getWidth / 2).toInt
       for(img <- sprites.Sprites.paintable(cls, side)){
         val (width, height) =  img.dimensions
-        val h2 = (scale * height / 2).toInt
-        val w2 = (scale * width / 2).toInt
+        
+        val factor :Double= cls match {
+          case GroundClass.Airfield => 2
+          case GroundClass.Plane => 1
+          case _ => 1
+        }
+
+        val h2 = (factor*scale * height / 2).toInt
+        val w2 = (factor*scale * width / 2).toInt
 //        new BufferedImageOp()
         //val op = new RescaleOp(scale.toFloat, 0f , null)
         //ig2.drawImage(img, op, randx-w2, randy-h2)
         val t = new AffineTransform()
         t.setToIdentity
         t.translate(randx-w2, randy-h2)
-        t.scale(scale, scale)
+        t.scale(factor*scale, factor*scale)
         img.paint(t, colDepth.toDouble/255D, ig2)
 //        ig2.drawImage(img, t, null)
 //        val vpadding = 16

@@ -85,22 +85,25 @@ object GroundClass extends Enumeration with Log {
   case class GC(weight:Double, name:String) extends Val {
     override def toString = name
   }
-  //type GroundClass = GC
-//type Value
+//  type GroundClass = Value
+//  type Val = GC
+ type GroundClass = Value
   
- val Tank = GC(10, "Tank")
- val Ship = GC(10, "Ship") 
- val Car = GC(5, "Car")
- val Fuel = GC(50, "Fuel") // a special type of car, handled in checkDescription
- val Wagon = GC(5, "Wagon") 
- val AAA = GC(6, "AAA") 
- val Artillery = GC(7, "Artillery") 
- val Bridge = GC(0, "Bridge") 
- val Ground = GC(0, "Ground") 
- val Misc = GC(0, "Misc") 
- val Plane = GC(0, "Plane") 
- val Unidentified = GC(1, "Unidentified")
+ val Tank = GC (10, "Tank")
+ val Ship = GC (10, "Ship") 
+ val Car = GC (5, "Car")
+ val Fuel = GC (100, "Fuel") // a special type of car, handled in checkDescription
+ val Wagon = GC (5, "Wagon") 
+ val AAA = GC (6, "AAA") 
+ val Artillery = GC (8, "Artillery") 
+ val Bridge = GC (0, "Bridge") 
+ val Ground = GC (0, "Ground") 
+ val Misc = GC (0, "Misc") 
+ val Plane = GC (20, "Plane")
+  val Airfield = GC (10000, "Airfield") 
+ val Unidentified = GC (1, "Unidentified")
   
+ implicit def vtogc(v: Value): GC = v.asInstanceOf[GC]
 
   def parse(in: String): Value = if (in == null) Unidentified else try {
 //println("iding "+in)    

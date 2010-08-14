@@ -13,7 +13,7 @@ object BitmapSprite extends Log {
  
     val fname: String = (cls match {
       case Artillery => Car.toString
-      case Plane => "Airfield"
+//      case Plane => "Airfield"
       case x => x toString
     }) + infix + ".png"
 

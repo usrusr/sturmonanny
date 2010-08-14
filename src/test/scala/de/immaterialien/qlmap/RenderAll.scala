@@ -17,11 +17,12 @@ object RenderAll {
     val mapBase = new io.File("src/main/resources/mapbase")
 
     var pat = ".*".r
-    //    pat = "Berlin.*".r
+//        pat = "Berlin.*".r
+    pat = "Dese.*".r
 //    pat = "Iasi.*".r
-    pat="Iasi44194405020.*".r
-    pat="Italien_43194309120.*".r
-    //    pat = "Afrika_42194204050.*".r 
+//    pat="Iasi44194405020.*".r
+//    pat="Italien_43194309120.*".r
+//        pat = "Afrika_42194204050.*".r 
     //    pat = "Afrika.*".r 
 
     val base = new MapBase(mapBase)

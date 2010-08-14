@@ -58,26 +58,13 @@ object ScalableSprite {
         println("defs:"+defs.getClass.getSimpleName)
         val fecol = fi.appended(new SVGOMFEColorMatrixElement(null, doc.asInstanceOf[batik.dom.AbstractDocument]))
         fecol.setAttribute("type", "matrix")
-//      {
-//          val t = factory.createSVGDocument(null, stram).asInstanceOf[SVGDocument]
-//
-//          val tdn = doc.importNode(t.getDocumentElement, true).asInstanceOf[SVGElement]
-//          val sdn = doc.getDocumentElement.asInstanceOf[SVGSVGElement]
-//          for(c<-t.getDocumentElement.children(_=>true)) sdn.append(doc.importNode(c, true).asInstanceOf[Element])
-//        }
         val matrix = {
           val a = "0.2"
           def r = if(side==1) " 1 " else " 0 "
           def b = if(side==2) " 1 " else " 0 "
           val o = " 0 "
           val l = " 1 "
-//          ""  
-//          b+r+o+o+a+ "  " +
-//          r+o+b+o+a+ "  " +
-//          o+b+r+o+a+ "  " +
-//          o+o+o+l+o+ "  " +
-//          ""
-            
+
                       ""  
           b+r+o+" 0    "+a+ " " +
           r+o+b+" 0    "+a+ " " +
@@ -95,51 +82,7 @@ object ScalableSprite {
         {
           val d = doc.getDocumentElement
           var n :SVGElement = doc.getRootElement
-////          val children : NodeList = n.getChildNodes
-////          val defs = doc.createElement("defs")
-////          val len = children.getLength
-////          val fs = children.item(1) 
-//println("n children: "+n.children("g").length)
-//          val defs = n.children("defs").firstOption.getOrElse{
-//            val d=doc.element("defs")  
-//            n.appendBefore("g", d) 
-//            d
-//          }
-//         
-//          defs.append(
-//                  doc.element("filter",
-////                      "filterUnits"-> "userSpaceOnUse",
-////                      "x"-> "0",
-////                      "y"-> "0",
-////                      "height"-> "64",
-////                      "width"-> "64",
-//                      "id"->"MyFilter"
-//                  ).append(
-//                      doc.element(
-//                          "feColorMatrix", 
-//                          "type"->"matrix",
-//                          "values"->matrix 
-//                      )
-//                  )
-//              )
-          
-          
-          //children.
-          //n.insertBefore(n.getChildNodes.item(0), defs)
-//          val myf = doc.createElement("filter")
-//          myf.setAttribute("id", "MyFilter")
-//          myf.setAttribute("filterUnits","userSpaceOnUse")
-//          myf.setAttribute("x","0" ) 
-//          myf.setAttribute("y","0" ) 
-//          myf.setAttribute("width","64" ) 
-//          myf.setAttribute("height","64")
-//          defs.appendChild(myf)
-          
-//          val gb = doc.createElement("feGaussianBlur")
-//          gb.setAttribute("in", "SourceAlpha") 
-//          gb.setAttribute("stdDeviation", "4") 
-//          gb.setAttribute("result", "blur")
-//          myf.appendChild(gb)
+
           
           val g = {
             val cs = n.getChildNodes
@@ -150,7 +93,7 @@ object ScalableSprite {
           }.filter(_.getNodeName=="g").first.asInstanceOf[Element]
           g.setAttribute("filter","url(#MyFilter)")
         }
-println(dumpNode(doc))        
+//println(dumpNode(doc))        
 
         val userAgent = new UserAgentAdapter()
         val loader = new DocumentLoader(userAgent)
@@ -219,20 +162,15 @@ class ScalableSprite(r: batik.gvt.GraphicsNode) extends Log with Paintable {
     
     var old = r.getTransform
     if(old == null) old = new AffineTransform()
-//
     val nt = 
       old
       new AffineTransform(old); nt.concatenate(trans)
-      
-    //        new AffineTransform(trans);nt.concatenate(old)
-    //r.setFilter()
-//    r.getDocument
-//    r.setFilter(f)
-      
+     
     r.setTransform(nt)
     
     r.paint(g2d)
-    r.setTransform(old)
+    nt.invert
+    r.setTransform(new AffineTransform)
   }
   def dimensions: (Int, Int) = {
     val bds = r.getBounds

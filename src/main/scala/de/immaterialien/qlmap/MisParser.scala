@@ -60,7 +60,13 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
     rep(bornPlace) ^^^ ()
   }
   lazy val bornPlace: Parser[Unit] = {
-    ("""\s*""".r~> int ~ double ~ double ~ double) ^^ { case a ~ h ~ x ~ y => println("bp:" + a + "@" + x + "/" + y); out.bornPlace(a, x, y) }
+    ("""\s*""".r~> int ~ double ~ double ~ double) ^^ { 
+      case a ~ h ~ x ~ y => {
+        println("bp:" + a + "@" + x + "/" + y); 
+        out.bornPlace(a, x, y)
+        out.groundUnit(GroundClass.Airfield, a, x, y) 
+      }
+    } 
   }
   lazy val frontMarkers: Parser[Unit] = {
     rep(frontMarker) ^^^ ()
