@@ -6,21 +6,23 @@ import java.awt.geom._
 import java.io
 import scala.collection._
 
-
 object MisRender {
   def paint(forMission: io.File, model: MisModel): Unit = {
 
     var format: String = null
 
-    // reanimate to enable PNG output...    
-    //     val iis = ImageIO.createImageInputStream(imageFile)
-    //     val readers = ImageIO.getImageReaders(iis)
-    //     while(format==null && readers.hasNext) {
-    //       val reader = readers.next
-    //       format = reader.getFormatName 
-    //     }
-    //     iis.close
+//     reanimate to enable PNG output...    
+//         val iis = ImageIO.createImageInputStream(model.imageFile)
+//         val readers = ImageIO.getImageReaders(iis)
+//         while(format==null && readers.hasNext) {
+//           val reader = readers.next
+//           format = reader.getFormatName 
+//         }
+//         iis.close
+         
+         // jpg
     if (format == null) format = "JPG"
+format = "PNG"      
     val in = ImageIO.read(model.imageFile)
     val ig = in.createGraphics()
     new MisRender(
@@ -50,7 +52,7 @@ private class MisRender(
   //      Double.NaN
   //    }(2,svr+2,svr+2)
   //  }
-  val svr = 50
+  val svr = 100
   val svrs = Array.fromFunction { (_, _, _) =>
     Double.NaN
   }(2, svr + 2, svr + 2)
@@ -127,9 +129,10 @@ private class MisRender(
 
   def sequence(in: BufferedImage) {
     veil()
-//    veil()
-        front(4, 3)
-        hatch() 
+//        veil()
+    front(4, 1)
+    //newfront(4, 3)
+            hatch() 
     units()
     airfields()
   }
@@ -142,16 +145,16 @@ private class MisRender(
     ig2.setColor(new java.awt.Color(light, light, light, 255 - background))
     ig2.fillRect(0, 0, iw, ih)
   }
-  def airfields(){
-    for((gx, gy, side)<-model.rawAirFields ){
-        val ox = gx - model.widthOffset
-        val oy = gy - model.heightOffset
-        val rx = ox / model.width
-        val ry = oy / model.height
-        val px = rx * iw
-        val py = ih - ry * ih
-        
-        drawObject(px.toInt, py.toInt, 1000, side, 1, GroundClass.Airfield )
+  def airfields() {
+    for ((gx, gy, side) <- model.rawAirFields) {
+      val ox = gx - model.widthOffset
+      val oy = gy - model.heightOffset
+      val rx = ox / model.width
+      val ry = oy / model.height
+      val px = rx * iw
+      val py = ih - ry * ih
+
+      drawObject(px.toInt, py.toInt, 1000, side, 1, GroundClass.Airfield)
     }
   }
   def units() {
@@ -179,7 +182,7 @@ private class MisRender(
         }
         def addHard(ax: Double, ay: Double) = {
           val update = if (radius > dist(ax, ay)) 1d else 0d
-          i = i + update 
+          i = i + update
           num += update.toInt
         }
         def thisOrOther(thisCls: GroundClass.GC, oCls: GroundClass.GC, oCnt: Double): (GroundClass.GC, Double) = {
@@ -200,33 +203,30 @@ private class MisRender(
       if (map.isEmpty) None else {
         val order = new Ordering[(GroundClass.GC, Counter)] {
           override def compare(o1: (GroundClass.GC, Counter), o2: (GroundClass.GC, Counter)) = {
-            val v1 = (o1._2.i)*o1._1.weight 
-            val v2 = (o2._2.i)*o2._1.weight
+            val v1 = (o1._2.i) * o1._1.weight
+            val v2 = (o2._2.i) * o2._1.weight
 
             if (v1 > v2) 1 else if (v2 > v1) -1 else 0
           }
         }
-        
-        
-        val isAirfield = map.get(GroundClass.Airfield ).map(counter=>
-            counter.num > 0
-         ).getOrElse(false)
-         
-         if(isAirfield) None
-         else{
-           val ret = map.max(order)
-           println("  identified " + ret._1 + " from " + map)
-           Some(ret._1, ret._2.i, ret._2.num )
-         }
-      
+
+        val isAirfield = map.get(GroundClass.Airfield).map(counter =>
+          counter.num > 0
+          ).getOrElse(false)
+
+        if (isAirfield) None
+        else {
+          val ret = map.max(order)
+          println("  identified " + ret._1 + " from " + map)
+          Some(ret._1, ret._2.i, ret._2.num)
+        }
+
       }
     }
     def forSide(side: Int) {
       val markers = if (side == 1) model.rfront else model.bfront
       val other = if (side == 1) model.bfront else model.rfront
       val sd = if (side == 1) "red" else if (side == 2) "blue" else "???"
-
-
 
       for (marker <- markers) {
         val (x, y) = (marker._1, marker._2)
@@ -236,13 +236,13 @@ private class MisRender(
         val ry = oy / model.height
         val px = rx * iw
         val py = ih - ry * ih
-        
+
         if (ox >= 0 && ox <= model.width && oy >= 0 && oy <= model.height) {
           val at = atMarker(x, y, side)
           for ((cls, weight, number) <- at) {
             val (who, depth) = whoAndDeepness(rx, ry, 1000)
-            if (cls.weight*cls.weight * weight + weight*depth*depth > 100000) {
-              
+            if (cls.weight * cls.weight * weight + weight * depth * depth > 100000) {
+
               drawObject(px.toInt, py.toInt, number, side, depth, cls)
             }
           }
@@ -252,97 +252,91 @@ private class MisRender(
     forSide(1)
     forSide(2)
   }
-  
-  lazy val drawInit = { import java.awt._
-      ig2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-      val font = new Font("SansSerif", Font.PLAIN, 8);
-      ig2.setFont(font);
+
+  lazy val drawInit = {
+    import java.awt._
+    ig2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    val font = new Font("SansSerif", Font.PLAIN, 8);
+    ig2.setFont(font);
   }
-  
-  def drawObject(x:Int, y:Int, count:Int, side:Int, depth:Int, cls : GroundClass.GC){ import java.awt._
+
+  def drawObject(x: Int, y: Int, count: Int, side: Int, depth: Int, cls: GroundClass.GC) {
+    import java.awt._
     drawInit
-    
-    val colDepth = Math.max(0, Math.min(depth/2, 255))
-    
+
+    val colDepth = Math.max(0, Math.min(depth / 2, 255))
+
     // set criteria to > 0 for disabling long range visibility of fuel etc
-    if(colDepth>=0){
-//      ig2.setColor(Color.black)
-      val (randx, randy) = randomizeLocations(x, y, 1D/colDepth.toDouble)
-  
+    if (colDepth >= 0) {
+      //      ig2.setColor(Color.black)
+      val (randx, randy) = randomizeLocations(x, y, 1D / colDepth.toDouble)
+
       val scale = {
         var s = 0.3
         var d = count.toDouble
-        while(d/2>2){
-          s+=0.05
-          d=d/2
+        while (d / 2 > 2) {
+          s += 0.05
+          d = d / 2
         }
         s
       }
-      
-      
-      
-      //ig2.drawString(count + " " + cls+"s ("+(randx -x)+", "+(randy-y) +")" , randx, randy)
-//      val image = sprites.Sprites.forClass(cls, side)
-//      for(img<- image ){
-//        val h2 = (scale * img.getHeight / 2).toInt
-//        val w2 = (scale * img.getWidth / 2).toInt
-      for(img <- sprites.Sprites.paintable(cls, side)){
-        val (width, height) =  img.dimensions
-        val factor = 1D
-//        val factor :Double= cls match {
-//          case GroundClass.Airfield => 2
-//          case GroundClass.Plane => 1
-//          case _ => 1
-//        }
 
-        val h2 = (factor*scale * height / 2).toInt
-        val w2 = (factor*scale * width / 2).toInt
-//        new BufferedImageOp()
+      //ig2.drawString(count + " " + cls+"s ("+(randx -x)+", "+(randy-y) +")" , randx, randy)
+      //      val image = sprites.Sprites.forClass(cls, side)
+      //      for(img<- image ){
+      //        val h2 = (scale * img.getHeight / 2).toInt
+      //        val w2 = (scale * img.getWidth / 2).toInt
+      for (img <- sprites.Sprites.paintable(cls, side)) {
+        val (width, height) = img.dimensions
+        val factor = 1D
+        //        val factor :Double= cls match {
+        //          case GroundClass.Airfield => 2
+        //          case GroundClass.Plane => 1
+        //          case _ => 1
+        //        }
+
+        val h2 = (factor * scale * height / 2).toInt
+        val w2 = (factor * scale * width / 2).toInt
+        //        new BufferedImageOp()
         //val op = new RescaleOp(scale.toFloat, 0f , null)
         //ig2.drawImage(img, op, randx-w2, randy-h2)
         val t = new AffineTransform()
         t.setToIdentity
-        t.translate(randx-w2, randy-h2)
-        t.scale(factor*scale, factor*scale)
-        img.paint(t, colDepth.toDouble/255D, ig2)
-//        ig2.drawImage(img, t, null)
-//        val vpadding = 16
-//        val hpadding = 3
-//        ig2.setColor(Color.black)
-//        ig2.drawString(count +"" , hpadding+randx-w2, vpadding+randy-h2)
+        t.translate(randx - w2, randy - h2)
+        t.scale(factor * scale, factor * scale)
+        img.paint(t, colDepth.toDouble / 255D, ig2)
+        //        ig2.drawImage(img, t, null)
+        //        val vpadding = 16
+        //        val hpadding = 3
+        //        ig2.setColor(Color.black)
+        //        ig2.drawString(count +"" , hpadding+randx-w2, vpadding+randy-h2)
       }
-      
+
       ig2.setColor(Color.green)
       ig2.drawLine(randx, randy, x, y)
     }
   }
-  def randomizeLocations(x:Int, y:Int, depth:Double):(Int, Int)={  
+  def randomizeLocations(x: Int, y: Int, depth: Double): (Int, Int) = {
     import java.awt.geom._
 
-    if(! randomize) (x, y) else{
-      val direction = Math.Pi * ((x, y).hashCode % 720).toDouble/360
+    if (!randomize) (x, y) else {
+      val direction = Math.Pi * ((x, y).hashCode % 720).toDouble / 360
       val distance = Math.min(10D, 200D * Math.sqrt(depth))
-      
-      
-      val ret = (
-          x+(Math.cos(direction)*distance).toInt, 
-          y+(Math.sin(direction)*distance).toInt
-      )
+
+      val ret = (x + (Math.cos(direction) * distance).toInt,
+        y + (Math.sin(direction) * distance).toInt)
       ret
     }
-    
+
   }
-  
+
   def front(steps: Int, aa: Int) {
     val dimension = ih + iw
     val scale = 1 << aa
 
     // set true to allow uninterpolated values for front calculation  
     var precise = false
-//    precise = true    
-
-    //ig2.transform(java.awt.geom.AffineTransform.getScaleInstance(1.1,1.1))
-    //ig2.transform(java.awt.geom.AffineTransform.getScaleInstance(1.toDouble/scale.toDouble,1.toDouble/scale.toDouble))
+        precise = true    
     ig2.scale(1.toDouble / scale.toDouble, 1.toDouble / scale.toDouble)
 
     val sih = ih * scale
@@ -367,26 +361,14 @@ private class MisRender(
       }
       val sig = signum(vals.first)
       vals.exists(x => signum(x) != sig)
-      //       var sig = Math.signum(vals.first)
-      //       vals.exists(x => {
-      //         val nSig = Math.signum(x)
-      //         if(sig==0) sig=nSig
-      //         nSig != sig
-      //       })
     }
     def pixel(x: Int, y: Int, me: Double, other: Double) {
 
       val max = 200
       val min = 50
       val deep = (Math.min(max, min + (max - min).toDouble * Math.abs(me / dimension)) / scale).toInt
-      //println("                                                                         pixel "+x+","+y+ "  "+deep+"   "+me+" vs "+other)           
-      //println("                                                                                      me is   "+dif(x,y))          
-
-      //       if(me>=0) ig2.setColor(new java.awt.Color(255,0,0, deep)) 
-      //     else if(me<=0 * -1) ig2.setColor(new java.awt.Color(0, 0, 255, deep))
       if (me < 0) ig2.setColor(new java.awt.Color(255, 100, 0, deep))
       else if (me > 0) ig2.setColor(new java.awt.Color(0, 100, 255, deep))
-      //ig2.drawLine(x,y,x,y)
 
       ig2.fillOval(x - scale, y - scale, scale * 2, scale * 2)
     }
@@ -399,6 +381,8 @@ private class MisRender(
      */
     def tile(x: Int, y: Int, step: Int, ul: Double, ur: Double, bl: Double, br: Double) {
 
+      precise = true 
+      
       if (step == 1) {
         //println("                                                   stepping "+step+" level "+x+","+y)           
         if (differentSides(ul, ur)) {
@@ -428,13 +412,6 @@ private class MisRender(
         val r = dif(x + step, y + half)
         val u = dif(x + half, y)
         val b = dif(x + half, y + step)
-
-        //println("                  stepping "+step+" level "+x+","+y +" center value: "+c)           
-
-        //tile(x,y,half, ul,u,l,c)
-        //tile(x+half,y,half, u, ur, c, r)
-        //tile(x,y+half,half, l, c, bl, b)
-        //tile(x+half,y+half,half, c, r, b, br)
 
         if (differentSides(ul, u, l, c)) {
           tile(x, y, half, ul, u, l, c)
@@ -467,10 +444,9 @@ private class MisRender(
 
     tile(0, 0, initialStep, dif(0, 0), dif(0, initialStep), dif(initialStep, 0), dif(initialStep, initialStep))
 
-    //ig2.scale(1/scale, 1/scale)
     ig2.scale(scale, scale)
   }
-  
+
   /**
    * the core hatching function
    * 
@@ -479,7 +455,7 @@ private class MisRender(
    * @param max 0..255?
    * @return (side number, "deepness")
    */
-  def whoAndDeepness(px: Double, py: Double, max: Int):(Int, Int) = {
+  def whoAndDeepness(px: Double, py: Double, max: Int): (Int, Int) = {
     val r = sideVal(px, py, model.rfront)
     val b = sideVal(px, py, model.bfront)
 
@@ -558,4 +534,9 @@ private class MisRender(
 
     ()
   }
+
+  def newfront(steps: Int, aa: Int) {
+ 
+  }
+
 }
