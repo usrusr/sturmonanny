@@ -16,7 +16,7 @@ class MisModel {
   var height = 160000.
   var widthOffset = 0.
   var heightOffset = 0.
-  var imageFile: io.File = null
+  private var _imageFile: io.File = null
   def frontMarker(x: Double, y: Double, a: Int) {
 //    println("frontmarker: " + x + " / " + y + " for " + a)
     front = (x, y, a) :: front
@@ -26,13 +26,15 @@ class MisModel {
   def bornPlace(a: Integer, x: Double, y: Double) {}
   def baseInfo(baseInfo: Option[MapInfo]) {
     for (in <- baseInfo) {
-      imageFile = in.image.get
+      _imageFile = in.image.get
       width = in.width.getOrElse(10.) * 10000.
       height = in.height.getOrElse(10.) * 10000.
       widthOffset = in.widthOffset.getOrElse(0.) * 10000.
       heightOffset = in.heightOffset.getOrElse(0.) * 10000.
     }
-
+  }
+  def imageFile =  if(_imageFile.exists) new java.io.FileInputStream(_imageFile) else {
+    this.getClass.getResourceAsStream("/mapbase/"+_imageFile.getName)
   }
   
   var rawAirFields:List[(Double, Double, Int)]=Nil

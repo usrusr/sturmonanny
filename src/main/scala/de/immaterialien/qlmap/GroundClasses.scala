@@ -9,19 +9,25 @@ class GroundClasses(fbdjPath:String) extends Log { import java.io.File
     val path = new File(fbdjPath)
     if( ! path.exists){
       log error "expecting csv files in " + path.getAbsolutePath + " but it does not exist, cannot paint ground units"
-      (Map(),Map())
-    }else{
-      def checkedFile(name:String, function:String=>Map[String, GroundClass.Value]):Map[String, GroundClass.Value]={
-        val mFile = new File(path, name)
-        if( ! mFile.exists) log error "expecting " + mFile.getAbsolutePath + " but it does not exist, cannot paint ground units"
-        if( ! mFile.canRead) log error "cannot read" + mFile.getAbsolutePath + " -> cannot paint ground units"
-        function(mFile.getAbsolutePath)
-      }
-      (
-          checkedFile("IL2MultiObjects.csv", CsvParser.loadMultiObjects), 
-          checkedFile("IL2StaticObjects.csv", CsvParser.loadStaticObjects)
-      )
+//      (Map(),Map())
+      
     }
+//    else{
+//      def checkedFile(name:String, function:(String,String)=>Map[String, GroundClass.Value]):Map[String, GroundClass.Value]={
+//        val mFile = new File(path, name)
+//        if( ! mFile.exists) log error "expecting " + mFile.getAbsolutePath + " but it does not exist, cannot paint ground units"
+//        if( ! mFile.canRead) log error "cannot read" + mFile.getAbsolutePath + " -> cannot paint ground units"
+//        function(mFile.getAbsolutePath)
+//      }
+//      (
+//          checkedFile("IL2MultiObjects.csv", CsvParser.loadMultiObjects), 
+//          checkedFile("IL2StaticObjects.csv", CsvParser.loadStaticObjects)
+//      )
+//    }
+     (
+          CsvParser.loadMultiObjects(fbdjPath, "IL2MultiObjects.csv"), 
+          CsvParser.loadStaticObjects(fbdjPath, "IL2StaticObjects.csv")
+      )
   }
   def get(name:String) = multi.get(name) map(Some(_)) getOrElse static.get(name)
 }
@@ -59,24 +65,35 @@ object CsvParser extends RegexParsers with Log {
       }
     }
   }
-  def loadStaticObjects (fname:String):Map[String, GroundClass.Value] = {
-    loadObjects(fname, staticObjectsLine)
+  def loadStaticObjects (path:String, fname:String):Map[String, GroundClass.Value] = {
+    loadObjects(path, fname, staticObjectsLine)
   }
-  def loadMultiObjects (fname:String):Map[String, GroundClass.Value] = {
-    loadObjects(fname, multiObjectsLine)
+  def loadMultiObjects (path:String, fname:String):Map[String, GroundClass.Value] = {
+    loadObjects(path, fname, multiObjectsLine)
   }
-  private def loadObjects (fname:String, parser:Parser[(String, GroundClass.Value)]):Map[String, GroundClass.Value] = {
-    val f = new java.io.File(fname)
-    if( ! f.exists) Map() else {
-      val s = scala.io.Source.fromFile(fname)
-      val tmp = new scala.collection.mutable.HashMap[String, GroundClass.Value]
+  private def loadObjects (path:String, fname:String, parser:Parser[(String, GroundClass.Value)]):Map[String, GroundClass.Value] = {
+    val f = new java.io.File(path, fname)
+    
+    val tmp = new scala.collection.mutable.HashMap[String, GroundClass.Value]
+    var stream:java.io.InputStream = null
+    try {
+      stream = if(f.exists){
+        new java.io.FileInputStream(f)
+      }else{
+        log warn "loading ground classes from jar, "+f.getAbsolutePath+" not found"
+        this.getClass.getResourceAsStream("/mapbase/"+fname)
+      }
+      val s = scala.io.Source.fromInputStream(stream)
+  
       for(line<-s.getLines) {
-//println ("in: "+ line )        
+  //println ("in: "+ line )        
         val parsed = parseAll(parser, line)
         parsed.map(tmp += _).getOrElse(log warn "failed to parse '"+line++"' from "+f.getAbsolutePath)
       }
-      Map() ++ tmp
+    }finally{
+      if(stream!=null) try stream.close
     }
+    Map() ++ tmp
   }
 }
 

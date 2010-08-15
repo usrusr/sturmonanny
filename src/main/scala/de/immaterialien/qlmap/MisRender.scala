@@ -22,17 +22,24 @@ object MisRender {
          
          // jpg
     if (format == null) format = "JPG"
-format = "PNG"      
-    val in = ImageIO.read(model.imageFile)
-    val ig = in.createGraphics()
-    new MisRender(
-      model,
-      ig,
-      in.getHeight,
-      in.getWidth
-      ).sequence(in)
-    ig.dispose
-    ImageIO.write(in, format, new java.io.File(forMission.getParentFile, forMission.getName + "." + format))
+//format = "PNG"      
+    var instream:java.io.InputStream = null
+    var ig:java.awt.Graphics2D = null
+    try {
+      instream = model.imageFile
+      var in = ImageIO.read(instream)
+      ig = in.createGraphics()
+      new MisRender(
+        model,
+        ig,
+        in.getHeight,
+        in.getWidth
+        ).sequence(in)
+      ImageIO.write(in, format, new java.io.File(forMission.getParentFile, forMission.getName + "." + format))
+    }finally{
+      try instream.close
+      try ig.dispose
+    }
   }
 }
 
@@ -80,27 +87,27 @@ private class MisRender(
 
     val ix = Math.floor(x * xsvr).toInt
     val iy = Math.floor(y * ysvr).toInt
-
-    val ll = buffered(ix, iy)
-    val hl = buffered(ix + 1, iy)
-    val lh = buffered(ix, iy + 1)
-    val hh = buffered(ix + 1, iy + 1)
-
-    def interpolate(c1: Double, c2: Double, c: Double, v1: Double, v2: Double): Double = {
-      val (lc, hc, lv, hv) = if (c1 < c2) (c1, c2, v1, v2) else (c2, c1, v2, v1)
-      val dist = hc - lc
-      ((c - lc) * hv + (hc - c) * lv) / dist
+    var ww = { 
+      val ll = buffered(ix, iy)
+      val hl = buffered(ix + 1, iy)
+      val lh = buffered(ix, iy + 1)
+      val hh = buffered(ix + 1, iy + 1)
+  
+      def interpolate(c1: Double, c2: Double, c: Double, v1: Double, v2: Double): Double = {
+        val (lc, hc, lv, hv) = if (c1 < c2) (c1, c2, v1, v2) else (c2, c1, v2, v1)
+        val dist = hc - lc
+        ((c - lc) * hv + (hc - c) * lv) / dist
+      }
+      //    val wl = interpolate(ix.toDouble/svr.toDouble, (ix+1).toDouble/svr.toDouble, x, ll, hl) 
+      //    val wh = interpolate(ix.toDouble/svr.toDouble, (ix+1).toDouble/svr.toDouble, x, lh, hh) 
+      //    
+      //    val ww = interpolate(iy.toDouble/svr.toDouble, (iy+1).toDouble/svr.toDouble, y, wh, wh)
+      //    
+      val lw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, ll, lh)
+      val hw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, hl, hh)
+      
+      interpolate(ix.toDouble / xsvr.toDouble, (ix + 1).toDouble / xsvr.toDouble, x, lw, hw)
     }
-    //    val wl = interpolate(ix.toDouble/svr.toDouble, (ix+1).toDouble/svr.toDouble, x, ll, hl) 
-    //    val wh = interpolate(ix.toDouble/svr.toDouble, (ix+1).toDouble/svr.toDouble, x, lh, hh) 
-    //    
-    //    val ww = interpolate(iy.toDouble/svr.toDouble, (iy+1).toDouble/svr.toDouble, y, wh, wh)
-    //    
-    val lw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, ll, lh)
-    val hw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, hl, hh)
-
-    val ww = interpolate(ix.toDouble / xsvr.toDouble, (ix + 1).toDouble / xsvr.toDouble, x, lw, hw)
-
     ww
   }
   /**

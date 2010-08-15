@@ -1,0 +1,727 @@
+"AAA","BA_10","BA 10",0
+"AAA","BA_6","BA 6",0
+"AAA","BA_64","BA 64",0
+"AAA","BarrageBalloon_1200m","Barrage Balloon",0
+"AAA","BarrageBalloon_1800m","Barrage Balloon",0
+"AAA","BarrageBalloon_2400m","Barrage Balloon",0
+"AAA","BarrageBalloon_600m","Barrage Balloon",0
+"AAA","Bofors_40mm_UK","40mm Bofors",0
+"AAA","Bofors_40mm_US","40mm Bofors",0
+"AAA","DShK","DShk",0
+"AAA","DShKAA","DShk",0
+"AAA","DemagFlak","Demag Flak",0
+"AAA","Flak18_37mm","37mm Flak",0
+"AAA","Flak18_88mm","88mm Flak",0
+"AAA","Flak30_20mm","20mm Flak",0
+"AAA","Flak38_20mm","20mm Flak",0
+"AAA","GAZ_AA","GAZ",0
+"AAA","GAZ_AAA","GAZ",0
+"AAA","LVT_2","LVT 2",0
+"AAA","M16","M16",0
+"AAA","M16_US","M16",0
+"AAA","M3A1_APC","M3A1 APC",0
+"AAA","M8_Greyhound","M8 Greyhound",0
+"AAA","MG42","MG42",0
+"AAA","Maxime","Maxime",0
+"AAA","Maxime4","Maxime",0
+"AAA","MaximeGAZ","MaximeGAZ",0
+"AAA","OpelBlitzMaultierAA","OpelBlitzMaultier",0
+"AAA","SdKfz6Flak37","Sdkfz6 Flak",0
+"AAA","StBofors_40mm_UK","40mm StBofors",0
+"AAA","StBofors_40mm_US","40mm StBofors",0
+"AAA","Trip25mm_JA","Triple 25mm",0
+"AAA","Twin25mm_JA","Twin 25mm",0
+"AAA","Type88_75mm_JA","Type88 75mm",0
+"AAA","Type98_20mm_JA","Type98 20mm",0
+"AAA","ZIS5_AA","ZIS5",0
+"AAA","Zenit25mm_1940","Zenit 25mm",0
+"AAA","Zenit3K","Zenit 3K",0
+"AAA","Zenit61K","Zenit 61K",0
+"AAA","Zenit85mm_1939","Zenit 85mm",0
+"AAA","_50calMG_US_M2HB","M2 50 cal",0
+"AAA","_50calMG_water_US","50 cal",0
+"Artillery","ATG38_45mm","ATG38 45mm",0
+"Artillery","BunkerA2_gun","Bunker Gun",0
+"Artillery","BunkerA_gun","Bunker Gun",0
+"Artillery","BunkerD_gun","Bunker Gun",0
+"Artillery","BunkerG1_gun","Bunker Gun",0
+"Artillery","BunkerR1_gun","Bunker Gun",0
+"Artillery","BunkerR2_gun","Bunker Gun",0
+"Artillery","BunkerS2_gun","Bunker Gun",0
+"Artillery","Howitzer_150mm","150mm Howitzer",0
+"Artillery","Karl_600mm","Karl 600mm",0
+"Artillery","Katyusha","Katyusha Rocket",0
+"Artillery","M2A1_105mm","M2A1 105mm",0
+"Artillery","M30_122mm","M30 120mm",0
+"Artillery","M3_75mm_GMC","M3 75mm",0
+"Artillery","M5_75mm","M5 75mm",0
+"Artillery","ML20","ML20",0
+"Artillery","OpelBlitzMaultierRocket","Opel blitz Rocket",0
+"Artillery","PaK35","Pak35",0
+"Artillery","PaK38","Pak38",0
+"Artillery","PaK40","Pak40",0
+"Artillery","StudebeckerRocket","Studebaker Rocket",0
+"Artillery","Type38_75mm","Type38 75mm",0
+"Artillery","Type91_105mm","Type91 105mm",0
+"Artillery","Type94_37mm_JA","Type 94 37mm",0
+"Artillery","ZIS3","ZIS3",0
+"Bridge","Bridge","Bridge",250
+"Car","Bulldozer_US","Bulldozer",0
+"Car","Bus_US","Bus",0
+"Car","Chevrolet_flatbed_US","Flatbed Truck",0
+"Car","Chevrolet_medic_US","Medical Truck",0
+"Car","Chevrolet_radio_US","Radio Truck",0
+"Car","DUKW","DUKW",0
+"Car","DemagD7","DemagD7",0
+"Car","DiamondT_US","DiamondT",0
+"Car","FAIM","FAIM",0
+"Car","GAZ67","GAZ67",0
+"Car","GAZ67t","GAZ67T",0
+"Car","GAZ_55","GAZ 55",0
+"Car","GAZ_Bus","Bus",0
+"Car","GAZ_M1","GAZ M1",0
+"Car","HoHa","HOHa",0
+"Car","Kettenkrad","Kettenkrad",0
+"Car","Kurogane","Kurogane",0
+"Car","M3_Halftrack","M3 HalfTrack",0
+"Car","M3_Halftrack_ppl","M3 Halftrack PPL",0
+"Car","Motorcycle","Motorcycle",0
+"Car","OpelBlitz36S","Opel Blitz36s",0
+"Car","OpelBlitz6700A","Opel Blitz6700A",0
+"Car","OpelBlitz6700A_fuel","Fuel Truck",0
+"Car","OpelBlitz6700A_medic","Medical Truck",0
+"Car","OpelBlitz6700A_radio","Radio Truck",0
+"Car","OpelBlitzMaultier","Opel BlitzMaultier",0
+"Car","OpelKadett","Open Kadett",0
+"Car","RSO","RSO",0
+"Car","SdKfz6","SdKfz6 Halftrack",0
+"Car","StudebeckerTruck","Truck",0
+"Car","Truck_Type94","Truck",0
+"Car","VW82","VW",0
+"Car","VW82t","VW82t",0
+"Car","WillisMB","Jeep",0
+"Car","WillisMB_US","Jeep",0
+"Car","WillisMBt","Jeep",0
+"Car","WillisMBt_US","Jeep",0
+"Car","WillisMBtc_US","Jeep",0
+"Car","ZIS5_PC","ZIS5 PC",0
+"Car","ZIS5_medic","Medical Truck",0
+"Car","ZIS5_radio","Radio Truck",0
+"Car","ZIS6_fuel","Fuel Truck",0
+"Ground","USSR_MBV2","USSR-MBV2",0
+"Ground","Wagon1","Wagon1",0
+"Ground","Wagon10","Wagon10",0
+"Ground","Wagon11","Wagon11",0
+"Ground","Wagon12","Wagon12",0
+"Ground","Wagon13","Wagon13",0
+"Ground","Wagon2","Wagon2",0
+"Ground","Wagon3","Wagon3",0
+"Ground","Wagon4","Wagon4",0
+"Ground","Wagon5","Wagon5",0
+"Ground","Wagon6","Wagon6",0
+"Ground","Wagon7","Wagon7",0
+"Ground","Wagon8","Wagon8",0
+"Ground","Wagon9","Wagon9",0
+"Misc","CampfireAirfield","Campfire",0
+"Misc","Landscape","Large Object",0
+"Misc","ObservBalloon_30m","Observation Balloon",0
+"Misc","ObservBalloon_60m","Observation Balloon",0
+"Misc","ObservBalloon_90m","Observation Balloon",0
+"Misc","RwyCon","RwyCon",0
+"Misc","RwySteel","RWYSteel",0
+"Misc","RwySteelLow","RWYSteelLow",0
+"Misc","RwyTransp","Transport",0
+"Misc","SL_ManualBlue","Spot Light Blue",0
+"Misc","SirenCity","Siren",0
+"Misc","Smoke1","Smoke",0
+"Misc","Smoke10","Smoke",0
+"Misc","Smoke11","Smoke",0
+"Misc","Smoke12","Smoke",0
+"Misc","Smoke13","Smoke",0
+"Misc","Smoke14","Smoke",0
+"Misc","Smoke15","Smoke",0
+"Misc","Smoke2","Smoke",0
+"Misc","Smoke3","Smoke",0
+"Misc","Smoke4","Smoke",0
+"Misc","Smoke5","Smoke",0
+"Misc","Smoke6","Smoke",0
+"Misc","Smoke7","Smoke",0
+"Misc","Smoke8","Smoke",0
+"Misc","Smoke9","Smoke",0
+"Plane","A5M4","A5M4",0
+"Plane","A6M2","A6M2",0
+"Plane","A6M2N","A6M2-N",0
+"Plane","A6M2_21","A6M2-21",0
+"Plane","A6M3","A6M3",0
+"Plane","A6M5","A6M5",0
+"Plane","A6M5A","A6M5a",0
+"Plane","A6M5B","A6M5b",0
+"Plane","A6M5C","A6M5c",0
+"Plane","A6M7_62","A6M7_Model62",0
+"Plane","A6M7_63","A6M7_Model63",0
+"Plane","AR_196A3","Ar-196A-3",0
+"Plane","AR_234B2","Ar-234B-2",0
+"Plane","AVIA_B534","Avia B-534-IV",0
+"Plane","A_20C","A-20C",0
+"Plane","A_20G","A-20G",0
+"Plane","B5N2","B5N2",0
+"Plane","B6N2","B6N2",0
+"Plane","BEAU10","Beaufighter MkX",0
+"Plane","BEAU21","Beaufighter Mk21",0
+"Plane","BF_109E1","Bf-109E-1",0
+"Plane","BF_109E1B","Bf-109E-1/B",0
+"Plane","BF_109E4","Bf-109E-4",0
+"Plane","BF_109E4B","Bf-109E-4/B",0
+"Plane","BF_109E7","Bf-109E-7",0
+"Plane","BF_109E7NZ","Bf-109E-7Z",0
+"Plane","BF_109F1","Bf-109F1",0
+"Plane","BF_109F2","Bf-109F-2",0
+"Plane","BF_109F2B","Bf-109F-2B",0
+"Plane","BF_109F2Btrop","Bf-109F-2B Trop",0
+"Plane","BF_109F2trop","Bf-109F-2 Trop",0
+"Plane","BF_109F4","Bf-109F-4",0
+"Plane","BF_109F4B","Bf-109F-4B",0
+"Plane","BF_109F4Btrop","Bf-109F-4B Trop",0
+"Plane","BF_109F4R1","Bf-109F-4 R1",0
+"Plane","BF_109F4trop","Bf-109F-4 Trop",0
+"Plane","BF_109G10","Bf-109G-10",0
+"Plane","BF_109G10C3","Bf-109G-10C3",0
+"Plane","BF_109G10Erla","Bf-109G-10 Erla",0
+"Plane","BF_109G10FABIAN","Fabian_Bf-109G-10",0
+"Plane","BF_109G14","Bf-109G-14",0
+"Plane","BF_109G14AS","Bf-109G-14AS",0
+"Plane","BF_109G14early","Bf-109G-14 Early",0
+"Plane","BF_109G2","Bf-109G-2",0
+"Plane","BF_109G2T","Bf-109G-2 Trop",0
+"Plane","BF_109G4","Bf-109G-4",0
+"Plane","BF_109G4T","Bf-109G-4 Trop",0
+"Plane","BF_109G6","Bf-109G-6",0
+"Plane","BF_109G6AS","Bf-109G-6AS",0
+"Plane","BF_109G6ASN","Bf-109G-6ASN",0
+"Plane","BF_109G6Erla","Bf-109G-6 Erla",0
+"Plane","BF_109G6GRAF","Graf_Bf-109G-6",0
+"Plane","BF_109G6HARTMANN","Hartmann_Bf-109G-6",0
+"Plane","BF_109G6HEPPES","Heppes_Bf-109G-6",0
+"Plane","BF_109G6KOVACS","Kovacs_Bf-109G-6",0
+"Plane","BF_109G6Late","Bf-109G-6 Late",0
+"Plane","BF_109G6Late","Bf-109G-6_Late",0
+"Plane","BF_109G6MOLNAR","Molnar_Bf-109G-6",0
+"Plane","BF_109G6Mid","Bf-109G-6 Mid",0
+"Plane","BF_109G6T","Bf-109G-6 Trop",0
+"Plane","BF_109K4","Bf-109K-4",0
+"Plane","BF_109K4C3","Bf-109K-4C3",0
+"Plane","BF_109K6","Bf-109K-6",0
+"Plane","BF_109Z","Bf-109Z",0
+"Plane","BF_110C4","Bf-110C-4",0
+"Plane","BF_110C4B","Bf-110C-4B",0
+"Plane","BF_110G2","Bf-110G-2",0
+"Plane","BF_110G4","Bf-110G-4",0
+"Plane","BI_1","BI-1",0
+"Plane","BI_6","BI-6",0
+"Plane","BLENHEIM1","BlenheimMkI",0
+"Plane","BLENHEIM1F","BlenheimMkIF",0
+"Plane","BLENHEIM4","Blenheim MkIV",0
+"Plane","B_17D","B-17D",0
+"Plane","B_17E","B-17E",0
+"Plane","B_17F","B-17F",0
+"Plane","B_17G","B-17G",0
+"Plane","B_17GMOD","B-17G Mod",0
+"Plane","B_24J","B-24J",0
+"Plane","B_24J100","B-24J-100-CF",0
+"Plane","B_25C25","B-25C-25NA",0
+"Plane","B_25D20","B-25D-20NA",0
+"Plane","B_25D5","B-25D-5NA",0
+"Plane","B_25G1","B-25G-1NA",0
+"Plane","B_25H1","B-25H-1NA",0
+"Plane","B_25J1","B-25J-1NA",0
+"Plane","B_25J15","B-25J-15NA",0
+"Plane","B_25J22","B-25J-22NA",0
+"Plane","B_29","B-29",0
+"Plane","BattleMkII","FaireyBattle",0
+"Plane","CR_42","CR_42",0
+"Plane","CW_21","CW-21",0
+"Plane","C_47","C-47",0
+"Plane","C_47A","C-47A",0
+"Plane","C_47B","C-47B",0
+"Plane","D3A1","D3A1",0
+"Plane","DO_335A0","Do-335A-0",0
+"Plane","DO_335V13","Do-335V-13",0
+"Plane","DXXI_DK","Fokker D.XXI-DK",0
+"Plane","DXXI_DU","Fokker D.XXI-DU",0
+"Plane","DXXI_SARJA3_EARLY","Fokker D.XXI SARJA3 Early",0
+"Plane","DXXI_SARJA3_LATE","Fokker D.XXI SARJA3 Late",0
+"Plane","DXXI_SARJA4","Fokker D.XXI SARJA4",0
+"Plane","F2A2","F2A-2",0
+"Plane","F2A_B239","B-239",0
+"Plane","F2A_B339","BuffaloMkI",0
+"Plane","F4F3","F4F-3",0
+"Plane","F4F4","F4F-4",0
+"Plane","F4F_FM2","FM-2",0
+"Plane","F4U1","F4U-1",0
+"Plane","F4U1A","F4U-1A",0
+"Plane","F4U1C","F4U-1C",0
+"Plane","F4U1D","F4U-1D",0
+"Plane","F4UCORSAIR1","Corsair MkI",0
+"Plane","F4UCORSAIR2","Corsair MkII",0
+"Plane","F4UCORSAIR4","Corsair MkIV",0
+"Plane","F6F3","F6F-3",0
+"Plane","F6F5","F6F-5",0
+"Plane","F9F2","F9F2 Panther",0
+"Plane","FI_156","Fi-156",0
+"Plane","FW_189A2","Fw-189A-2",0
+"Plane","FW_190A3","Fw-190-A3",0
+"Plane","FW_190A4","Fw-190A-4",0
+"Plane","FW_190A5","Fw-190A-5",0
+"Plane","FW_190A5165ATA","Fw-190A-5165ATA",0
+"Plane","FW_190A5U14","Fw-190A-5U14",0
+"Plane","FW_190A6","Fw-190A-6",0
+"Plane","FW_190A8","Fw-190A-8",0
+"Plane","FW_190A8MSTL","Fw-190A-8Mistel",0
+"Plane","FW_190A9","Fw-190A-9",0
+"Plane","FW_190D11","Fw 190D11",0
+"Plane","FW_190D13","Fw 190D13",0
+"Plane","FW_190D9","Fw-190D-9",0
+"Plane","FW_190D9LATE","Fw-190D-9_Late",0
+"Plane","FW_190F8","Fw-190F-8",0
+"Plane","FW_200C3U4","FW-200C-3U4",0
+"Plane","G4M1_11","G4M1_11",0
+"Plane","G4M2E","G4M2E",0
+"Plane","G50","G-50",0
+"Plane","G55","G-55",0
+"Plane","G55_Late","G-55 Late",0
+"Plane","GLADIATOR1","GladiatorMkI",0
+"Plane","GLADIATOR1J8A","J8A",0
+"Plane","GLADIATOR2","GladiatorMkII",0
+"Plane","GO_229A1","Go-229A-1",0
+"Plane","G_11","G-11",0
+"Plane","H8K1","H8K1",0
+"Plane","HE_111H2","He-111H-2",0
+"Plane","HE_111H6","He-111H-6",0
+"Plane","HE_111Z","He-111Z",0
+"Plane","HE_162A2","He-162A-2",0
+"Plane","HE_162B","He-162B",0
+"Plane","HE_162C","He-162C",0
+"Plane","HE_LERCHE3","He-L-IIIB2",0
+"Plane","HS_129B2","Hs-129B-2",0
+"Plane","HS_129B3Wa","Hs-129B-3/Wa",0
+"Plane","HalifaxBMkIII","Halifax BMk III",0
+"Plane","Hawk75A2","Hawk75A-2",0
+"Plane","Hawk75A3","Hawk75A-3",0
+"Plane","Hawk75A4","Hawk75A-4",0
+"Plane","HurricaneMkIIb","Hurricane Mk IIB",0
+"Plane","HurricaneMkIIbMod","Hurricane MkIIB Mod",0
+"Plane","HurricaneMkIIc","Hurricane MkIIC",0
+"Plane","HurricaneMkIId","Hurricate Mk IId",0
+"Plane","HurricaneMkIa","HurricaneMkI",0
+"Plane","IAR_80","IAR80",0
+"Plane","IAR_81A","IAR81a",0
+"Plane","IAR_81C","IAR81c",0
+"Plane","IL_10","Il-10",0
+"Plane","IL_2I","Il-2I",0
+"Plane","IL_2MEarly","Il-2M_Early",0
+"Plane","IL_2MLate","Il-2M_Late",0
+"Plane","IL_2T","Il-2T",0
+"Plane","IL_2Type3","Il-2_3",0
+"Plane","IL_2Type3M","Il-2_M3",0
+"Plane","IL_2_1940Early","Il-2 1940 Early",0
+"Plane","IL_2_1940Late","Il-2 1940 Late",0
+"Plane","IL_2_1941Early","Il-2 1941 Early",0
+"Plane","IL_2_1941Late","Il-2_1941_Late",0
+"Plane","IL_4_DB3B","DB-3b",0
+"Plane","IL_4_DB3F","DB-3F",0
+"Plane","IL_4_DB3M","DB-3M",0
+"Plane","IL_4_DB3T","DB-3T",0
+"Plane","IL_4_IL4","Il-4",0
+"Plane","I_153P","I-153P",0
+"Plane","I_153_2BS","I-153-2BS",0
+"Plane","I_153_2SHKAS_BS","I-153 2SHKAS-BS",0
+"Plane","I_153_M62","I-153M62",0
+"Plane","I_153_fin","I-153 Fin",0
+"Plane","I_15BIS","I-15bis",0
+"Plane","I_15BIS_SKIS","I-15bis Skis",0
+"Plane","I_16TYPE18","I-16type18",0
+"Plane","I_16TYPE24","I-16type24",0
+"Plane","I_16TYPE24DRONE","I-16type24_SPB",0
+"Plane","I_16TYPE24SAFONOV","Safonovs_I-16_24",0
+"Plane","I_16TYPE5","I-16type5",0
+"Plane","I_16TYPE5_SKIS","I-16type5 Skis",0
+"Plane","I_16TYPE5_SPB","I-16type5 SPB",0
+"Plane","I_16TYPE6","I-16type6",0
+"Plane","I_16TYPE6_SKIS","I-16type6 Skis",0
+"Plane","I_185M71","I-185M-71",0
+"Plane","I_185M82A","I-185M-82A",0
+"Plane","I_250","I-250",0
+"Plane","J2M3","J2M3",0
+"Plane","J2M5","J2M5",0
+"Plane","JU_52_3MG4E","Ju-52/3mg4e",0
+"Plane","JU_52_3MG5E","Ju-52/3mg5e",0
+"Plane","JU_87B2","Ju-87B-2",0
+"Plane","JU_87D3","Ju-87D-3",0
+"Plane","JU_87D5","Ju-87D-5",0
+"Plane","JU_87G1","Ju-87G-1",0
+"Plane","JU_87G2RUDEL","Hans_Rudels_Ju-87G-2",0
+"Plane","JU_88A4","Ju-88A-4",0
+"Plane","JU_88MSTL","Ju-88Mistel",0
+"Plane","KI_100_IKO","Ki-100-I-Ko",0
+"Plane","KI_21_I","Ki-21-I",0
+"Plane","KI_21_II","Ki-21-II",0
+"Plane","KI_27_KO","Ki-27-Ko",0
+"Plane","KI_27_OTSU","Ki-27-Otsu",0
+"Plane","KI_43_IA","Ki-43-Ia",0
+"Plane","KI_43_IB","Ki-43-Ib",0
+"Plane","KI_43_IC","Ki-43-Ic",0
+"Plane","KI_43_II","Ki-43-II",0
+"Plane","KI_43_IIKAI","Ki-43-II-Kai",0
+"Plane","KI_46_OTSU","Ki-46-Otsu",0
+"Plane","KI_46_OTSUHEI","Ki-46-Otsu-Hei",0
+"Plane","KI_46_RECCE","Ki-46-Recce",0
+"Plane","KI_61_IHEI","Ki-61-I-Hei",0
+"Plane","KI_61_IKO","Ki-61-I-Ko",0
+"Plane","KI_61_IOTSU","Ki-61-I-Otsu",0
+"Plane","KI_84_IA","Ki-84-Ia",0
+"Plane","KI_84_IB","Ki-84-Ib",0
+"Plane","KI_84_IC","Ki-84-Ic",0
+"Plane","L2D","L2D",0
+"Plane","LAGG_3IT","LaGG-3IT",0
+"Plane","LAGG_3RD","LaGG-3RD",0
+"Plane","LAGG_3SERIES29","LaGG-3series29",0
+"Plane","LAGG_3SERIES35","LaGG-3series35",0
+"Plane","LAGG_3SERIES4","LaGG-3series4",0
+"Plane","LAGG_3SERIES66","LaGG-3series66",0
+"Plane","LA_5","La-5",0
+"Plane","LA_5F","La-5F",0
+"Plane","LA_5FN","La-5FN",0
+"Plane","LA_7","La-7",0
+"Plane","LA_7B20","La-73xB20",0
+"Plane","LA_7KOJEDUB","Kojedubs_La-7",0
+"Plane","LA_7R","La-7R",0
+"Plane","LI_2","Li-2",0
+"Plane","LetovS_328","S-328",0
+"Plane","MBR_2AM34","MBR-2-AM-34",0
+"Plane","MC_200_1","MC-200series1",0
+"Plane","MC_200_3","MC-200series3",0
+"Plane","MC_200_7","MC-200series7",0
+"Plane","MC_200_7FB","MC-200series7FB",0
+"Plane","MC_202","MC-202",0
+"Plane","MC_202_12","MC-202_XII",0
+"Plane","MC_202_3","MC-202_III",0
+"Plane","MC_202_7","MC-202_VII",0
+"Plane","MC_205_1","MC-205_I",0
+"Plane","MC_205_3","MC-205_III",0
+"Plane","ME_163B1A","Me-163B-1a",0
+"Plane","ME_210CA1","Me-210Ca-1",0
+"Plane","ME_210CA1ZSTR","Me-210Ca-1ZSTR",0
+"Plane","ME_262A1A","Me-262A-1a",0
+"Plane","ME_262A1ANOWOTNY","Nowotnys_Me-262A-1a",0
+"Plane","ME_262A1AU4","Me-262A-1aU4",0
+"Plane","ME_262A2A","Me-262A-2a",0
+"Plane","ME_262HGII","Me-262HG-II",0
+"Plane","ME_321","Me-321",0
+"Plane","ME_323","Me-323",0
+"Plane","ME_410A","Me-410A",0
+"Plane","ME_410B","Me-410B",0
+"Plane","ME_410D","Me-410D",0
+"Plane","MIG_3AM38","MiG-3-AM-38",0
+"Plane","MIG_3EARLY","MiG-3",0
+"Plane","MIG_3POKRYSHKIN","Pokryshkins_MiG-3",0
+"Plane","MIG_3SHVAK","MiG-3-2xShVAK",0
+"Plane","MIG_3U","MiG-3U",0
+"Plane","MIG_3UB","MiG-3-2xUB",0
+"Plane","MIG_3UD","MiG-3ud",0
+"Plane","MIG_9FS","MiG-9FS",0
+"Plane","MIG_9_I_300","MiG-9protoF-2",0
+"Plane","MOSQUITO16","Mosquito Mk 16",0
+"Plane","MOSQUITO4","Mosquito Mk IV",0
+"Plane","MOSQUITO6","Mosquito FBMk VI",0
+"Plane","MOSQUITO6CC","Mosquito FBMk VICC",0
+"Plane","MS406","MS406",0
+"Plane","MS410","MS410",0
+"Plane","MSMORKO","MS-Morko",0
+"Plane","MXY_7","MXY-7-11",0
+"Plane","MagisterM14A","Magister",0
+"Plane","N1K1J","N1K1-J",0
+"Plane","N1K1JA","N1K1-Ja",0
+"Plane","N1K2JA","N1K2-Ja",0
+"Plane","PBN1","PBN-1",0
+"Plane","PE_2SERIES1","Pe-2series1",0
+"Plane","PE_2SERIES110","Pe-2series110",0
+"Plane","PE_2SERIES359","Pe-2series359",0
+"Plane","PE_2SERIES84","Pe-2series84",0
+"Plane","PE_3BIS","Pe-3bis",0
+"Plane","PE_3SERIES1","Pe-3series1",0
+"Plane","PE_8","Pe-8",0
+"Plane","P_11C","P_11c",0
+"Plane","P_24B","P_24B",0
+"Plane","P_24E","P_24E",0
+"Plane","P_24F","P_24F",0
+"Plane","P_24G","P_24G",0
+"Plane","P_36A3","P-36A-3",0
+"Plane","P_36A4","P-36A-4",0
+"Plane","P_38E","P-38E",0
+"Plane","P_38F1LO","P-38F-1-LO",0
+"Plane","P_38G10LO","P-38G-10-LO",0
+"Plane","P_38G15LO","P-38G-15-LO",0
+"Plane","P_38G5LO","P-38G-5-LO",0
+"Plane","P_38H5LO","P-38H-5-LO",0
+"Plane","P_38J","P-38J",0
+"Plane","P_38L","P-38L",0
+"Plane","P_38LLate","P-38L_Late",0
+"Plane","P_39D1","P-39D1",0
+"Plane","P_39D2","P-39D2",0
+"Plane","P_39N","P-39N1",0
+"Plane","P_39NPOKRYSHKIN","Pokryshkins_P-39N1",0
+"Plane","P_39Q1","P-39Q-1",0
+"Plane","P_39Q10","P-39Q-10",0
+"Plane","P_39Q15RECHKALOV","Rechkalovs_P-39Q15",0
+"Plane","P_400","P-400",0
+"Plane","P_40E","P-40E",0
+"Plane","P_40EM105","P-40E-M-105",0
+"Plane","P_40M","P-40M",0
+"Plane","P_40SUKAISVOLOCH2A","TomahawkMkIIa",0
+"Plane","P_40SUKAISVOLOCH2B","TomahawkMkIIb",0
+"Plane","P_40SUKAISVOLOCHB","P-40B",0
+"Plane","P_40SUKAISVOLOCHC","P-40C",0
+"Plane","P_40SUKAISVOLOCHHAWKA2","Hawk81A-2",0
+"Plane","P_47D","P-47D",0
+"Plane","P_47D10","P-47D-10",0
+"Plane","P_47D22","P-47D-22",0
+"Plane","P_47D27","P-47D-27",0
+"Plane","P_51B","P-51B-NA",0
+"Plane","P_51C","P-51C-NT",0
+"Plane","P_51CM","Mustang III",0
+"Plane","P_51D20NA","P-51D-20NA",0
+"Plane","P_51D20NT","P-51D-20NT",0
+"Plane","P_51D25NA","P-51D-25NA",0
+"Plane","P_51D30NA","P-51D-30NA",0
+"Plane","P_51D5NT","P-51D-5NT",0
+"Plane","P_63C","P-63C",0
+"Plane","P_80A","P-80A",0
+"Plane","RE_2000","RE-2000",0
+"Plane","R_10","R-10",0
+"Plane","SBD3","SBD-3",0
+"Plane","SBD5","SBD-5",0
+"Plane","SB_2M100A","SB_2M-100A",0
+"Plane","SB_2M103","SB_2M-103",0
+"Plane","SEAFIRE1","Seafire Mk I",0
+"Plane","SEAFIRE245","SeaFire Mk II 45",0
+"Plane","SEAFIRE250","SeaFire Mk II 50",0
+"Plane","SEAFIRE2C","Seafire Mk II",0
+"Plane","SEAFIRE2C4","Seafire Mk II4xH",0
+"Plane","SEAFIRE3","Seafire MkIII",0
+"Plane","SEAFIRE3F","SeafireF MkIII",0
+"Plane","SEAGLADIATOR2","Sea Gladiator MkII",0
+"Plane","SEAHURRICANE1","Sea Hurricane Mk Ib",0
+"Plane","SEAHURRICANE2","Sea Hurricane Mk IIc",0
+"Plane","SM79i","SM-79",0
+"Plane","SPITFIRE1","Spitfire Mk I",0
+"Plane","SPITFIRE12","Spitfire Mk XII",0
+"Plane","SPITFIRE14C","Spitfire Mk XIVc",0
+"Plane","SPITFIRE5B","Spitfire MkVb",0
+"Plane","SPITFIRE5BCLP","SpitfireMkVbCLP",0
+"Plane","SPITFIRE5BLF","SpitfireMkVbLF",0
+"Plane","SPITFIRE5BLFCLP","SpitfireMkVbLFCLP",0
+"Plane","SPITFIRE5BT","Spitfire MkVbT",0
+"Plane","SPITFIRE5C2","SpitfireMkVc",0
+"Plane","SPITFIRE5C2FB","Spitfire Mk VcFB",0
+"Plane","SPITFIRE5C2LF","Spitfire Mk VcLF",0
+"Plane","SPITFIRE5C2LFCLP","Spitfire Mk VcLFCLP",0
+"Plane","SPITFIRE5C4","SpitfireMkVc4xH",0
+"Plane","SPITFIRE5C4FB","SpitfireMkVcFB4xH",0
+"Plane","SPITFIRE5C4LF","SpitfireMkVcLF4xH",0
+"Plane","SPITFIRE8","SpitfireMkVIII",0
+"Plane","SPITFIRE825LBS","Spitfire Mk VIII25lbs",0
+"Plane","SPITFIRE8CLP","SpitfireMkVIIICLP",0
+"Plane","SPITFIRE8CLPFB","SpitfireMkVIIICLPFB",0
+"Plane","SPITFIRE8FB","Spitfire Mk VIIIFB",0
+"Plane","SPITFIRE8HF","Spitfire Mk VIIIHF",0
+"Plane","SPITFIRE925LBS","SpitfireMkIX25lbs",0
+"Plane","SPITFIRE9C","SpitfireMkIXc",0
+"Plane","SPITFIRE9CCLP","SpitfireMkIXcCLP",0
+"Plane","SPITFIRE9E","SpitfireMkIXe",0
+"Plane","SPITFIRE9ECLP","SpitfireMkIXeCLP",0
+"Plane","SPITFIRE9EHF","SpitfireMkIXeHF",0
+"Plane","SPITFIRELF14E","Spitfire LF Mk XIVe",0
+"Plane","SU_2","Su-2",0
+"Plane","TA_152C","Ta-152C",0
+"Plane","TA_152C0","Ta-152C-0",0
+"Plane","TA_152C1","Ta-152C-1",0
+"Plane","TA_152C3","Ta-152C-3",0
+"Plane","TA_152H1","Ta-152H-1",0
+"Plane","TA_183","Ta-183",0
+"Plane","TBF1","TBF-1",0
+"Plane","TBF1C","TBF-1C",0
+"Plane","TBM3","TBM-3",0
+"Plane","TBM3AVENGER3","AvengerMkIII",0
+"Plane","TB_3_4M_17","TB-3_4M-17",0
+"Plane","TB_3_4M_34R","TB-3_4M-34R",0
+"Plane","TB_3_4M_34R_SPB","TB-3_4M-34R_SPB",0
+"Plane","TEMPEST11LBS","TempestMkV 11lbs",0
+"Plane","TEMPEST13LBS","TempestMkV 13lbs",0
+"Plane","TEMPEST5","TempestMkV",0
+"Plane","TU_2S","Tu-2S",0
+"Plane","U_2VS","U-2VS",0
+"Plane","YAK_1","Yak-1",0
+"Plane","YAK_15","Yak-15",0
+"Plane","YAK_1B","Yak-1B",0
+"Plane","YAK_3","Yak-3",0
+"Plane","YAK_3P","Yak-3P",0
+"Plane","YAK_3R","Yak-3R",0
+"Plane","YAK_3VK107","Yak-3VK-107",0
+"Plane","YAK_7A","Yak-7A",0
+"Plane","YAK_7B","Yak-7B",0
+"Plane","YAK_7BPF","Yak-7BPF",0
+"Plane","YAK_9","Yak-9",0
+"Plane","YAK_9B","Yak-9B",0
+"Plane","YAK_9D","Yak-9D",0
+"Plane","YAK_9K","Yak-9K",0
+"Plane","YAK_9M","Yak-9M",0
+"Plane","YAK_9T","Yak-9T",0
+"Plane","YAK_9TALBERT","Durand_Yak-9T",0
+"Plane","YAK_9U","Yak-9U",0
+"Plane","YAK_9UT","Yak-9UT",0
+"Ship","Aurora","Aurora",0
+"Ship","BBK1124_1943","BBK1124 1943",0
+"Ship","BBK_1942","BBK 1942",0
+"Ship","DUKW_WAT","DUKW WAT",0
+"Ship","DaihatsuLC","Daihatsu LC",0
+"Ship","Destroyer_USSR_Type7","Type7 Destroyer",0
+"Ship","Destroyer_USSR_Type7_44","Type7 1944 Destroyer",0
+"Ship","G5","G5",0
+"Ship","HMSDukeOfYorkBB","HMS Duke of York",0
+"Ship","HMSIllustriousCV","HMS Illustrious CV",0
+"Ship","HMSKingGeorgeVBB","HMS King George BB",0
+"Ship","HMSPoWBB","HMS Pow BB",0
+"Ship","IJNAkagiCV","Akagi CV",0
+"Ship","IJNAkizukiDD42","Nakizuki DD",0
+"Ship","IJNAmatsukazeDD41","Amatsukaze DD",0
+"Ship","IJNAmatsukazeDD43","Amatsukaze 1943 DD",0
+"Ship","IJNAmatsukazeDD45","Amatsukaze 1945 DD",0
+"Ship","IJNArashiDD41","Arashi DD",0
+"Ship","IJNBBGeneric","Imperial BB",0
+"Ship","IJNCVGeneric","Imperial CV",0
+"Ship","IJNFishJunk","Fishing Junk",0
+"Ship","IJNFishJunkA","Fishing Junk A",0
+"Ship","IJNKageroDD41","Kagero DD",0
+"Ship","IJNNowakiDD41","Nowaki DD",0
+"Ship","IJNNowakiDD43","Nowaki 1943 DD",0
+"Ship","IJNShokakuCV","Shokaku CV",0
+"Ship","IJNYukikazeDD41","Yukikaze DD",0
+"Ship","IJNYukikazeDD43","Yukikaze 1943 DD",0
+"Ship","IJNYukikazeDD45","Yukikaze 1945 DD",0
+"Ship","IJNZuikakuCV","Zuikaku CV",0
+"Ship","Illmarinen","Illmarinen",0
+"Ship","Kirov","Kirov",0
+"Ship","LCVP","LCVP",0
+"Ship","LVT_2WAT","LVT 2WAT",0
+"Ship","MAS501","MAS501",0
+"Ship","MBoat","M-Boat",0
+"Ship","MFP","MFP",0
+"Ship","MFP2","MFP2",0
+"Ship","MO4","MO4",0
+"Ship","Marat","Marat",0
+"Ship","Murgesku","Murgesku",0
+"Ship","Niobe","Niobe DD",0
+"Ship","PAM","PAM",0
+"Ship","PilotBoatWater_US","Pilot Boat Water US",0
+"Ship","PilotWater_JA","PilotWater Imperial",0
+"Ship","PilotWater_US","PilotWater US",0
+"Ship","S80","S80",0
+"Ship","Shuka","Shuka",0
+"Ship","SubTypeVIIC_Srf","Type VIIC Sub Surfaced",0
+"Ship","SubTypeVIIC_Sub","Type VIIC Sub Submerged",0
+"Ship","Submarine","Submarine",0
+"Ship","Tanker","Tanker",0
+"Ship","Tashkent","Tashkent",0
+"Ship","Tirpitz","Tirpitz BB",600
+"Ship","Tral","Tral",0
+"Ship","Tramp","Cargo-Tramp",0
+"Ship","USSBBGeneric","US Battleship",0
+"Ship","USSCVGeneric","US Carrier",0
+"Ship","USSCasablancaCVE55","USS Casablanca CVE",0
+"Ship","USSDentDD116","USS Dent DD",0
+"Ship","USSEssexCV9","USS Essex CV",0
+"Ship","USSFletcherDD445","USS Fletcher DD",0
+"Ship","USSGatoSS212_Srf","USS Gato sub Surfaced",0
+"Ship","USSGatoSS212_Sub","USS Gato Sub Submirged",0
+"Ship","USSGreenlingSS213_Srf","USS Greenling Sub Surfaced",0
+"Ship","USSGreenlingSS213_Sub","USS Greenling Sub Submirged",0
+"Ship","USSIndianapolisCA35","USS Indianapolis CA",0
+"Ship","USSIntrepidCV11","USS Intrepid CV",0
+"Ship","USSKiddDD661","USS Kidd DD",0
+"Ship","USSKitkunBayCVE71","USS KitKunBay CVE",0
+"Ship","USSLexingtonCV2","USS Lexington CV",0
+"Ship","USSOBannonDD450","USS O'Bannon DD",0
+"Ship","USSSaratogaCV3","USS Saratoga CV3",0
+"Ship","USSShamrockBayCVE84","USS Shamrock Bay CVE",0
+"Ship","USSWardDD139","USS Ward DD",0
+"Ship","Vainamoinen","Vainamoinen",0
+"Tank","7TP","7TP",0
+"Tank","BT7","BT-7",0
+"Tank","ChiHa","Chi Ha",0
+"Tank","ChiHa_alt","Chi Ha Alt",0
+"Tank","Coelian","coelian",0
+"Tank","Ferdinand","Ferdinand",0
+"Tank","HaGo","Ha Go",0
+"Tank","HaGoRadio","Ha go Radio",0
+"Tank","Hetzer","Hetzer",0
+"Tank","HoRo","HoRo",0
+"Tank","IS2","IS2",0
+"Tank","IS3","IS3",0
+"Tank","ISU152","ISU152",0
+"Tank","Jagdpanther","Jagdpanther",0
+"Tank","KV1","KV1",0
+"Tank","LT_35","LT-35",0
+"Tank","LT_35Ro","LT-35Ro",0
+"Tank","LT_35Sl","LT-35Sl",0
+"Tank","LT_38","LT-38",0
+"Tank","LT_38Sl","LT-38Sl",0
+"Tank","LT_40","LT-40",0
+"Tank","LT_40MG","LT-40MG",0
+"Tank","M3A1Stuart","M3A1 Stuart",0
+"Tank","M4A2","M4A2",0
+"Tank","M4A2_76W","M4A2-76W",0
+"Tank","M4A2_76W_US","M4A2-76W US",0
+"Tank","M4A2_US","M4A2 Us",0
+"Tank","M5A1Stuart","M5A1 Stuart",0
+"Tank","MarderIII","Marder IIIH",0
+"Tank","MatildaMkII_AU","Matilda Mk II AU",0
+"Tank","MatildaMkII_UK","Matilda Mk II UK",0
+"Tank","Maus","Maus",0
+"Tank","Nimrod","Nimrod",0
+"Tank","PzIIF","Panzer IIF",0
+"Tank","PzIIIG","Panzer IIIG",0
+"Tank","PzIIIJ","Panzer IIIJ",0
+"Tank","PzIIIM","Panzer IIIM",0
+"Tank","PzIIIN","Panzer IIIN",0
+"Tank","PzIVE","Panzer IVE",0
+"Tank","PzIVF","Panzer IVF",0
+"Tank","PzIVF2","Panzer IVF2",0
+"Tank","PzIVJ","Panzer IVJ",0
+"Tank","PzVA","Panzer VA",0
+"Tank","PzVIB","Panzer VIB",0
+"Tank","PzVIE","Panzer VIE",0
+"Tank","PzV_II","Panzer V-II",0
+"Tank","SU100","SU100",0
+"Tank","SU76M","SU76M",0
+"Tank","SU85","SU85",0
+"Tank","SdKfz251","Sdkfz251",0
+"Tank","StuGIIIG","StuG IIIG",0
+"Tank","StuGIV","StuG IV",0
+"Tank","T26_Early","T26 Early",0
+"Tank","T26_Late","T26 Late",0
+"Tank","T28","T28",0
+"Tank","T34","T34",0
+"Tank","T34_85","T34-85",0
+"Tank","T35","T35",0
+"Tank","T40S","T40S",0
+"Tank","T44","T44",0
+"Tank","T60","T60",0
+"Tank","T70M","T70M",0
+"Tank","Tatra_OA30","Tatra OA30",0
+"Tank","TuranI","Turan I",0
+"Tank","TuranII","Turan II",0
+"Tank","ValentineII","Valentine II",0
+"Tank","Wirbelwind","Wirbelwind",0
+"Tank","ZSU37","ZSU37",0
+"Tank","ZrinyiII","Zrinyi II",0
+"Tank","_7TP","-7TP",0
