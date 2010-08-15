@@ -19,12 +19,12 @@ object RenderAll {
     var pat = ".*".r
 //        pat = "Berlin.*".r
 //    pat = "Dese.*".r
-    pat = "Berlin_45194503220.*".r
+//    pat = "Berlin_45194503220.*".r
 //    pat = "Iasi.*".r
 //    pat="Iasi44194405020.*".r
 //    pat="Italien_43194309120.*".r
 //        pat = "Afrika_42194204050.*".r 
-    //    pat = "Afrika.*".r 
+//        pat = "Afrika.*".r 
 
     val base = new MapBase(mapBase)
 

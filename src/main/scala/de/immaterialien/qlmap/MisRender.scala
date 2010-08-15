@@ -131,7 +131,7 @@ private class MisRender(
     veil()
 //        veil()
     front(4, 2)
-            hatch() 
+    hatch() 
     units()
     airfields()
   }
@@ -225,7 +225,7 @@ private class MisRender(
           ).getOrElse(false)
 
         if (isAirfield) for(fuelCount<-map.get(GroundClass.Fuel)){
-          val airfieldFuelPenalty = 50
+          val airfieldFuelPenalty = GroundClass.Fuel.weight / 2
           fuelCount.i = fuelCount.i/airfieldFuelPenalty
         }
 
@@ -293,7 +293,7 @@ private class MisRender(
         var s = 0.3
         var d = count.toDouble
         while (d / 2 > 2) {
-          s += 0.05
+          s += 0.08
           d = d / 2
         }
         s
@@ -354,7 +354,7 @@ private class MisRender(
 
     // set true to allow uninterpolated values for front calculation  
     var precise = false
-        precise = true    
+//        precise = true    
     ig2.scale(1.toDouble / scale.toDouble, 1.toDouble / scale.toDouble)
 
     val sih = ih * scale
@@ -363,8 +363,11 @@ private class MisRender(
     val initialStep = scale << (steps);
 
     def dif(x: Int, y: Int): Double = {
-      val px: Double = (x.toDouble - model.widthOffset) / siw.toDouble
-      val py: Double = 1 - (y.toDouble - model.heightOffset) / sih.toDouble
+//      val px: Double = (x.toDouble - model.widthOffset) / siw.toDouble
+//      val py: Double = 1 - (y.toDouble - model.heightOffset) / sih.toDouble
+      val px: Double = (x.toDouble) / siw.toDouble
+      val py: Double = 1 - (y.toDouble ) / sih.toDouble
+
       val (r, b) = if (precise) (preciseSideVal(px, py, model.rfront),
         preciseSideVal(px, py, model.bfront))
       else (sideVal(px, py, model.rfront),

@@ -185,10 +185,10 @@
        transform="translate(0,1036.3622)" />
     <path
        style="fill:#55aa55;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;fill-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
-       d="M 5,44 5,19 59,19 59,44 5,44 z"
+       d="M 5,44 5,31.5 10,21 54,21 59,31.5 59,44 5,44 z"
        id="path3914"
        transform="translate(0,988.3622)"
-       sodipodi:nodetypes="ccccc" />
+       sodipodi:nodetypes="ccccccc" />
     <path
        sodipodi:type="arc"
        style="fill:#55aa55;fill-opacity:1;stroke:#000000;stroke-width:0.18284062;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
@@ -198,7 +198,7 @@
        sodipodi:rx="0.83576202"
        sodipodi:ry="1.0000054"
        d="m 8.8269806,11.899012 a 0.83576202,1.0000054 0 1 1 -1.6715241,0 0.83576202,1.0000054 0 1 1 1.6715241,0 z"
-       transform="matrix(5.9825636,0,0,4.9999696,-1.8079728,971.8675)" />
+       transform="matrix(5.9825636,0,0,4.9999696,-1.8079726,973.8675)" />
     <path
        sodipodi:type="arc"
        style="fill:#55aa55;fill-opacity:1;stroke:#000000;stroke-width:0.18284062;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
@@ -208,6 +208,6 @@
        sodipodi:rx="0.83576202"
        sodipodi:ry="1.0000054"
        d="m 8.8269806,11.899012 a 0.83576202,1.0000054 0 1 1 -1.6715241,0 0.83576202,1.0000054 0 1 1 1.6715241,0 z"
-       transform="matrix(5.9825636,0,0,4.9999696,-29.807973,971.8675)" />
+       transform="matrix(5.9825636,0,0,4.9999696,-29.807973,973.8675)" />
   </g>
 </svg>
