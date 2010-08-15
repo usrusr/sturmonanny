@@ -7,13 +7,14 @@ class MissionFilter(args: String) extends javax.xml.ws.Provider[File] with Log {
   val groundClasses = new GroundClasses(args)
   override def invoke(file: File): File = {
     
-    new Thread("recon "+file.getName){
+    val thread = new Thread("recon "+file.getName){
       override def run {
         val parsed = new MisParser(file, mapBase, groundClasses)
         val img = MisRender.paint(file, parsed.out)
       }
-    }.start
-  
+    }
+    thread.setPriority(Thread.MIN_PRIORITY)
+    thread.start
     file
   }
 }
