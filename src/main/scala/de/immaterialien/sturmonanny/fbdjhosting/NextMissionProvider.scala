@@ -7,7 +7,7 @@ import javax.xml.ws.Provider
 import scala.collection.JavaConversions
 
 object NextMissionProvider 
-//	extends de.immaterialien.sturmonanny.util.Log 
+	extends de.immaterialien.sturmonanny.util.Log 
 	{   
   def makeList(conf:core.Configuration):List[Provider[File]] = if(conf==null) Nil else{
   	 
@@ -19,14 +19,14 @@ object NextMissionProvider
     for(nameNum <- allAddons){
       val num = nameNum._2
       val cName = nameNum._1
-      
+      val actualClass = cName.replace("_", ".").replace("..","_")
       if(ret.containsKey(num)){
-//        log.error("A mission processor ("+ret.get(0).getClass.getCanonicalName+") already exists at position "+num+", ignoring "+cName)
+        log.error("A mission processor ("+ret.get(0).getClass.getCanonicalName+") already exists at position "+num+", ignoring "+cName)
       }else{
         var instance:Provider[File] = null
         val arg = conf.fbdj.DCG.addonArguments(cName)
         try{
-       	 	val cls = Class.forName(cName).asInstanceOf[Class[Provider[File]]]
+       	 	val cls = Class.forName(actualClass).asInstanceOf[Class[Provider[File]]]
           
           try{
             val constructor = cls.getConstructor(classOf[String])
@@ -40,7 +40,7 @@ object NextMissionProvider
       	  
       	  if(instance!=null) ret.put(num, instance)
         }catch{
-//          case x => log.error("could not load mission processor "+cName+" for processor position "+num+":", x)
+          case x => log.error("could not load mission processor "+actualClass+" for processor position "+num+":", x)
       	case _ =>
         }
       }
@@ -64,7 +64,7 @@ log.debug("invoking "+filter.getClass.getSimpleName+" with input "+ret)
 log.debug("got "+next+" from "+filter.getClass.getSimpleName)      	
       	if(next!=null) ret = next
       }catch{
-//        case x => log.error("error in mission processor "+filter.getClass.getCanonicalName+", skipping ", x)
+        case x => log.error("error in mission processor "+filter.getClass.getCanonicalName+", skipping ", x)
       	case _ =>
       }
     }

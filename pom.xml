@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.immaterialien</groupId>
 	<artifactId>sturmonanny</artifactId>
-	<version>0.0.7-SNAPSHOT</version>
+	<version>0.0.8-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<inceptionYear>2010</inceptionYear>
 	<properties>
@@ -84,6 +84,13 @@
 			<version>2.5</version>
 			<scope>provided</scope>
 		</dependency>
+		
+    <dependency>
+		  <groupId>de.immaterialien</groupId>
+      <artifactId>qlmap</artifactId>
+      <version>0.1.1-SNAPSHOT</version>
+    </dependency>
+		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

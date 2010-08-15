@@ -209,12 +209,14 @@ JVM-processing should better be invoked inside the sturmonanny JVM.
 
 example configuration:
 <addons>
-my.package.Preprocessor = -10
-my.package.Postprocessor = 1
-my.other.package.AnotherPostprocessor = 10
+my_package_Preprocessor = -10
+my_package_Postprocessor = 1
+my_other_package_AnotherPostprocessor = 10
 </addons>
 
-Keys (left of the equals sign) have to be fully qualified class names of classes present on the classpath. 
+Keys (left of the equals sign) have to be fully qualified class names of classes present on the classpath 
+(with the dots replaced by underscores, as the config format does not allow dots - if you really have to 
+use an underscore you can double-escape it: "my_stupid_package.The_class" would become "my__stupid__package_The__class"). 
 Values (right of the equals sign) have to be unique numbers: 
 	* negative values for preprocessors (called before the script invokation)
   * positive values for postprocessors (called after the script invokation)
@@ -233,11 +235,11 @@ Use the <addonArguments> configuration for setup through this String argument co
 """
      }
      object addonArguments extends Table(""){
-       doc = """optional configuration for processors defined in <addons>
+       doc = """optional configuration for processors defined in <addons>, same escaping of qualified class names as in <addons>
  
 example configuration:
 <addonArguments>
-my.package.Postprocessor = "this will be used as argument for a String argument constructor of my.package.Postprocessor, if available"
+my_package_Postprocessor = "this will be used as argument for a String argument constructor of my.package.Postprocessor, if available"
 </addonArguments>
 """
        
