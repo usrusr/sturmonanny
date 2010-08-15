@@ -43,19 +43,19 @@ private class MisRender(
   iw: Int) {
 
   val randomize = true && false
-  val interpolate = 20
-  //  var xsvr = 100
-  //  var ysvr = 100
-  //  lazy val svrs :(Int, Int, Array[Array[Array[Double]]])={
-  //    val xsvr = iw 
-  //    Array.fromFunction{(_,_,_)=>
-  //      Double.NaN
-  //    }(2,svr+2,svr+2)
-  //  }
-  val svr = 100
-  val svrs = Array.fromFunction { (_, _, _) =>
-    Double.NaN
-  }(2, svr + 2, svr + 2)
+  val interpolate = 5
+    var xsvr = iw/interpolate
+    var ysvr = ih/interpolate
+    lazy val svrs ={
+      val xsvr = iw 
+      Array.fromFunction{(_,_,_)=>
+        Double.NaN
+      }(2,xsvr+2,ysvr+2)
+    }
+//  val svr = 100
+//  val svrs = Array.fromFunction { (_, _, _) =>
+//    Double.NaN
+//  }(2, svr + 2, svr + 2)
 
   /**
    * 
@@ -72,14 +72,14 @@ private class MisRender(
       val ret = svrs(sideIndex)(ix)(iy)
       //if(ret!=Double.NaN) ret else {
       if (!ret.isNaN) ret else {
-        val tmp = preciseSideVal(ix.toDouble / svr.toDouble, iy.toDouble / svr.toDouble, markers)
+        var tmp = preciseSideVal(ix.toDouble / xsvr.toDouble, iy.toDouble / ysvr.toDouble, markers)
         svrs(sideIndex)(ix)(iy) = tmp
         tmp
       }
     }
 
-    val ix = Math.floor(x * svr).toInt
-    val iy = Math.floor(y * svr).toInt
+    val ix = Math.floor(x * xsvr).toInt
+    val iy = Math.floor(y * ysvr).toInt
 
     val ll = buffered(ix, iy)
     val hl = buffered(ix + 1, iy)
@@ -96,10 +96,10 @@ private class MisRender(
     //    
     //    val ww = interpolate(iy.toDouble/svr.toDouble, (iy+1).toDouble/svr.toDouble, y, wh, wh)
     //    
-    val lw = interpolate(iy.toDouble / svr.toDouble, (iy + 1).toDouble / svr.toDouble, y, ll, lh)
-    val hw = interpolate(iy.toDouble / svr.toDouble, (iy + 1).toDouble / svr.toDouble, y, hl, hh)
+    val lw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, ll, lh)
+    val hw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, hl, hh)
 
-    val ww = interpolate(ix.toDouble / svr.toDouble, (ix + 1).toDouble / svr.toDouble, x, lw, hw)
+    val ww = interpolate(ix.toDouble / xsvr.toDouble, (ix + 1).toDouble / xsvr.toDouble, x, lw, hw)
 
     ww
   }
@@ -130,8 +130,7 @@ private class MisRender(
   def sequence(in: BufferedImage) {
     veil()
 //        veil()
-    front(4, 1)
-    //newfront(4, 3)
+    front(4, 2)
             hatch() 
     units()
     airfields()
@@ -381,8 +380,6 @@ private class MisRender(
      */
     def tile(x: Int, y: Int, step: Int, ul: Double, ur: Double, bl: Double, br: Double) {
 
-      precise = true 
-      
       if (step == 1) {
         //println("                                                   stepping "+step+" level "+x+","+y)           
         if (differentSides(ul, ur)) {
@@ -534,9 +531,4 @@ private class MisRender(
 
     ()
   }
-
-  def newfront(steps: Int, aa: Int) {
- 
-  }
-
 }
