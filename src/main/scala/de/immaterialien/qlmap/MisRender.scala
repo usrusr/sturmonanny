@@ -158,9 +158,9 @@ private class MisRender(
   }
   def units() {
     /**
-     * returns class, weight and count
+     * returns class, weight, count and relative position of dominant class
      */
-    def atMarker(mx: Double, my: Double, mside: Int): Option[(GroundClass.GC, Double, Int)] = {
+    def atMarker(mx: Double, my: Double, mside: Int): Option[(GroundClass.GC, Double, Int, (Int, Int))] = {
       val radius = 5000d
       def dist(ax: Double, ay: Double) = {
         val dx = ax - mx
@@ -170,6 +170,12 @@ private class MisRender(
       class Counter {
         var i = 0d
         var num = 0
+        var cumulatedOffX = 0D
+        var cumulatedOffY = 0D
+        // in game coords
+        def offX = cumulatedOffX / num
+        // in game coords
+        def offY = cumulatedOffY / num
         /**
          * weight within the radius is constant, drops off gently outside 
          */
@@ -178,16 +184,21 @@ private class MisRender(
           val countUpdate = if (radius > dist(ax, ay)) 1d else 0d
           i = i + update
           num += countUpdate.toInt
+          cumulatedOffX += countUpdate*(ax-mx) 
+          cumulatedOffY += countUpdate*(ay-my) 
         }
         def addHard(ax: Double, ay: Double) = {
           val update = if (radius > dist(ax, ay)) 1d else 0d
           i = i + update
           num += update.toInt
+          cumulatedOffX += update*(ax-mx) 
+          cumulatedOffY += update*(ay-my) 
         }
         def thisOrOther(thisCls: GroundClass.GC, oCls: GroundClass.GC, oCnt: Double): (GroundClass.GC, Double) = {
           if (oCnt > i) (oCls, oCnt) else (thisCls, this.i)
         }
-        override def toString = "" + i
+
+        override def toString = num +":w("+i+")@"+offX+","+offY
       }
 
       var map: mutable.Map[GroundClass.GC, Counter] = mutable.HashMap()
@@ -213,12 +224,15 @@ private class MisRender(
           counter.num > 0
           ).getOrElse(false)
 
-        if (isAirfield) None
-        else {
-          val ret = map.max(order)
-          println("  identified " + ret._1 + " from " + map)
-          Some(ret._1, ret._2.i, ret._2.num)
+        if (isAirfield) for(fuelCount<-map.get(GroundClass.Fuel)){
+          val airfieldFuelPenalty = 50
+          fuelCount.i = fuelCount.i/airfieldFuelPenalty
         }
+
+        //val ret = map.max(order)
+        val (cls, counter) = map.max(order)
+        println("  identified "+counter+ " " + cls + " from " + map )
+        Some(cls, counter.i, counter.num, (counter.offX.toInt,counter.offY.toInt))
 
       }
     }
@@ -238,11 +252,16 @@ private class MisRender(
 
         if (ox >= 0 && ox <= model.width && oy >= 0 && oy <= model.height) {
           val at = atMarker(x, y, side)
-          for ((cls, weight, number) <- at) {
+          for ((cls, weight, number, offset) <- at) {
             val (who, depth) = whoAndDeepness(rx, ry, 1000)
             if (cls.weight * cls.weight * weight + weight * depth * depth > 100000) {
 
-              drawObject(px.toInt, py.toInt, number, side, depth, cls)
+              val finalX = (((x + offset._1) - model.widthOffset) / model.width) * iw
+              val finalY = ih - ((((y + offset._2) - model.heightOffset) / model.height) * ih)
+              
+//              val finalX = (px+imgOffX).toInt
+//              val finalY = (px-imgOffY).toInt
+              drawObject(finalX.toInt, finalY.toInt, number, side, depth, cls)
             }
           }
         }
