@@ -7,7 +7,7 @@ import java.io
 import scala.collection._
 
 object MisRender {
-  def paint(forMission: io.File, model: MisModel): Option[io.File] = try{
+  def paint(forMission: io.File, model: MisModel, outputPath : Option[io.File] = None): Option[io.File] = try{
 
     var format: String = null
 
@@ -35,7 +35,8 @@ object MisRender {
         in.getHeight,
         in.getWidth
         ).sequence(in)
-      val outFile = new java.io.File(forMission.getParentFile, forMission.getName + "." + format)
+      val outPath = outputPath.getOrElse(forMission.getParentFile)
+      val outFile = new java.io.File(outPath, forMission.getName + "." + format)
       ImageIO.write(in, format, outFile)
       Some(outFile)
     }finally{

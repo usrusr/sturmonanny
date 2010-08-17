@@ -30,8 +30,13 @@ case class MapInfo(image: Option[io.File], width: Option[Double], height: Option
   def errors(n: List[String]): MapInfo = MapInfo(image, width, height, widthOffset, heightOffset, errors ::: n)
 }
 object MapInfo extends MapInfo(None, None, None, None, None, Nil)
-class MapBase(folder: io.File) extends Log{
+class MapBase(confOrFolder: io.File) extends Log{
   def this(baseFolder: String) = this(new io.File(baseFolder))
+  val (folder, configuration) = 
+    if(confOrFolder.isDirectory)
+      (confOrFolder, None) 
+    else 
+      (confOrFolder.getParentFile, Some(new MapConfiguration(confOrFolder)))
   class InfoParser(misFile: java.io.File) extends JavaTokenParsers {
     lazy val parseResult: MapInfo = {
       val file : io.Reader = if(misFile.exists) {

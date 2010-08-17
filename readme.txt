@@ -1,6 +1,12 @@
 This zip contains map-metadata for the optional sturmonanny recon map generator.
 
+
+Mapbase-folder configuration
+===========================================================================
+
+
 Inclusion in sturmonanny:  
+===========================================================================
 
 Set up a post-processor (positive number) in your sturmonanny instance 
 configuration (e.g. default.conf) under Configuration/fbdj/DCG/addons.
@@ -26,7 +32,7 @@ Example configuration (note the underscores replacing the dots):
       de_immaterialien_qlmap_HtmlMissionFilter = 10
     </addons>
     <addonArguments>
-      de_immaterialien_qlmap_HtmlMissionFilter = "C:/serverstuff/mapbase"
+      de_immaterialien_qlmap_HtmlMissionFilter = "C:/serverstuff/mapbase"  # or C:/serverstuff/mapbase/out.conf
     </addonArguments>
     [...]
   </DCG>
