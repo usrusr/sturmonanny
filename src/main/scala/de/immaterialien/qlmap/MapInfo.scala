@@ -12,7 +12,7 @@ import scala.util.parsing.combinator._
  *
  */
 case class MapInfo(image: Option[io.File], width: Option[Double], height: Option[Double], widthOffset: Option[Double], heightOffset: Option[Double], errors: List[String]) {
-  println("defining " + this)
+  
   def and(other: MapInfo): MapInfo = {
     def nonnull[T](x: Option[T], y: Option[T]): Option[T] = if (x.isDefined && x.get != null) x else y
     MapInfo(nonnull(other.image, this.image),
@@ -29,7 +29,7 @@ case class MapInfo(image: Option[io.File], width: Option[Double], height: Option
   def heightOffset(n: Double): MapInfo = MapInfo(image, width, height, widthOffset, Some(n), errors)
   def errors(n: List[String]): MapInfo = MapInfo(image, width, height, widthOffset, heightOffset, errors ::: n)
 }
-object MapInfo extends MapInfo(None, None, None, None, None, Nil)
+object MapInfo extends MapInfo(None, None, None, None, None, Nil) with Log
 class MapBase(confOrFolder: io.File) extends Log{
   def this(baseFolder: String) = this(new io.File(baseFolder))
   val (folder, configuration) = 
@@ -55,13 +55,20 @@ class MapBase(confOrFolder: io.File) extends Log{
     }
 
     private lazy val fileParser: Parser[MapInfo] = {
-      rep(("image" ~ "=" ~> """\S+""".r) ^^ { x => MapInfo.image(new io.File(folder, x)) } | ("width" ~ "=" ~> dbl) ^^ { x => MapInfo.width(x.toDouble) } | ("height" ~ "=" ~> dbl) ^^ { x => MapInfo.height(x.toDouble) } | ("widthOffset" ~ "=" ~> dbl) ^^ { x => MapInfo.widthOffset(x.toDouble) } | ("heightOffset" ~ "=" ~> dbl) ^^ { x => MapInfo.heightOffset(x.toDouble) } |
-        ".+".r ^^ { x =>
-          println("ignoring " + x)
-          if (x.trim.isEmpty) MapInfo
-          else MapInfo.errors(x :: Nil)
-        }
-        ) ^^ { x =>
+      rep(("image" ~ "=" ~> """\S+""".r) ^^ { x => 
+        MapInfo.image(new io.File(folder, x)) 
+      }| ("width" ~ "=" ~> dbl) ^^ { x => 
+        MapInfo.width(x.toDouble) 
+      }| ("height" ~ "=" ~> dbl) ^^ { x => 
+        MapInfo.height(x.toDouble) 
+      }| ("widthOffset" ~ "=" ~> dbl) ^^ { x => 
+        MapInfo.widthOffset(x.toDouble) 
+      }| ("heightOffset" ~ "=" ~> dbl) ^^ { x => 
+        MapInfo.heightOffset(x.toDouble) 
+      }| ".+".r ^^ { x =>
+        if (x.trim.isEmpty) MapInfo
+        else MapInfo.errors(x :: Nil)
+      }) ^^ { x =>
         x.foldLeft(MapInfo.asInstanceOf[MapInfo]) { (acc, add) =>
           acc.and(add)
         }

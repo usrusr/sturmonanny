@@ -9,3 +9,8 @@ object HtmlTest {
     filter.invoke(misFile) 
   }
 } 
+class HtmlTest {
+  @org.junit.Test
+  def runMain = HtmlTest.main((""::Nil).toArray)
+  
+}

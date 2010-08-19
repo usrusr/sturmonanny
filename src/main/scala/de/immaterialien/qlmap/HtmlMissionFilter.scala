@@ -4,7 +4,7 @@ import scala.xml._
 
 class HtmlMissionFilter(args: String) extends javax.xml.ws.Provider[File] with Log {
   val mapBase = new MapBase(new File(args))
-  val groundClasses = new GroundClasses(args)
+  val groundClasses = new GroundClasses(mapBase.folder.getAbsolutePath )
   override def invoke(file: File): File = {
 
     val thread = new Thread("recon " + file.getName) {
@@ -61,7 +61,6 @@ class HtmlUpdater(path: File, mission: File) {
     override def accept(path: File, fname: String): Boolean = {
       val ln = fname.toLowerCase
       val ret = ln.endsWith(".mis.recon.html") && ln.startsWith(lowerCampaign)
-println(ret+" for '"+ln +"' and '"+campaignPrefix+"'")      
       ret
     }
   }  

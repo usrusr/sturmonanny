@@ -54,9 +54,9 @@ object DomHelper {
     def appendBefore(name: (Element => Boolean), es: Element*) = {
       firstElement(name).map { f =>
         for (c <- es.reverse) {
-          println("f is " + f)
-          println("e is " + e)
-          println("c is " + c)
+//          println("f is " + f)
+//          println("e is " + e)
+//          println("c is " + c)
           e.insertBefore(c, f)
         }
       } orElse {

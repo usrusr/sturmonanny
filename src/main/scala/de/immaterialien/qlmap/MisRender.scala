@@ -6,7 +6,7 @@ import java.awt.geom._
 import java.io
 import scala.collection._
 
-object MisRender {
+object MisRender extends Log{
   def paint(forMission: io.File, model: MisModel, outputPath : Option[io.File] = None): Option[io.File] = try{
 
     var format: String = null
@@ -46,11 +46,11 @@ object MisRender {
   }catch{case _ =>None}
 }
 
-private class MisRender(
+private class MisRender (
   model: MisModel,
   ig2: java.awt.Graphics2D,
   ih: Int,
-  iw: Int) {
+  iw: Int) extends Log{
 
   val randomize = true && false
   val interpolate = 5
@@ -241,7 +241,7 @@ private class MisRender(
 
         //val ret = map.max(order)
         val (cls, counter) = map.max(order)
-        println("  identified "+counter+ " " + cls + " from " + map )
+        log debug ("  identified "+counter+ " " + cls + " from " + map )
         Some(cls, counter.i, counter.num, (counter.offX.toInt,counter.offY.toInt))
 
       }

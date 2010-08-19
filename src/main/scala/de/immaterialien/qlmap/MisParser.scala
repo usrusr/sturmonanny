@@ -8,7 +8,7 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
 
   val out = new MisModel
   val parseResult = this.parseAll(fileParser, file)
-  println(" reading " + misFile.getAbsolutePath + " -> " + parseResult)
+  log debug (" reading " + misFile.getAbsolutePath + " -> " + parseResult)
   file.close
 
   lazy val fileParser: Parser[Unit] = {
@@ -21,16 +21,16 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
   }
 
   def iniLine(what: String): Parser[Unit] = {
-    "[" ~> what <~ "]" ^^ { x => println("ini: " + x); () }
+    "[" ~> what <~ "]" ^^^()
   }
 
   lazy val newLine: Parser[Unit] = ("\r\n" | "\n\r" | "\n") ^^^ ()
 
   lazy val iniLine: Parser[Unit] = {
-    "[" ~> "[^\\]]+".r <~ "]" ^^ { x => println("skip ini: " + x); () }
+    "[" ~> "[^\\]]+".r <~ "]" ^^^()
   }
   lazy val anyLine: Parser[Unit] = {
-    ("[^\\[].+".r) ^^ { x => println("ignoring " + x); () }
+    ("[^\\[].+".r) ^^^()
   }
 
   lazy val nStationaries: Parser[Unit] = {
@@ -62,7 +62,6 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
   lazy val bornPlace: Parser[Unit] = {
     ("""\s*""".r~> int ~ double ~ double ~ double) ^^ { 
       case a ~ h ~ x ~ y => {
-        println("bp:" + a + "@" + x + "/" + y); 
         out.bornPlace(a, x, y)
         out.airfield(a, x, y)
         // notify ground units of airfield presence

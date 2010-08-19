@@ -11,8 +11,9 @@ import GroundClass._
 import scala.collection._
 import org.apache.batik
 import batik.dom.svg
-import org.apache.batik.ext.awt.image.renderable._
-import org.apache.batik.gvt.filter._
+import batik.ext.awt.image.renderable._
+import batik.gvt.filter._
+import batik.ext.awt.RenderingHintsKeyExt
 import java.awt.image.renderable._
 import java.io._
 import org.w3c.dom._
@@ -55,7 +56,6 @@ object ScalableSprite {
         val fi:SVGFilterElement = new SVGOMFilterElement(null, doc.asInstanceOf[batik.dom.AbstractDocument])
         defs.append(fi)
         fi.setId("MyFilter")
-        println("defs:"+defs.getClass.getSimpleName)
         val fecol = fi.appended(new SVGOMFEColorMatrixElement(null, doc.asInstanceOf[batik.dom.AbstractDocument]))
         fecol.setAttribute("type", "matrix")
         val matrix = {
@@ -103,28 +103,28 @@ object ScalableSprite {
 
         val rootGN = builder.build(ctx, doc)
 //        rootGN.
-        val f : Option[ColorMatrixRable]= 
-          if (side == 1) Some(ColorMatrixRable8Bit.buildHueRotate(hueRotation * -1)) 
-          else if (side == 2) Some(ColorMatrixRable8Bit.buildHueRotate(hueRotation)) 
-          else None
-        
-        var rable:AbstractRable = new GraphicsNodeRable8Bit(rootGN) 
-        rable = {
-            val r = ColorMatrixRable8Bit.buildSaturate(4f).asInstanceOf[AbstractRable]
-            r.asInstanceOf[ColorMatrixRable].setSource(rable)
-            r
-          }
-        
-        val res = f map (f=>{
-          f.setSource(rable)
-          f
-        }) getOrElse rable
-        
-        
+//        val f : Option[ColorMatrixRable]= 
+//          if (side == 1) Some(ColorMatrixRable8Bit.buildHueRotate(hueRotation * -1)) 
+//          else if (side == 2) Some(ColorMatrixRable8Bit.buildHueRotate(hueRotation)) 
+//          else None
+//        
+//        var rable:AbstractRable = new GraphicsNodeRable8Bit(rootGN) 
+//        rable = {
+//            val r = ColorMatrixRable8Bit.buildSaturate(4f).asInstanceOf[AbstractRable]
+//            r.asInstanceOf[ColorMatrixRable].setSource(rable)
+//            r
+//          }
+//        
+//        val res = f map (f=>{
+//          f.setSource(rable)
+//          f
+//        }) getOrElse rable
+//        
+//        
+//        Some(new RableSprite(res))
         
         
         Some(new ScalableSprite(rootGN))
-//        Some(new RableSprite(res))
       } catch {
         case e => {
           error("error loading " + fname, e)
@@ -167,6 +167,9 @@ class ScalableSprite(r: batik.gvt.GraphicsNode) extends Log with Paintable {
       new AffineTransform(old); nt.concatenate(trans)
      
     r.setTransform(nt)
+    
+    g2d.setRenderingHint(RenderingHintsKeyExt.KEY_TRANSCODING, RenderingHintsKeyExt.VALUE_TRANSCODING_PRINTING)
+
     
     r.paint(g2d)
     nt.invert

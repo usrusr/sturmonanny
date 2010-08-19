@@ -11,7 +11,7 @@ class MapConfiguration(file: File) extends Log {
     val reader = scala.io.Source.fromFile(file)
     var outPath: Option[File] = None
 
-    object parser extends RegexParsers {
+    object parser extends RegexParsers with Log {
       lazy val comment = opt("#" ~ ".*")
        
       lazy val keyValue = 
@@ -19,7 +19,7 @@ class MapConfiguration(file: File) extends Log {
         case key ~ _ ~ value => {
           key match {
             case "reconDir" => { val outPathString = value
-              println("reconDir:" + outPathString)
+              log.debug("reconDir:" + outPathString)
               val out = if (outPathString startsWith ".") new File(file.getParent + File.separator + outPathString)
               else new File(outPathString)
     
