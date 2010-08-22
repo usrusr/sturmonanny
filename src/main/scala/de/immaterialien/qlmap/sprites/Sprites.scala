@@ -1,5 +1,5 @@
 package de.immaterialien.qlmap.sprites
-
+import java.io._
 
 import de.immaterialien.qlmap._
 import java.awt.image._
@@ -9,20 +9,20 @@ import scala.collection._
 import java.awt.geom._
 
 
-object Sprites extends Log{ 
+class Sprites(mapBaseFolder:Option[File]) extends Log{ 
   val map = new mutable.HashMap[String, Option[Paintable]]
 
   def paintable(cls:GC, side:Int):Option[Paintable]={
-    val key=""+cls+side
+    val key=""+cls+side 
     map.get(key).getOrElse{
-      val ret = memPaintable(cls:GC, side:Int)
+      val ret = memPaintable(cls, side )
       map.put(key, ret)
       ret
     }
   }
   def memPaintable(cls:GC, side:Int):Option[Paintable]={
     
-    val scalable = ScalableSprite.create(cls, side)
+    val scalable = ScalableSprite.create(cls, side, mapBaseFolder)
     scalable.map(x=>Some(x)).getOrElse(
       BitmapSprite.create(cls, side)
     )

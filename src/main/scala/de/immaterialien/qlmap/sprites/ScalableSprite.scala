@@ -1,6 +1,6 @@
 package de.immaterialien.qlmap.sprites
 import org.apache.batik.dom.svg._
-
+import java.io._
 import de.immaterialien.qlmap._
 
 import java.awt._
@@ -32,7 +32,7 @@ object ScalableSprite {
   val hueRotation = Math.Pi.toFloat / 3f
 
 
-  def create(cls: GC, side: Int): Option[Paintable] = {
+  def create(cls: GC, side: Int, mapBaseFolder:Option[File]): Option[Paintable] = {
     val fname: String = (cls match {
       case Artillery => Car.toString
       case Plane => "Airfield"
@@ -42,7 +42,10 @@ object ScalableSprite {
     log debug ("getting " + fname)
     //Sprites.getClass.classPathResource(fname)
     try {
-      val stram = Sprites.getClass.getResourceAsStream("/de/immaterialien/qlmap/sprites/" + fname)
+      //val stram = Sprites.getClass.getResourceAsStream("/de/immaterialien/qlmap/sprites/" + fname)
+      val stram = mapBaseFolder map { base =>
+        new FileInputStream(new File(base, fname))
+      } getOrElse ScalableSprite.getClass.getResourceAsStream("/de/immaterialien/qlmap/sprites/" + fname)
       log debug ("stream " + stram)
       try {
         import batik.bridge._

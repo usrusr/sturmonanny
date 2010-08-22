@@ -1,14 +1,16 @@
 package de.immaterialien.qlmap
 
 import javax.imageio.ImageIO
+
 import java.awt.image._
 import java.awt.geom._
 import java.io
 import scala.collection._
-
+import de.immaterialien.qlmap.sprites.Sprites
 object MisRender extends Log{
-  def paint(forMission: io.File, model: MisModel, outputPath : Option[io.File] = None): Option[io.File] = try{
-
+  def paint(forMission: io.File, model: MisModel, mapBase:MapBase): Option[io.File] = try{
+    val outputPath = mapBase.configuration.flatMap(_.outPath)
+    val sprites:Sprites = new Sprites(Some(mapBase.folder)) 
     var format: String = null
 
 //     reanimate to enable PNG output...    
@@ -32,6 +34,7 @@ object MisRender extends Log{
       new MisRender(
         model,
         ig,
+        sprites, 
         in.getHeight,
         in.getWidth
         ).sequence(in)
@@ -49,6 +52,7 @@ object MisRender extends Log{
 private class MisRender (
   model: MisModel,
   ig2: java.awt.Graphics2D,
+  spritesMaker:Sprites,
   ih: Int,
   iw: Int) extends Log{
 
@@ -312,10 +316,10 @@ private class MisRender (
       //ig2.drawString(count + " " + cls+"s ("+(randx -x)+", "+(randy-y) +")" , randx, randy)
       //      val image = sprites.Sprites.forClass(cls, side)
       //      for(img<- image ){
-      //        val h2 = (scale * img.getHeight / 2).toInt
+      //        val h2 = (scale * img.getHeight / 2).toInt 
       //        val w2 = (scale * img.getWidth / 2).toInt
-      for (img <- sprites.Sprites.paintable(cls, side)) {
-        val (width, height) = img.dimensions
+      for (img <- spritesMaker.paintable(cls, side)) {
+        val (width, height) = img.dimensions 
         val factor = 1D
         //        val factor :Double= cls match {
         //          case GroundClass.Airfield => 2

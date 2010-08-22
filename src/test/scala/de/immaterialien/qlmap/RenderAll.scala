@@ -33,7 +33,7 @@ object RenderAll {
     for (mis <- list.filter(pat.unapplySeq(_).isDefined)) {
       val pars = new MisParser(new java.io.File(misPath, mis), base, new GroundClasses("C:/Users/ulf/Desktop/fbdj__"))
       val before = System.currentTimeMillis
-      val img = MisRender.paint(new io.File(misPath, mis), pars.out)
+      val img = MisRender.paint(new io.File(misPath, mis), pars.out, base)
 //      val img = pars.out.paint(new io.File(misPath, mis))
 println("painted in "+(System.currentTimeMillis-before))
       

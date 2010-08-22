@@ -19,7 +19,7 @@ object BitmapSprite extends Log {
 
     log debug ("getting " + fname)
     //Sprites.getClass.classPathResource(fname)
-    val stram = Sprites.getClass.getResourceAsStream("/de/immaterialien/qlmap/sprites/" + fname)
+    val stram = BitmapSprite.getClass.getResourceAsStream("/de/immaterialien/qlmap/sprites/" + fname)
     log debug ("stream " + stram)
     val iio = try {
       Some(ImageIO.read(stram))
