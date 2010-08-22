@@ -3,6 +3,8 @@ package de.immaterialien.sturmonanny.fbdjhosting;
 import _root_.de.immaterialien.sturmonanny.core
 import _root_.de.immaterialien.sturmonanny.util.Logging
 import _root_.de.immaterialien.sturmonanny.util.event
+import javax.xml.ws.Provider
+import java.io.File
 
 class FbdjAdapter extends core.UpdatingMember with Logging {
   private var fbdjPath = "."
@@ -80,7 +82,9 @@ debug("FBDj configuratoin changing!")
 		  		//val created = new FbdjHost(conf)
 		  	  
 		  	  val created = ContainerPool.getContainer(conf.fbdj.installationPath.apply, conf.fbdj.overridesJar.apply)
-		  	  
+		  	  created.adapterNextMissionProxy = Some(new Provider[File]{
+		  	  	override def invoke(i:File):File = nextMissionProvider.invoke(i)
+		  	  })
 		  	  created.changeConfiguration(conf, server.initConf)
 		  	  created.start  
        

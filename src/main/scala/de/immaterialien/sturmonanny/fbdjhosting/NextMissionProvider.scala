@@ -46,7 +46,10 @@ object NextMissionProvider
       }
     }
 
-  	JavaConversions.asBuffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
+  	val jclRet = JavaConversions.asBuffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
+  	
+println("jcl ret "+jclRet+"\n from "+ret)  	
+  	jclRet
   }
 }
 
@@ -56,9 +59,10 @@ class NextMissionProvider(private var filters:List[Provider[File]]) extends java
 
   override def invoke(oldMissionPath:File):File = {
     var ret = oldMissionPath
-    
+println("mission callback filters: "+filters)    
     for(filter<-filters){
       try{
+println("invoking "+filter.getClass.getSimpleName+" with input "+ret)
 log.debug("invoking "+filter.getClass.getSimpleName+" with input "+ret)      	
       	val next = filter.invoke(ret)
 log.debug("got "+next+" from "+filter.getClass.getSimpleName)      	

@@ -20,15 +20,21 @@ object DcgMissionProvider {
 } 
 
 class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provider[File] with util.Log{
+  def dcgPathAndCommand(searchPath:File = new File(".")) = {
+        // use configured dcgPath or the mission path
+    val dcgPath = if(conf.fbdj.DCG.dcgPath.apply.isEmpty) searchPath else new File(conf.fbdj.DCG.dcgPath.apply)
+    val commandLine = conf.fbdj.DCG.dcgCommand.apply
+    (dcgPath, commandLine)
+  }
   override def invoke(oldMissionPath:File):File = {
     def searchPath = oldMissionPath.getParentFile
     
     val beforeFiles = DcgMissionProvider.listMissions(searchPath)
     
-    // use configured dcgPath or the mission path
-    val dcgPath = if(conf.fbdj.DCG.dcgPath.apply.isEmpty) searchPath else new File(conf.fbdj.DCG.dcgPath.apply)
-    val commandLine = conf.fbdj.DCG.dcgCommand.apply
-    
+//    // use configured dcgPath or the mission path
+//    val dcgPath = if(conf.fbdj.DCG.dcgPath.apply.isEmpty) searchPath else new File(conf.fbdj.DCG.dcgPath.apply)
+//    val commandLine = conf.fbdj.DCG.dcgCommand.apply
+    val (dcgPath, commandLine)=dcgPathAndCommand(searchPath)
     log.info("starting DCG \n "+commandLine+"\n  at\n "+dcgPath.getAbsolutePath)
     val exec = Runtime.getRuntime.exec(commandLine, null, dcgPath);
     
@@ -52,4 +58,5 @@ class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provide
     
     ret
   }
+  override def toString = "DCG mission generator at "+dcgPathAndCommand()
 }

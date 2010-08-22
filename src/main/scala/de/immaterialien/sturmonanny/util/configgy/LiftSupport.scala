@@ -44,12 +44,12 @@ trait LiftSupport extends ConfigurationSchema {
 		        		{internal.map(_ _1)}
               </div>
 	          </div>
-		        , internal.flatMap(_ _2)
+		        , internal.flatMap(_ _2) 
 		      )
 		    }
 		    case table : ConfigurationSchema#Table[_] => {
 
-		      val fullName = table.full
+		      val fullName:String = table.full
 		      val fNode : Elem= new Elem(form, fullName, Null, xml.TopScope)
 		      val binding = table.defaultValue match {
 		        case x:String 	=> {
@@ -342,7 +342,7 @@ trait LiftSupport extends ConfigurationSchema {
   private class StringTabulator(receiver : ConfigurationSchema#Table[String] ) extends Tabulator[String](receiver){
 
 
-    override def validate(x : String) = {
+    override def validate(x : String):Option[String] = {
           if(receiver.maxLength!=null && (x.length > receiver.maxLength.intValue)) Some("'"+x+"' is longer than the allowed maximum of "+receiver.maxLength+"!")
           else if(receiver.pattern!=null && ! receiver.pattern.unapplySeq(x).isDefined) Some("'"+x+"' does not match the regex pattern "+receiver.pattern+"!")
           None
@@ -350,7 +350,7 @@ trait LiftSupport extends ConfigurationSchema {
   }
   private class IntTabulator(receiver : ConfigurationSchema#Table[Int] ) extends Tabulator[Int](receiver){
 
-    override def validate(is : String) = {
+    override def validate(is : String):Option[String] = {
     	if( ! LiftSupport.numberPattern.unapplySeq(is).isDefined) Some("'"+is+"' is not a full number!")   
     	else {
     		val i = is.toInt
@@ -362,7 +362,7 @@ trait LiftSupport extends ConfigurationSchema {
   }
   private class BooleanTabulator(receiver : ConfigurationSchema#Table[Boolean] ) extends Tabulator[Boolean](receiver){
 
-    override def validate(toMatch:String) = {
+    override def validate(toMatch:String):Option[String] = {
       toMatch match {
         case "true" => None 
         case "false" => None 

@@ -16,7 +16,7 @@ class AllPlanesEverywhere(args: String) extends javax.xml.ws.Provider[File] with
 
     {
       var i = 0
-      for (side <- g.dromesToSides.elements) {
+      for (side <- g.dromesToSides) {
         val set = g.sideToPlanes.get(side).getOrElse {
           val s = new mutable.LinkedHashSet[String]
           g.sideToPlanes.put(side, s)

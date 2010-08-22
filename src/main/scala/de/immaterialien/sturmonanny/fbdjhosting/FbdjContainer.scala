@@ -1,11 +1,14 @@
 package de.immaterialien.sturmonanny.fbdjhosting
 
 import _root_.de.immaterialien.sturmonanny.core
+
 import _root_.de.immaterialien.sturmonanny.util.Logging
 import scala.collection.immutable
 import java.net.URL
 import net.liftweb.actor.LiftActor
 import java.util.concurrent._
+import javax.xml.ws.Provider
+import java.io.File
 object ContainerPool {
 
   def returnToPool(what:FbdjContainer){
@@ -80,8 +83,8 @@ debug("container pool returning -> "+overridesToPool)
 
 
 class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
-		val overrideUrl = new java.io.File(info.overridesJar).toURI
-  
+		val overrideUrl = new File(info.overridesJar).toURI
+  var adapterNextMissionProxy:Option[Provider[java.io.File]]=None
   override def toString = "FBDj container @ "+info.installationPath+" from "+info.overridesJar
   
 		var outList : java.util.LinkedList[String] = null 
@@ -179,7 +182,13 @@ debug("thread death in "+t.getName)
   		inList = consoleOutQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
   		eventList = eventlogOutQueue.get(null).asInstanceOf[java.util.LinkedList[String]]
     
-    	newMissionCallback.set(null, new NextMissionProvider(conf))
+    	//newMissionCallback.set(null, new NextMissionProvider(conf))
+  		newMissionCallback.set(null, new Provider[File]{
+  			override def invoke(i:File):File = adapterNextMissionProxy.map(_.invoke(i)).getOrElse{
+  				warn("nextMissionProvider from adapter not configured!")
+  				i
+  			}
+  		})
 
   		startStopInterface.get(null).asInstanceOf[javax.xml.ws.Provider[String]]
     }catch{
