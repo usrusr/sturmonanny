@@ -20,6 +20,8 @@ import org.w3c.dom._
 import org.w3c.dom.svg._
 import DomHelper._
 
+import de.immaterialien.gfxutil.Implicits._
+
 object ScalableSprite {
   import org.apache.batik.ext.awt.image.renderable._
   val parser = batik.util.XMLResourceDescriptor.getXMLParserClassName
@@ -32,7 +34,7 @@ object ScalableSprite {
   val hueRotation = Math.Pi.toFloat / 3f
 
 
-  def create(cls: GC, side: Int, mapBaseFolder:Option[File]): Option[Paintable] = {
+  def create(cls: GC, side: Int, mapBaseFolder:Option[File]): Option[Paintable] = { 
     val fname: String = (cls match {
       case Artillery => Car.toString
       case Plane => "Airfield"
@@ -58,6 +60,7 @@ object ScalableSprite {
         }
         val fi:SVGFilterElement = new SVGOMFilterElement(null, doc.asInstanceOf[batik.dom.AbstractDocument])
         defs.append(fi)
+        
         fi.setId("MyFilter")
         val fecol = fi.appended(new SVGOMFEColorMatrixElement(null, doc.asInstanceOf[batik.dom.AbstractDocument]))
         fecol.setAttribute("type", "matrix")
@@ -101,10 +104,23 @@ object ScalableSprite {
         val userAgent = new UserAgentAdapter()
         val loader = new DocumentLoader(userAgent)
         val ctx = new BridgeContext(userAgent, loader)
-        ctx.setDynamicState(BridgeContext.DYNAMIC)
+        ctx.setDynamicState(BridgeContext.STATIC)
         val builder = new GVTBuilder()
 
+//doc.getDocumentElement.setAttributeNS(null, "overflow", "visible");        
+        
         val rootGN = builder.build(ctx, doc)
+//// removes clipping, but does not help with the rotate-cut       
+//val treeWalker = new org.apache.batik.gvt.GVTTreeWalker(rootGN)
+//var currNode = treeWalker.nextGraphicsNode
+//
+//  while (currNode != null) {
+//          currNode.setClip(null)
+//          currNode = treeWalker.nextGraphicsNode
+//  }
+
+        
+        
 //        rootGN.
 //        val f : Option[ColorMatrixRable]= 
 //          if (side == 1) Some(ColorMatrixRable8Bit.buildHueRotate(hueRotation * -1)) 
@@ -162,21 +178,143 @@ class ScalableSprite(r: batik.gvt.GraphicsNode) extends Log with Paintable {
   import ScalableSprite._
 
   def paint(trans: AffineTransform, depth: Double, g2d: java.awt.Graphics2D) {
+    paint(trans, depth, g2d, 10)
+    paint(trans, depth, g2d, -10)
+  }
     
-    var old = r.getTransform
-    if(old == null) old = new AffineTransform()
+  def paint(trans: AffineTransform, depth: Double, g2d: java.awt.Graphics2D, r1:Int) {
+//    var old = r.getTransform
+//    if(old == null) old = new AffineTransform()
     val nt = 
-      old
-      new AffineTransform(old); nt.concatenate(trans)
-     
-    r.setTransform(nt)
-    
-    g2d.setRenderingHint(RenderingHintsKeyExt.KEY_TRANSCODING, RenderingHintsKeyExt.VALUE_TRANSCODING_PRINTING)
+//      old
+//      new AffineTransform(old); nt.concatenate(trans)
+      new AffineTransform
+//      nt.concatenate(trans)
+//    r.setTransform(nt)
+      val halfW =  (dimensions._1 /2)
+      val halfH =  (dimensions._2 /2)
+//      nt.translate(-halfW, -halfH)
+//      nt.rotate(100,4,halfW, halfH)
+//)
+      val sx=trans.getScaleX
+      val sy=trans.getScaleY
+      
+      //nt.translate(-halfW/sx, -halfH/sy)
+      //nt.rotate(r1,0, -trans.getTranslateX/sx, -trans.getTranslateY/sy)
 
+   nt.translate(halfW, halfH)
+      
+      nt.scale(sx, sy)
+//      nt.rotate(-0.01,r1)
+//      nt.rotate(r1,-0.1) 
+      //nt.translate(-halfW*sx, -halfH*sy)
+      nt.translate(-halfW, -halfH)
+      //nt.translate(halfW, halfH)
+//      r.setClip(null)
+      //r.setTransform(nt)
+//  r.
     
-    r.paint(g2d)
-    nt.invert
-    r.setTransform(new AffineTransform)
+      g2d freeze {
+//        trans.invert
+
+  
+//        g2d.setTransform(the)
+        g2d.setRenderingHint(RenderingHintsKeyExt.KEY_TRANSCODING, RenderingHintsKeyExt.VALUE_TRANSCODING_PRINTING)
+//  g2d.rotate(0.03, trans.getTranslateX, trans.getTranslateY)
+//        nt.concatenate(AffineTransform.getTranslateInstance(trans.getTranslateX, trans.getTranslateY))
+//  g2d.translate(trans.getTranslateX, trans.getTranslateY)
+//        g2d.setTransform(nt)
+  
+//  val rcat = new AffineTransform
+//  rcat.concatenate(nt)
+//  rcat.rotate(r1, 4)
+//  
+//  rcat.preConcatenate(AffineTransform.getTranslateInstance(trans.getTranslateX, trans.getTranslateY))
+  
+//  var m=r.getMask
+//  if(m!=null){
+//  val mr:geom.Rectangle2D = m.getFilterRegion
+//  mr.add(-halfW, -halfH)
+//  mr.add(2*halfW, 2*halfH)
+//  m.setFilterRegion(mr)
+//  r.setMask(m)
+//  }
+        
+        val treeWalker = new org.apache.batik.gvt.GVTTreeWalker(r)
+var currNode = treeWalker.nextGraphicsNode
+
+  while (currNode != null) {
+//          currNode.setClip(null)
+//          currNode.setMask(null)
+    val filter = currNode.getFilter
+if(filter!=null){
+  println("  filter "+filter)
+}
+          currNode.setFilter(null)
+          currNode = treeWalker.nextGraphicsNode
+  }
+        
+//println("r is a "+r.getClass.getCanonicalName+ " bounds: "+r.getBounds)
+//val b = r.getBounds
+//b.add(0-(sx*halfW), 0-(sy*halfH))
+//b.add(0+(sx*halfW), 0+(sy*halfH))
+//b.add(b.getX-(sx*halfW), b.getY-(sy*halfH))
+//b.add(b.getX+(sx*halfW)+b.getWidth, b.getY+(sy*halfH)+b.getHeight)
+        val tempg = g2d.create((trans.getTranslateX - 2*halfW).toInt, (trans.getTranslateY- 2*halfH).toInt, (4*halfW).toInt, (4*halfH).toInt)
+//        tempg.clipRect((trans.getTranslateX - 2*halfW).toInt, (trans.getTranslateY- 2*halfH).toInt, (4*halfW).toInt, (4*halfH).toInt)
+        val tempg2d = tempg.asInstanceOf[Graphics2D]
+        tempg2d.rotate(0.39, halfW, halfW)
+        tempg2d.clipRect(-(1*halfW).toInt,-(1*halfW).toInt,(4*halfW).toInt, (5*halfH).toInt)
+        
+        val cloneBounds = r.getBounds.clone.asInstanceOf[Rectangle2D]
+        val b = r.getBounds
+//        val p1 = new Point2D.Double(-halfW, -halfH)
+//        val p2 = new Point2D.Double(3*halfW, 3*halfH)
+//        val p3 = new Point2D.Double(3*halfW, -halfH)
+//        val p4 = new Point2D.Double(-halfW, 3*halfH)
+        
+        val p1 = new Point2D.Double(b.getX, b.getY)
+        val p2 = new Point2D.Double(b.getX, b.getY+b.getHeight)
+        val p3 = new Point2D.Double(b.getX+b.getWidth, b.getY)
+        val p4 = new Point2D.Double(b.getX+b.getWidth, b.getY+b.getHeight)
+//        p.
+        
+        r.setTransform(new AffineTransform)
+        //r.getTransform.rotate(100,1, trans.getTranslateX, trans.getTranslateY)
+//        val tg2t = tempg2d.getTransform
+        val tg2t = r.getTransform
+        
+        val tp1 = tg2t.transform(p1, null)
+        val tp2 = tg2t.transform(p2, null)
+        val tp3 = tg2t.transform(p3, null)
+        val tp4 = tg2t.transform(p4, null)
+        
+        val miX = Math.min(Math.min(tp1.getX, tp2.getX), Math.min(tp3.getX, tp4.getX))
+        val miY = Math.min(Math.min(tp1.getY, tp2.getY), Math.min(tp3.getY, tp4.getY))
+        val maX = Math.max(Math.max(tp1.getX, tp2.getX), Math.max(tp3.getX, tp4.getX))
+        val maY = Math.max(Math.max(tp1.getY, tp2.getY), Math.max(tp3.getY, tp4.getY))
+        val difX = maX-miX
+        val difY = maY-miY
+         
+//        b.setFrame(
+//            (miX-difX).toInt, (miY-difY).toInt,
+//            (difX*4).toInt, (difY*4).toInt
+//        )
+//        tempg2d.clipRect(-(1*halfW).toInt,-(1*halfW).toInt,(4*halfW).toInt, (5*halfH).toInt)
+        
+        r.paint(tempg2d)
+//        r.paint(g2d)
+//        b.setRect(cloneBounds)
+
+        // removes clipping, but does not help with the rotate-cut       
+
+        
+        tempg2d.dispose
+      }
+//    nt.invert
+//    r.setTransform(new AffineTransform)
+//     nt.concatenate(trans)
+//    r.setTransform(r.getInverseTransform)
   }
   def dimensions: (Int, Int) = {
     val bds = r.getBounds

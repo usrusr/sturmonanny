@@ -14,7 +14,7 @@ object RenderAll {
   }  
   def main(args: Array[String]): Unit = {
     val misPath = new io.File("src/test/resources")
-    val mapBase = new io.File("__src/main/resources/mapbase")
+    val mapBase = new io.File("src/main/resources/mapbase")
 
     var pat = ".*".r
 //        pat = "Berlin.*".r
@@ -31,11 +31,12 @@ object RenderAll {
     val list = misPath.list(dotMis)
 
     for (mis <- list.filter(pat.unapplySeq(_).isDefined)) {
-      val pars = new MisParser(new java.io.File(misPath, mis), base, new GroundClasses("C:/Users/ulf/Desktop/fbdj__"))
+      val pars = new MisParser(new java.io.File(misPath, mis), base, new GroundClasses("C:/Users/ulf/Desktop/fbdj"))
+println("...parsed")      
       val before = System.currentTimeMillis
       val img = MisRender.paint(new io.File(misPath, mis), pars.out, base)
 //      val img = pars.out.paint(new io.File(misPath, mis))
-println("painted in "+(System.currentTimeMillis-before))
+println("painted to "+pars.out+" in "+(System.currentTimeMillis-before))
       
       ()
     }
