@@ -155,9 +155,9 @@ private class MisRender(
 
   def sequence(in: BufferedImage) {
     veil()
-//    veil()
-        front(4, 2)
+    veil()
         hatch() 
+        front(4, 2)
     units()
     airfields()
   }
@@ -181,6 +181,18 @@ private class MisRender(
 
       drawObject(px.toInt, py.toInt, 1, side, 1, GroundClass.Airfield)
     }
+  }
+  private def calculateScale(number:Int)={
+    val c = 0.20+(Math.log(number)*0.12)
+//    var s = 0.3
+//    var d = number.toDouble
+//    while (d / 2 > 2) {
+//      s += 0.08
+//      d = d / 2
+//    }
+//println("iterative scale: "+s +" vs. "+c)    
+//    s
+    c
   }
   def units() {
     /**
@@ -288,15 +300,7 @@ private class MisRender(
               //              val finalX = (px+imgOffX).toInt
               //              val finalY = (px-imgOffY).toInt
 
-              val scale = {
-                var s = 0.3
-                var d = number.toDouble
-                while (d / 2 > 2) {
-                  s += 0.08
-                  d = d / 2
-                }
-                s
-              }
+              val scale = calculateScale(number)
 
               drawObject(finalX.toInt, finalY.toInt, scale, side, depth, cls)
             }
@@ -332,9 +336,9 @@ private class MisRender(
 
         val scale = 0.3D + (Math.log(count) * 0.02)
 
-        val depth = whoAndDeepness(rx, ry, 1000)._2
+        val (who, depth) = whoAndDeepness(rx, ry, 1000)
         val weight = count
-        if (cls.weight * cls.weight * weight + weight * depth * depth > 100000000) {
+        if (who!=side || cls.weight * cls.weight * weight + weight * depth * depth > 100000000) {
 
           println("chief " + cls + " at " + px + "," + py + " count:" + count + " scale:" + scale)
 
@@ -379,10 +383,9 @@ private class MisRender(
         }
       }
     }
+    forChiefs
     forSide(1)
     forSide(2)
-
-    forChiefs
   }
 
   lazy val drawInit = {

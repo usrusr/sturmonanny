@@ -18,6 +18,45 @@
    sodipodi:docname="ChiefMove.svg">
   <defs
      id="defs4">
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0.0"
+       refX="0.0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3645"
+         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt;marker-start:none"
+         transform="scale(0.8) translate(12.5,0)" />
+    </marker>
+    <linearGradient
+       id="linearGradient3634">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3636" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop3638" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3616">
+      <stop
+         style="stop-color:#00ff00;stop-opacity:0;"
+         offset="0"
+         id="stop3618" />
+      <stop
+         id="stop3624"
+         offset="0.73182541"
+         style="stop-color:#00ff00;stop-opacity:0.45217392;" />
+      <stop
+         style="stop-color:#00ff00;stop-opacity:1;"
+         offset="1"
+         id="stop3620" />
+    </linearGradient>
     <linearGradient
        id="linearGradient3614">
       <stop
@@ -26,11 +65,11 @@
          id="stop3616" />
       <stop
          id="stop3614"
-         offset="0.19559067"
-         style="stop-color:#55aa55;stop-opacity:0.46956521;" />
+         offset="0.53958571"
+         style="stop-color:#55aa55;stop-opacity:0.57391304;" />
       <stop
-         style="stop-color:#55aa55;stop-opacity:0.78260869;"
-         offset="0.47820503"
+         style="stop-color:#55aa55;stop-opacity:0.8347826;"
+         offset="0.81886095"
          id="stop3617" />
       <stop
          id="stop3612"
@@ -170,17 +209,6 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
-    <radialGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3614"
-       id="radialGradient3610"
-       cx="29.404074"
-       cy="1020.0778"
-       fx="29.404074"
-       fy="1020.0778"
-       r="18"
-       gradientTransform="matrix(1.8888888,-1.8243535e-6,3.6894542e-6,1.7777778,-23.544788,-793.10942)"
-       gradientUnits="userSpaceOnUse" />
     <inkscape:perspective
        id="perspective3656"
        inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
@@ -195,6 +223,26 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3614"
+       id="radialGradient3632"
+       cx="28.482759"
+       cy="1020.3622"
+       fx="28.482758"
+       fy="1020.3622"
+       r="17"
+       gradientTransform="matrix(1.7058825,7.5791794e-7,-3.9202607e-7,0.88235197,-24.58784,120.04358)"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3634"
+       id="linearGradient3640"
+       x1="55"
+       y1="1032.3622"
+       x2="35"
+       y2="1032.3622"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -204,7 +252,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="14.234375"
-     inkscape:cx="21.813392"
+     inkscape:cx="33.165803"
      inkscape:cy="32"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -250,8 +298,8 @@
      id="layer1"
      transform="translate(0,-988.3622)">
     <path
-       style="fill:url(#radialGradient3610);fill-opacity:1;fill-rule:nonzero;marker-mid:none;opacity:1"
-       d="m 32,1011.3622 c 0,0 26,8.0796 26,5 0,-3.0494 0,-1 0,-1 l 6,5 -6,5 c 0,0 0,1.8717 0,-1 0,-3.0796 -26,5 -26,5"
+       style="fill:url(#radialGradient3632);fill-opacity:1;fill-rule:nonzero;stroke:url(#linearGradient3640);stroke-width:0.50000000000000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;marker-mid:none;stroke-opacity:1;stroke-dashoffset:17.19999999999999900;marker-end:none"
+       d="m 30,1011.3622 c 0,0 24,8.0796 24,5 0,-3.0494 0,-4 0,-4 l 8,8 -8,8 c 0,0 0,-1.1283 0,-4 0,-3.0796 -24,5 -24,5"
        id="path2840"
        sodipodi:nodetypes="czccczc" />
     <path

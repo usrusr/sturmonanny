@@ -16,7 +16,7 @@ object Implicits {
       try {
         func
       } finally {
-        println("resetting transform")
+//        println("resetting transform")
         g2d.setTransform(frozen)
       }
     }
