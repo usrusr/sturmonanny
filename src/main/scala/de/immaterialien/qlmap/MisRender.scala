@@ -9,31 +9,30 @@ import scala.collection._
 import de.immaterialien.qlmap.sprites.Sprites
 import de.immaterialien.gfxutil.Implicits._
 
-
-object MisRender extends Log{
+object MisRender extends Log {
   val leadingDigits = """(\d+)\D.*""".r
   val containsColumn = """.*Column.*""".r
   val containsTrain = """.*Train.*""".r
-  
-  def paint(forMission: io.File, model: MisModel, mapBase:MapBase): Option[io.File] = try{
+  val debugMode = false
+  def paint(forMission: io.File, model: MisModel, mapBase: MapBase): Option[io.File] = try {
     val outputPath = mapBase.configuration.flatMap(_.outPath)
-    val sprites:Sprites = new Sprites(Some(mapBase.folder)) 
+    val sprites: Sprites = new Sprites(Some(mapBase.folder))
     var format: String = null
 
-//     reanimate to enable PNG output...    
-//         val iis = ImageIO.createImageInputStream(model.imageFile)
-//         val readers = ImageIO.getImageReaders(iis)
-//         while(format==null && readers.hasNext) {
-//           val reader = readers.next
-//           format = reader.getFormatName 
-//         }
-//         iis.close
-         
-         // jpg
+    //     reanimate to enable PNG output...    
+    //         val iis = ImageIO.createImageInputStream(model.imageFile)
+    //         val readers = ImageIO.getImageReaders(iis)
+    //         while(format==null && readers.hasNext) {
+    //           val reader = readers.next
+    //           format = reader.getFormatName 
+    //         }
+    //         iis.close
+
+    // jpg
     if (format == null) format = "JPG"
-//format = "PNG"      
-    var instream:java.io.InputStream = null
-    var ig:java.awt.Graphics2D = null
+    //format = "PNG"      
+    var instream: java.io.InputStream = null
+    var ig: java.awt.Graphics2D = null
     try {
       instream = model.imageFile
       var in = ImageIO.read(instream)
@@ -41,7 +40,7 @@ object MisRender extends Log{
       new MisRender(
         model,
         ig,
-        sprites, 
+        sprites,
         in.getHeight,
         in.getWidth
         ).sequence(in)
@@ -49,39 +48,40 @@ object MisRender extends Log{
       val outFile = new java.io.File(outPath, forMission.getName + "." + format)
       ImageIO.write(in, format, outFile)
       Some(outFile)
-    }finally{
+    } finally {
       try instream.close
       try ig.dispose
     }
-  }catch{
-    case x =>{
-      log.error("failed to paint for "+forMission,x)
+  } catch {
+    case x => {
+      log.error("failed to paint for " + forMission, x)
       None
     }
   }
 }
 
-private class MisRender (
+private class MisRender(
   model: MisModel,
   ig2: java.awt.Graphics2D,
-  spritesMaker:Sprites,
+  spritesMaker: Sprites,
   ih: Int,
-  iw: Int) extends Log{
+  iw: Int) {
+  import MisRender._
 
   val randomize = true && false
   val interpolate = 5
-    var xsvr = iw/interpolate
-    var ysvr = ih/interpolate
-    lazy val svrs ={
-      val xsvr = iw 
-      Array.fromFunction{(_,_,_)=>
-        Double.NaN
-      }(2,xsvr+2,ysvr+2)
-    }
-//  val svr = 100
-//  val svrs = Array.fromFunction { (_, _, _) =>
-//    Double.NaN
-//  }(2, svr + 2, svr + 2)
+  var xsvr = iw / interpolate
+  var ysvr = ih / interpolate
+  lazy val svrs = {
+    val xsvr = iw
+    Array.fromFunction { (_, _, _) =>
+      Double.NaN
+    }(2, xsvr + 2, ysvr + 2)
+  }
+  //  val svr = 100
+  //  val svrs = Array.fromFunction { (_, _, _) =>
+  //    Double.NaN
+  //  }(2, svr + 2, svr + 2)
 
   /**
    * 
@@ -106,12 +106,12 @@ private class MisRender (
 
     val ix = Math.floor(x * xsvr).toInt
     val iy = Math.floor(y * ysvr).toInt
-    var ww = { 
+    var ww = {
       val ll = buffered(ix, iy)
       val hl = buffered(ix + 1, iy)
       val lh = buffered(ix, iy + 1)
       val hh = buffered(ix + 1, iy + 1)
-  
+
       def interpolate(c1: Double, c2: Double, c: Double, v1: Double, v2: Double): Double = {
         val (lc, hc, lv, hv) = if (c1 < c2) (c1, c2, v1, v2) else (c2, c1, v2, v1)
         val dist = hc - lc
@@ -124,7 +124,7 @@ private class MisRender (
       //    
       val lw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, ll, lh)
       val hw = interpolate(iy.toDouble / ysvr.toDouble, (iy + 1).toDouble / ysvr.toDouble, y, hl, hh)
-      
+
       interpolate(ix.toDouble / xsvr.toDouble, (ix + 1).toDouble / xsvr.toDouble, x, lw, hw)
     }
     ww
@@ -155,9 +155,9 @@ private class MisRender (
 
   def sequence(in: BufferedImage) {
     veil()
-        veil()
-//    front(4, 2)
-//    hatch() 
+//    veil()
+        front(4, 2)
+        hatch() 
     units()
     airfields()
   }
@@ -210,21 +210,21 @@ private class MisRender (
           val countUpdate = if (radius > dist(ax, ay)) 1d else 0d
           i = i + update
           num += countUpdate.toInt
-          cumulatedOffX += countUpdate*(ax-mx) 
-          cumulatedOffY += countUpdate*(ay-my) 
+          cumulatedOffX += countUpdate * (ax - mx)
+          cumulatedOffY += countUpdate * (ay - my)
         }
         def addHard(ax: Double, ay: Double) = {
           val update = if (radius > dist(ax, ay)) 1d else 0d
           i = i + update
           num += update.toInt
-          cumulatedOffX += update*(ax-mx) 
-          cumulatedOffY += update*(ay-my) 
+          cumulatedOffX += update * (ax - mx)
+          cumulatedOffY += update * (ay - my)
         }
         def thisOrOther(thisCls: GroundClass.GC, oCls: GroundClass.GC, oCnt: Double): (GroundClass.GC, Double) = {
           if (oCnt > i) (oCls, oCnt) else (thisCls, this.i)
         }
 
-        override def toString = num +":w("+i+")@"+offX+","+offY
+        override def toString = num + ":w(" + i + ")@" + offX + "," + offY
       }
 
       var map: mutable.Map[GroundClass.GC, Counter] = mutable.HashMap()
@@ -250,15 +250,15 @@ private class MisRender (
           counter.num > 0
           ).getOrElse(false)
 
-        if (isAirfield) for(fuelCount<-map.get(GroundClass.Fuel)){
+        if (isAirfield) for (fuelCount <- map.get(GroundClass.Fuel)) {
           val airfieldFuelPenalty = GroundClass.Fuel.weight / 2
-          fuelCount.i = fuelCount.i/airfieldFuelPenalty
+          fuelCount.i = fuelCount.i / airfieldFuelPenalty
         }
 
         //val ret = map.max(order)
         val (cls, counter) = map.max(order)
-        log debug ("  identified "+counter+ " " + cls + " from " + map )
-        Some(cls, counter.i, counter.num, (counter.offX.toInt,counter.offY.toInt))
+        log debug ("  identified " + counter + " " + cls + " from " + map)
+        Some(cls, counter.i, counter.num, (counter.offX.toInt, counter.offY.toInt))
 
       }
     }
@@ -284,10 +284,10 @@ private class MisRender (
 
               val finalX = (((x + offset._1) - model.widthOffset) / model.width) * iw
               val finalY = ih - ((((y + offset._2) - model.heightOffset) / model.height) * ih)
-              
-//              val finalX = (px+imgOffX).toInt
-//              val finalY = (px-imgOffY).toInt
-              
+
+              //              val finalX = (px+imgOffX).toInt
+              //              val finalY = (px-imgOffY).toInt
+
               val scale = {
                 var s = 0.3
                 var d = number.toDouble
@@ -297,7 +297,7 @@ private class MisRender (
                 }
                 s
               }
-              
+
               drawObject(finalX.toInt, finalY.toInt, scale, side, depth, cls)
             }
           }
@@ -305,23 +305,23 @@ private class MisRender (
       }
     }
     def forChiefs {
-println("drawing "+model.chiefs.size+" chiefs")
-for((name, chief) <- model.chiefs){
-  println(name+ " side:"+chief.side+" -> "+chief.path)
-}
-      for((name, chief) <- model.chiefs) if(chief.side.isDefined && !chief.path.isEmpty){
+      println("drawing " + model.chiefs.size + " chiefs")
+      for ((name, chief) <- model.chiefs) {
+        println(name + " side:" + chief.side + " -> " + chief.path)
+      }
+      for ((name, chief) <- model.chiefs) if (chief.side.isDefined && !chief.path.isEmpty) {
         val side = chief.side.get
         val start = chief.path.head
         val end = chief.path.lastOption.get
         val cls = chief.cls
-        
-        val count = name match    {
-          case  MisRender.leadingDigits(nums)  => nums.toInt
-          case  MisRender.containsColumn()  => 5
-          case  MisRender.containsTrain()  => 10
+
+        val count = name match {
+          case MisRender.leadingDigits(nums) => nums.toInt
+          case MisRender.containsColumn() => 5
+          case MisRender.containsTrain() => 10
         }
-        
-//        val (ex, ey) = end
+
+        //        val (ex, ey) = end
         val (x, y) = start
         val ox = x - model.widthOffset
         val oy = y - model.heightOffset
@@ -329,68 +329,60 @@ for((name, chief) <- model.chiefs){
         val ry = oy / model.height
         val px = rx * iw
         val py = ih - ry * ih
-        
-//        if (ox >= 0 && ox <= model.width && oy >= 0 && oy <= model.height) {
-//          val at = atMarker(x, y, side)
-//          for ((cls, weight, number, offset) <- at) {
-//            val (who, depth) = whoAndDeepness(rx, ry, 1000)
-//            if (cls.weight * cls.weight * weight + weight * depth * depth > 100000) {
-//
-//              
 
-        val scale = 0.3D+(Math.log(count)*0.01)
-        
-              drawObject(px.toInt, py.toInt, scale, side, 255, cls)
-              
-println("chief "+cls+" at "+px+","+py+" count:"+count+" scale:"+scale)                
-      ig2.setColor(awt.Color.green)
-      
-      var lastX = px.toInt
-      var lastY = py.toInt
-      for((ix, iy)<- chief.path.tail){
-        val finalX = ((((ix) - model.widthOffset) / model.width) * iw).toInt
-        val finalY = ih - (((((iy) - model.heightOffset) / model.height) * ih)).toInt
-        ig2.drawLine(lastX, lastY, finalX, finalY)
-        lastX=finalX
-        lastY=finalY
-      }
-      ig2.setColor(awt.Color.white)
-      ig2.drawLine(px.toInt, py.toInt, lastX, lastY)
-      
-      val sumsCount = chief.path.take(15).takeRight(5).foldLeft(0D,0D, 0){(acc, us)=>
-        (acc._1+us._1, acc._2+us._2, acc._3+1)
-      }
-      val (avgX, avgY) = {
-        val r1 = (
-          sumsCount._1/sumsCount._3, 
-          sumsCount._2/sumsCount._3
-        )
-          
-        (((((r1._1) - model.widthOffset) / model.width) * iw),
-         ih - (((((r1._2) - model.heightOffset) / model.height) * ih))
-        )
-      }
-      
-      val difX = avgX-px
-      val difY = avgY-py
-      val len = Math.sqrt(
-          (difX*difX)+
-          (difY*difY)
-      )
-ig2.setColor(awt.Color.BLACK)      
-ig2.drawOval(avgX.toInt-4, avgY.toInt-4,8,8)      
-println("arrow at "+avgX+","+avgY+" len :"+len) 
-//      drawObject(avgX.toInt, avgY.toInt, 1D, side, 200, GroundClass.ChiefMove)
-      drawObject(avgX.toInt, avgY.toInt, len/16D, side, 200, GroundClass.ChiefMove, Some((difX, difY)))
-//            }
-//          }
-//        }
+        val scale = 0.3D + (Math.log(count) * 0.02)
+
+        val depth = whoAndDeepness(rx, ry, 1000)._2
+        val weight = count
+        if (cls.weight * cls.weight * weight + weight * depth * depth > 100000000) {
+
+          println("chief " + cls + " at " + px + "," + py + " count:" + count + " scale:" + scale)
+
+          var lastX = px.toInt
+          var lastY = py.toInt
+          for ((ix, iy) <- chief.path.tail) {
+            val finalX = ((((ix) - model.widthOffset) / model.width) * iw).toInt
+            val finalY = ih - (((((iy) - model.heightOffset) / model.height) * ih)).toInt
+
+            if (debugMode) { // draw exact path
+              ig2.setColor(awt.Color.green)
+              ig2.drawLine(lastX, lastY, finalX, finalY)
+            }
+            lastX = finalX
+            lastY = finalY
+          }
+
+          if (debugMode) { // full vector
+            ig2.setColor(awt.Color.white)
+            ig2.drawLine(px.toInt, py.toInt, lastX, lastY)
+          }
+          val sumsCount = chief.path.take(15).takeRight(5).foldLeft(0D, 0D, 0) { (acc, us) =>
+            (acc._1 + us._1, acc._2 + us._2, acc._3 + 1)
+          }
+          val (avgX, avgY) = {
+            val r1 = (sumsCount._1 / sumsCount._3,
+              sumsCount._2 / sumsCount._3)
+
+            (((((r1._1) - model.widthOffset) / model.width) * iw),
+              ih - (((((r1._2) - model.heightOffset) / model.height) * ih)))
+          }
+
+          val difX = avgX - px
+          val difY = avgY - py
+          val len = Math.sqrt((difX * difX) + (difY * difY)
+            )
+          //ig2.setColor(awt.Color.BLACK)      
+          //ig2.drawOval(avgX.toInt-4, avgY.toInt-4,8,8)      
+          //println("arrow at "+avgX+","+avgY+" len :"+len) 
+          drawObject(px.toInt, py.toInt, scale * 4D, side, 1000, GroundClass.ChiefMove, Some((difX, difY)))
+          drawObject(px.toInt, py.toInt, scale, side, 255, cls)
+        }
       }
     }
     forSide(1)
     forSide(2)
-      
-//    forChiefs
+
+    forChiefs
   }
 
   lazy val drawInit = {
@@ -400,62 +392,41 @@ println("arrow at "+avgX+","+avgY+" len :"+len)
     ig2.setFont(font);
   }
 
-  def drawObject(x: Int, y: Int, scale: Double, side: Int, depth: Int, cls: GroundClass.GC, rotation:Option[(Double, Double)]=None) {
-    
+  def drawObject(x: Int, y: Int, scale: Double, side: Int, depth: Int, cls: GroundClass.GC, rotation: Option[(Double, Double)] = None) {
+
     drawInit
-    ig2.freeze{  
+    ig2.freeze {
       val colDepth = Math.max(0, Math.min(depth / 2, 255))
-  //try{
+      //try{
       // set criteria to > 0 for disabling long range visibility of fuel etc
       if (colDepth >= 0) {
         //      ig2.setColor(Color.black)
         val (randx, randy) = randomizeLocations(x, y, 1D / colDepth.toDouble)
-  
-        
-  
+
         for (img <- spritesMaker.paintable(cls, side)) {
-          val (width, height) = img.dimensions 
+          val (width, height) = img.dimensions
           val factor = 1D
-  
-          val h2 = (factor * scale * height / 2).toInt
-          val w2 = (factor * scale * width / 2).toInt
-  
+
           val t = new AffineTransform()
           t.setToIdentity
-                
-  //for(rot<-rotation){
-  //  t.rotate(0,1)
-  //  t.rotate(rot._1, rot._2, w2, h2)        
-  //}
-  //        for(rot<-rotation){
-  ////  t.rotate(0,1)
-  //  t.rotate(-rot._1, -rot._2, randx,  randy)        
-  //}    
-          //t.translate(randx - w2, randy - h2)
+
           t.translate(randx, randy)
-  
+
           t.scale(factor * scale, factor * scale)
-  //   for(rot<-rotation){
-  ////  t.rotate(0,1)
-  //  t.rotate(-rot._1, -rot._2, width / 2,  height / 2)        
-  //}  
           ig2.setColor(awt.Color.green)
           ig2.drawLine(randx, randy, x, y)
-//          ig2 freeze img.paint(t, colDepth.toDouble / 255D, ig2)
-          
-         try ig2 freeze {
-//  var rot = t
-//          rot = AffineTransform.getRotateInstance(100, 1, x, y)
-//          rot.concatenate(t)
-  //        
-           img.paint(t, colDepth.toDouble / 255D, ig2)
-           println("rot success                       "+x+","+y)
-          }catch{case x=>println("rot failed "+x.getClass.getCanonicalName+" : "+x.getMessage)}
+
+          try ig2 freeze {
+            //  var rot = t
+            //          rot = AffineTransform.getRotateInstance(100, 1, x, y)
+            //          rot.concatenate(t)
+            //        
+            img.paint(t, colDepth.toDouble / 255D, ig2, rotation)
+          } catch { case x => println("rot failed " + x.getClass.getCanonicalName + " : " + x.getMessage) }
         }
-  
 
       }
-//}catch{case x => log.error("failed rotation ",x) }
+      //}catch{case x => log.error("failed rotation ",x) }
     }
   }
   def randomizeLocations(x: Int, y: Int, depth: Double): (Int, Int) = {
@@ -478,7 +449,7 @@ println("arrow at "+avgX+","+avgY+" len :"+len)
 
     // set true to allow uninterpolated values for front calculation  
     var precise = false
-//        precise = true    
+    //        precise = true    
     ig2.scale(1.toDouble / scale.toDouble, 1.toDouble / scale.toDouble)
 
     val sih = ih * scale
@@ -487,10 +458,10 @@ println("arrow at "+avgX+","+avgY+" len :"+len)
     val initialStep = scale << (steps);
 
     def dif(x: Int, y: Int): Double = {
-//      val px: Double = (x.toDouble - model.widthOffset) / siw.toDouble
-//      val py: Double = 1 - (y.toDouble - model.heightOffset) / sih.toDouble
+      //      val px: Double = (x.toDouble - model.widthOffset) / siw.toDouble
+      //      val py: Double = 1 - (y.toDouble - model.heightOffset) / sih.toDouble
       val px: Double = (x.toDouble) / siw.toDouble
-      val py: Double = 1 - (y.toDouble ) / sih.toDouble
+      val py: Double = 1 - (y.toDouble) / sih.toDouble
 
       val (r, b) = if (precise) (preciseSideVal(px, py, model.rfront),
         preciseSideVal(px, py, model.bfront))

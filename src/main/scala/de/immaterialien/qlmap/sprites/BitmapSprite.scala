@@ -36,7 +36,13 @@ object BitmapSprite extends Log {
 class BitmapSprite(img:BufferedImage) extends Paintable with Log {
   def dimensions: (Int, Int) = (img.getWidth, img.getHeight)
 
-  def paint(trans: AffineTransform, depth: Double, g2d: java.awt.Graphics2D) {
+  def paint(trans: AffineTransform, depth: Double, g2d: java.awt.Graphics2D, rotation:Option[(Double, Double)]=None) {
+    
+    val t = new AffineTransform(trans)
+    t.translate(dimensions._1/ -2,dimensions._2/ -2)
+    for(r<-rotation) t.rotate(r._1, r._2, t.getTranslateX, t.getTranslateY)
+    
+    
     g2d.drawImage(img, trans, null)
     //        val vpadding = 16
     //        val hpadding = 3

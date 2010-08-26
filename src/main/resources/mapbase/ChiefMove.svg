@@ -21,13 +21,21 @@
     <linearGradient
        id="linearGradient3614">
       <stop
-         style="stop-color:#55aa55;stop-opacity:1;"
+         style="stop-color:#55aa55;stop-opacity:0;"
          offset="0"
          id="stop3616" />
       <stop
-         style="stop-color:#55aa55;stop-opacity:0;"
+         id="stop3614"
+         offset="0.19559067"
+         style="stop-color:#55aa55;stop-opacity:0.46956521;" />
+      <stop
+         style="stop-color:#55aa55;stop-opacity:0.78260869;"
+         offset="0.47820503"
+         id="stop3617" />
+      <stop
+         id="stop3612"
          offset="1"
-         id="stop3618" />
+         style="stop-color:#55aa55;stop-opacity:1;" />
     </linearGradient>
     <inkscape:perspective
        sodipodi:type="inkscape:persp3d"
@@ -162,16 +170,31 @@
        inkscape:vp_y="0 : 1000 : 0"
        inkscape:vp_x="0 : 0.5 : 1"
        sodipodi:type="inkscape:persp3d" />
-    <linearGradient
+    <radialGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3614"
-       id="linearGradient3620"
-       x1="32"
-       y1="24"
-       x2="32"
-       y2="84"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0,1,-1,0,64,988.3622)" />
+       id="radialGradient3610"
+       cx="29.404074"
+       cy="1020.0778"
+       fx="29.404074"
+       fy="1020.0778"
+       r="18"
+       gradientTransform="matrix(1.8888888,-1.8243535e-6,3.6894542e-6,1.7777778,-23.544788,-793.10942)"
+       gradientUnits="userSpaceOnUse" />
+    <inkscape:perspective
+       id="perspective3656"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3656-1"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -227,17 +250,30 @@
      id="layer1"
      transform="translate(0,-988.3622)">
     <path
-       style="fill:url(#linearGradient3620);fill-opacity:1;fill-rule:nonzero;marker-mid:none"
-       d="m 0,1010.3622 c 0,0 28,10 28,5 0,-4.9511 0,-2 0,-2 l 7,7 -7,7 c 0,0 0,2.6625 0,-2 0,-5 -28,5 -28,5"
+       style="fill:url(#radialGradient3610);fill-opacity:1;fill-rule:nonzero;marker-mid:none;opacity:1"
+       d="m 32,1011.3622 c 0,0 26,8.0796 26,5 0,-3.0494 0,-1 0,-1 l 6,5 -6,5 c 0,0 0,1.8717 0,-1 0,-3.0796 -26,5 -26,5"
        id="path2840"
        sodipodi:nodetypes="czccczc" />
+    <path
+       sodipodi:type="arc"
+       style="fill:#55aa55;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:12;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;opacity:0"
+       id="path3619"
+       sodipodi:cx="31.5"
+       sodipodi:cy="31.5"
+       sodipodi:rx="32"
+       sodipodi:ry="32"
+       d="M 63.488605,32.353903 C 63.017007,50.020722 48.312915,63.960203 30.646097,63.488605 12.979278,63.017007 -0.96020273,48.312915 -0.48860499,30.646097 -0.01700726,12.979278 14.687085,-0.96020273 32.353903,-0.48860499 49.894028,-0.02038921 63.785747,14.485131 63.495625,32.029105"
+       transform="translate(0.5,988.8622)"
+       sodipodi:start="0.026687644"
+       sodipodi:end="6.2997206"
+       sodipodi:open="true" />
     <rect
-       style="fill-opacity:1;fill-rule:nonzero;fill:none;stroke:#000000;stroke-opacity:1;opacity:0.57843137"
-       id="rect5559"
-       width="64"
-       height="64"
-       x="0"
-       y="0"
+       style="opacity:0;fill:#55aa55;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:12;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect2841"
+       width="57"
+       height="54"
+       x="3"
+       y="4"
        transform="translate(0,988.3622)"
        ry="5" />
   </g>
