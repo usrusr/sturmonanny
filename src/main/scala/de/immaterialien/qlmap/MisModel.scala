@@ -2,6 +2,7 @@ package de.immaterialien.qlmap
 
 import scala.xml._
 
+
 //import scala.swing
 import javax.imageio.ImageIO
 import java.awt.image.BufferedImage
@@ -16,6 +17,26 @@ class MisModel {
   var height = 160000.
   var widthOffset = 0.
   var heightOffset = 0.
+  class Chief(
+    var side:Option[Int]=None,
+    var cls : GroundClass.GC = GroundClass.Unidentified,
+    var path:List[(Double, Double)]=Nil
+  ){  
+    def classSide(cls : GroundClass.GC, side:Int){
+      this.side = Some(side)
+      this.cls = cls
+    }
+    def waypoint(xy:(Double,Double)){
+      path = path ::: xy ::Nil
+    }
+  }
+  val chiefs = new mutable.HashMap[String, Chief]{
+    override def default(name:String):Chief={
+      val ret = new Chief()
+      put(name, ret)
+      ret
+    }
+  }
   private var _imageFile: io.File = null
   def frontMarker(x: Double, y: Double, a: Int) {
 //    println("frontmarker: " + x + " / " + y + " for " + a)

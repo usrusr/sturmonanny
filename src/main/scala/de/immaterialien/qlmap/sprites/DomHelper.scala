@@ -18,7 +18,18 @@ object DomHelper {
   //  }
 
   class WrapElement(e: Element, doc: SVGDocument) {
-    def children(name: (Element => Boolean)): IndexedSeq[Element] = {
+    def pushBetweenChildren(newChild : Element , name: (Element => Boolean) = (_=>true)){
+      
+      val childElements = children(name).toList
+      for(c <- childElements){
+        e removeChild c
+        newChild appendChild c
+      }
+      e appendChild newChild
+      
+      ()
+    }
+    def children(name: (Element => Boolean) = (_=>true)): IndexedSeq[Element] = {
       val cs = e.getChildNodes
       val l = cs.getLength
       val ll = for (i <- 0 until l) yield {

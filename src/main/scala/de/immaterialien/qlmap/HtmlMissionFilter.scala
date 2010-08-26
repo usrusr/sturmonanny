@@ -95,10 +95,10 @@ class HtmlUpdater(path: File, mission: File) {
                   <table>
                     <tr>
                       <td><img src={ newImage }/></td>
-                      <td valign="top">
+                      <td valign="top" height="100%">
                         { name }<br/>
-                        { formatDateTime(mission.lastModified) }<br/>
-                        <div style="font-size:smallest;">Timeline:</div><iframe src={campaignPrefix+"list.recon.html"} width="150px" style="border:none;"/>
+                        <a href="latest.recon.html" title="jump to latest">{ formatDateTime(mission.lastModified) }</a><br/>
+                        <div style="font-size:smallest;">Timeline:</div><iframe src={campaignPrefix+"list.recon.html"} width="150px" height="100%" style="border:none;"/>
                       </td>
                     </tr>
                   </table>

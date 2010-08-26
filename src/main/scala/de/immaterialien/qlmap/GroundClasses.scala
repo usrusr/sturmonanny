@@ -52,9 +52,9 @@ object CsvParser extends RegexParsers with Log {
     }
   }
   
-  lazy val multiObjectsLine:Parser[(String, GroundClass.Value)] = { 
-    cell ~","~> cell ~","~ classCell ^^ {
-      case name ~_~ classCell => checkDescription(name, classCell)
+  lazy val multiObjectsLine:Parser[(String, GroundClass.Value)] = {
+    cell ~","~ cell ~","~ classCell ^^ {
+      case name ~_~_~_~ classCell => checkDescription(name, classCell)
     }
   }
   lazy val staticObjectsLine:Parser[(String, GroundClass.Value)] = {
@@ -119,6 +119,7 @@ object GroundClass extends Enumeration with Log {
  val Plane = GC (0, "Plane")
   val Airfield = GC (1, "Airfield") 
  val Unidentified = GC (1, "Unidentified")
+ val ChiefMove = GC (0, "ChiefMove")
   
  implicit def vtogc(v: Value): GC = v.asInstanceOf[GC]
 
