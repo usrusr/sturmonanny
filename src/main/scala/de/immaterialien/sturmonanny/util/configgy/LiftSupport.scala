@@ -19,7 +19,7 @@ trait LiftSupport extends ConfigurationSchema {
 	object intermediates extends SessionVar[configgy.Config](new configgy.Config)
  
 	def  liftForm:NodeSeq={
-		for(message <- self.status.messages) message match  {
+		for(message <- self.status.messages) message match  { 
 		  case ConfigurationSchema.Warning(msg) => S.warning(msg)
 		  case ConfigurationSchema.Error(msg) => S.error(msg)
 		  case ConfigurationSchema.Success(msg) => S.notice(msg)
@@ -63,10 +63,11 @@ trait LiftSupport extends ConfigurationSchema {
 		    	  }
 		      }
 		      val unbound =
-		    		if(table.documentationString==null || table.documentationString.trim.isEmpty)  
+		    		if(table.documentationString==null || table.documentationString.trim.isEmpty)  {
 			    		(<div class="configgy_label">{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
-			    	else
+		    		}else{
 			    		(<div class="configgy_label" title={table.documentationString}>{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
+			    	}
 		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
 		    case field : ConfigurationSchema#Field[_] => {
@@ -109,10 +110,11 @@ trait LiftSupport extends ConfigurationSchema {
 		}
                                 
 		var createdSeq : NodeSeq = Nil
-    createdSeq = tuples.foldLeft(createdSeq){(existing, tuple)=>   
-       params ++ tuple._2
-		   existing ++ tuple._1 
-		} 
+
+		for((node, binding)<-tuples){
+			params ++= binding
+			createdSeq ++= node
+		}
 		val save = new Elem(form, "submitsave", Null, xml.TopScope)
 		val apply = new Elem(form, "submitapply", Null, xml.TopScope)
 		val title = if(documentationString==null || documentationString.trim.isEmpty) 
@@ -140,7 +142,7 @@ trait LiftSupport extends ConfigurationSchema {
     	}else None
  		}.filter(_ isDefined).map(_ get).toList
     
-    params += "submitapply" -> SHtml.submit("Apply", () => updateConfiguration(paramCopy) )
+    params += ("submitapply" -> SHtml.submit("Apply", () => updateConfiguration(paramCopy) ))
     params += "submitsave" -> SHtml.submit("Save", () => {
 	      if(updateConfiguration(paramCopy)){ 
 	    	  //println("saved "+System.identityHashCode(self)+"\n"+self)
@@ -153,6 +155,7 @@ trait LiftSupport extends ConfigurationSchema {
     })
     
 		var ret = bind(form, formNodes, params :_*)
+		
     ret
 	}
 	def updateConfiguration(paramCopy:Seq[Bindator]):Boolean = {
