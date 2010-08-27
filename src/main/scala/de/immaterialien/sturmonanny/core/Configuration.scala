@@ -1,19 +1,20 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util.configgy
+import _root_.de.immaterialien.sturmonanny.util.configgy
+import _root_.de.immaterialien.sturmonanny
  
-class Configuration(override val file : String, val serverInstance:de.immaterialien.sturmonanny.core.Server) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{
+class Configuration(override val file : String, val serverInstance : sturmonanny.core.Server) extends configgy.ConfigurationSchema(file) with configgy.LiftSupport{
   
   override def apply(conf : net.lag.configgy.Config) : Option[java.io.File]= {
     val ret = super.apply(conf)
     
-    if(server!=null) serverInstance.conf = this 
+    if(serverInstance!=null) serverInstance.conf = this  
     
     ret
   }
   
   
-	doc = "configuration for a single host instance"
+	doc = "configuration for a single host instance" 
 	object server  extends Group{    
 	  object host extends Field( "127.0.0.1") {doc="host for the console connection"}
 	  object il2port extends Field(2001) {doc="""console port of the IL2-server that should be connected
@@ -36,7 +37,7 @@ works like the IPS item in the [Console] section of confs.ini"""
 	  object pollMillis extends Field(1000)  {
 	    doc = "SC pilots listing is too slow to be useful, set (minimum) number of milliseconds to pass between polls"
 	  }
-	  object serverPath extends Field("..")  {
+	  object serverPath extends Field("..")  { 
 	    doc = "path to the IL-2 server directory (used e.g. to access the i18n files)"
 	  } 
 	}
@@ -102,6 +103,15 @@ landing refund should be distributed in the same ratio but this is not implement
 	  object implementation extends Field("de.immaterialien.sturmonanny.core.AllPlanesEqualMarket")
 	  object configuration extends Field("planes.lst")
 	} 
+	object persistence extends Group {
+		doc="pluggable storage for pilot balance state, e.g. connecting to a database, flat text file or simply storing/forgetting in RAM"
+		object implementation extends Field("de.immaterialien.sturmonanny.persistence.InMemoryBackend") {
+			doc="fully qualified class name of a class implementing trait de.immaterialien.sturmonanny.persistence.IBalanceDao"
+		}
+		object properties extends Table("") {
+			doc="configuration properties for the IBalanceDao implementation, e.g. filename, JDBC driver, URL and credentials or something similar"
+		}
+	}
  
 	object names extends Group {
 	  doc = "a few strings you can set to customize messages"
@@ -199,12 +209,14 @@ JVM-processing should better be invoked inside the sturmonanny JVM.
 
 example configuration:
 <addons>
-my.package.Preprocessor = -10
-my.package.Postprocessor = 1
-my.other.package.AnotherPostprocessor = 10
+my_package_Preprocessor = -10
+my_package_Postprocessor = 1
+my_other_package_AnotherPostprocessor = 10
 </addons>
 
-Keys (left of the equals sign) have to be fully qualified class names of classes present on the classpath. 
+Keys (left of the equals sign) have to be fully qualified class names of classes present on the classpath 
+(with the dots replaced by underscores, as the config format does not allow dots - if you really have to 
+use an underscore you can double-escape it: "my_stupid_package.The_class" would become "my__stupid__package_The__class"). 
 Values (right of the equals sign) have to be unique numbers: 
 	* negative values for preprocessors (called before the script invokation)
   * positive values for postprocessors (called after the script invokation)
@@ -223,11 +235,11 @@ Use the <addonArguments> configuration for setup through this String argument co
 """
      }
      object addonArguments extends Table(""){
-       doc = """optional configuration for processors defined in <addons>
+       doc = """optional configuration for processors defined in <addons>, same escaping of qualified class names as in <addons>
  
 example configuration:
 <addonArguments>
-my.package.Postprocessor = "this will be used as argument for a String argument constructor of my.package.Postprocessor, if available"
+my_package_Postprocessor = "this will be used as argument for a String argument constructor of my.package.Postprocessor, if available"
 </addonArguments>
 """
        

@@ -1,8 +1,10 @@
 package de.immaterialien.sturmonanny.fbdjhosting;
 
-import de.immaterialien.sturmonanny.core
-import de.immaterialien.sturmonanny.util.Logging
-import de.immaterialien.sturmonanny.util.event
+import _root_.de.immaterialien.sturmonanny.core
+import _root_.de.immaterialien.sturmonanny.util.Logging
+import _root_.de.immaterialien.sturmonanny.util.event
+import javax.xml.ws.Provider
+import java.io.File
 
 class FbdjAdapter extends core.UpdatingMember with Logging {
   private var fbdjPath = "."
@@ -79,25 +81,27 @@ debug("FBDj configuratoin changing!")
 		  	  
 		  		//val created = new FbdjHost(conf)
 		  	  
-		  	  val created = ContainerPool.getContainer(conf.fbdj.installationPath, conf.fbdj.overridesJar)
-		  	  
+		  	  val created = ContainerPool.getContainer(conf.fbdj.installationPath.apply, conf.fbdj.overridesJar.apply)
+		  	  created.adapterNextMissionProxy = Some(new Provider[File]{
+		  	  	override def invoke(i:File):File = nextMissionProvider.invoke(i)
+		  	  })
 		  	  created.changeConfiguration(conf, server.initConf)
 		  	  created.start  
        
        
 		  		fbdj = Some(created)
-		  		fbdjPath = conf.fbdj.installationPath
-		  		confPath = conf.fbdj.fbdjConfigurationDirectory
-		  		headless=conf.fbdj.headless
+		  		fbdjPath = conf.fbdj.installationPath.apply
+		  		confPath = conf.fbdj.fbdjConfigurationDirectory.apply
+		  		headless=conf.fbdj.headless.apply
 //		  		stats=conf.fbdj.stats
 //		  		autoconnect=conf.fbdj.stats
 //		  		minutesPerMission=conf.fbdj.DCG.minutesPerMission 
-		  		dcgCommand=conf.fbdj.DCG.dcgCommand 
-		  		dcgPath=conf.fbdj.DCG.dcgPath 
-		  		minSortiesBigger=conf.fbdj.DCG.campaignProgress.minSorties.bigger
-		  		minSortiesSmaller=conf.fbdj.DCG.campaignProgress.minSorties.smaller
-		  		minPilotsBigger=conf.fbdj.DCG.campaignProgress.minPilots.bigger
-		  		minPilotsSmaller=conf.fbdj.DCG.campaignProgress.minPilots.smaller      
+		  		dcgCommand=conf.fbdj.DCG.dcgCommand .apply
+		  		dcgPath=conf.fbdj.DCG.dcgPath .apply
+		  		minSortiesBigger=conf.fbdj.DCG.campaignProgress.minSorties.bigger.apply
+		  		minSortiesSmaller=conf.fbdj.DCG.campaignProgress.minSorties.smaller.apply
+		  		minPilotsBigger=conf.fbdj.DCG.campaignProgress.minPilots.bigger.apply
+		  		minPilotsSmaller=conf.fbdj.DCG.campaignProgress.minPilots.smaller.apply  
       
           addons = conf.fbdj.DCG.addons.map 
           addonArguments = conf.fbdj.DCG.addonArguments.map
@@ -105,9 +109,10 @@ debug("FBDj configuratoin changing!")
           
           nextMissionProvider = new NextMissionProvider(conf) 
           
-		  		overridesPath = conf.fbdj.overridesJar
+		  		overridesPath = conf.fbdj.overridesJar.apply
 	  	    debug("initialized FBDj: \n  "+fbdjPath+"\n  "+overridesPath+"\n  "+confPath+"\n   in:"+System.identityHashCode(fbdj.get.inList)+"   out:"+System.identityHashCode(fbdj.get.outList))
 		  		server.multi.internalConnection ! server.multi.internalConnection.UpdatedQueues 
+		  		server.multi.eventLogConnection ! server.multi.eventLogConnection.UpdatedQueues 
 		  	}catch{
 		  	  case x => {
 		  	    debug("failed to setup FBDj: "+x)

@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
 import scala.util.parsing.combinator._
 import net.liftweb.actor.LiftActor
 import scala.io._
@@ -26,7 +26,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	}
  
  	def updateConfiguration = {
-	  val newPath = conf.server.serverPath
+	  val newPath :String= conf.server.serverPath.apply
    
 	  if(newPath!=serverPath){
 	    init(newPath)
@@ -35,7 +35,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	}
  	override def updateTranslations(translations:mutable.Map[String, List[String]]){
     	  localizedMessageParser = new LocalizedParserInstance(translations)
-	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
+//	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
     }
 
  	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
@@ -57,9 +57,9 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //log.write("\n<-------\n")
 //log.flush
 		parseResult.getOrElse(None) match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+line+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored,_) => // ignore
+		      case PilotMessage(who, Is.Unknown,_) => debug("unkown message: '"+line+"'")
+		      case PilotMessage(who, what ,_) => {
 		    	  pilotMessageSend(who, what)
 //debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		       }
@@ -85,9 +85,9 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //log.flush  
 		for (res <- resList) { 
 		  res match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+lines+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored,_) => // ignore
+		      case PilotMessage(who, Is.Unknown,_) => debug("unkown message: '"+lines+"'")
+		      case PilotMessage(who, what ,_) => {
 		    	  pilotMessageSend(who, what)
 //debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
 		       }
@@ -174,7 +174,10 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
  	  (what+""": """)~rep1("""\t""") ~> regexMatch("""(\S(.*\S)?)\\n\n""".r)^^(_.group(1))
 	}
  	def stringToState : PartialFunction[String, Is.PilotState] = {
- 	  case """In Flight""" => Is.InFlight 
+ 	  case """In Flight""" => {
+ 	  	Is.InFlight
+// 	 not necessary, InFlight handled only if a plane is known  	Is.Ignored // because the stats lists displays "In Flight" while a pilot is connecting... 
+ 	  }
  	  case """Landed at Airfield""" => Is.LandedAtAirfield
  	  case """KIA""" => Is.KIA
  	  case """Hit the Silk""" => Is.HitTheSilk  
@@ -311,8 +314,8 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 						case idPilotPingPoints(rpo, rpi, rpilot) => {
 							val pilot=rpilot.reverse
 							after match {
-								case sideNone(side) => Some(PilotMessage(pilot, Is.Flying("", Armies.forName(side))))
-								case sidePlane(side, plane) => Some(PilotMessage(pilot, Is.Flying(plane, Armies.forName(side))))
+								case sideNone(side) => Some(PilotMessage(pilot, Is.InPlaneForSide("", Armies.forName(side))))
+								case sidePlane(side, plane) => Some(PilotMessage(pilot, Is.InPlaneForSide(plane, Armies.forName(side))))
 								case _ => null
 							}
 						}

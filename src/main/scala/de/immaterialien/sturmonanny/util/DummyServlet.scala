@@ -2,6 +2,7 @@ package de.immaterialien.sturmonanny.util
 
 import javax.servlet._
 import http._
+import _root_.de.immaterialien.sturmonanny.global
 
 /**
  * a workaround for the lack of a <load-on-startup> equivalent in servlet filters, 

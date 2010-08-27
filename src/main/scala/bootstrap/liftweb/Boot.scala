@@ -15,7 +15,7 @@ import _root_.java.sql.{Connection, DriverManager}
 //import _root_.de.immaterialien.sturmonanny.model._
 import _root_.javax.servlet.http.{HttpServletRequest}
 
-import de.immaterialien.sturmonanny.snippet
+import _root_.de.immaterialien.sturmonanny.snippet
 import _root_.de.immaterialien.sturmonanny._
 
 /**
@@ -60,7 +60,7 @@ class Boot extends util.Log{// extends net.liftweb.util.LiftLogger{
     
     snippet.InstanceConf.registerRules 
    
-    net.liftweb.util.LogBoot.loggerSetup
+//    net.liftweb.util.LogBoot.loggerSetup
 
 //      val s = new Server
 log.warning("starting sturmonanny instances")    

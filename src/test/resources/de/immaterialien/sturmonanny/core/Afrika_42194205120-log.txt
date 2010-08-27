@@ -1,0 +1,338 @@
+[Jun 9, 2010 6:32:33 PM] Mission: net/dogfight\DCG\Afrika_42194205120.mis is Playing
+[6:32:33 PM] Mission BEGIN
+[6:32:41 PM] 100040_Static destroyed by 100050_Static at 122020.0 49769.0
+[6:32:49 PM] 100070_Static destroyed by 100060_Static at 122280.0 49793.0
+[6:33:01 PM] 100060_Static destroyed by 100090_Static at 122020.0 49793.0
+[6:33:05 PM] 100090_Static destroyed by 100080_Static at 122280.0 49769.0
+[6:33:11 PM] 100050_Static destroyed by 100080_Static at 122280.0 49829.0
+[6:33:33 PM] blackjack_89 has disconnected
+[6:33:44 PM] 100080_Static destroyed by 46_Chief2 at 122020.0 49829.0
+[6:33:50 PM] blackjack_89 has connected
+[6:37:00 PM] Apostol has disconnected
+[6:37:56 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 73896.164 72082.55
+[6:37:57 PM] blackjack_89:Ju-88A-4 loaded weapons '28xSC50_2xSC250' fuel 50%
+[6:39:13 PM] 100010_Static destroyed by 2_Chief1 at 129518.0 61724.0
+[6:39:29 PM] blackjack_89:Ju-88A-4 in flight at 74690.57 70180.22
+[6:39:43 PM] 100030_Static destroyed by 2_Chief1 at 129518.0 61664.0
+[6:41:30 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 84798.06 68165.414
+[6:41:32 PM] blackjack_89:Ju-88A-4(1) seat occupied by blackjack_89 at 84978.65 68145.65
+[6:41:33 PM] blackjack_89:Ju-88A-4(2) seat occupied by blackjack_89 at 85025.34 68140.51
+[6:41:33 PM] blackjack_89:Ju-88A-4(3) seat occupied by blackjack_89 at 85068.93 68135.71
+[6:41:33 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 85112.516 68130.9
+[6:42:01 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 87593.6 67614.68
+[6:42:18 PM] blackjack_89:Ju-88A-4(1) seat occupied by blackjack_89 at 88997.83 67250.51
+[6:42:19 PM] blackjack_89:Ju-88A-4(2) seat occupied by blackjack_89 at 89088.72 67226.9
+[6:42:19 PM] blackjack_89:Ju-88A-4(3) seat occupied by blackjack_89 at 89120.91 67218.53
+[6:42:20 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 89150.47 67210.85
+[6:42:20 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 89177.375 67203.85
+[6:42:20 PM] blackjack_89:Ju-88A-4(1) seat occupied by blackjack_89 at 89207.02 67196.14
+[6:42:21 PM] blackjack_89:Ju-88A-4(2) seat occupied by blackjack_89 at 89234.01 67189.125
+[6:42:21 PM] blackjack_89:Ju-88A-4(3) seat occupied by blackjack_89 at 89258.336 67182.8
+[6:42:21 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 89285.39 67175.76
+[6:42:23 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 89426.64 67138.984
+[6:42:23 PM] blackjack_89:Ju-88A-4(1) seat occupied by blackjack_89 at 89462.086 67129.75
+[6:42:23 PM] blackjack_89:Ju-88A-4(2) seat occupied by blackjack_89 at 89478.47 67125.484
+[6:42:23 PM] blackjack_89:Ju-88A-4(3) seat occupied by blackjack_89 at 89497.586 67120.5
+[6:42:24 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 89513.984 67116.23
+[6:44:54 PM] AIST has connected
+[6:45:10 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 106327.94 66661.63
+[6:45:11 PM] blackjack_89:Ju-88A-4(1) seat occupied by blackjack_89 at 106373.05 66643.41
+[6:45:12 PM] blackjack_89:Ju-88A-4(2) seat occupied by blackjack_89 at 106454.86 66610.336
+[6:45:15 PM] blackjack_89:Ju-88A-4(3) seat occupied by blackjack_89 at 106746.04 66492.586
+[6:45:18 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 107052.28 66368.625
+[6:47:26 PM] AIST:P-40M(0) seat occupied by AIST at 155796.95 64848.477
+[6:47:26 PM] AIST:P-40M loaded weapons 'default' fuel 100%
+[6:48:31 PM] AIST:P-40M in flight at 155348.6 65628.75
+[6:48:40 PM] 87_Chief7 destroyed by 27_Chief1 at 122815.0 49518.0
+[6:51:27 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 122884.85 60686.09
+[6:51:28 PM] blackjack_89:Ju-88A-4(1) seat occupied by blackjack_89 at 122852.41 60601.832
+[6:51:52 PM] blackjack_89:Ju-88A-4(2) seat occupied by blackjack_89 at 122145.65 58347.195
+[6:51:52 PM] blackjack_89:Ju-88A-4(3) seat occupied by blackjack_89 at 122124.97 58285.637
+[6:51:53 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 122114.6 58254.79
+[6:51:53 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 122099.03 58208.434
+[6:52:48 PM] blackjack_89:Ju-88A-4(1) seat occupied by blackjack_89 at 126400.21 58943.4
+[6:52:49 PM] blackjack_89:Ju-88A-4(2) seat occupied by blackjack_89 at 126455.234 58975.785
+[6:52:55 PM] blackjack_89:Ju-88A-4(3) seat occupied by blackjack_89 at 126994.81 59295.07
+[6:52:55 PM] blackjack_89:Ju-88A-4(0) seat occupied by blackjack_89 at 127033.17 59318.074
+[6:54:27 PM] ACX has connected
+[6:55:00 PM] blackjack_89:Ju-88A-4 damaged by 55_Chief2 at 129668.35 61513.062
+[6:55:01 PM] 60_Chief1 destroyed by blackjack_89:Ju-88A-4 at 129668.0 61364.0
+[6:55:01 PM] blackjack_89:Ju-88A-4(0) was killed at 129667.555 61375.984
+[6:55:01 PM] blackjack_89:Ju-88A-4(1) was killed at 129667.555 61375.984
+[6:55:01 PM] blackjack_89:Ju-88A-4(2) was killed at 129667.555 61375.984
+[6:55:02 PM] blackjack_89:Ju-88A-4(3) was killed at 129667.555 61375.984
+[6:55:02 PM] blackjack_89:Ju-88A-4 shot down by 55_Chief2 at 129667.555 61375.984
+[6:55:14 PM] blackjack_89 entered refly menu
+[6:55:21 PM] blackjack_89:Bf-109F-4(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[6:55:21 PM] blackjack_89:Bf-109F-4 loaded weapons 'default' fuel 50%
+[6:55:31 PM] blackjack_89 entered refly menu
+[6:56:07 PM] blackjack_89:Bf-109E-7(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[6:56:07 PM] blackjack_89:Bf-109E-7 loaded weapons '1xSC250' fuel 50%
+[6:56:13 PM] blackjack_89 entered refly menu
+[6:56:14 PM] blackjack_89:Bf-109E-7(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[6:56:14 PM] blackjack_89:Bf-109E-7 loaded weapons '1xSC250' fuel 50%
+[6:56:53 PM] Charly-Lima has connected
+[6:57:01 PM] blackjack_89:Bf-109E-7 in flight at 115898.45 60710.406
+[6:59:17 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 155904.89 64883.914
+[6:59:17 PM] Charly-Lima:A-20C loaded weapons '1x10002x500' fuel 25%
+[6:59:52 PM] leon1:Bf-109E-7(0) seat occupied by leon1 at 115013.484 60274.906
+[6:59:52 PM] leon1:Bf-109E-7 loaded weapons '1xSC250' fuel 50%
+[7:00:08 PM] 2_Chief1 destroyed by 100020_Static at 128834.0 61700.0
+[7:00:17 PM] 55_Chief3 destroyed by blackjack_89:Bf-109E-7 at 129668.0 61508.0
+[7:00:17 PM] 55_Chief4 destroyed by blackjack_89:Bf-109E-7 at 129668.0 61496.0
+[7:00:35 PM] Charly-Lima:A-20C in flight at 154814.83 65072.516
+[7:02:27 PM] leon1:Bf-109E-7 in flight at 116243.54 60955.523
+[7:03:08 PM] AIST:P-40M damaged by 2306_Static at 74972.75 67516.06
+[7:03:09 PM] AIST:P-40M(0) was killed at 74864.266 67607.71
+[7:03:09 PM] AIST:P-40M shot down by 2306_Static at 74864.266 67607.71
+[7:03:19 PM] AIST has disconnected
+[7:03:29 PM] blackjack_89:Bf-109E-7 landed at 116056.414 60855.594
+[7:03:31 PM] blackjack_89 entered refly menu
+[7:03:36 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 134986.67 64440.297
+[7:03:37 PM] blackjack_89:Bf-109E-7(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:03:37 PM] blackjack_89:Bf-109E-7 loaded weapons '1xSC250' fuel 25%
+[7:03:50 PM] blackjack_89 entered refly menu
+[7:04:19 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:04:19 PM] blackjack_89:Ju-87B-2 loaded weapons '1SC1000' fuel 25%
+[7:05:27 PM] blackjack_89:Ju-87B-2 in flight at 117118.66 61159.438
+[7:05:31 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 121574.83 60754.85
+[7:05:32 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 121456.82 60708.438
+[7:05:33 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 121300.61 60647.023
+[7:05:36 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 117856.33 61299.25
+[7:05:38 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 120772.81 60439.746
+[7:05:40 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 118105.625 61351.387
+[7:05:46 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 119852.11 60079.004
+[7:05:46 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 119806.93 60061.33
+[7:05:46 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 119747.836 60038.215
+[7:08:24 PM] blackjack_89:Ju-87B-2(0) was killed at 116033.85 60798.668
+[7:08:24 PM] blackjack_89:Ju-87B-2(1) was killed at 116033.85 60798.668
+[7:08:24 PM] blackjack_89:Ju-87B-2 shot down by landscape at 116033.85 60798.668
+[7:08:30 PM] blackjack_89 has disconnected
+[7:08:54 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 119491.87 61709.375
+[7:09:49 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 126487.984 62087.95
+[7:09:50 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 126615.68 62093.984
+[7:09:51 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 126709.55 62098.4
+[7:10:25 PM] blackjack_89 has connected
+[7:12:39 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:12:39 PM] blackjack_89:Bf-110G-2 loaded weapons 'r3m2sc500' fuel 25%
+[7:12:49 PM] blackjack_89 entered refly menu
+[7:13:30 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:13:30 PM] blackjack_89:Bf-110G-2 loaded weapons '2sc5004sc50' fuel 25%
+[7:13:43 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 130482.28 60678.355
+[7:13:43 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 130512.41 60717.31
+[7:13:51 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 131151.0 61377.867
+[7:13:51 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 131205.52 61421.22
+[7:13:54 PM] blackjack_89 entered refly menu
+[7:13:55 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:13:55 PM] blackjack_89:Bf-110G-2 loaded weapons '2sc5004sc50' fuel 25%
+[7:14:46 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 138136.47 62781.305
+[7:14:47 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 138210.9 62787.54
+[7:14:56 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 139350.78 62882.094
+[7:14:56 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 139409.14 62886.87
+[7:14:58 PM] blackjack_89:Bf-110G-2 in flight at 116264.74 60947.297
+[7:14:59 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 116348.52 60993.977
+[7:15:02 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 116553.24 61086.246
+[7:15:03 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 140294.52 62958.625
+[7:15:04 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 140430.16 62969.5
+[7:15:19 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 142277.73 63114.56
+[7:15:19 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 142343.31 63119.6
+[7:15:41 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 145146.9 63328.527
+[7:15:41 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 145208.45 63332.97
+[7:15:59 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 120646.46 62346.176
+[7:16:04 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 148076.81 63532.84
+[7:16:04 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 148119.1 63535.684
+[7:16:16 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 121907.625 62917.727
+[7:16:38 PM] leon1:Bf-109E-7(0) was wounded at 148807.56 61802.94
+[7:16:42 PM] leon1:Bf-109E-7 landed at 148879.34 61886.105
+[7:16:42 PM] leon1:Bf-109E-7 damaged on the ground at 148879.34 61886.105
+[7:16:46 PM] leon1:Bf-109E-7(0) was heavily wounded at 148879.34 61886.105
+[7:16:51 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 124640.59 63896.98
+[7:16:51 PM] leon1:Bf-109E-7(0) was killed at 148879.34 61886.105
+[7:16:54 PM] ACX has disconnected
+[7:16:55 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 125034.805 63948.363
+[7:16:56 PM] leon1 has disconnected
+[7:17:45 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 129473.734 63828.844
+[7:17:48 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 129651.82 63690.59
+[7:17:50 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 152107.61 65394.414
+[7:17:51 PM] Charly-Lima:A-20C(1) seat occupied by Charly-Lima at 152143.34 65384.137
+[7:17:52 PM] Charly-Lima:A-20C(2) seat occupied by Charly-Lima at 152279.9 65346.81
+[7:17:53 PM] Charly-Lima:A-20C(0) seat occupied by Charly-Lima at 152332.44 65333.434
+[7:18:38 PM] 45_Chief1 destroyed by blackjack_89:Bf-110G-2 at 129668.0 61700.0
+[7:18:38 PM] 45_Chief2 destroyed by blackjack_89:Bf-110G-2 at 129668.0 61688.0
+[7:18:46 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 128729.53 62308.75
+[7:18:46 PM] Charly-Lima:A-20C landed at 155142.17 65202.027
+[7:18:46 PM] Charly-Lima:A-20C damaged on the ground at 155142.17 65202.027
+[7:18:50 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 128709.234 62698.95
+[7:19:05 PM] Charly-Lima entered refly menu
+[7:19:24 PM] Charly-Lima:HurricaneMkIIc(0) seat occupied by Charly-Lima at 155904.89 64883.914
+[7:19:24 PM] Charly-Lima:HurricaneMkIIc loaded weapons 'default' fuel 50%
+[7:20:24 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 128968.6 61754.617
+[7:20:26 PM] Charly-Lima:HurricaneMkIIc in flight at 154072.4 64197.957
+[7:20:28 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 128653.74 61855.168
+[7:20:49 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 126760.47 62513.703
+[7:20:52 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 126470.5 62619.598
+[7:21:31 PM] blackjack_89:Bf-110G-2(1) seat occupied by blackjack_89 at 122642.29 64316.617
+[7:21:34 PM] blackjack_89:Bf-110G-2(0) seat occupied by blackjack_89 at 122360.9 64427.65
+[7:23:24 PM] blackjack_89:Bf-110G-2 landed at 116120.76 60897.42
+[7:23:25 PM] blackjack_89 entered refly menu
+[7:23:41 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:23:41 PM] blackjack_89:Ju-87B-2 loaded weapons '1SC1000' fuel 25%
+[7:24:40 PM] blackjack_89:Ju-87B-2 in flight at 116116.18 60887.598
+[7:25:00 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 117568.18 61181.7
+[7:25:03 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 117814.59 61230.793
+[7:25:41 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 121068.766 61922.918
+[7:25:45 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 121375.375 61971.754
+[7:26:06 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 123251.84 62193.387
+[7:26:10 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 123618.17 62219.18
+[7:26:52 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 127214.39 62174.66
+[7:26:54 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 127436.86 62114.484
+[7:27:41 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 129454.05 60997.7
+[7:27:44 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 129292.836 61014.445
+[7:28:01 PM] leon1 has connected
+[7:28:07 PM] 54_Chief1 destroyed by blackjack_89:Ju-87B-2 at 129668.0 61616.0
+[7:28:07 PM] 54_Chief2 destroyed by blackjack_89:Ju-87B-2 at 129668.0 61604.0
+[7:28:18 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 114830.85 60150.414
+[7:28:18 PM] Seraphim:Bf-110G-2 loaded weapons 'r4' fuel 100%
+[7:28:18 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 129420.42 61326.004
+[7:28:21 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 129178.266 61379.47
+[7:28:24 PM] Seraphim entered refly menu
+[7:28:28 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 114830.85 60150.414
+[7:28:28 PM] Seraphim:Bf-110G-2 loaded weapons 'r4' fuel 100%
+[7:28:47 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 126788.63 61744.69
+[7:28:52 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 126380.74 61769.27
+[7:29:15 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 124252.125 61510.773
+[7:29:19 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 123942.22 61446.94
+[7:29:29 PM] Seraphim:Bf-110G-2 in flight at 116249.914 60817.027
+[7:29:52 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 117899.055 61874.07
+[7:29:56 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 118157.28 62027.9
+[7:30:53 PM] Seraphim:Bf-110G-2 damaged by Charly-Lima:HurricaneMkIIc at 122854.71 60402.94
+[7:31:01 PM] Seraphim:Bf-110G-2(0) bailed out at 123355.62 59873.957
+[7:31:02 PM] Seraphim:Bf-110G-2(1) bailed out at 123441.67 59789.21
+[7:31:07 PM] Seraphim:Bf-110G-2 shot down by Charly-Lima:HurricaneMkIIc at 123765.805 59477.09
+[7:31:11 PM] Seraphim:Bf-110G-2(0) successfully bailed out at 123695.086 59536.87
+[7:31:11 PM] Seraphim:Bf-110G-2(0) was captured at 123695.086 59536.87
+[7:31:11 PM] Seraphim entered refly menu
+[7:31:26 PM] blackjack_89:Ju-87B-2 landed at 115870.54 60702.465
+[7:31:32 PM] blackjack_89 entered refly menu
+[7:31:50 PM] Seraphim:Bf-110G-2(1) successfully bailed out at 123906.91 59335.562
+[7:31:50 PM] Seraphim:Bf-110G-2(1) was captured at 123906.91 59335.562
+[7:31:51 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 114830.85 60150.414
+[7:31:51 PM] Seraphim:Bf-110G-2 loaded weapons 'r4' fuel 100%
+[7:32:11 PM] Seraphim:Bf-110G-2(0) successfully bailed out at 123841.05 59313.914
+[7:32:11 PM] Seraphim:Bf-110G-2(0) was captured at 123841.05 59313.914
+[7:32:15 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 114830.86 60150.406
+[7:32:15 PM] blackjack_89:Bf-109F-4(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:32:15 PM] blackjack_89:Bf-109F-4 loaded weapons 'default' fuel 50%
+[7:32:21 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 114830.86 60150.406
+[7:32:46 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 114852.71 60137.035
+[7:32:49 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 114878.18 60131.742
+[7:33:02 PM] blackjack_89:Bf-109F-4 in flight at 115784.98 60678.9
+[7:33:23 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 116117.805 60887.023
+[7:33:24 PM] Seraphim:Bf-110G-2 in flight at 116174.37 60948.61
+[7:33:28 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 116341.164 61173.81
+[7:33:40 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 116495.305 62028.254
+[7:33:47 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 116521.68 62471.65
+[7:34:08 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 116500.33 63921.938
+[7:34:18 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 116470.28 64672.543
+[7:34:37 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 116960.89 65821.055
+[7:34:50 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 117622.83 66478.15
+[7:35:17 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 119420.23 66896.56
+[7:35:26 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 120197.625 66880.945
+[7:35:26 PM] leon1:Bf-109E-7(0) seat occupied by leon1 at 115013.484 60274.906
+[7:35:26 PM] leon1:Bf-109E-7 loaded weapons '1xSC250' fuel 50%
+[7:35:44 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 121954.38 66804.484
+[7:35:49 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 122408.7 66640.01
+[7:36:08 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 123908.336 65272.965
+[7:36:12 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 124229.664 64938.48
+[7:36:26 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 124930.65 63423.715
+[7:36:29 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 124889.3 63132.16
+[7:36:30 PM] leon1:Bf-109E-7 in flight at 116307.08 60978.25
+[7:37:01 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 122624.62 59794.074
+[7:37:14 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 123239.62 58556.203
+[7:37:56 PM] Seraphim:Bf-110G-2(1) seat occupied by Seraphim at 120437.12 61653.58
+[7:38:13 PM] Seraphim:Bf-110G-2(0) seat occupied by Seraphim at 118659.27 61333.727
+[7:38:33 PM] Seraphim:Bf-110G-2 damaged by Charly-Lima:HurricaneMkIIc at 119092.3 59112.58
+[7:38:37 PM] Seraphim:Bf-110G-2(0) was killed at 119082.73 58718.574
+[7:38:37 PM] Seraphim:Bf-110G-2(1) was killed at 119082.73 58718.574
+[7:38:37 PM] Seraphim:Bf-110G-2 shot down by Charly-Lima:HurricaneMkIIc at 119082.73 58718.574
+[7:38:43 PM] Seraphim has disconnected
+[7:39:44 PM] Seraphim has connected
+[7:39:44 PM] Seraphim has disconnected
+[7:39:45 PM] Seraphim has connected
+[7:39:46 PM] Seraphim has disconnected
+[7:39:48 PM] Charly-Lima:HurricaneMkIIc damaged by landscape at 123617.86 60559.16
+[7:39:49 PM] Charly-Lima:HurricaneMkIIc(0) was killed at 123669.1 60545.562
+[7:39:49 PM] Charly-Lima:HurricaneMkIIc shot down by blackjack_89:Bf-109F-4 at 123669.1 60545.562
+[7:40:14 PM] Seraphim has connected
+[7:40:14 PM] Seraphim has disconnected
+[7:40:17 PM] Seraphim has connected
+[7:40:17 PM] Seraphim has disconnected
+[7:40:19 PM] Seraphim has connected
+[7:40:19 PM] Seraphim has disconnected
+[7:40:23 PM] Seraphim has connected
+[7:40:23 PM] Seraphim has disconnected
+[7:40:27 PM] Charly-Lima entered refly menu
+[7:40:37 PM] Charly-Lima:HurricaneMkIIc(0) seat occupied by Charly-Lima at 155904.89 64883.914
+[7:40:37 PM] Charly-Lima:HurricaneMkIIc loaded weapons 'default' fuel 25%
+[7:41:37 PM] Charly-Lima:HurricaneMkIIc in flight at 154331.31 64370.535
+[7:41:57 PM] blackjack_89:Bf-109F-4 landed at 115719.84 60614.76
+[7:41:59 PM] blackjack_89 entered refly menu
+[7:42:09 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:42:09 PM] blackjack_89:Ju-87B-2 loaded weapons '1SC1000' fuel 50%
+[7:43:03 PM] blackjack_89:Ju-87B-2 in flight at 116074.85 60843.01
+[7:44:08 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 120920.57 60360.254
+[7:44:11 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 121181.29 60416.93
+[7:45:49 PM] 55_Chief1 destroyed by blackjack_89:Ju-87B-2 at 129668.0 61532.0
+[7:45:49 PM] 55_Chief2 destroyed by blackjack_89:Ju-87B-2 at 129668.0 61520.0
+[7:46:05 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 129665.75 61093.383
+[7:46:08 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 129367.516 61101.02
+[7:46:12 PM] 82_Chief7 destroyed by leon1:Bf-109E-7 at 144866.0 60300.0
+[7:46:12 PM] 88_Chief7 destroyed by leon1:Bf-109E-7 at 144878.0 60300.0
+[7:46:35 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 126794.625 61019.508
+[7:46:37 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 126597.59 60999.605
+[7:47:06 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 123760.766 60584.363
+[7:47:09 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 123495.8 60534.824
+[7:47:32 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 121297.75 60397.176
+[7:47:35 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 121076.37 60443.0
+[7:49:26 PM] blackjack_89:Ju-87B-2 landed at 115867.13 60704.598
+[7:49:26 PM] blackjack_89:Ju-87B-2 damaged on the ground at 115867.13 60704.598
+[7:49:31 PM] blackjack_89 entered refly menu
+[7:49:32 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 114868.92 60183.164
+[7:49:32 PM] blackjack_89:Ju-87B-2 loaded weapons '1SC1000' fuel 50%
+[7:50:35 PM] blackjack_89:Ju-87B-2 in flight at 116517.81 60574.688
+[7:51:46 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 122069.45 61539.25
+[7:51:48 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 122261.805 61563.445
+[7:52:28 PM] Charly-Lima:HurricaneMkIIc landed at 154780.66 65195.27
+[7:52:32 PM] Charly-Lima entered refly menu
+[7:52:38 PM] leon1:Bf-109E-7 landed at 115793.67 60628.023
+[7:52:42 PM] leon1 entered refly menu
+[7:52:44 PM] leon1:Bf-109E-7(0) seat occupied by leon1 at 115013.484 60274.906
+[7:52:44 PM] leon1:Bf-109E-7 loaded weapons '1xSC250' fuel 50%
+[7:52:58 PM] Charly-Lima:P-40M(0) seat occupied by Charly-Lima at 155904.89 64883.914
+[7:52:58 PM] Charly-Lima:P-40M loaded weapons '1000lb' fuel 25%
+[7:53:22 PM] 75_Chief1 destroyed by blackjack_89:Ju-87B-2 at 129668.0 61280.0
+[7:53:47 PM] leon1:Bf-109E-7 in flight at 116221.03 60910.86
+[7:54:07 PM] Charly-Lima:P-40M in flight at 153159.53 63736.926
+[7:54:08 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 126752.16 61692.5
+[7:54:12 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 126434.445 61723.168
+[7:54:32 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 124689.82 61770.855
+[7:54:37 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 124336.805 61752.21
+[7:54:44 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 123720.14 61677.895
+[7:54:44 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 123715.17 61677.152
+[7:54:45 PM] blackjack_89:Ju-87B-2(1) seat occupied by blackjack_89 at 123610.65 61661.22
+[7:54:48 PM] blackjack_89:Ju-87B-2(0) seat occupied by blackjack_89 at 123423.76 61632.445
+[7:57:04 PM] blackjack_89:Ju-87B-2 landed at 115881.44 60736.27
+[7:57:06 PM] blackjack_89 entered refly menu
+[7:58:28 PM] 82_Chief5 destroyed by leon1:Bf-109E-7 at 144842.0 60300.0
+[7:58:28 PM] 82_Chief1 destroyed by leon1:Bf-109E-7 at 144794.0 60300.0
+[7:58:28 PM] 82_Chief3 destroyed by leon1:Bf-109E-7 at 144818.0 60300.0
+[7:58:28 PM] 82_Chief4 destroyed by leon1:Bf-109E-7 at 144830.0 60300.0
+[7:58:28 PM] 82_Chief6 destroyed by leon1:Bf-109E-7 at 144854.0 60300.0
+[7:58:28 PM] 88_Chief1 destroyed by leon1:Bf-109E-7 at 144806.0 60300.0
+[7:58:28 PM] 88_Chief2 destroyed by leon1:Bf-109E-7 at 144818.0 60300.0
+[7:58:28 PM] 88_Chief3 destroyed by leon1:Bf-109E-7 at 144830.0 60300.0
+[7:58:28 PM] 88_Chief4 destroyed by leon1:Bf-109E-7 at 144842.0 60300.0
+[7:58:28 PM] 88_Chief5 destroyed by leon1:Bf-109E-7 at 144854.0 60300.0
+[7:58:28 PM] 88_Chief6 destroyed by leon1:Bf-109E-7 at 144866.0 60300.0
+[7:59:02 PM] blackjack_89 has disconnected
+[8:02:33 PM] Mission END

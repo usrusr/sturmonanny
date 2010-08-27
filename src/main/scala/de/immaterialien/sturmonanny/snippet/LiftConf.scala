@@ -8,8 +8,8 @@ import net.liftweb.http.S
 import net.liftweb.http.SHtml
 import net.liftweb.util.Helpers._ 
 
-import de.immaterialien.sturmonanny.util.configgy._
-import de.immaterialien.sturmonanny.global._
+import _root_.de.immaterialien.sturmonanny.util.configgy._
+import _root_.de.immaterialien.sturmonanny.global._
 
 class LiftConf {
    def conf(html:NodeSeq)={
@@ -70,12 +70,12 @@ class LiftConf {
 		</div>
   }
 }
-object LiftConf {
+object LiftConf { 
   def globalConfig = GlobalConfig.singleton
 //  val instances = new Instances()
 
    
-  object isLoggedIn extends SessionVar[Boolean](false)
+  object isLoggedIn extends SessionVar[Boolean](false) 
   def loggedIn(html:NodeSeq) = if(isLoggedIn) html else NodeSeq.Empty
   def loggedOut(html:NodeSeq) = if(isLoggedIn) NodeSeq.Empty else html
 

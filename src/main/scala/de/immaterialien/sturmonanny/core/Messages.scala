@@ -2,9 +2,13 @@ package de.immaterialien.sturmonanny.core
 
 
 
-case class Message()
-case class PilotMessage(who: String, event : Is.Individual) extends Message
-case class PilotMessageAt(override val who : String, override val event : Is.Individual, where:At.Location) extends PilotMessage(who, event)
+class Message
+case class PilotMessage(who: String, event : Is.Individual, where:At.Location) extends Message
+object PilotMessage {
+	def apply(who: String, event : Is.Individual):PilotMessage = apply(who, event, At.Nowhere)
+}
+//case class PilotMessageAt(override val who : String, override val event : Is.Individual, where:At.Location) extends PilotMessage(who, event)
+
 
 case class GlobalMessage(event : Is.Global) extends Message
 
@@ -14,7 +18,9 @@ case class DispatchMessage(message:String) {
 }
 
 object At {
-   case class Location(x:Double, y:Double)
+	trait Location
+   case class Coordinate(x:Double, y:Double) extends Location
+   case object Nowhere extends Location
 }
 
 object Is {  
@@ -41,12 +47,17 @@ object Is {
  	case object LandedAtAirfield extends PilotState 
  	case object KIA extends PilotState with PilotLost
  	case object InFlight extends PilotState
+
+ 	
  	case object HitTheSilk extends PilotState with PlaneLost
  	case object Selecting extends PilotState  
  
-	case class Flying(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
+	case class InPlaneForSide(val plane : String, val side : Armies.Armies) extends PilotEvent with PlaneEvent {
 	  def this(plane:String, side:String) = this(plane, Armies.forName(side )) 
 	}
+	/**
+	 * either coming from refly menu or switching seats inside a plane
+	 */
   case class TakingSeat(plane : String) extends PilotEvent
   case class Loading(plane : String, weapon:String, fuel:Double) extends PilotEvent
   
@@ -64,7 +75,7 @@ object Is {
    	case object Leaving extends PilotEvent
 
     case object Unknown extends Individual with Global 
-    case object Ignored extends Individual with Global 
+    case object Ignored extends PilotState with Global 
    
 //	case object Destroyed extends PlaneLost with PilotLost
 	case class Informed(val text : String) extends PilotEvent

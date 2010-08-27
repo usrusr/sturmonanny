@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.util
 
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
 import scala.collection.mutable 
 
  
@@ -25,7 +25,7 @@ trait Domain[D <: Domain[D]]  extends  Logging{
 //debug("domainactor adding  "+p.name)		     
 		    items.put(p.name, p)
 		  }
-		  case unregister(p) => items.removeKey(p.name)
+		  case unregister(p) => items.remove(p.name)
 	   
     	  case forMatches(pat, body) => {
     	    val founds = find(pat)
@@ -59,7 +59,7 @@ trait Domain[D <: Domain[D]]  extends  Logging{
     private def find(pat:String) : Iterable[this.Element] = {
      if(( pat eq null) || pat.trim.isEmpty){
        items map (_ _2)
-     }else{
+     }else{ 
     	def regexMatchings(reg : scala.util.matching.Regex) = items filterKeys (reg findFirstIn _ isDefined) map (_ _2)
     	 
       	val content = """(\Q"""+pat.replaceAll("""\*""", """\\E.*\\Q""")+"""\E)"""

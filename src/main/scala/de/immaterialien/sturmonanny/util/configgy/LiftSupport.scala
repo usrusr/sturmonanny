@@ -12,14 +12,14 @@ import net.lag.configgy
  * with bindings for "apply" and "save"
  */
 
-trait LiftSupport extends ConfigurationSchema {
+trait LiftSupport extends ConfigurationSchema { 
 	private val self : ConfigurationSchema = this
 	private val form = "cfg"
  
 	object intermediates extends SessionVar[configgy.Config](new configgy.Config)
  
 	def  liftForm:NodeSeq={
-		for(message <- self.status.messages) message match  {
+		for(message <- self.status.messages) message match  { 
 		  case ConfigurationSchema.Warning(msg) => S.warning(msg)
 		  case ConfigurationSchema.Error(msg) => S.error(msg)
 		  case ConfigurationSchema.Success(msg) => S.notice(msg)
@@ -44,12 +44,12 @@ trait LiftSupport extends ConfigurationSchema {
 		        		{internal.map(_ _1)}
               </div>
 	          </div>
-		        , internal.flatMap(_ _2)
+		        , internal.flatMap(_ _2) 
 		      )
 		    }
 		    case table : ConfigurationSchema#Table[_] => {
 
-		      val fullName = table.full
+		      val fullName:String = table.full
 		      val fNode : Elem= new Elem(form, fullName, Null, xml.TopScope)
 		      val binding = table.defaultValue match {
 		        case x:String 	=> {
@@ -59,14 +59,15 @@ trait LiftSupport extends ConfigurationSchema {
 		    	    fullName -> new BooleanTabulator(table.asInstanceOf[ConfigurationSchema#Table[Boolean]])
 		    	  }
 		    	  case x:Int		 	=> {
-							fullName -> new IntegerTabulator(table.asInstanceOf[ConfigurationSchema#Table[Integer]])
+							fullName -> new IntTabulator(table.asInstanceOf[ConfigurationSchema#Table[Int]])
 		    	  }
 		      }
 		      val unbound =
-		    		if(table.documentationString==null || table.documentationString.trim.isEmpty)  
+		    		if(table.documentationString==null || table.documentationString.trim.isEmpty)  {
 			    		(<div class="configgy_label">{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
-			    	else
+		    		}else{
 			    		(<div class="configgy_label" title={table.documentationString}>{table.configgyName}</div><div class="configgy_textarea">{fNode}</div>)
+			    	}
 		      (<div class="configgy_field">{unbound}</div>, binding::Nil)
 		    } 
 		    case field : ConfigurationSchema#Field[_] => {
@@ -84,7 +85,7 @@ trait LiftSupport extends ConfigurationSchema {
 		    	  }
 		    	  case x:Int		 	=> {
 		    		  attributes = new UnprefixedAttribute("title", "full number", attributes)
-							fullName -> new IntegerValidator(field.asInstanceOf[ConfigurationSchema#Field[Integer]])
+							fullName -> new IntValidator(field.asInstanceOf[ConfigurationSchema#Field[Int]])
 		    	  }
        
 		    	}
@@ -109,10 +110,11 @@ trait LiftSupport extends ConfigurationSchema {
 		}
                                 
 		var createdSeq : NodeSeq = Nil
-    createdSeq = tuples.foldLeft(createdSeq){(existing, tuple)=>   
-       params ++ tuple._2
-		   existing ++ tuple._1 
-		} 
+
+		for((node, binding)<-tuples){
+			params ++= binding
+			createdSeq ++= node
+		}
 		val save = new Elem(form, "submitsave", Null, xml.TopScope)
 		val apply = new Elem(form, "submitapply", Null, xml.TopScope)
 		val title = if(documentationString==null || documentationString.trim.isEmpty) 
@@ -128,11 +130,19 @@ trait LiftSupport extends ConfigurationSchema {
     </form>
     
     val paramCopy:List[Bindator] = params.map{
-      case TheBindableBindParam(_, x:Bindator) => Some(x)
-      case _ => None
+//      case TheBindableBindParam(_, x:Bindator) => Some(x)
+//    	case BindParam(_ , x:Bindator) => Some(x)
+//      case _ => None
+    	
+    	param => 
+    	if(param.isInstanceOf[net.liftweb.util.BindHelpers.TheBindParam]) {
+    		val theParamValue = param.asInstanceOf[net.liftweb.util.BindHelpers.TheBindParam].value
+    		if(theParamValue.isInstanceOf[Bindator]) Some(theParamValue.asInstanceOf[Bindator])
+    		else None
+    	}else None
  		}.filter(_ isDefined).map(_ get).toList
     
-    params += "submitapply" -> SHtml.submit("Apply", () => updateConfiguration(paramCopy) )
+    params += ("submitapply" -> SHtml.submit("Apply", () => updateConfiguration(paramCopy) ))
     params += "submitsave" -> SHtml.submit("Save", () => {
 	      if(updateConfiguration(paramCopy)){ 
 	    	  //println("saved "+System.identityHashCode(self)+"\n"+self)
@@ -145,6 +155,7 @@ trait LiftSupport extends ConfigurationSchema {
     })
     
 		var ret = bind(form, formNodes, params :_*)
+		
     ret
 	}
 	def updateConfiguration(paramCopy:Seq[Bindator]):Boolean = {
@@ -216,7 +227,7 @@ trait LiftSupport extends ConfigurationSchema {
       }
     }
   }
-  private class IntegerValidator(receiver : ConfigurationSchema#Field[Integer] ) extends Validator[Integer](receiver){
+  private class IntValidator(receiver : ConfigurationSchema#Field[Int] ) extends Validator[Int](receiver){
     override def asHtml = {
       val attributes = if(receiver.max!=null || receiver.min!=null) {
     	  val biggest : Int = if(receiver.max==null){
@@ -225,7 +236,7 @@ trait LiftSupport extends ConfigurationSchema {
     	    receiver.max.intValue
     	  }else{ 
     	    val max : Int = receiver.max.intValue 
-    	    scala.Math.max(max, (-1 * receiver.min.intValue ))
+    	    math.max(max, (-1 * receiver.min.intValue ))
     	  }
       	val len = 1 + (""+biggest).length
         ("size", ""+len) :: Nil
@@ -310,7 +321,7 @@ trait LiftSupport extends ConfigurationSchema {
     }	
    	def mapKeyValue[R](func : ((String, String)=>R)):Seq[R] = {
    	  intermediates.getConfigMap(receiver.full).map{x => 
-   			x.asMap.projection.toList.map(kv=> func(kv._1, kv._2))
+   			x.asMap.view.toList.map(kv=> func(kv._1, kv._2))
       }.getOrElse(Nil)
    	}
    
@@ -334,15 +345,15 @@ trait LiftSupport extends ConfigurationSchema {
   private class StringTabulator(receiver : ConfigurationSchema#Table[String] ) extends Tabulator[String](receiver){
 
 
-    override def validate(x : String) = {
+    override def validate(x : String):Option[String] = {
           if(receiver.maxLength!=null && (x.length > receiver.maxLength.intValue)) Some("'"+x+"' is longer than the allowed maximum of "+receiver.maxLength+"!")
           else if(receiver.pattern!=null && ! receiver.pattern.unapplySeq(x).isDefined) Some("'"+x+"' does not match the regex pattern "+receiver.pattern+"!")
           None
     }
   }
-  private class IntegerTabulator(receiver : ConfigurationSchema#Table[Integer] ) extends Tabulator[Integer](receiver){
+  private class IntTabulator(receiver : ConfigurationSchema#Table[Int] ) extends Tabulator[Int](receiver){
 
-    override def validate(is : String) = {
+    override def validate(is : String):Option[String] = {
     	if( ! LiftSupport.numberPattern.unapplySeq(is).isDefined) Some("'"+is+"' is not a full number!")   
     	else {
     		val i = is.toInt
@@ -354,7 +365,7 @@ trait LiftSupport extends ConfigurationSchema {
   }
   private class BooleanTabulator(receiver : ConfigurationSchema#Table[Boolean] ) extends Tabulator[Boolean](receiver){
 
-    override def validate(toMatch:String) = {
+    override def validate(toMatch:String):Option[String] = {
       toMatch match {
         case "true" => None 
         case "false" => None 

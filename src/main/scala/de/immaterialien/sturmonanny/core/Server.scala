@@ -1,8 +1,9 @@
 package de.immaterialien.sturmonanny.core 
 
-import de.immaterialien.sturmonanny.util._
-import de.immaterialien.sturmonanny.core._ 
-import de.immaterialien.sturmonanny.fbdjhosting.FbdjAdapter 
+import _root_.de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.core._ 
+import _root_.de.immaterialien.sturmonanny.fbdjhosting.FbdjAdapter 
+import _root_.de.immaterialien.sturmonanny.persistence.BalanceWrapper 
   
 class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) extends Logging{
   def this(initConf:String) = this(initConf, null)
@@ -20,15 +21,17 @@ class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) exten
 	  if(threadGroup!=null) threadGroup.interrupt
    else error("can only shut down if started within a threadgroup")
 	} 
-	
+	val balance = new BalanceWrapper with Member 
 	val rules = new Rules with Member   
 	val pilots = new Pilots with Member   
-	val planes = new Planes with Member     
-	val market = new MarketActor(conf.market.implementation, conf.market.configuration) with Member
+	val planes = new Planes with Member      
+	val market = new MarketActor(conf.market.implementation.apply, conf.market.configuration.apply) with Member
 	val fbdj = new FbdjAdapter with Member
 	val dispatcher = new LocalizedDispatcher with Member
+	val eventlog = new EventLogDispatcher with Member
 
-	val multi = new Multiplexer ("", 0, conf.server.consoleport) with Member
+
+	val multi = new Multiplexer ("", 0, conf.server.consoleport.apply) with Member
  
 //	debug("conf is initialized from '"+initConf+"'\n================\n"+conf)
  
@@ -48,7 +51,7 @@ class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) exten
 trait NonUpdatingMember extends UpdatingMember {
 	override def updateConfiguration=() 
 } 
-trait UpdatingMember { 
+trait UpdatingMember {  
 	def updateConfiguration : Unit 
 	val server : Server = null // overridden by Server#Member
 	def conf  : Configuration = Configuration.default(server)

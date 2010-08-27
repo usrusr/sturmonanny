@@ -9,8 +9,8 @@ import net.liftweb.util.NamedPF
 import net.liftweb.http.LiftRules
 import net.liftweb.sitemap._
  
-import de.immaterialien.sturmonanny.util.configgy._
-import de.immaterialien.sturmonanny.global._
+import _root_.de.immaterialien.sturmonanny.util.configgy._
+import _root_.de.immaterialien.sturmonanny.global._
 
  
 
@@ -35,7 +35,7 @@ println("LiftRules.statelessRewrite updated: "+tmp.statelessRewrite)
 //    Menu(Loc("Configurations", ))
 //  }
   def confLink(name:String):String={
-    "/instance/"+java.net.URLEncoder.encode(name)+"/conf"
+    "/instance/"+java.net.URLEncoder.encode(name, "UTF-8")+"/conf"
     //java.net.URLEncoder.encode(name)
   }
 }

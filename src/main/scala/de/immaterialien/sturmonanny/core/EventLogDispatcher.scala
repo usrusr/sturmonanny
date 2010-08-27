@@ -1,6 +1,6 @@
 package de.immaterialien.sturmonanny.core
 
-import de.immaterialien.sturmonanny.util._
+import _root_.de.immaterialien.sturmonanny.util._
 import scala.util.parsing.combinator._
 import net.liftweb.actor.LiftActor
 import scala.io._
@@ -24,20 +24,22 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 			case e@Error(_,_) => e
 		}
 	}
- 
+	var maxAge = 10 
+ 	
  	def updateConfiguration = {
-
-	}
+			
+	} 
 
  	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
+ 	def allPilotMessageSend(what: Is.Event) = server.pilots.forMatches("")(_!what) 
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
-	  case DispatchMessage(x) => processMessage(x)
+	  case DispatchMessage(x) => processMessage(x) 
 	  case _ => // ignore 
 	}
-
+ 	def parseOneLine(line:String) : ParseResult[_] = parse(rootLineParser, line.stripLineEnd) 
 	def processLine(line:String) : Unit = {
-		val parseResult : ParseResult[_] = parse(rootLineParser, line.stripLineEnd+"\n")
+		val parseResult : ParseResult[_] = parseOneLine( line )
 //debug("-------------------------\nparsing line '"+line+"' \n  -> '"+parseResult+"'")  
 //log.write("/===line:===\n")
 //log.write(line)
@@ -46,14 +48,22 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 //log.write("\n<-------\n")
 //log.flush
 		parseResult.getOrElse(None) match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+line+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored, _) => // ignore
+		      case PilotMessage(who, Is.Unknown, _) => debug("unkown message: '"+line+"'")
+		      case PilotMessage(who, what, _ ) => {
 		    	  pilotMessageSend(who, what)
 debug("success "+who+" -> "+what+"  from '"+line+"'")		        
 		      }
-        case GlobalMessage(Is.MissionChanging(mis)) => {
+		      
+		    case GlobalMessage(Is.MissionChanging(mis)) => {
           server.market.cycle(mis)
+        	allPilotMessageSend(Is.MissionChanging(mis))
+		    }
+        case GlobalMessage(Is.MissionEnd) => {
+        	allPilotMessageSend(Is.MissionEnd)
+        }
+        case GlobalMessage(Is.MissionBegin) => {
+          allPilotMessageSend(Is.MissionBegin)
         } 
 		      case None => {
 debug("no parseResult: None from '"+line+"'")		        
@@ -77,9 +87,9 @@ debug("no parseResult: None from '"+line+"'")
 //log.flush  
 		for (res <- resList) { 
 		  res match { 
-		      case PilotMessage(who, Is.Ignored) => // ignore
-		      case PilotMessage(who, Is.Unknown) => debug("unkown message: '"+lines+"'")
-		      case PilotMessage(who, what ) => {
+		      case PilotMessage(who, Is.Ignored,_) => // ignore
+		      case PilotMessage(who, Is.Unknown,_) => debug("unkown message: '"+lines+"'")
+		      case PilotMessage(who, what ,_) => {
 		    	  pilotMessageSend(who, what)
 //debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
 		       }
@@ -97,6 +107,19 @@ debug("no parseResult: None from '"+line+"'")
 	lazy val lineParser : Parser[Message]= (
 	  dateTimeParser ~> eventParser
 	)
+	
+	lazy val maxAgeLineParser : Parser[Message]= (
+	  (dateTimeParser ~ eventParser) ^^ {
+	  	case date ~ msg => {
+	  		val age = System.currentTimeMillis - date.getTimeInMillis 
+	  		if( age > maxAge*1000) {
+debug("skipping "+msg+" because it is too old: "+(age/1000)+"s")	  			
+	  			GlobalMessage(Is.Ignored)
+	  		}else msg
+	  	}
+	  }
+	)
+	
 	lazy val dateTimeParser : Parser[java.util.Calendar] = (
 	  "[" ~ dayParser  ~ hmsParser ~ ":" ~ hmsParser~":" ~ hmsParser ~ (" AM" ^^^ 0 | " PM" ^^^ 12) ~ "] " 
 	  	^^ { case  _ ~ day ~ hour ~_~ minute ~_~ second ~ amPm ~ _  =>  
@@ -104,7 +127,7 @@ debug("no parseResult: None from '"+line+"'")
 	  	  val x:java.util.Date = day
 	  	  val offs : Int = amPm
 	  	  val ret = Calendar.getInstance
-	  	  ret setTime day
+	  	  if(day!=null) ret setTime day
 	  	  ret set(Calendar.HOUR, hour + amPm)
 	  	  ret set(Calendar.MINUTE, minute)
 	  	  ret set(Calendar.SECOND, second)
@@ -123,7 +146,7 @@ debug("no parseResult: None from '"+line+"'")
  	}
 
 	lazy val hmsParser : Parser[Int] = {
-	  """\d\d""".r ^^ (_ toInt)
+	  """\d\d?""".r ^^ (_ toInt)
 	}
 	lazy val fuelParser : Parser[Int] = {
 	  "fuel "~> """\d+""".r <~"%" ^^ (_ toInt)
@@ -138,14 +161,15 @@ debug("no parseResult: None from '"+line+"'")
         | inFlight
         | landed  
         | wasKilled  
+        | ejected
         | refly
         | disconnecting
  	)
-//    lazy val pilotMessageAtParser : Parser[PilotMessageAt] = {
+//    lazy val PilotMessageParser : Parser[PilotMessage] = {
 //      ( 
 //      ) ~ atLocationParser ^^ 
 //      {
-//        case what ~ where => PilotMessageAt(what.who, what.event, where) 
+//        case what ~ where => PilotMessage(what.who, what.event, where) 
 //      }
 //
 //  }
@@ -156,7 +180,7 @@ debug("no parseResult: None from '"+line+"'")
 //    server.dispatcher.pilotNameParser 
 //  }
   
-  object pilotNameParser extends Parser[String] {
+  object pilotNameParserObj extends Parser[String] {
     def apply(in:Input)={
 			val ret =  server.dispatcher.pilotNameParser.apply(in)
 			
@@ -166,9 +190,36 @@ debug("no parseResult: None from '"+line+"'")
 			  Failure("not a known pilot name", ret.next)
 			}
     }
-    def learnNewName(pilotName:String) = server.dispatcher.pilotNameParser.learnNewName(pilotName)
+ 	}
+ 	def pilotNameParser :  Parser[String] = pilotNameParserObj
+ 	object memorizingPilotNameParserObj extends Parser[String] {
+ 		var state = ""
+ 		def apply(in:Input)={
+			val ret =  pilotNameParser.apply(in)
+			
+			if(ret.successful) {
+				state = ret.asInstanceOf[{def result:String}].result
+//println("memoing pilot "+state)				
+				ret
+			}else{
+//debug("did not find a pilot for memoing: "+in.source)				
+				state = ""
+			  ret
+			}
+    }
+ 	}
+ 	def memorizingPilotNameParser :  Parser[String] = memorizingPilotNameParserObj
+ 	def memoedName :  Parser[String] = {
+ 		memorizingPilotNameParserObj.state ^^ {memoed =>
+println("identified memoed "+memoed) 		
+ 			memoed
+ 		}
+ 	}
+ 	
+ 	
+  def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.learnNewName(pilotName)
     
-  }
+ 	
   /**
    * teaches pilot names to dispatcherparser...
    */
@@ -176,41 +227,54 @@ debug("no parseResult: None from '"+line+"'")
     ".* has connected".r ^^ {all=>
       val pilotName = all.substring(0, all.length-14)
       
-      pilotNameParser.learnNewName(pilotName)
+      learnNewName(pilotName)
 //      pilotNameParser.learnNewName(pilotName)
       PilotMessage(pilotName, Is.Joining)
  	} 
   
-  lazy val planeNumber : Parser[Int] = {
-    "(" ~> """\d+""".r <~ ")" ^^ (_ toInt)
+  case class PlaneAndSeat (plane:String, seat: Int)
+  lazy val planeAndSeat : Parser[PlaneAndSeat] = {
+  	regexMatch("""\:(\S+)\((\d+)\)""") ^^ { both=>
+  		val plane = both.group(1)
+  		val num = both.group(2).toInt
+  		PlaneAndSeat(plane, num)
+  	}
   }
-  lazy val seatOccupied : Parser[PilotMessageAt] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ planeNumber~" seat occupied by " ~ pilotNameParser ~ atLocationParser ^^ {
-      case pilot ~ _ ~ plane ~ planeNum ~ _ ~ p2 ~ at if pilot==p2 => {
-        PilotMessageAt(pilot, Is.TakingSeat(plane), at) 
+  lazy val seatOccupied : Parser[PilotMessage] = {
+    memorizingPilotNameParser ~ planeAndSeat ~" seat occupied by " ~ memoedName ~ atLocationParser ^^ {
+    	case pilot ~ both ~ _ ~ _ ~ at => {
+      	PilotMessage(pilot, Is.TakingSeat(both.plane), at)
+      }
+    }
+  }
+  lazy val ejected : Parser[PilotMessage] = {
+    pilotNameParser ~ planeAndSeat ~" bailed out " ~ atLocationParser ^^ {
+    	case pilot ~ _ ~ _ ~ at => {
+      	PilotMessage(pilot, Is.Ejecting, at)
       }
     }
   }
   
   lazy val loading : Parser[PilotMessage] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ " loaded weapons '" ~ """\S+""".r ~ "'" ~ fuelParser ^^ {
+    pilotNameParser ~ ":" ~ """\S+""".r ~ " loaded weapons '" ~ """[^']+""".r ~ "' " ~ fuelParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ loadout ~ _ ~ fuel => {
         PilotMessage(pilot, Is.Loading(plane, loadout, fuel/100)) 
       }
     }
   }
 
-  lazy val inFlight : Parser[PilotMessageAt] = {
+  lazy val inFlight : Parser[PilotMessage] = {
     pilotNameParser ~ ":" ~ """\S+""".r ~ " in flight "  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ at => {
-        PilotMessageAt(pilot, Is.InFlight, at) 
+debug("inflight event "+new Exception)      	
+        PilotMessage(pilot, Is.InFlight, at) 
       }
     }
   }
-  lazy val landed : Parser[PilotMessageAt] = {
+  lazy val landed : Parser[PilotMessage] = {
     pilotNameParser ~ ":" ~ """\S+""".r ~ " landed "  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ at => {
-        PilotMessageAt(pilot, Is.Returning, at) 
+        PilotMessage(pilot, Is.Returning, at) 
       }
     }
   }
@@ -222,17 +286,18 @@ debug("no parseResult: None from '"+line+"'")
     pilotNameParser <~ " entered refly menu" ^^ (PilotMessage(_, Is.Selecting)) 
   }
   
-  lazy val wasKilled : Parser[PilotMessageAt] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ planeNumber ~ " was killed "  ~ atLocationParser ^^ {
-      case pilot ~ _ ~ plane ~ _ ~ _ ~ at => {
-        PilotMessageAt(pilot, Is.Dying, at) 
+  lazy val wasKilled : Parser[PilotMessage] = {
+    pilotNameParser ~ planeAndSeat ~ " was killed "  ~ atLocationParser ^^ {
+      case pilot ~ plane ~ _ ~ at => {
+        PilotMessage(pilot, Is.Dying, at) 
       }
     }
   }  
 
 	lazy val atLocationParser : Parser[At.Location] = {
 	  " at " ~ simpleDouble ~" "~ simpleDouble ^^ {
-	    case _ ~ x ~ _ ~ y => At.Location(x,y)
+	    case _ ~ x ~ _ ~ y => At.Coordinate(x,y)
+	    case _ => At.Nowhere
 	  }
 	} 
   lazy val simpleDouble : Parser[Double] = {

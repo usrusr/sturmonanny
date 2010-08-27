@@ -1,11 +1,14 @@
 package de.immaterialien.sturmonanny.fbdjhosting
 
-import de.immaterialien.sturmonanny.core
-import de.immaterialien.sturmonanny.util.Logging
+import _root_.de.immaterialien.sturmonanny.core
+
+import _root_.de.immaterialien.sturmonanny.util.Logging
 import scala.collection.immutable
 import java.net.URL
 import net.liftweb.actor.LiftActor
 import java.util.concurrent._
+import javax.xml.ws.Provider
+import java.io.File
 object ContainerPool {
 
   def returnToPool(what:FbdjContainer){
@@ -80,8 +83,8 @@ debug("container pool returning -> "+overridesToPool)
 
 
 class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
-		val overrideUrl = new java.io.File(info.overridesJar).toURL
-  
+		val overrideUrl = new File(info.overridesJar).toURI
+  var adapterNextMissionProxy:Option[Provider[java.io.File]]=None
   override def toString = "FBDj container @ "+info.installationPath+" from "+info.overridesJar
   
 		var outList : java.util.LinkedList[String] = null 
@@ -100,7 +103,7 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
 
   debug("initializing fbdj container @ '"+info.installationPath +"' \n  "+ContainerPool.LoaderStatus.loaderstatus)
 		private val jarFile = new java.io.File(info.installationPath+"/FBDj.jar")
-  	private val jarUrl = jarFile.toURL
+  	private val jarUrl = jarFile.toURI
     
     
   	private val overrideFile = new java.io.File(info.overridesJar)
@@ -132,7 +135,7 @@ class FbdjContainer(val info:ContainerPool.InstallationInfo) extends Logging {
       case _:ClassNotFoundException => // check passed, no FBDj.jar on classpath
     }
     
-  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl, jarUrl), parent)
+  	val classLoader = new java.net.URLClassLoader(Array(overrideUrl.toURL, jarUrl.toURL), parent)
    ContainerPool.LoaderStatus.loaderstatus.registerLoader(classLoader)
 //  	try{
 //  		val connClass = classLoader.loadClass("utility.SocketConnection")
@@ -172,18 +175,27 @@ debug("thread death in "+t.getName)
   		val eventlogOutQueue = connClass.getField("eventlogOutQueue")
   		val startStopInterface = connClass.getField("startStopInterface")
 
-      val newMissionCallback = connClass.getField("startStopInterface")
+      val newMissionCallback = connClass.getField("newMissionCallback")
 
     
   		outList = consoleInQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
   		inList = consoleOutQueueField.get(null).asInstanceOf[java.util.LinkedList[String]]
   		eventList = eventlogOutQueue.get(null).asInstanceOf[java.util.LinkedList[String]]
     
-    	newMissionCallback.set(null, new NextMissionProvider(conf))
+    	//newMissionCallback.set(null, new NextMissionProvider(conf))
+  		newMissionCallback.set(null, new Provider[File]{
+  			override def invoke(i:File):File = adapterNextMissionProxy.map(_.invoke(i)).getOrElse{
+  				warn("nextMissionProvider from adapter not configured!")
+  				i
+  			}
+  		})
 
   		startStopInterface.get(null).asInstanceOf[javax.xml.ws.Provider[String]]
     }catch{
-      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from "+jarUrl+" ")
+      case c:ClassNotFoundException => throw new ClassNotFoundException("Could not load socket connection override from" +
+      		"\n fbdj jar URL: "+jarUrl+" "+
+      		"\n overrides jar URL: "+overrideUrl+"" +
+      		"\n", c)
     }  
   
 		val interface = new Thread(tg, threadName) with javax.xml.ws.Provider[String]{

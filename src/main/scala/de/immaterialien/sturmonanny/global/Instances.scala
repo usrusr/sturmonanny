@@ -1,10 +1,10 @@
 package de.immaterialien.sturmonanny.global
 
-import de.immaterialien.sturmonanny.util.Logging
-import de.immaterialien.sturmonanny.util.configgy
+import _root_.de.immaterialien.sturmonanny.util.Logging
+import _root_.de.immaterialien.sturmonanny.util.configgy
 import scala.collection.mutable
 import scala.collection.immutable
-import de.immaterialien.sturmonanny.core 
+import _root_.de.immaterialien.sturmonanny.core 
 
 class Instances(val fname:String, val instancesMapToLoad : mutable.Map[String, core.Server]) extends configgy.ConfigurationSchema(fname) with configgy.LiftSupport {
   def this()=this("instances.conf", null)
@@ -23,7 +23,7 @@ server2 = "server2.conf"
 println("instances read: "+this+"\n---from---"+in)
     if(instancesMapToLoad!=null) instancesMapToLoad.retain((k,v)=>{
 println("found in map: "+k+" is "+v)
-      if((instancesMapToLoad!=null) && (instancesMapToLoad.keys contains k)){
+      if((instancesMapToLoad!=null) && (instancesMapToLoad contains k)){
 println("keeping "+k)
         true
       }else{

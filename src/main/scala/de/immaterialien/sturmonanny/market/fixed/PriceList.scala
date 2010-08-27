@@ -1,28 +1,24 @@
 package de.immaterialien.sturmonanny.market.fixed
 import net.lag.configgy
-import de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
+import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
 
 class PriceList(file:String) extends ConfigurationSchema(file) {
 	object planes extends Table(0)  {
-	doc = """ Beispiel:
+	doc = """ 
+Beispiel:
 	<planes>
-	  La-5FN = 50
-	  La-5F = 40
-	  Pe-2series110 = -100 
-	  Il-2_3 = -80
-	  Il-2M_Late = -70
+      # F6F-3 mit default loadout (oder einem nicht anderweitig aufgeführten loadout) gibt 100 pro Minute:
+      F6F-3 = -100   
 
+      # das gleiche Flugzeug mit loadout 6xhvarap kostet 50 pro Minute:
+      F6F-3_6xhvarap = 50
 
-	Bf-109G-2=30
-	Bf-109G-6_Late=40
-	Fw-190F-8=60
-	He-111H-6=-100
-	IAR81c=-80
-	Ju-87D-5=-60
-	Ju-87G-1=-70
-	Ju-88A-4=-70
- 
+      # Achtung: in einigen Loadout-Bezeichnungen wird "*" oder "+" verwendet, 
+      # dies kann für die Bezeichnung hier leider nicht verwendet werden und ist hier durch "x" (für "*") 
+      # zu ersetzen bzw. zu entfernen (für "+") 
+      # Aus 1*ParaFlare+6*10kg würde also 1xParaFlare6x10kg, was dem Bezeichnungsmuster der original-1C-Loadouts entspricht 
+			S-328_1xParaFlare6x10kg = 20
 	</planes>
 """
 	}
