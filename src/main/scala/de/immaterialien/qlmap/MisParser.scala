@@ -74,26 +74,6 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
   }
   lazy val chiefHeaders: Parser[Unit] = {
     rep(chiefDefinition
-//   )  ~> rep((
-////opt(rep(emptyLine))~>
-//        chiefNameIni ~ 
-//            (
-////opt(rep(emptyLine))~>
-//            waypoint <~ double ~ double ~ double) ~
-//            rep(
-////opt(rep(emptyLine))~>
-//            waypoint
-//            ) 
-//            
-//        ) ^^ {
-//          case name ~ first ~ rest  => {
-//println("name:"+name+" first:"+first+" rest:"+rest)            
-//            val chief = out.chiefs(name)
-//            chief.waypoint(first)
-//            for(wp<-rest) chief.waypoint(wp)
-//          }
-//        }
-//    )
     )^^^()
   }
   
@@ -123,7 +103,7 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
   
   lazy val chiefDefinition: Parser[Unit] = {
     //14_Chief Armor.4-PzVA 2
-    "\\s*".r~>"[^\\[\\s]\\S*".r ~ ("""[^\.]+\.""".r ~> "\\S+".r) ~ int ^^ {
+    "\\s*".r~>"[^\\[\\s]\\S*".r ~ ("""[^\.]+\.""".r ~> "\\S+".r) ~ int <~ opt(double~double~double) ^^ {
       case name ~ className ~ side => {
         val cls = grounds.get(className)
         if (cls.isEmpty) {

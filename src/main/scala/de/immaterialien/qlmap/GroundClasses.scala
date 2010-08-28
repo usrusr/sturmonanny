@@ -120,6 +120,7 @@ object GroundClass extends Enumeration with Log {
   val Airfield = GC (1, "Airfield") 
  val Unidentified = GC (1, "Unidentified")
  val ChiefMove = GC (0, "ChiefMove")
+ val ChiefStand = GC (0, "ChiefStand")
   
  implicit def vtogc(v: Value): GC = v.asInstanceOf[GC]
 

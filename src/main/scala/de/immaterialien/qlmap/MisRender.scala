@@ -13,7 +13,7 @@ object MisRender extends Log {
   val leadingDigits = """(\d+)\D.*""".r
   val containsColumn = """.*Column.*""".r
   val containsTrain = """.*Train.*""".r
-  val debugMode = false
+  val debugMode = true
   def paint(forMission: io.File, model: MisModel, mapBase: MapBase): Option[io.File] = try {
     val outputPath = mapBase.configuration.flatMap(_.outPath)
     val sprites: Sprites = new Sprites(Some(mapBase.folder))
@@ -90,7 +90,10 @@ private class MisRender(
    * @param markers
    * @return
    */
-  def sideVal(x: Double, y: Double, markers: List[(Double, Double)]): Double = {
+  def sideVal(x: Double, y: Double, markers: List[(Double, Double)]): Double = {import math._  
+  	sideValWithLimits(max(0D, min(1D, x)), max(0D, min(1D, y)), markers) 
+  }
+  private def sideValWithLimits(x: Double, y: Double, markers: List[(Double, Double)]): Double = {
     val sideIndex = if (markers eq model.rfront) 0 else 1
     //println("x:"+x+" y:"+y)    
     def buffered(ix: Int, iy: Int): Double = {
@@ -104,8 +107,8 @@ private class MisRender(
       }
     }
 
-    val ix = Math.floor(x * xsvr).toInt
-    val iy = Math.floor(y * ysvr).toInt
+    val ix = math.floor(x * xsvr).toInt
+    val iy = math.floor(y * ysvr).toInt
     var ww = {
       val ll = buffered(ix, iy)
       val hl = buffered(ix + 1, iy)
@@ -142,12 +145,12 @@ private class MisRender(
       val (px, py) = coord
       val xd = (x * model.width - (px - model.widthOffset))
       val yd = (y * model.height - (py - model.heightOffset))
-      val dist = Math.sqrt(xd * xd + yd * yd)
+      val dist = math.sqrt(xd * xd + yd * yd)
       val dimension = model.width + model.height
-      val add = (Math.pow(dimension / dist, 3)) / dist
+      val add = (math.pow(dimension / dist, 3)) / dist
       //       val add = dimension*dimension*dimension/(dist*dist*dist*dist)
       //       val add = dimension*dimension/ (dist*dist*dist) 
-      (acc._1 + add, Math.max(acc._2, add))
+      (acc._1 + add, math.max(acc._2, add))
     }))
 
     (ret._1 / markers.size) * 1 + ret._2
@@ -156,8 +159,8 @@ private class MisRender(
   def sequence(in: BufferedImage) {
     veil()
     veil()
-        hatch() 
-        front(4, 2)
+//        hatch() 
+//        front(4, 2)
     units()
     airfields()
   }
@@ -183,7 +186,7 @@ private class MisRender(
     }
   }
   private def calculateScale(number:Int)={
-    val c = 0.20+(Math.log(number)*0.12)
+    val c = 0.20+(math.log(number)*0.12)
 //    var s = 0.3
 //    var d = number.toDouble
 //    while (d / 2 > 2) {
@@ -203,7 +206,7 @@ private class MisRender(
       def dist(ax: Double, ay: Double) = {
         val dx = ax - mx
         val dy = ay - my
-        Math.sqrt(dx * dx + dy * dy)
+        math.sqrt(dx * dx + dy * dy)
       }
       class Counter {
         var i = 0d
@@ -218,7 +221,7 @@ private class MisRender(
          * weight within the radius is constant, drops off gently outside 
          */
         def addSoft(ax: Double, ay: Double) = {
-          val update = radius / Math.min(radius, dist(ax, ay))
+          val update = radius / math.min(radius, dist(ax, ay))
           val countUpdate = if (radius > dist(ax, ay)) 1d else 0d
           i = i + update
           num += countUpdate.toInt
@@ -334,7 +337,7 @@ private class MisRender(
         val px = rx * iw
         val py = ih - ry * ih
 
-        val scale = 0.3D + (Math.log(count) * 0.02)
+        val scale = 0.3D + (math.log(count) * 0.02)
 
         val (who, depth) = whoAndDeepness(rx, ry, 1000)
         val weight = count
@@ -360,7 +363,12 @@ private class MisRender(
             ig2.setColor(awt.Color.white)
             ig2.drawLine(px.toInt, py.toInt, lastX, lastY)
           }
-          val sumsCount = chief.path.take(15).takeRight(5).foldLeft(0D, 0D, 0) { (acc, us) =>
+          var skipFirst = 15
+          var useMax = 5
+//          skipFirst = 0
+//          useMax = 0
+          
+          val sumsCount = chief.path.take(skipFirst).takeRight(useMax).foldLeft(0D, 0D, 0) { (acc, us) =>
             (acc._1 + us._1, acc._2 + us._2, acc._3 + 1)
           }
           val (avgX, avgY) = {
@@ -373,12 +381,19 @@ private class MisRender(
 
           val difX = avgX - px
           val difY = avgY - py
-          val len = Math.sqrt((difX * difX) + (difY * difY)
+          val len = math.sqrt((difX * difX) + (difY * difY)
             )
-          //ig2.setColor(awt.Color.BLACK)      
-          //ig2.drawOval(avgX.toInt-4, avgY.toInt-4,8,8)      
-          //println("arrow at "+avgX+","+avgY+" len :"+len) 
-          drawObject(px.toInt, py.toInt, scale * 4D, side, 1000, GroundClass.ChiefMove, Some((difX, difY)))
+          if(debugMode){
+          	ig2.setColor(awt.Color.BLACK)      
+          	ig2.drawOval(avgX.toInt-4, avgY.toInt-4,8,8)
+          }
+          println("arrow at "+avgX+","+avgY+" len :"+len) 
+          if(len>10){
+          	drawObject(px.toInt, py.toInt, scale * 4D, side, 1000, GroundClass.ChiefMove, Some((difX, difY)))
+          }else{
+          	val dir = if(difX!=0) difX else if(difY!=0) difY else (side.toDouble - 1.5)
+          	drawObject(px.toInt, py.toInt, scale * 3D, side, 1000, GroundClass.ChiefStand, Some(dir, -math.abs(dir)))
+          }
           drawObject(px.toInt, py.toInt, scale, side, 255, cls)
         }
       }
@@ -399,7 +414,7 @@ private class MisRender(
 
     drawInit
     ig2.freeze {
-      val colDepth = Math.max(0, Math.min(depth / 2, 255))
+      val colDepth = math.max(0, math.min(depth / 2, 255))
       //try{
       // set criteria to > 0 for disabling long range visibility of fuel etc
       if (colDepth >= 0) {
@@ -436,11 +451,11 @@ private class MisRender(
     import java.awt.geom._
 
     if (!randomize) (x, y) else {
-      val direction = Math.Pi * ((x, y).hashCode % 720).toDouble / 360
-      val distance = Math.min(10D, 200D * Math.sqrt(depth))
+      val direction = math.Pi * ((x, y).hashCode % 720).toDouble / 360
+      val distance = math.min(10D, 200D * math.sqrt(depth))
 
-      val ret = (x + (Math.cos(direction) * distance).toInt,
-        y + (Math.sin(direction) * distance).toInt)
+      val ret = (x + (math.cos(direction) * distance).toInt,
+        y + (math.sin(direction) * distance).toInt)
       ret
     }
 
@@ -476,7 +491,7 @@ private class MisRender(
     def differentSides(vals: Double*): Boolean = {
       def signum(d: Double): Double = {
         if (d.isNaN || Double.NaN == d) 0
-        else Math.signum(d)
+        else math.signum(d)
       }
       val sig = signum(vals.first)
       vals.exists(x => signum(x) != sig)
@@ -485,7 +500,7 @@ private class MisRender(
 
       val max = 200
       val min = 50
-      val deep = (Math.min(max, min + (max - min).toDouble * Math.abs(me / dimension)) / scale).toInt
+      val deep = (math.min(max, min + (max - min).toDouble * math.abs(me / dimension)) / scale).toInt
       if (me < 0) ig2.setColor(new java.awt.Color(255, 100, 0, deep))
       else if (me > 0) ig2.setColor(new java.awt.Color(0, 100, 255, deep))
 
@@ -590,22 +605,22 @@ private class MisRender(
       val min = 0
 
       val offset = 0
-      //var deep = min+((max-min)*Math.pow((them+offset)/(offset+us-them), 1.)).toInt
-      var deep = max - ((max - min) * Math.pow((us - them) / (us + us * them), 1)).toInt
-      //            var deep = max-((max-min)*Math.pow(((us-them)/(us+us*them * ((us-(them+threshold))))), 4)).toInt    
+      //var deep = min+((max-min)*math.pow((them+offset)/(offset+us-them), 1.)).toInt
+      var deep = max - ((max - min) * math.pow((us - them) / (us + us * them), 1)).toInt
+      //            var deep = max-((max-min)*math.pow(((us-them)/(us+us*them * ((us-(them+threshold))))), 4)).toInt    
 
-      deep = Math.min(max, deep)
+      deep = math.min(max, deep)
 
       if (advantage < threshold) {
         val out = advantage / threshold
         deep = deep - (deep * (1 - out)).toInt
-        deep = Math.min(max, deep)
+        deep = math.min(max, deep)
       }
 
-      //deep = deep + (255*Math.min(0, us-(them+threshold)/(us-them))).toInt
+      //deep = deep + (255*math.min(0, us-(them+threshold)/(us-them))).toInt
 
-      //            var deep = max-((max-min)*Math.pow((us+10)/(10+us-them), 0.1)).toInt                                                             
-      deep = Math.max(0, deep)
+      //            var deep = max-((max-min)*math.pow((us+10)/(10+us-them), 0.1)).toInt                                                             
+      deep = math.max(0, deep)
       (who, deep)
     } else (0, 0)
   }

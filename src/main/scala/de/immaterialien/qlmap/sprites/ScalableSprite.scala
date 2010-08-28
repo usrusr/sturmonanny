@@ -31,7 +31,7 @@ object ScalableSprite {
   val factory = new svg.SAXSVGDocumentFactory(parser, false)
 
   factory.setValidating(false)
-  val hueRotation = Math.Pi.toFloat / 3f
+  val hueRotation = math.Pi.toFloat / 3f
 
   def create(cls: GC, side: Int, mapBaseFolder: Option[File]): Option[Paintable] = {
     val fname: String = (cls match {
@@ -187,7 +187,7 @@ class ScalableSprite(r: batik.gvt.RootGraphicsNode, side: Int) extends Log with 
     val (halfX, halfY) = 
 //      (dimensions._1/2, dimensions._2/2)
     {
-      val max = Math.max(dimensions._1, dimensions._2)/2
+      val max = math.max(dimensions._1, dimensions._2)/2
       (max,max)
     }
 //      {
