@@ -126,7 +126,8 @@ println("commit plane price "+state)
 			// call when it is definitely known that the pilot is fresh in a plane
 			def definitelyInPlane() {
 				refund () =0
-				invitations.retain(((x,y) => y.until > System.currentTimeMillis))
+				//invitations.value.retain(((x,y) => y.until > System.currentTimeMillis))
+				
 				planePrice = server.market.getPrice(planeName, load)
 				lostPlaneName = ""
 				val now = System.currentTimeMillis

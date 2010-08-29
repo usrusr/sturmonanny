@@ -73,7 +73,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   class ChatTo(val who: String, val what: String) extends UpCommand("chat " + what + " TO \"" + who + "\"")
   class ChatBroadcast(val what: String) extends UpCommand("chat " + what + " ALL")
   class ChatArmy(val what: String, val army: Armies.Armies) extends UpCommand("chat " + what + " ARMY " + army)
-  class Kick(val who: String) extends UpCommand("kick \"" + who + "\"")
+//  class Kick(val who: String) extends UpCommand("kick \"" + who + "\"")
 
   object promptNotifier;
 
