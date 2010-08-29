@@ -20,11 +20,20 @@ class MisModel {
   class Chief(
     var side:Option[Int]=None,
     var cls : GroundClass.GC = GroundClass.Unidentified,
-    var path:List[(Double, Double)]=Nil
+    var path:List[(Double, Double)]=Nil,
+    var count :Int=1
   ){  
-    def classSide(cls : GroundClass.GC, side:Int){
+    def classSideClassName(cls : GroundClass.GC, side:Int, className:String){
       this.side = Some(side)
       this.cls = cls
+      
+      count = 1 *(className match {
+        case MisRender.leadingDigits(nums) => math.max(nums.toInt, 1)
+        case MisRender.containsColumn() => 5
+        case MisRender.containsTrain() => 10
+        case _ => 1
+      })
+      
     }
     def waypoint(xy:(Double,Double)){
       path = path ::: xy ::Nil

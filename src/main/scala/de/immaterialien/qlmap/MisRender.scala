@@ -13,7 +13,7 @@ object MisRender extends Log {
   val leadingDigits = """(\d+)\D.*""".r
   val containsColumn = """.*Column.*""".r
   val containsTrain = """.*Train.*""".r
-  val debugMode = true
+  var debugMode = false
   def paint(forMission: io.File, model: MisModel, mapBase: MapBase): Option[io.File] = try {
     val outputPath = mapBase.configuration.flatMap(_.outPath)
     val sprites: Sprites = new Sprites(Some(mapBase.folder))
@@ -157,10 +157,10 @@ private class MisRender(
   }
 
   def sequence(in: BufferedImage) {
-    veil()
-    veil()
-//        hatch() 
-//        front(4, 2)
+//    veil()
+//    veil()
+        hatch() 
+        front(4, 2)
     units()
     airfields()
   }
@@ -311,22 +311,94 @@ private class MisRender(
         }
       }
     }
+    
+    def groupChiefs = { import model.Chief // interesting instance-import!
+    	val groupedMap = new mutable.HashMap[String, ChiefGroup]
+    	class ChiefGroup(val name:String,  val chief:Chief, val members:List[String]){
+    		private var memberOfBigger=false
+    		def use() = memberOfBigger=true
+    		def used = memberOfBigger
+    		def unused = ! memberOfBigger
+    		lazy val memberChiefs = {
+println("members of "+name+" : "+members)    			
+    			members.map(groupedMap(_)).toList
+    		}
+    		val count = chief.count
+    		//def size = memberChiefs.count( _ unused)
+    		def size = memberChiefs.filter(_ unused).map(_ count).foldLeft[Int](0)(_+_)
+    		def isBigger0 = size>0
+    	}
+    	
+    	for ((name, chief) <- model.chiefs) if( ! chief.path.isEmpty){
+    		groupedMap.put(name, {
+    			val ourStart = chief.path.firstOption.get
+    			val ourEnd = chief.path.lastOption.get
+    			new ChiefGroup(name, chief, model.chiefs.filter{ case(on, oc) => 
+	    			if(
+	    					oc.path.isEmpty || 
+	    					chief.side!=oc.side ||
+	    					chief.cls != oc.cls
+	    			) false else {
+	    				val theirStart = oc.path.firstOption.get
+	    				val theirEnd = oc.path.lastOption.get
+	    				
+	    				val xDiffStart = theirStart._1-ourStart._1 
+	    				val yDiffStart = theirStart._2-ourStart._2 
+	    				val xDiffEnd = theirEnd._1-ourEnd._1 
+	    				val yDiffEnd = theirEnd._2-ourEnd._2 
+	    				val distanceStart = math.sqrt(xDiffStart*xDiffStart+yDiffStart*yDiffStart)
+	    				val distanceEnd = math.sqrt(xDiffEnd*xDiffEnd+yDiffEnd*yDiffEnd)
+	    				
+	    				(distanceStart+distanceEnd < 5000)
+	    			}
+    			}.map(_ _1).toList)
+    		})
+    	}
+    	
+    	var ret : List[(Chief, Int)] = Nil
+    	
+    	var nonempties = groupedMap.values.toList
+    	while( ! nonempties.isEmpty){
+    		val biggest = nonempties.max(Ordering[Int].on{cg:ChiefGroup =>cg.size})
+    		ret = (biggest.chief, biggest.size) :: ret
+    		for(m<-biggest.memberChiefs) m.use()
+    		nonempties = groupedMap.values.filter(_ isBigger0).toList
+    	}
+    	
+    	ret
+    }
+    
     def forChiefs {
       println("drawing " + model.chiefs.size + " chiefs")
       for ((name, chief) <- model.chiefs) {
         println(name + " side:" + chief.side + " -> " + chief.path)
       }
-      for ((name, chief) <- model.chiefs) if (chief.side.isDefined && !chief.path.isEmpty) {
+      
+      val doGroupChiefs = true &&
+//      	false &&
+      	true
+       
+      val countedChiefs = if(doGroupChiefs) {
+    		groupChiefs 
+    	} else {
+    		model.chiefs.values
+    			.filter{chief => chief.side.isDefined && !chief.path.isEmpty}
+    			.map{chief=>(chief, chief.count)}
+    			.toList
+    	}
+//      for ((name, chief) <- model.chiefs) if (chief.side.isDefined && !chief.path.isEmpty) {
+//      	val count = name match {
+//          case MisRender.leadingDigits(nums) => nums.toInt
+//          case MisRender.containsColumn() => 5
+//          case MisRender.containsTrain() => 10
+//        }
+//      for((chief, count)<- groupChiefs)	{
+      for((chief, count)<- countedChiefs)	{
         val side = chief.side.get
         val start = chief.path.head
         val end = chief.path.lastOption.get
         val cls = chief.cls
 
-        val count = name match {
-          case MisRender.leadingDigits(nums) => nums.toInt
-          case MisRender.containsColumn() => 5
-          case MisRender.containsTrain() => 10
-        }
 
         //        val (ex, ey) = end
         val (x, y) = start
@@ -341,7 +413,7 @@ private class MisRender(
 
         val (who, depth) = whoAndDeepness(rx, ry, 1000)
         val weight = count
-        if (who!=side || cls.weight * cls.weight * weight + weight * depth * depth > 100000000) {
+        if (who!=side || cls.weight * cls.weight * weight + weight * depth * depth > 1000000) {
 
           println("chief " + cls + " at " + px + "," + py + " count:" + count + " scale:" + scale)
 
@@ -392,7 +464,7 @@ private class MisRender(
           	drawObject(px.toInt, py.toInt, scale * 4D, side, 1000, GroundClass.ChiefMove, Some((difX, difY)))
           }else{
           	val dir = if(difX!=0) difX else if(difY!=0) difY else (side.toDouble - 1.5)
-          	drawObject(px.toInt, py.toInt, scale * 3D, side, 1000, GroundClass.ChiefStand, Some(dir, -math.abs(dir)))
+          	drawObject(px.toInt, py.toInt, scale * 2.5D, side, 1000, GroundClass.ChiefStand, Some(dir, -math.abs(dir)))
           }
           drawObject(px.toInt, py.toInt, scale, side, 255, cls)
         }

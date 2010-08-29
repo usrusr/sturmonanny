@@ -13,8 +13,8 @@ object RenderAll {
 
   }  
   def main(args: Array[String]): Unit = {
-    val misPath = new io.File("src/test/resources")
-    val mapBase = new io.File("src/main/resources/mapbase")
+    val misPath = new io.File("../qlmap/src/test/resources")
+    val mapBase = new io.File("../qlmap/src/main/resources/mapbase")
 
     var pat = ".*".r
 //        pat = "Berlin.*".r

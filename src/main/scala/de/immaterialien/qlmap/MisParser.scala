@@ -111,7 +111,7 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
 println("multi: "+grounds.multi)          
 println("static: "+grounds.static)          
         } else {
-          out.chiefs(name).classSide(cls.get, side)
+          out.chiefs(name).classSideClassName(cls.get, side, className)
         }
       }
     }
