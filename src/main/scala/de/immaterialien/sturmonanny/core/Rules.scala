@@ -6,22 +6,45 @@ import _root_.de.immaterialien.sturmonanny.util.Logging
 
 class Rules extends NonUpdatingMember with Logging {
   import Rules._
-  def startCost(price: Double) = price * conf.game.startcost.apply
-  def startCostCheck(price: Double, balance: Double): Rules.CostResult = {
-    if (price > 0) {
-      val cost = startCost(price)
-      val newBalance = balance - cost
-      if (newBalance > 0) {
-        Rules.CostResult(true, updateBalance(balance, -cost), 100 * cost / conf.game.refund.apply, cost)
-      } else {
-        Rules.CostResult(false, balance, 0, cost)
-      }
-    } else {
-      // jumping in a negatively priced plane does not immediately change the balance
-      Rules.CostResult(true, balance, 0, 0)
+  def startCost(price:Double):Double = math.max(0D, price * conf.game.startcost.apply)
+  def startCost(price: Double, pilot:String, recruiter:Option[String], side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]):PriceInfo = {
+  	val cost:Double = startCost(price)
+  	if(cost==0D) emptyPrice else {
+	  	val list = if(recruiter.isDefined){
+	  		val cruiterPart = recruiterPercents.toDouble/100D
+	  		val recruitPart = 1D-cruiterPart
+	  		Payment(pilot, cost*recruitPart)::Payment(recruiter.get, cost*cruiterPart)::Nil
+	  	}else{
+	  		Payment(pilot, cost)::Nil
+	  	}
+//	  					val invitation = invites.current
+//				val side = firstNonNeutral(invitation.map(_.inv.side))
 
-    }
+	  	PriceInfo(cost, list,side, invitation)
+  	}
   }
+//  def startCostCheck(price: Double, balance: Double, invite:Option[AutoInvitations#InvitationState#Invitation]): Rules.CostResult = {
+//    if (price > 0) {
+//      val cost = startCost(price)
+//      val recruitFactor = if(invite.isDefined) recruitPercents.toDouble/100D else 1D
+//      val cruiterFactor = 1D-recruitFactor
+//      
+//      val myCost = recruitFactor * cost 
+//      val cruiterCost = cruiterFactor * cost
+//      val newBalance = balance - myCost
+//      if (newBalance > 0) {
+//        Rules.CostResult(true, updateBalance(balance, -cost), 100 * cost / conf.game.refund.apply, cost)
+//      } else {
+//        Rules.CostResult(false, balance, 0, cost)
+//      }
+//    } else {
+//      // jumping in a negatively priced plane does not immediately change the balance
+//      Rules.CostResult(true, balance, 0, 0)
+//
+//    }
+//  }
+  
+  def refund = (conf.game.refund.apply.toDouble / 100D) 
   def updateBalance(old: Double, diff: Double): Double = {
     val ret = old + diff
     val lowest = conf.pilots.lowestBalance.apply
@@ -33,7 +56,10 @@ class Rules extends NonUpdatingMember with Logging {
   def calculateDeathPause: Long = {
     System.currentTimeMillis + (1000 * conf.pilots.deathpenalty.apply)
   }
-
+  def recruiterPercents = {
+  	math.max(0, math.min(100, conf.recruiting.recruitshare.apply))
+  }
+  def recruitPercents = 100 - recruiterPercents
   def warnPlane(who: String, plane: String, load: Option[String], since: Long, balance: Double) {
     val multi = server.multi
     var difference = System.currentTimeMillis - since
@@ -78,7 +104,7 @@ class Rules extends NonUpdatingMember with Logging {
 
   //	def kick(who : String, reason:String="unspecified reasons"){
   def kick(who: String, reason: String) {
-    val cmdString: String = server.conf.game.kickCommand
+    val cmdString: String = server.conf.game.kickCommand.apply
     val split = escapedNewline.split(cmdString)
     var timeAcc = 0
     /**
@@ -105,19 +131,14 @@ class Rules extends NonUpdatingMember with Logging {
       else LAPinger.schedule(server.multi, command, secs * 1000)
     }
   }
-  def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, invitations: mutable.Map[IMarket.Loadout, Pilots.Invitation]) {
+  def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, inviteString:Option[String]) {
     val multi = server.multi
     var difference = System.currentTimeMillis - since
     val pauseDuration = conf.game.planeWarningsSeconds.apply
     val remaining = (pauseDuration * 1000) - difference
     val seconds: Long = remaining / 1000
 
-    cleanInvitations(invitations)
-    val inviteString = invitations.values.toList match {
-      case Nil => None
-      case first :: Nil => Some(first.plane + " (with " + first.by + ")")
-      case x => Some(x.map(_.plane).mkString(", "))
-    }
+
 
     if (what == null || what.trim.isEmpty) {
 
@@ -150,9 +171,15 @@ class Rules extends NonUpdatingMember with Logging {
   }
 }
 object Rules {
-	def cleanInvitations(invitations:mutable.Map[IMarket.Loadout, Pilots.Invitation])=invitations.retain(((x,y) => y.until > System.currentTimeMillis))
   private val escapedNewline = """\s*\\n\s*""".r
   private val escapedNumber = """\(\s*(\d+)\s*\)(.*)""".r
   private val headVarTail = """^(.*?)\$(name|qname|reason)(.*)$""".r
-  case class CostResult(val allowed: Boolean, newBalance: Double, refund: Double, startFee: Double)
+  case class CostResult(val allowed: Boolean, fullPayments : List[Payment])
+  case class Payment(who:String, what:Double)
+  case class PriceInfo(price:Double, payments:List[Payment], side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]){
+  	def forPilot(name:String)={
+  		payments.find(_.who == name).map(_ what).getOrElse(0D)
+  	}
+  }
+  val emptyPrice = PriceInfo(0D, Nil, Armies.None, None)
 }

@@ -28,8 +28,14 @@ object Armies extends Enumeration("Red", "Blue", "None") {
 //println("updating "+provider.currentSide+" "+this.getClass.getSimpleName+" to  "+body )
       update(provider, body)
     }
-    def update(which:SideProvider, body : => T):Unit = which currentSide match {
-		case Red => red = body
+    def update(which:SideProvider, body : => T):Unit = update(which.currentSide, body)
+//    def update(which:SideProvider, body : => T):Unit = which currentSide match {
+//			case Red => red = body
+//	    case Blue => blue = body  
+//	    case _ => none = body 
+//    }
+    def update(which:Armies, body : => T):Unit = which match {
+			case Red => red = body
 	    case Blue => blue = body  
 	    case _ => none = body 
     }
@@ -42,11 +48,18 @@ object Armies extends Enumeration("Red", "Blue", "None") {
 	protected var blue : T = x 
 	protected var none : T = x
 
-    def apply(which:SideProvider) : T = which currentSide match {
-		case Red => red 
-	    case Blue => blue  
+		def apply(which:SideProvider) : T = apply(which currentSide)
+//    def apply(which:SideProvider) : T = which currentSide match {
+//			case Red => red 
+//	    case Blue => blue  
+//	    case _ => none 
+//    }
+    def apply(which:Armies.Armies) : T = which match {
+			case Red => red 
+	    case Blue => blue   
 	    case _ => none 
     } 
+	
     def apply : T = apply(provider)
     def value = apply
     def other = apply(provider.other)
@@ -78,9 +91,17 @@ trait SideProvider{
 	} 
   
 	private var internalSide = Armies.None
-	def currentSide() = internalSide
-	def currentSide_=(in : Armies.Value) = internalSide = in 
-
+	private var lastSide = Armies.None
+	def currentSide = internalSide
+	def previousSide = lastSide
+	def currentSide_=(in : Armies.Value) = {
+		if(internalSide!=Armies.None) lastSide=internalSide 
+		internalSide = in 
+	}
+	def joinNeutral() = currentSide = Armies.None
+	def joinRed() = currentSide = Armies.Red
+	def joinBlue() = currentSide = Armies.Blue
+	
 	def switchSides = internalSide = other.currentSide
  
 	object Army {

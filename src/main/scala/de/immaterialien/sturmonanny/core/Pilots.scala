@@ -8,7 +8,7 @@ import net.liftweb.actor
 
 
 
-class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember with Logging{
+class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember with Logging{ import Pilots._
 	case class ClearToFly(pilot:Pilot, deathPauseUntil:Long)
 	override def messageHandler = {
 		case ClearToFly(pilot, deathPauseUntil) => if(deathPauseUntil == pilot.state.deathPauseUntil){
@@ -18,8 +18,8 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 	override def newElement(name:String) = new Pilot(name)
 	class Pilot(override val name : String) extends Pilots.this.Element(name) with SideProvider{
 		val balance = Army Var 0D
-		val refund = Army Var 0D
-		val invitations = Army Val (new mutable.HashMap[IMarket.Loadout, Pilots.Invitation]())
+//		val refund = Army Var 0D
+//		val invitations = Army Val (new mutable.HashMap[IMarket.Loadout, Pilots.Invitation]())
 		
 		for(loaded <- server.balance.load(name)){
 			balance(Armies.RedSide) = loaded.red
@@ -28,20 +28,21 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			chat("your balance: "+loaded.red.toInt+currency+" on red and "+loaded.blue.toInt+currency+" on blue")
 		}
 		
-
+		val _invites = new AutoInvitations(this) 
+		def invites = _invites.get // wrap each access in a timeout clean
 		object state{
 		  override def toString = {
 		    " "+
-		    (if(deathPause) ("pause for "+(deathPauseUntil-System.currentTimeMillis)) else "") +
+		    (if(deathPauseUntil>System.currentTimeMillis) ("pause for "+(deathPauseUntil-System.currentTimeMillis)) else "") +
         (if(died) " died" else "") +
         (if(landed) " landed" else "") +
-        " plane:" +planeName+" @ "+planePrice + 
+        " plane:" +planeName+" @ "+lastPayment + 
         (if(planeVerified) " verified" else " unchecked") +
         (if(lostPlaneName!="") " lost:"+lostPlaneName else "") +
         ""
 		  }
 		  
-			var deathPause = false
+//			var deathPause = false
 			var deathPauseUntil = 0L
 			
 			var died = false
@@ -51,10 +52,16 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			var planeName = ""
 			var lastPlanePriceCommit = System.currentTimeMillis
 			var planeVerified = true
+			var lastPlaneVerification = 0L
 			var lostPlaneName = ""
-			var planePrice : Double = 0
+//			var planePrice : Double = 0
 			var load : Option[String] = None
-			var lastBalance : Option[Double] = None
+			//var lastBalance : Option[Double] = None
+			
+			/**
+			 * full payment pilot->price, as divided after applying recruit share
+			 */
+			var lastPayment : Option[Rules.PriceInfo]=None 
 			
 			def dies() = {
 				val now = System.currentTimeMillis
@@ -79,22 +86,24 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			}
 			private def planeLost() : Option[String] = {
 				flying=false
-			  if(planeVerified && ! deathPause && somePlane) commitPlanePrice()// finish balance
+			  if(planeVerified && deathPauseUntil<System.currentTimeMillis && somePlane) commitPlanePrice()// finish balance
+			  val startFee = lastPayment.map(_ price).getOrElse(0D)
 
-				
-				val result =server.rules.startCostCheck(planePrice, balance) match {
-				  case Rules.CostResult(false, _, _, cost) => {
-				    Some("you can't afford a "+planeName+" again")//+", chat \"! available\" for information")
-				  }
-				  case _ => None
-				}
-			  refund () = 0    
+//				val result =server.rules.startCostCheck(planePrice, balance) match {
+//				  case Rules.CostResult(false, _, _, cost) => {
+//				    Some("you can't afford a "+planeName+" again")//+", chat \"! available\" for information")
+//				  }
+//				  case _ => None
+//				}
+			  lastPayment = None    
 				lostPlaneName = planeName
 				planeVerified = false
 				planeName = ""
-				planePrice = 0
+				
 				load = None
-				result
+				lastPayment.map(_ price).filter(_<balance).map{ _ =>
+			  	Some("you can't afford a "+planeName+" again")//+", chat \"! available\" for information")
+				} getOrElse None
 			}
 			def crashes() = {
 				val priceMsg = planeLost()
@@ -111,13 +120,13 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			
 			
 			def commitPlanePrice(){
-			  if(planeVerified){
+			  if(planeVerified) for(planePrice <- lastPayment.map(_ price)){
 println("commit plane price "+state)			  	
 					val now = System.currentTimeMillis
 
 					val millis = System.currentTimeMillis - lastPlanePriceCommit
 					val difference = planePrice * millis / (-60000) 
-					debug("price update for "+millis+" with raw price"+ planePrice+ " -> difference "+difference )       
+					debug("price update for "+millis+" with raw price"+ currency(planePrice)+ " -> difference "+currency(difference) )       
 					balance () = server.rules.updateBalance(balance, difference)
 					lastPlanePriceCommit = now
 					persist()
@@ -125,56 +134,141 @@ println("commit plane price "+state)
 			}
 			// call when it is definitely known that the pilot is fresh in a plane
 			def definitelyInPlane() {
-				refund () =0
+				lastPayment = None
 				//invitations.value.retain(((x,y) => y.until > System.currentTimeMillis))
 				
-				planePrice = server.market.getPrice(planeName, load)
+				
+				val planePrice = server.market.getPrice(planeName, load)
+				
+				
 				lostPlaneName = ""
 				val now = System.currentTimeMillis
 				lastPlanePriceCommit = now
+				var invitation = invites in planeName
+				val side = firstNonNeutral(invitation.map(_.inv.side))
+				val rawPrice = server.rules.startCost(planePrice, name, invitation.map(_.inv.by), side, invitation)
 				
-				if(deathPauseUntil>now){
+//				if( ! invitation.accept(rawPrice))
+				
+				if(deathPauseUntil>now && invitation.isEmpty){
 					// pilot is in death pause, invitations are checked in rules
-					deathPause = true
 					planeVerified = false
 				} else {
-					deathPause = false
-					server.rules.startCostCheck(planePrice, balance) match {
-					case Rules.CostResult(true, newBalance, newRefund, startFee) => {
-							planeVerified = true
-							if(newBalance!=balance.value){
-								if(newRefund>0) chat("Start fee "+startFee+conf.names.currency+", possible refund: "+newRefund +conf.names.currency+"")
-								else chat("Start fee of "+startFee+conf.names.currency+" debited")
-							}
-							lastBalance = Some(balance)
-							balance () = newBalance
-							refund () = newRefund
-						}
-					case Rules.CostResult(false, newBalance, newRefund, startFee) => {
-							chat(""+startFee+conf.names.currency+" needed, available "+(balance.value)+conf.names.currency+"")
-							
-							planeVerified = false
-						}
+					val myPrice = rawPrice.forPilot(name)
+					
+					
+					if(myPrice>0D && myPrice>balance) {
+						chat(""+myPrice+conf.names.currency+" needed, available "+(balance.value)+conf.names.currency+"")
+						planeVerified = false
+					}else{
+						planeVerified = true
+						lastPlaneVerification = System.currentTimeMillis
+						for(i<-invitation) i.preaccept()
+						pay(rawPrice, side, invitation)
 					}
+//					server.rules.startCostCheck(planePrice, balance) match {
+//					case Rules.CostResult(true, newBalance, newRefund, startFee) => {
+//							planeVerified = true
+//							if(newBalance!=balance.value){
+//								if(newRefund>0) chat("Start fee "+startFee+conf.names.currency+", possible refund: "+newRefund +conf.names.currency+"")
+//								else chat("Start fee of "+startFee+conf.names.currency+" debited")
+//							}
+//							balance () = newBalance
+//							
+//						}
+//					case Rules.CostResult(false, newBalance, newRefund, startFee) => {
+//							chat(""+startFee+conf.names.currency+" needed, available "+(balance.value)+conf.names.currency+"")
+//							
+//							planeVerified = false
+//						}
+//					}
 				}          
 			}
 			def planeNotEmpty = ! (planeName==null || planeName=="")
 			def planeNotLostPlane = lostPlaneName==null || lostPlaneName=="" || planeName != lostPlaneName
-			
+
+			def pay(rawPrice:Rules.PriceInfo, side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]) = {
+				rawPrice.payments match {
+					case me :: Nil => {
+						chat("Start fee "+currency(me.what)++", possible refund: "+currency(refund(me.what)))
+						balance (side) = server.rules.updateBalance(balance(side), - me.what) 
+					}
+					case me :: boss :: Nil => {
+						chat("Start fee "+currency(me.what)++", possible refund: "+currency(refund(me.what)))
+						balance (side) = server.rules.updateBalance(balance(side), - me.what) 
+						domain.forElement(boss.who){ recruiter => 
+							if(invitation.isDefined) recruiter ! BalanceUpdate(-boss.what, invitation.get.inv.side, " recruited "+name+", possible refund: "+currency(refund(boss.what)))
+							else recruiter ! BalanceUpdate(-boss.what, currentSide, name+" used your invitation") // something's wrong if this message appears!
+						}
+					}
+					case Nil => {
+						chat("Plane verified")		
+					}
+					case other => for(pay<-other){
+						domain.forElement(pay.who){ payer =>
+							payer ! BalanceUpdate(
+									-pay.what, 
+									invitation.map(_.inv.side).getOrElse(currentSide), 
+									" recruitment cost for "+name) // something's wrong if this message appears!
+						}
+					}
+				}
+			} 
+			def firstNonNeutral(sides:Option[Armies.Armies]*):Armies.Armies={
+				val fs = sides.flatten
+				_firstNonNeutral(fs:_*)
+			}
+			def firstNonNeutral(sides:Armies.Armies*):Armies.Armies=_firstNonNeutral(sides:_*)
+			private def _firstNonNeutral(sides:Armies.Armies*):Armies.Armies={
+				val neutral:Armies.Armies = Armies.None
+				val curr:Armies.Armies = currentSide
+				if(curr != neutral) curr
+				else sides.find(_!=neutral).getOrElse(neutral)
+			}
 			def updateLoadout(what:String){
-				
 				load = Some(what)
 				if(planeVerified){
 					val newPrice = server.market.getPrice(planeName, load)
-					if(planePrice != newPrice ){
-						if(lastBalance.isDefined){
-							balance () = lastBalance.get
-							refund () = 0
-							chat("balance rollback due to updated loadout information")
-							definitelyInPlane()
-						}else{
-							debug("lastBalance is undefined while plane is verified")
+					val inv = invites.current
+					//	  					val invitation = invites.current
+//				val side = firstNonNeutral(invitation.map(_.inv.side))
+
+					val side = firstNonNeutral(inv.map(_.inv.side))
+					val newPriceInfo = server.rules.startCost(newPrice, name, inv.map(_.inv.by),side, inv)
+					if(lastPayment.isEmpty) {
+						chat("directly paying with loadout...")
+						pay(newPriceInfo, side, inv)
+					} else { 
+						val payment = lastPayment.get
+						if(payment.price != newPrice ){
+							if(inv.isDefined){
+								if(inv.get.inv.priceLimit<newPrice){
+									val diff = newPrice - payment.price  // positive if more expensive
+									chat("expensive loadout not paid for by recruiter: -"+currency(diff))
+									balance(side) = server.rules.updateBalance(balance(side), -diff) 
+								}else{
+									for(newpm<- newPriceInfo.payments){
+										val old = payment.forPilot(newpm.who)
+										
+										val thisDiff = newpm.what - old // positive if more expensive
+										if(newpm.who == name) {
+											chat("Loadout update "+currency(thisDiff)+", total possible refund: "+currency(refund(newpm.what)))
+											balance (side) = server.rules.updateBalance(balance(side), - thisDiff) 
+										}else{
+											domain.forElement(newpm.who){ recruiter =>
+												recruiter ! BalanceUpdate(-thisDiff, side, "Loadout update for recruit "+name+" "+currency(thisDiff)+", total possible refund: "+currency(refund(newpm.what)))
+											}
+										}
+									}
+								}
+							}else{
+								// no invite
+								val diff = newPrice - payment.price  // positive if more expensive
+								chat("loadout update: -"+currency(diff))
+								balance(side) = server.rules.updateBalance(balance(side), -diff)
+							}
 						}
+						lastPayment = Some(newPriceInfo)
 					}
 				}
 			}
@@ -183,7 +277,7 @@ println("commit plane price "+state)
 					planeVerified = false
 					planeName = ""
 					lostPlaneName = ""
-					refund () =0
+					lastPayment = None
 				}else if(what==planeName) { // plane name did not change
 //						if(( ! planeVerified) && planeNotLostPlane) {
 //							lostPlaneName = ""
@@ -196,17 +290,28 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 					planeName = what
 					definitelyInPlane()
 				}
-				if(deathPause && planeNotEmpty) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invitations.value)
+				if(deathPauseUntil>System.currentTimeMillis && planeNotEmpty) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invites.allInvitationsLine)
 				else if(planeNotEmpty && planeNotLostPlane && ! planeVerified ) server.rules.warnPlane(Pilot.this.name, planeName, load, lastPlanePriceCommit, balance)
 			}
 
 			def returns(){
 				commitPlanePrice()
-				if(refund.value>0) {
-					chat("Awarded a refund of "+refund.value+conf.names.currency+" for returning the "+planeName)
-					balance () = server.rules.updateBalance(balance, refund)
-					refund () = 0
+				for(pi<-lastPayment; pay<-pi.payments ){
+					val ref = refund(pay.what)
+					if(pay.who==name){
+						balance(pi.side) = server.rules.updateBalance(balance(pi.side), ref)
+						chat("ref: "+currency(ref))
+					}else{
+						domain.forElement(pay.who){ recruiter =>
+							recruiter ! BalanceUpdate(ref, pi.side, "Refund for recruit "+name+": "+currency(ref))
+						}
+					}
 				}
+//				if(refund.value>0) {
+//					chat("Awarded a refund of "+refund.value+conf.names.currency+" for returning the "+planeName)
+//					balance () = server.rules.updateBalance(balance, refund)
+//					refund () = 0
+//				}
 				persist()
 				clear()
 			} 
@@ -215,10 +320,10 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				planeVerified = false
 				flying=false
 				planeName = ""
-				planePrice = 0
+				lastPayment = None
 				landed = true
 				load = None
-				lastBalance = None
+				invites.clean
 			}
 			def persist() {
 //debug("persisting "+name)				
@@ -231,19 +336,23 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 			val pilotName = Pilot.this.name
    
 			server.planes.forMatches(which){plane =>		  
+			/**
+			 * todo: by-loadout price info!
+			 */
 				val price = server.market.getPrice(plane.name)
 
 				def padRight(in:String, reference:String):String=in+(reference.drop(in.length))
 				def padLeft(in:String, reference:String):String=(reference.drop(in.length))+in
 				val (result, affordable, verb) = (if(price > 0){
-					server.rules.startCostCheck(price, balance) match {
-					case Rules.CostResult(false, newBal, _, startFee) => {
-							(false, "!", "would.cost."+startFee.toInt+".+" )
-						}
-					case Rules.CostResult(true, _, _, startFee) => {
-							(true, "+", "costs.once."+startFee.toInt+".+" )
-						}
-					case _ => (false, "!","gives u respect, yo!")
+					
+					val cost = server.rules.startCost(price)
+					val bal:Double=balance
+					val affordable = cost < bal 
+					
+					if(affordable){
+						(true, "+", "costs.once."+cost.toInt+".+" )
+					}else{
+						(false, "!", "would.cost."+cost.toInt+".+" )
 					}
 				}else{
 					(true, "*", "gives")
@@ -280,7 +389,9 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
       }
 		}
 				
-		
+		def refund(in:Double)={
+			in * server.rules.refund
+		}
 		def ImessageHandler : PartialFunction[Any, Unit] = { 
 			case Is.Persisted => state.persist()
 
@@ -299,9 +410,8 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 			case Is.Crashing => {
 				state.crashes()
 			}
-			case inv : Pilots.Invitation => {
-				invitations.put(inv.plane, inv)
-			  if(state.deathPause) chat(inv.by + " invites you to fly "+inv.plane+" ("+((inv.until - System.currentTimeMillis)/1000)+"s)")
+			case inv : Invite => {
+				invites add inv
 			}
 
 			case Is.Loading(plane, load, _) => {
@@ -309,13 +419,15 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				state.updateLoadout(load)
 			}
 			case Is.MissionEnd => {
-				state.commitPlanePrice()
+				state.returns()
 				state.clear()
 			}
 			case Is.MissionChanging => {
+				state.returns()
 				state.clear()
 			}
 			case Is.MissionBegin => {
+				state.returns()
 				state.clear()
 			}
     	case Is.InFlight => {
@@ -336,9 +448,10 @@ debug(name + " Is.Selecting "+state)
 					chat("refly counted as a lost plane")
 					state.crashes()
 				}else{
+					state.returns()
 					state.clear()
 				}
-				
+				joinNeutral()
     	}
     	case Is.KIA => {
 debug(name + " Is.KIA "+state)    	  
@@ -364,24 +477,85 @@ debug(name + " Is.TakingSeat "+state)
 					state.clear()
 				}
     	}
-
+    	case BalanceUpdate(diff, side, reason)=>{
+    		val before = balance(side)
+    		val after = server.rules.updateBalance(balance(side), diff)
+    		balance(side) = after
+    		val color = if(side==currentSide) "" else " ("+side+")" 
+    		if(reason.isEmpty) chat("updated balance"+color+" from "+currency(before)+ " to "+currency(after))
+    		else chat(currency(diff)+ color+": "+reason)
+    	}
+    	case i:Invite=>{
+    		invites add i 
+    	}
      
 			case Is.Chatting(msg) => { 
 debug(name + " sending chat "+msg)  			  
 			  msg match { 
-  	  		case Pilots.Commands.balancecommand(_) => {
+  	  		case Commands.balance(_) => {
 						chat("current balance is "+balance)
 					}
-					case Pilots.Commands.pricecommand(which) => {
+					case Commands.price(which) => {
 						priceMessages(which, true)
 					}
-					case Pilots.Commands.availablecommand(which) => {
+					case Commands.available(which) => {
 						priceMessages(which, false)
 					}
-					case Pilots.Commands.statecommand(which) => {
+					case Commands.state(which) => {
 						chat(state.toString)
 					}
-					case x => //debug("unknown command by "+name+":"+x)
+					case Commands.recruit(who) => {
+						val secs = conf.recruiting.time.apply 
+						if( ! state.planeVerified){
+							chat("You can't recruit outside a plane")
+						}else if(invites.current.isDefined){
+							chat("You are a recruit yourself")
+						}else if(state.lastPlaneVerification + (secs * 1000) < System.currentTimeMillis){
+							chat("You can only recruit for up to "+secs+" s after starting")
+						}else{
+							val ni = Invite(
+													name, 
+													IMarket.Loadout(state.planeName, state.load), 
+													System.currentTimeMillis+(1000*secs), 
+													currentSide,
+													state.lastPayment.map(_ price).getOrElse(0D)
+							)
+							domain.forMatches(who){recruit=>
+								recruit ! ni
+							}
+						}
+					}
+					
+					case Commands.invites(_) => {
+						val i = invites
+						chat(i.allInvitationsLine.getOrElse("no invites"))
+					}
+					case Commands.help(_) => {
+						chat("available commands are:")
+						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
+					}					
+					case Commands.helpCommand(cmd)=> cmd match {
+						case "balance"=>chat("displays how many "+conf.names.currency+" you have")
+						case "available"=>chat("'available abc' displays the allowed planes with 'abc' in their name")
+						case "price"=>chat("'price abc' displays the price of planes with 'abc' in their name")
+						case "state"=>chat("shows info about your current state")
+						case "recruit"=>{
+							chat("'recruit abc' invites pilots with 'abc' in their name to join your flight")
+							chat("you can recruit for up to "+conf.recruiting.time.apply+" s after starting"
+									, 1000)
+							val planeDesc = if(state.planeName!=null && ! state.planeName.isEmpty) "a "+state.planeName else "the same plane as you"
+							chat("the invitation will be accepted if the other pilot takes "+ planeDesc + " within that timespan"
+									,2000)
+							chat("death-timeout is skipped for your recruits"
+									,3000)
+							val percs = server.rules.recruiterPercents
+							chat("you will pay "+percs+"% of your recruit's takeoff fee and get "+percs+"% of his landing refund"
+									,4000)
+						}
+						case "invites"=>chat("'invites' displays recruitment invitations")
+					}
+			
+					case x => //debug("unknown  by "+name+":"+x)
 			  }
 			}
 			
@@ -389,19 +563,29 @@ debug(name + " sending chat "+msg)
 		}
 			
 
-		private def chat(msg:String) = server.multi ! new server.multi.ChatTo(name, msg) 
-		
+		def chat(msg:String, delay : Long = 0) {
+			val m = new server.multi.ChatTo(name, msg)
+			if(delay<1) server.multi ! m
+			else net.liftweb.actor.LAPinger.schedule(server.multi, m, delay)
+		}
+		def currency(double:Double):String={
+			("%1.0f" format double)+conf.names.currency.apply
+		}
 	}
 }
 object Pilots {
-
+	case class BalanceUpdate(diff:Double, side:Armies.Armies, reason:String="")
 	
 	object Commands{
-		val balancecommand = """(\s*!\s*balance\s*)""".r
-		val pricecommand = """\s*!\s*price\s+(\S*)""".r
-		val availablecommand = """\s*!\s*available\s+(\S*)""".r
-		val statecommand = """\s*!\s*state\s*""".r
+		val balance = """(\s*!\s*balance\s*)""".r
+		val price = """\s*!\s*price\s+(\S*)""".r
+		val available = """\s*!\s*available\s+(\S*)""".r
+		val state = """\s*!\s*state\s*""".r
+		val recruit = """\s*!\s*recruit\s+(\S*)""".r
+		val invites = """\s*!\s*invites\s*""".r
+		val help = """\s*!\s*help\s*""".r
+		val helpCommand = """\s*!\s*help\s+(\S*)""".r
 	}
-	class Invitation(val by:String, val plane:IMarket.Loadout, val until:Long) 
+//	class Invitation(val by:String, val plane:IMarket.Loadout, val until:Long) 
 }
 
