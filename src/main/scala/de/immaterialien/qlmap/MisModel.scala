@@ -53,7 +53,7 @@ class MisModel {
     if (a == 1) rfront = (x, y) :: rfront
     if (a == 2) bfront = (x, y) :: bfront
   }
-  def bornPlace(a: Integer, x: Double, y: Double) {}
+  def bornPlace(a: Int, x: Double, y: Double) {}
   def baseInfo(baseInfo: Option[MapInfo]) {
     for (in <- baseInfo) {
       _imageFile = in.image.get

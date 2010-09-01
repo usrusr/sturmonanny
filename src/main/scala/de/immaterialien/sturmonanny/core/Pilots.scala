@@ -145,7 +145,7 @@ println("commit plane price "+state)
 				val now = System.currentTimeMillis
 				lastPlanePriceCommit = now
 				var invitation = invites in planeName
-				val side = firstNonNeutral(invitation.map(_.inv.side))
+				val side = firstNonNeutral(invitation.map(_.inv.side).toList:_*)
 				val rawPrice = server.rules.startCost(planePrice, name, invitation.map(_.inv.by), side, invitation)
 				
 //				if( ! invitation.accept(rawPrice))
@@ -187,7 +187,7 @@ println("commit plane price "+state)
 			def planeNotEmpty = ! (planeName==null || planeName=="")
 			def planeNotLostPlane = lostPlaneName==null || lostPlaneName=="" || planeName != lostPlaneName
 
-			def pay(rawPrice:Rules.PriceInfo, side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]) = {
+			def pay(rawPrice:Rules.PriceInfo, side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]) {
 				rawPrice.payments match {
 					case me :: Nil => {
 						chat("Start fee "+currency(me.what)++", possible refund: "+currency(refund(me.what)))
@@ -213,8 +213,9 @@ println("commit plane price "+state)
 						}
 					}
 				}
+				lastPayment = Some(rawPrice)
 			} 
-			def firstNonNeutral(sides:Option[Armies.Armies]*):Armies.Armies={
+			def firstNonNeutralOption(sides:Option[Armies.Armies]*):Armies.Armies={
 				val fs = sides.flatten
 				_firstNonNeutral(fs:_*)
 			}
@@ -233,7 +234,7 @@ println("commit plane price "+state)
 					//	  					val invitation = invites.current
 //				val side = firstNonNeutral(invitation.map(_.inv.side))
 
-					val side = firstNonNeutral(inv.map(_.inv.side))
+					val side = firstNonNeutral(inv.map(_.inv.side).toList:_*)
 					val newPriceInfo = server.rules.startCost(newPrice, name, inv.map(_.inv.by),side, inv)
 					if(lastPayment.isEmpty) {
 						chat("directly paying with loadout...")
@@ -485,9 +486,6 @@ debug(name + " Is.TakingSeat "+state)
     		if(reason.isEmpty) chat("updated balance"+color+" from "+currency(before)+ " to "+currency(after))
     		else chat(currency(diff)+ color+": "+reason)
     	}
-    	case i:Invite=>{
-    		invites add i 
-    	}
      
 			case Is.Chatting(msg) => { 
 debug(name + " sending chat "+msg)  			  
@@ -501,8 +499,9 @@ debug(name + " sending chat "+msg)
 					case Commands.available(which) => {
 						priceMessages(which, false)
 					}
-					case Commands.state(which) => {
-						chat(state.toString)
+					case Commands.state(_) => {
+						chat("state:")
+						chat( state.toString)
 					}
 					case Commands.recruit(who) => {
 						val secs = conf.recruiting.time.apply 
@@ -553,6 +552,7 @@ debug(name + " sending chat "+msg)
 									,4000)
 						}
 						case "invites"=>chat("'invites' displays recruitment invitations")
+							case _ => chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites")
 					}
 			
 					case x => //debug("unknown  by "+name+":"+x)

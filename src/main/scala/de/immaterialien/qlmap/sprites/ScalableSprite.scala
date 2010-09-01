@@ -90,13 +90,14 @@ object ScalableSprite {
           val d = doc.getDocumentElement
           var n: SVGElement = doc.getRootElement
 
-          val g = {
+          val go = {
             val cs = n.getChildNodes
             for (i <- 0 until cs.getLength) yield {
               val c = cs.item(i)
               c
             }
-          }.filter(_.getNodeName == "g").first.asInstanceOf[Element]
+          }.filter(_.getNodeName == "g").headOption.asInstanceOf[Option[Element]]
+          if(go.isDefined) log warn "no group found below root element, rotation might be limited"
           n.setAttribute("filter", "url(#MyFilter)")
 
           val ge = new SVGOMGElement(null, batikDoc)

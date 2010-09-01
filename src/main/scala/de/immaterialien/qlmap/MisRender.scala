@@ -74,9 +74,14 @@ private class MisRender(
   var ysvr = ih / interpolate
   lazy val svrs = {
     val xsvr = iw
-    Array.fromFunction { (_, _, _) =>
+    Array.tabulate(2, xsvr + 2, ysvr + 2) { (_, _, _) =>
       Double.NaN
-    }(2, xsvr + 2, ysvr + 2)
+    }
+    
+//        val aaa : Array[Array[Array[Double]]]= Array.tabulate(2, xsvr + 2, ysvr + 2) { _:(Int, Int, Int) =>
+//      Double.NaN
+//    }
+//    aaa
   }
   //  val svr = 100
   //  val svrs = Array.fromFunction { (_, _, _) =>
@@ -320,7 +325,7 @@ private class MisRender(
     		def used = memberOfBigger
     		def unused = ! memberOfBigger
     		lazy val memberChiefs = {
-println("members of "+name+" : "+members)    			
+//println("members of "+name+" : "+members)    			
     			members.map(groupedMap(_)).toList
     		}
     		val count = chief.count
@@ -331,7 +336,7 @@ println("members of "+name+" : "+members)
     	
     	for ((name, chief) <- model.chiefs) if( ! chief.path.isEmpty){
     		groupedMap.put(name, {
-    			val ourStart = chief.path.firstOption.get
+    			val ourStart = chief.path.headOption.get
     			val ourEnd = chief.path.lastOption.get
     			new ChiefGroup(name, chief, model.chiefs.filter{ case(on, oc) => 
 	    			if(
@@ -339,7 +344,7 @@ println("members of "+name+" : "+members)
 	    					chief.side!=oc.side ||
 	    					chief.cls != oc.cls
 	    			) false else {
-	    				val theirStart = oc.path.firstOption.get
+	    				val theirStart = oc.path.headOption.get
 	    				val theirEnd = oc.path.lastOption.get
 	    				
 	    				val xDiffStart = theirStart._1-ourStart._1 
@@ -565,7 +570,7 @@ println("members of "+name+" : "+members)
         if (d.isNaN || Double.NaN == d) 0
         else math.signum(d)
       }
-      val sig = signum(vals.first)
+      val sig = signum(vals.head)
       vals.exists(x => signum(x) != sig)
     }
     def pixel(x: Int, y: Int, me: Double, other: Double) {

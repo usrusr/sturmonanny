@@ -60,7 +60,7 @@ object DomHelper {
 
     def firstElement(name: (Element => Boolean)): Option[Element] = {
       val cs = children(name)
-      if (cs.length > 0) Some(cs.first) else None
+      cs.headOption
     }
     def appendBefore(name: (Element => Boolean), es: Element*) = {
       firstElement(name).map { f =>

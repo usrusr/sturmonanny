@@ -115,7 +115,8 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
       debug("created il2waiter:" + il2waiter)
     }
     case msg: DownLine => {
-      //handlerLog.write("direct line "+msg)		  
+//handlerLog.write("direct line "+msg)
+//println("direct line "+msg)	    	
       //handlerLog.flush
       for (client <- clients) {
         client ! msg //.asMessage
@@ -239,7 +240,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
         requery(conf.server.pollMillis.apply)
       }
       case DownLine(line) => {
-        server.eventlog ! DispatchLine(line)
+        server.dispatcher ! DispatchLine(line)
       }
       case DownMessage(msg) => {
         val merged = msg.map(_.stripLineEnd) mkString ("\n")
