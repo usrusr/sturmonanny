@@ -21,6 +21,10 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 //		val refund = Army Var 0D
 //		val invitations = Army Val (new mutable.HashMap[IMarket.Loadout, Pilots.Invitation]())
 		
+		var verbose = true
+		
+		
+		
 		for(loaded <- server.balance.load(name)){
 			balance(Armies.RedSide) = loaded.red
 			balance(Armies.BlueSide) = loaded.blue
@@ -237,7 +241,7 @@ println("commit plane price "+state)
 					val side = firstNonNeutral(inv.map(_.inv.side).toList:_*)
 					val newPriceInfo = server.rules.startCost(newPrice, name, inv.map(_.inv.by),side, inv)
 					if(lastPayment.isEmpty) {
-						chat("directly paying with loadout...")
+						if(verbose) chat("directly paying with loadout "+what)
 						pay(newPriceInfo, side, inv)
 					} else { 
 						val payment = lastPayment.get
@@ -487,7 +491,21 @@ debug(name + " Is.TakingSeat "+state)
     		else chat(currency(diff)+ color+": "+reason)
     	}
      
-			case Is.Chatting(msg) => { 
+			case Is.Chatting(msg) => processCommand(msg)
+			
+			case _ => unknownMessage _ 
+		}
+			
+
+		def chat(msg:String, delay : Long = 0) {
+			val m = new server.multi.ChatTo(name, msg)
+			if(delay<1) server.multi ! m
+			else net.liftweb.actor.LAPinger.schedule(server.multi, m, delay)
+		}
+		def currency(double:Double):String={
+			("%1.0f" format double)+conf.names.currency.apply
+		}
+		def processCommand(msg:String){ 
 debug(name + " sending chat "+msg)  			  
 			  msg match { 
   	  		case Commands.balance(_) => {
@@ -529,10 +547,15 @@ debug(name + " sending chat "+msg)
 						val i = invites
 						chat(i.allInvitationsLine.getOrElse("no invites"))
 					}
+//					case Commands.verbose(_) => {
+//						
+//						chat("available commands are:")
+//						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
+//					}		
 					case Commands.help(_) => {
 						chat("available commands are:")
 						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
-					}					
+					}
 					case Commands.helpCommand(cmd)=> cmd match {
 						case "balance"=>chat("displays how many "+conf.names.currency+" you have")
 						case "available"=>chat("'available abc' displays the allowed planes with 'abc' in their name")
@@ -552,39 +575,31 @@ debug(name + " sending chat "+msg)
 									,4000)
 						}
 						case "invites"=>chat("'invites' displays recruitment invitations")
-							case _ => chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites")
+						case "verbose"=>chat("toggles between verbose (debug) mode and a less chatty nanny")
+						case _ => chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites")
 					}
 			
 					case x => //debug("unknown  by "+name+":"+x)
 			  }
-			}
-			
-			case _ => unknownMessage _ 
-		}
-			
-
-		def chat(msg:String, delay : Long = 0) {
-			val m = new server.multi.ChatTo(name, msg)
-			if(delay<1) server.multi ! m
-			else net.liftweb.actor.LAPinger.schedule(server.multi, m, delay)
-		}
-		def currency(double:Double):String={
-			("%1.0f" format double)+conf.names.currency.apply
-		}
+			}		
 	}
 }
 object Pilots {
 	case class BalanceUpdate(diff:Double, side:Armies.Armies, reason:String="")
 	
 	object Commands{
-		val balance = """(\s*!\s*balance\s*)""".r
-		val price = """\s*!\s*price\s+(\S*)""".r
-		val available = """\s*!\s*available\s+(\S*)""".r
-		val state = """\s*!\s*state\s*""".r
-		val recruit = """\s*!\s*recruit\s+(\S*)""".r
-		val invites = """\s*!\s*invites\s*""".r
-		val help = """\s*!\s*help\s*""".r
-		val helpCommand = """\s*!\s*help\s+(\S*)""".r
+		
+		
+		
+		val balance = """(?i-)(\s*!\s*balance\s*)""".r
+		val price = """(?i-)\s*!\s*price\s+(\S*)""".r
+		val available = """(?i-)\s*!\s*available\s+(\S*)""".r
+		val state = """(?i-)\s*!\s*state\s*""".r
+		val recruit = """(?i-)\s*!\s*recruit\s+(\S*)""".r
+		val invites = """(?i-)\s*!\s*invites\s*""".r
+		val help = """(?i-)\s*!\s*help\s*""".r
+		val helpCommand = """(?i-)\s*!\s*help\s+(\S*)""".r
+		val verbose = """(?i-)\s*!\s*verbose\s*""".r
 	}
 //	class Invitation(val by:String, val plane:IMarket.Loadout, val until:Long) 
 }
