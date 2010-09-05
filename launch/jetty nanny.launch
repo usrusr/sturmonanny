@@ -17,5 +17,6 @@
 <listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
 <listEntry value="org.eclipse.debug.ui.launchGroup.run"/>
 </listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-Xms640m -Xmx640m -XX:PermSize=64m -Xss6M -server -XX:+DoEscapeAnalysis -XX:MaxGCPauseMillis=10 -XX:+ScavengeBeforeFullGC -XX:-UseParallelOldGC"/>
 <stringAttribute key="org.eclipse.jdt.launching.WORKING_DIRECTORY" value="E:/2.8workspace/sturmonanny"/>
 </launchConfiguration>

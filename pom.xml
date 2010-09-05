@@ -145,10 +145,14 @@
             <jvmArg>-Xss64m</jvmArg>
             <jvmArg>-Xmx1024m</jvmArg>
           </jvmArgs>
-<addArgs><addArg>-deprecation</addArg></addArgs>
-<args><arg>-deprecation</arg></args>
+<args>
+<arg>-deprecation</arg>
+<!--<arg>-verbose</arg>-->
+<!--<arg>-Ydebug</arg>-->
+<!--<arg>-Ylog:erasure</arg>-->
+</args>
 					<displayCmd>true</displayCmd>
-					<fork>true</fork>
+<!--					<fork>true</fork>-->
 <!--					<recompileMode>all</recompileMode>-->
 					<verbose>true</verbose>
 <!--					<args></args>-->

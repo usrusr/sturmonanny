@@ -9,15 +9,15 @@ package de.immaterialien.sturmonanny.core
  */
 trait IMarket { import IMarket._
 	
-	final def getPrice(plane:String) : Double = getPrice(plane, None)
-	final def getPrice(plane:String, load:String) : Double = getPrice(plane, Some(load))
-	final def getPrice(plane:String, load:Option[String]) : Double = getPrice(Loadout(plane, load))
-	def getPrice(loadout:Loadout) : Double = loadout match {
-		case Loadout(_, None) => tryPrice(loadout) getOrElse 0
-		case Loadout(plane, Some(_)) => tryPrice(loadout) getOrElse getPrice(Loadout(plane, None))
+	final def getPrice(plane:String, side:Int) : Double = getPrice(plane, None, side)
+	final def getPrice(plane:String, load:String, side:Int) : Double = getPrice(plane, Some(load), side)
+	final def getPrice(plane:String, load:Option[String], side:Int) : Double = getPrice(Loadout(plane, load), side)
+	def getPrice(loadout:Loadout, side:Int) : Double = loadout match {
+		case Loadout(_, None) => tryPrice(loadout, side) getOrElse 0D
+		case Loadout(plane, Some(_)) => tryPrice(loadout, side) getOrElse getPrice(Loadout(plane, None), side)
 	}
 	
-	protected def tryPrice(loadout:Loadout) : Option[Double]
+	protected def tryPrice(loadout:Loadout, side:Int) : Option[Double]
 	
 
 	
@@ -25,7 +25,7 @@ trait IMarket { import IMarket._
 	 * @param plane
 	 * @param millis
 	 */
-	def addAirTime(plane : Loadout, millis : Long) : Unit
+	def addAirTime(plane : Loadout, millis : Long, side:Int) : Unit
 	/**
 	 * return true for a successful configuration update 
 	 */  
@@ -38,7 +38,7 @@ trait IMarket { import IMarket._
 	 * 
 	 * @param name
 	 */
-	def cycle(name : String) : Unit   
+	def cycle(name : java.io.File) : Unit   
 }   
 object IMarket {
 	case class Loadout(plane:String, load:Option[String]) {

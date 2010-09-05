@@ -30,7 +30,7 @@ object Is {
  	
   case object MissionBegin extends Global
   case object MissionEnd extends Global
-  case class MissionChanging(mis:String) extends Global
+  case class MissionChanging(mis:java.io.File) extends Global
 	
  
 	sealed trait Individual extends Event

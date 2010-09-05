@@ -9,12 +9,12 @@ class FixedPriceMarket extends IMarket with Logging{
 	var priceList : Option[PriceList] = None  
 	var server : Option[Server] = None 
 
- 	def addAirTime(plane : IMarket.Loadout, millis : Long) = ()
-	def cycle(name : String) = ()
+ 	def addAirTime(plane : IMarket.Loadout, millis : Long, side:Int) = ()
+	def cycle(name : java.io.File) = ()
 	
 	
   
-	override def tryPrice(loadout : IMarket.Loadout) : Option[Double] = {
+	override def tryPrice(loadout : IMarket.Loadout, side:Int) : Option[Double] = {
 	  //val res = priceList.map(_.planes(plane)) map (_ toDouble)
 		
 		val name = loadout.toString
@@ -22,7 +22,7 @@ class FixedPriceMarket extends IMarket with Logging{
 			.replace("+", "")
 			.replace(" ", "")
 		val res = for(list <- priceList) yield list.planes(name)
-		
+		 
 println("price for "+loadout+" aka "+name+" -> " +res);
 		
 	  res map (_ toDouble)

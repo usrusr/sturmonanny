@@ -24,7 +24,7 @@ class AllPlanesEverywhere(args: String) extends javax.xml.ws.Provider[File] with
         }
         val planes = g.dromesToPlanes(i)
         i += 1
-        set ++= planes
+        set ++= planes.map(_ trim)
       }
     }
     
@@ -44,6 +44,11 @@ class AllPlanesEverywhere(args: String) extends javax.xml.ws.Provider[File] with
     w.close
     log debug "" + pr2
     out
+    
+    val bak = new File(file.getParent, file.getName + ".mis.preflatten")
+    file.renameTo(bak)
+    out.renameTo(file)
+    file
   }
 }
 

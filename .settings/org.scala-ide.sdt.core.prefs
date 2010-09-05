@@ -1,4 +1,4 @@
-#Sun Aug 08 20:19:17 CEST 2010
+#Sat Sep 04 22:38:28 CEST 2010
 Xcheck-null=false
 Xcheckinit=false
 Xdisable-assertions=false
@@ -8,7 +8,7 @@ Xfatal-warnings=false
 Xfuture=false
 Xlog-implicits=false
 Xmigration=false
-Xno-uescape=false
+Xno-uescape=true
 Xpluginsdir=misc\\scala-devel\\plugins
 Xwarninit=false
 Yclosure-elim=false
@@ -29,6 +29,6 @@ eclipse.preferences.version=1
 g=vars
 no-specialization=false
 optimise=false
-scala.compiler.useProjectSettings=false
+scala.compiler.useProjectSettings=true
 target=jvm-1.5
 unchecked=false

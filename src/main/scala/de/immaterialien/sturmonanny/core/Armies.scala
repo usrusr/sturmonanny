@@ -7,11 +7,11 @@ import _root_.de.immaterialien.sturmonanny.util.Logging
  *  
  * 
  */
-object Armies extends Enumeration("Red", "Blue", "None") {
+object Armies extends Enumeration("None", "Red", "Blue") {
   type Armies = Value
-  val Red = Value 
-  val Blue = Value 
-  val None = Value
+  val None = Value(0)
+  val Red = Value(1) 
+  val Blue = Value(2) 
  
   object BlueSide extends SideProvider {
     override val currentSide = Blue

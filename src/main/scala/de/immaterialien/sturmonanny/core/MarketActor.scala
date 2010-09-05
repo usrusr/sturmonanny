@@ -10,7 +10,7 @@ class MarketActor(val initClassName :String, val initConfigurationPath:String) e
 	var internal : Option[IMarket] = None
 	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket"  
 	var configurationPath : String = "/dev/null"
-	var mission = ""
+	var mission : java.io.File = null
 	def setServerContext(server:Server) = (this ! Msg.updateConfiguration) 
 	override def updateConfiguration : Unit = this ! Msg.updateConfiguration 
 
@@ -51,7 +51,7 @@ debug(cls + " new instance created! "+server)
 				nu setServerContext server
 				if( nu.setConfiguration(cfg)){
 debug(cls + " new instance configured! -> "+server.planes.items.keys.mkString)
-			        nu cycle mission
+			        nu cycle mission 
 			        className = cls
 			        configurationPath = cfg    
 				 Some(nu)
@@ -68,8 +68,8 @@ debug(cls + " new instance not configured!")
  	  }
 	}
 	def messageHandler = {
-	  case Msg.getPrice(plane) => reply(Msg.getPriceResult(internal map (_ getPrice plane) getOrElse 0))
-	  case Msg.addAirTime(plane, millis) => internal map (_ addAirTime(plane, millis))
+	  case Msg.getPrice(plane, side) => reply(Msg.getPriceResult(internal map (_ getPrice(plane, side)) getOrElse 0))
+	  case Msg.addAirTime(plane, millis, side) => internal map (_ addAirTime(plane, millis, side))
 	  case Msg.setConfiguration(pathToFile) => reply(Msg.setConfigurationResult(internal map (_ setConfiguration pathToFile) getOrElse false))
 	  case Msg.cycle(mis) => {
 	    this.mission = mis
@@ -78,32 +78,32 @@ debug(cls + " new instance not configured!")
 	  case Msg.updateConfiguration => internalUpdateConfiguration
 	  case _ =>
 	}
-	override def getPrice(plane : IMarket.Loadout) : Double = {
+	override def getPrice(plane : IMarket.Loadout, side:Int) : Double = {
 println("get Price "+plane+ " from "+internal)
 if(plane.load.isEmpty)
 new Exception().printStackTrace()
 val ret =
-		!!(Msg.getPrice(plane), 500)
+		!!(Msg.getPrice(plane, side), 500)
 	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
 	  		.price
 println("got "+ret)	  		
 ret	  		
 	}
-	override def tryPrice(plane : IMarket.Loadout) : Option[Double] = { 
-	  !!(Msg.getPrice(plane), 500)
+	override def tryPrice(plane : IMarket.Loadout, side:Int) : Option[Double] = { 
+	  !!(Msg.getPrice(plane, side), 500)
 //	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
 //	  		.price
 	  		.asA[Msg.getPriceResult] map (_ price)
 	}
-	def addAirTime(plane : IMarket.Loadout, millis : Long) {
-	  this ! Msg.addAirTime(plane, millis)
+	def addAirTime(plane : IMarket.Loadout, millis : Long, side:Int) {
+	  this ! Msg.addAirTime(plane, millis, side)
 	}
 	def setConfiguration(pathToFile : String) : Boolean ={
    	  !!(Msg.setConfiguration(pathToFile), 1000)
 	  		.asA[Msg.setConfigurationResult].getOrElse(Msg.setConfigurationResult(false))
 	  		.success
 	}
-	def cycle(mission : String) = {
+	def cycle(mission : java.io.File) = {
 	  this ! Msg.cycle(mission)
     }
 
@@ -114,11 +114,11 @@ ret
     }
 } 
 object Msg {
-	case class getPrice(plane : IMarket.Loadout)
+	case class getPrice(plane : IMarket.Loadout, side:Int)
 	case class getPriceResult(price : Double)
-	case class addAirTime(plane : IMarket.Loadout, millis : Long) 
+	case class addAirTime(plane : IMarket.Loadout, millis : Long, side:Int) 
 	case class setConfiguration(pathToFile : String) 
 	case class setConfigurationResult(success : Boolean)
-	case class cycle(mission : String)  
+	case class cycle(mission : java.io.File)  
 	case object updateConfiguration 
 }

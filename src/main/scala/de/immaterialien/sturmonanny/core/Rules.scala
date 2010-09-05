@@ -17,32 +17,9 @@ class Rules extends NonUpdatingMember with Logging {
 	  	}else{
 	  		Payment(pilot, cost)::Nil
 	  	}
-//	  					val invitation = invites.current
-//				val side = firstNonNeutral(invitation.map(_.inv.side))
-
 	  	PriceInfo(cost, list,side, invitation)
   	}
   }
-//  def startCostCheck(price: Double, balance: Double, invite:Option[AutoInvitations#InvitationState#Invitation]): Rules.CostResult = {
-//    if (price > 0) {
-//      val cost = startCost(price)
-//      val recruitFactor = if(invite.isDefined) recruitPercents.toDouble/100D else 1D
-//      val cruiterFactor = 1D-recruitFactor
-//      
-//      val myCost = recruitFactor * cost 
-//      val cruiterCost = cruiterFactor * cost
-//      val newBalance = balance - myCost
-//      if (newBalance > 0) {
-//        Rules.CostResult(true, updateBalance(balance, -cost), 100 * cost / conf.game.refund.apply, cost)
-//      } else {
-//        Rules.CostResult(false, balance, 0, cost)
-//      }
-//    } else {
-//      // jumping in a negatively priced plane does not immediately change the balance
-//      Rules.CostResult(true, balance, 0, 0)
-//
-//    }
-//  }
   
   def refund = (conf.game.refund.apply.toDouble / 100D) 
   def updateBalance(old: Double, diff: Double): Double = {
@@ -60,7 +37,7 @@ class Rules extends NonUpdatingMember with Logging {
   	math.max(0, math.min(100, conf.recruiting.recruitshare.apply))
   }
   def recruitPercents = 100 - recruiterPercents
-  def warnPlane(who: String, plane: String, load: Option[String], since: Long, balance: Double) {
+  def warnPlane(who: String, plane: String, load: Option[String], since: Long, balance: Double, side:Armies.Armies) {
     val multi = server.multi
     var difference = System.currentTimeMillis - since
     val remaining = (conf.game.planeWarningsSeconds.apply * 1000) - difference
@@ -69,7 +46,7 @@ class Rules extends NonUpdatingMember with Logging {
       kick(who, "too much time in rare planes like " + loadout)
       //			multi ! new multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+loadout)
     } else {
-      lazy val startPrice = server.market.getPrice(loadout) * conf.game.startcost.apply
+      lazy val startPrice = server.market.getPrice(loadout, side.id) * conf.game.startcost.apply
       val seconds: Long = remaining / 1000
 
       val ratio = remaining.toDouble / (remaining + difference).toDouble
@@ -137,7 +114,7 @@ class Rules extends NonUpdatingMember with Logging {
     val pauseDuration = conf.game.planeWarningsSeconds.apply
     val remaining = (pauseDuration * 1000) - difference
     val seconds: Long = remaining / 1000
-
+    val pauseLen = conf.pilots.deathpenalty.apply
 
 
     if (what == null || what.trim.isEmpty) {
@@ -145,18 +122,18 @@ class Rules extends NonUpdatingMember with Logging {
       multi ! new multi.ChatTo(who, who + ", you can fly " + inviteString.map(_ + " or wait ").getOrElse("again in ") + seconds + " seconds")
     } else {
       if (remaining < 0) {
-        kick(who, "did not wait " + pauseDuration + "s or for an invitation")
+        kick(who, "did not wait " + pauseLen + "s or for an invitation")
         //multi ! new multi.ChatBroadcast(who + " has been kicked: hit refly too fast")
       } else {
         val ratio = remaining.toDouble / (remaining + difference).toDouble
         val message = if (ratio > 0.7) {
           if (inviteString.isDefined)
-            "Fly " + inviteString.get + " or wait " + seconds + " seconds"
+            "Fly " + inviteString.get + " or wait " + pauseLen + " seconds"
           else
-            "After dying, you are not allowed to fly for " + seconds + " seconds"
+            "After dying, you are not allowed to fly for " + pauseLen + " seconds"
         } else if (ratio > 0.4) {
           if (inviteString.isDefined)
-            "Fly " + inviteString.get + " or wait " + seconds + " seconds"
+            "Fly " + inviteString.get + " or wait " + pauseLen + " seconds"
           else
             who + ", you must be back in plane selection in " + seconds + " s!"
         } else if (ratio > 0.2) {

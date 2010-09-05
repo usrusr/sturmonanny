@@ -8,7 +8,10 @@ import net.liftweb.actor
 
 
 
-class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember with Logging{ import Pilots._
+class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember with Logging{ 
+	import Pilots._
+
+	
 	case class ClearToFly(pilot:Pilot, deathPauseUntil:Long)
 	override def messageHandler = {
 		case ClearToFly(pilot, deathPauseUntil) => if(deathPauseUntil == pilot.state.deathPauseUntil){
@@ -49,12 +52,16 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 //			var deathPause = false
 			var deathPauseUntil = 0L
 			
-			var died = false
-			var landed = false
-			var flying = false
 			
+			var died = true
+			var crashed = true 
+			var landed = true
+			
+			var flying = false
+
 			var planeName = ""
 			var lastPlanePriceCommit = System.currentTimeMillis
+			var planeWarningSince = 0L
 			var planeVerified = true
 			var lastPlaneVerification = 0L
 			var lostPlaneName = ""
@@ -68,29 +75,32 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			var lastPayment : Option[Rules.PriceInfo]=None 
 			
 			def dies() = {
-				val now = System.currentTimeMillis
-				if(deathPauseUntil<=now){
-				  deathPauseUntil = server.rules.calculateDeathPause
-				  
-				  actor.LAPinger.schedule(Pilots.this, ClearToFly(Pilot.this, deathPauseUntil), deathPauseUntil-now)
-				  
-				  val seconds = (deathPauseUntil - now) / 1000 
-				  val priceMsg = planeLost()
-	
-				  priceMsg match{
-				    case Some(msg) => {
-				      chat(name+": death pause for "+seconds+"s and "+msg)
-				    }
-				    case None => {
-				      chat(name+": death pause for "+seconds+"s, then clear to refly "+lostPlaneName)
-				    } 
-				  }
+				if( ! died) {
+					val now = System.currentTimeMillis
+					if(deathPauseUntil<=now){
+					  deathPauseUntil = server.rules.calculateDeathPause
+					  
+					  actor.LAPinger.schedule(Pilots.this, ClearToFly(Pilot.this, deathPauseUntil), deathPauseUntil-now)
+					  
+					  val seconds = (deathPauseUntil - now) / 1000 
+					  val priceMsg = planeLost()
+		
+					  priceMsg match{
+					    case Some(msg) => {
+					      chat(name+": death pause for "+seconds+"s and "+msg)
+					    }
+					    case None => {
+					      chat(name+": death pause for "+seconds+"s, then clear to refly "+lostPlaneName)
+					    } 
+					  }
+					}
 				}
 				flying=false
+				died = true
 			}
 			private def planeLost() : Option[String] = {
-				flying=false
 			  if(planeVerified && deathPauseUntil<System.currentTimeMillis && somePlane) commitPlanePrice()// finish balance
+				flying=false
 			  val startFee = lastPayment.map(_ price).getOrElse(0D)
 
 //				val result =server.rules.startCostCheck(planePrice, balance) match {
@@ -110,12 +120,14 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 				} getOrElse None
 			}
 			def crashes() = {
-				val priceMsg = planeLost()
-    
-				priceMsg.map{msg => 
-				  chat(name+": "+msg+", chat \"! available\"")
+				if( ! crashed){
+					val priceMsg = planeLost()
+	    
+					priceMsg.map{msg => 
+					  chat(name+": "+msg+", chat \"! available\"")
+					}
+					flying=false
 				}
-				flying=false
     	}
 			
 
@@ -139,10 +151,11 @@ println("commit plane price "+state)
 			// call when it is definitely known that the pilot is fresh in a plane
 			def definitelyInPlane() {
 				lastPayment = None
-				//invitations.value.retain(((x,y) => y.until > System.currentTimeMillis))
+println("    definitelyInPlane  ")
+				//invitations.value.retain(((x,y) => y.until > System.currentTimeMillis)) 
 				
 				
-				val planePrice = server.market.getPrice(planeName, load)
+				val planePrice = server.market.getPrice(planeName, load, currentSide.id)
 				
 				
 				lostPlaneName = ""
@@ -166,6 +179,10 @@ println("commit plane price "+state)
 						planeVerified = false
 					}else{
 						planeVerified = true
+						died = false
+						crashed = false
+						landed = false
+						
 						lastPlaneVerification = System.currentTimeMillis
 						for(i<-invitation) i.preaccept()
 						pay(rawPrice, side, invitation)
@@ -233,7 +250,8 @@ println("commit plane price "+state)
 			def updateLoadout(what:String){
 				load = Some(what)
 				if(planeVerified){
-					val newPrice = server.market.getPrice(planeName, load)
+error("this code should be dead code now!")					
+					val newPrice = server.market.getPrice(planeName, load, currentSide.id)
 					val inv = invites.current
 					//	  					val invitation = invites.current
 //				val side = firstNonNeutral(invitation.map(_.inv.side))
@@ -277,6 +295,21 @@ println("commit plane price "+state)
 					}
 				}
 			}
+			
+			def planeVerifiable = ! planeVerified && currentSide != Armies.None && planeName != "" && load.isDefined
+			def warnPlane(){
+				if( ! planeVerified &&  planeVerifiable && planeNotEmpty && planeNotLostPlane) {
+					if(planeWarningSince == 0) planeWarningSince = System.currentTimeMillis
+					server.rules.warnPlane(Pilot.this.name, planeName, load, planeWarningSince, balance, currentSide)
+				}
+			}
+			def tryPlaneVerification() {
+				if( planeVerifiable ) {
+					definitelyInPlane()
+					if( ! planeVerified) server.rules.warnPlane(Pilot.this.name, planeName, load, lastPlanePriceCommit, balance, currentSide)					
+				}
+			}
+			
 			def updatePlaneName(what:String){
 				if(what==null || what.trim.isEmpty){
 					planeVerified = false
@@ -288,37 +321,41 @@ println("commit plane price "+state)
 //							lostPlaneName = ""
 //							definitelyInPlane() // once planeNotLostPlane is reset (e.g. by getting a flying None message) we run into this line
 //						}
+					tryPlaneVerification()
 				}else{
 debug("update plane name '"+planeName+"' to '"+what+"'")						
 				  planeVerified = false
 					lostPlaneName = ""
 					planeName = what
-					definitelyInPlane()
+					tryPlaneVerification()
 				}
 				if(deathPauseUntil>System.currentTimeMillis && planeNotEmpty) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invites.allInvitationsLine)
-				else if(planeNotEmpty && planeNotLostPlane && ! planeVerified ) server.rules.warnPlane(Pilot.this.name, planeName, load, lastPlanePriceCommit, balance)
+				else warnPlane()
 			}
 
 			def returns(){
-				commitPlanePrice()
-				for(pi<-lastPayment; pay<-pi.payments ){
-					val ref = refund(pay.what)
-					if(pay.who==name){
-						balance(pi.side) = server.rules.updateBalance(balance(pi.side), ref)
-						chat("ref: "+currency(ref))
-					}else{
-						domain.forElement(pay.who){ recruiter =>
-							recruiter ! BalanceUpdate(ref, pi.side, "Refund for recruit "+name+": "+currency(ref))
+				if( ! landed){
+					commitPlanePrice()
+					for(pi<-lastPayment; pay<-pi.payments ){
+						val ref = refund(pay.what)
+						if(pay.who==name){
+							balance(pi.side) = server.rules.updateBalance(balance(pi.side), ref)
+							chat("ref: "+currency(ref))
+						}else{
+							domain.forElement(pay.who){ recruiter =>
+								recruiter ! BalanceUpdate(ref, pi.side, "Refund for recruit "+name+": "+currency(ref))
+							}
 						}
 					}
+	//				if(refund.value>0) {
+	//					chat("Awarded a refund of "+refund.value+conf.names.currency+" for returning the "+planeName)
+	//					balance () = server.rules.updateBalance(balance, refund)
+	//					refund () = 0
+	//				}
+					landed = true
+					persist()
+					clear()
 				}
-//				if(refund.value>0) {
-//					chat("Awarded a refund of "+refund.value+conf.names.currency+" for returning the "+planeName)
-//					balance () = server.rules.updateBalance(balance, refund)
-//					refund () = 0
-//				}
-				persist()
-				clear()
 			} 
 			def clear(){
 				lostPlaneName = ""
@@ -326,9 +363,10 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				flying=false
 				planeName = ""
 				lastPayment = None
-				landed = true
 				load = None
 				invites.clean
+				joinNeutral()
+				planeWarningSince = 0L
 			}
 			def persist() {
 //debug("persisting "+name)				
@@ -344,7 +382,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 			/**
 			 * todo: by-loadout price info!
 			 */
-				val price = server.market.getPrice(plane.name)
+				val price = server.market.getPrice(plane.name, currentSide.id)
 
 				def padRight(in:String, reference:String):String=in+(reference.drop(in.length))
 				def padLeft(in:String, reference:String):String=(reference.drop(in.length))+in
@@ -420,28 +458,28 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 			}
 
 			case Is.Loading(plane, load, _) => {
-				state.updatePlaneName(plane)
+				
 				state.updateLoadout(load)
+				state.updatePlaneName(plane)
 			}
 			case Is.MissionEnd => {
 				state.returns()
-				state.clear()
 			}
-			case Is.MissionChanging => {
+			case Is.MissionChanging(_) => {
 				state.returns()
-				state.clear()
 			}
 			case Is.MissionBegin => {
 				state.returns()
-				state.clear()
 			}
     	case Is.InFlight => {
     		
-				if(state.somePlane){
+				if(state.planeVerified){
 debug(name + " Is.InFlight "+state) 
 	    	  state.flying = true
 	    	  state.commitPlanePrice()
-				}else debug("ignored Is.InFlight for "+name)
+				}else if(state.planeVerifiable) {
+					state.warnPlane()
+				}
     	}
       case Is.LandedAtAirfield => {
 debug(name + " Is.LandedAtAirfield "+state) 
@@ -454,9 +492,9 @@ debug(name + " Is.Selecting "+state)
 					state.crashes()
 				}else{
 					state.returns()
-					state.clear()
+					//state.clear()
 				}
-				joinNeutral()
+				state.clear()
     	}
     	case Is.KIA => {
 debug(name + " Is.KIA "+state)    	  
@@ -519,12 +557,13 @@ debug(name + " sending chat "+msg)
 					}
 					case Commands.state(_) => {
 						chat("state:")
-						chat( state.toString)
+						chat( (if(state.planeVerified)"verified" else "unchecked" )+state.toString)
 					}
 					case Commands.recruit(who) => {
 						val secs = conf.recruiting.time.apply 
 						if( ! state.planeVerified){
 							chat("You can't recruit outside a plane")
+							if(verbose) chat("state is: "+state.toString, 300)
 						}else if(invites.current.isDefined){
 							chat("You are a recruit yourself")
 						}else if(state.lastPlaneVerification + (secs * 1000) < System.currentTimeMillis){
@@ -552,10 +591,10 @@ debug(name + " sending chat "+msg)
 //						chat("available commands are:")
 //						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
 //					}		
-					case Commands.help(_) => {
-						chat("available commands are:")
-						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
-					}
+//					case Commands.help(_) => {
+//						chat("available commands are:")
+//						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
+//					}
 					case Commands.helpCommand(cmd)=> cmd match {
 						case "balance"=>chat("displays how many "+conf.names.currency+" you have")
 						case "available"=>chat("'available abc' displays the allowed planes with 'abc' in their name")
@@ -576,15 +615,83 @@ debug(name + " sending chat "+msg)
 						}
 						case "invites"=>chat("'invites' displays recruitment invitations")
 						case "verbose"=>chat("toggles between verbose (debug) mode and a less chatty nanny")
-						case _ => chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites")
+						case _ => {
+							chat("available commands are:")
+							chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)							
+						}
 					}
 			
 					case x => //debug("unknown  by "+name+":"+x)
 			  }
 			}		
+		
+		
+		
+//		case class PilotState( 
+//				died : Todo = Done(false), 
+//				crashed : Todo = Done(false), 
+//				flying : Todo = Done(false), 
+////				landed : Todo = Done(true),
+//				verified:Boolean = false, 
+//				plane:String = "", 
+//				load:String = "", 
+//				side:Armies.Armies = Armies.None 
+//				
+//		) {
+//			def updated : PilotState = {
+//			if(died.unhandledTrue){
+//				state.dies
+//				//copy(died = died.check, flying = Done(false), crashed = Done(true), plane = "", load="")
+//				PilotState(died = died.check, flying = Done(false), crashed = Done(true))
+//			}else if(crashed.unhandledTrue || flying.unhandledFalse){
+//				state.crashes
+//				copy(flying = Done(false), crashed = Done(true))
+//			}else if(plane!="" && side!=Armies.None && flying.todo){
+//				this
+//			}else{
+//				this
+//			}
+//		}
+//		def withPlane(np:String)={
+//			if(np==plane) this
+//			else this.copy(flying=Todo(false), plane=np, load="")
+//		}.updated
+//		def withLoad(nl:String)={
+//			if(nl==load) this
+//			else this.copy(flying=Todo(false), load=nl)
+//		}.updated
+//		def withSide(na:Armies.Armies)={
+//			if(na==side) this
+//			else if(flying.handledTrue) {
+//				this.copy(side=na, flying = Todo(false))
+//			}else{
+//				this.copy(side=na)
+//			}
+//		}.updated
+//		
+//}
+//	val x = new PilotState() withPlane "test"
+//		
 	}
 }
 object Pilots {
+
+//	def Done(v: Boolean)=Todo(v, false)
+//	/**
+//	 * for substates that should be processed exactly once after getting updated, 
+//	 * but might not be consumed at once (if the processing requires some other substates)  
+//	 * @author ulf
+//	 */
+//	case class Todo(value:Boolean, todo:Boolean=true){
+//		def done = ! todo
+//		def unhandledTrue = todo && value 
+//		def unhandledFalse = todo && ! value 
+//		def handledTrue = ( ! todo) && value 
+//		def handledFalse = ( ! todo) && ! value 
+//		def check = if(todo) this.copy(todo=false) else this
+//		def uncheck = if(todo) this else this.copy(todo=true) 
+//	}	
+//	
 	case class BalanceUpdate(diff:Double, side:Armies.Armies, reason:String="")
 	
 	object Commands{
@@ -597,7 +704,7 @@ object Pilots {
 		val state = """(?i-)\s*!\s*state\s*""".r
 		val recruit = """(?i-)\s*!\s*recruit\s+(\S*)""".r
 		val invites = """(?i-)\s*!\s*invites\s*""".r
-		val help = """(?i-)\s*!\s*help\s*""".r
+		//val help = """(?i-)\s*!\s*help\s*""".r
 		val helpCommand = """(?i-)\s*!\s*help\s+(\S*)""".r
 		val verbose = """(?i-)\s*!\s*verbose\s*""".r
 	}
