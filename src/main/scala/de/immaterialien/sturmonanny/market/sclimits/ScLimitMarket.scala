@@ -41,7 +41,10 @@ log debug "cycling to "+iniName
 		var side : Option[Int] = None 
 		var ret = Map[Int, Map[String, Double]]()
 		def processSide() = {
+println("processing "+side)			
 			for(s<-side){
+println(s+" planes raw: "+planes)			
+				
 				var prices = Map[String, Double]()
 				val sum = planes.map(_ _2).foldLeft(0)(_ + _)
 				val total = planes.size
@@ -80,6 +83,7 @@ log debug "cycling to "+iniName
 					}
 					
 				})
+				println(s+" planes proc: "+prices)		
 				ret = ret + ((s, prices))
 			}
 			planes.clear()
@@ -96,9 +100,11 @@ log debug "cycling to "+iniName
 				}
 				case (Some(_), planeCount(which, is)) => {
 					val i = is.toInt
+println("add "+side+" plane "+i+" of "+which)					
 					planes.put(which, planes.get(which).map(_ + i).getOrElse(i))
 				}
-				case _ => 
+				case x => 
+println(" ignoring '"+x+"'" )				
 			}
 			log debug "new prices "+ret
 			pl = ret
@@ -110,5 +116,5 @@ log debug "cycling to "+iniName
 object ScLimitMarket {
 	val army = """\s*\[\s*PlanesArmy(\d)\s*\]\s*""".r
 	val ini = """\s*\[\s*([^\]]*?)\s*\]\s*""".r
-	val planeCount = """\s*([^\s=]+)\s*(\d+)(?:\s*,.*)?""".r 	
+	val planeCount = """\s*([^\s=]+)\s*=\s*(\d+)(?:\s*,.*)?""".r 	
 }

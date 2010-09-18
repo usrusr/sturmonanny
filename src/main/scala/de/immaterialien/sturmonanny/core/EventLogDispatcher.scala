@@ -56,6 +56,7 @@ debug("success "+who+" -> "+what+"  from '"+line+"'")
 		      }
 		      
 		    case GlobalMessage(Is.MissionChanging(mis)) => {
+println("mission changing!")		    	
           server.market.cycle(mis) 
         	allPilotMessageSend(Is.MissionChanging(mis))
 		    }
@@ -154,11 +155,11 @@ debug("skipping "+msg+" because it is too old: "+(age/1000)+"s")
  	lazy val eventParser : Parser[Message] = (
 		  "Mission BEGIN" ^^^ GlobalMessage(Is.MissionBegin)
     | "Mission END" ^^^ GlobalMessage(Is.MissionEnd)
-    | ("Mission: " ~> ".*".r <~ ".mis is Playing") ^^ (x => GlobalMessage(Is.MissionChanging{
+    | ("Mission: " ~> "\\S.*\\.mis".r <~ " is Playing") ^^ (x => GlobalMessage(Is.MissionChanging{ import java.io._
 //    			server.conf.server.
 //    			()
 //    			x+".mis" 
-    			new java.io.File(conf.server.serverPath.apply+x+".mis")
+    			new File(conf.server.serverPath.apply+File.separator+"Missions"+File.separator+x)
     	}))
     | connectParser
     | loading
