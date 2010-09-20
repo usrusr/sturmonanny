@@ -48,7 +48,6 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 						for(s<-side) {
 							var ps = Map[String, Double]()
 							ps = ps ++ planes
-//							supply = supply + ((s, ps))
 							sides(s).cycle(ps)
 							planes.clear()
 						}
@@ -62,33 +61,17 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 					case x => 
 	println(" ignoring '"+x+"'" )				
 				}
-//				log debug "new supply "+supply
 			}
 			source.close
-// moved to sidemarket			
-//			totalsupply = supply.map{kv=> 
-//				(kv._1, kv._2.values.foldLeft(0D)(_+_))
-//			}
-//			
-//			// create a copy of supply with 0-Variables
-//			use = supply.map(x=>(x._1, x._2.map(y=>(y._1, new Variable(0D)))))
-//			recalculate()
-//		} 
 	}
 	
   
 	class SideMarket(s:Int) {
 		def pair=(s, this)
 	
-	//	/**
-	//	 * for the initial calculation, any available plane supply information from the previous round will be scaled 
-	//	 * so that to total amount of new supply w
-	//	 */
-	//	val backlogWeight = 1D //    
 		var pl = Map[String, Double]()
 		var supply = Map[String, Double]()
 		private var use = Map[String, Variable[Double]]()
-		//(summe über die supply-maps füllen)
 		var totalsupply : Double = 0D
 		
 		
@@ -150,51 +133,38 @@ println("cycling "+s+" with "+newSupply)
 	println("total: "+total+" avg:"+avg+" sum:"+sum +"  _> relativesum: "+relativeSum)				
 				val sideRet = for((plane, variable)<-use) yield {
 					val count = variable.v
-	//				var prices = Map[String, Double]()
-	
-					
 					/* example calculation:
 					 * 
-	
-	5 spit
-	10 p40
-	15 hurri
-	
-	avg 10
-	total 40
-	
-	spit: 5 less than average
-	hurry: 5 more than average
-	
-	but we need 3 times as many hurri in the air, so h would b1 -1, s would be +3
-	
-	a/c-1*x:
-	
-	p40       
-	10/10 -> 1 -1 -> 0  *-10 => 0
-	               
-	spit:  
-	10/5 -> 2 -1 -> 1 
-	
-	hurry: 
-	10/15 = 0,66 - 1 -> -0,33
-	
+											5 spit
+											10 p40
+											15 hurri
+											
+											avg 10
+											total 40
+											
+											spit: 5 less than average
+											hurry: 5 more than average
+											
+											but we need 3 times as many hurri in the air, so h would b1 -1, s would be +3
+											
+											a/c-1*x:
+											
+											p40       
+											10/10 -> 1 -1 -> 0  *-10 => 0
+											               
+											spit:  
+											10/5 -> 2 -1 -> 1 
+											
+											hurry: 
+											10/15 = 0,66 - 1 -> -0,33
+											
 					 */
 	
 					val r = if(count==0D) 0D else {
 						priceFactor * (avg/count - 1)
 					}
-					
-	//					val r = if(count==avg)0D else {
-	//						val sign = if(count > avg) -1D else 1D
-	//						val factor = 10D
-	//					
-	//						sign*factor*(total.toDouble / count.toDouble) * relativeSum
-	//					}
 						(plane,r)
 					}
-	//				println(s+" planes proc: "+prices)		
-	//				ret = ret + ((s, prices))
 					sideRet
 				}
 			
