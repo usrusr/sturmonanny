@@ -3,15 +3,20 @@ import _root_.de.immaterialien.sturmonanny.core._
 import _root_.de.immaterialien.sturmonanny.util._
 import IMarket._
 import java.io._
-import scala.collection._
+import scala.collection.{mutable, immutable}
 class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 	val priceFactor = 10D
 	val supplyFactor = 2D // minutes for one SC plane
+	val leftoverWeight = 1D // 1D: inital prices after cycle will be 50:50 derived from leftover and new supply, bigger weight: more leftover,
+	val memoryName = "DynScLimitMarket.leftovers.txt"
 
 	val sides = Map(new SideMarket(1).pair, new SideMarket(2).pair)
   override def addAirTime(load : Loadout, millis : Long, side:Int) = sides(side).addAirTime(load, millis)
   protected def tryPrice(loadout:Loadout, side:Int) = sides(side).tryPrice(loadout)
-  
+
+  // holds the remaining capacities of the last cycle, or None for first access
+ 	var memory : Option[Map[Int, Map[String, Double]]] = None
+
   /**
 	 * return true for a successful configuration update 
 	 */  
@@ -30,6 +35,41 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 	log debug "cycling to "+iniName	
 			val source = scala.io.Source.fromFile(iniName)
 			
+			if(memory.isDefined){
+				// update with current state, then store
+				memory = Some{
+					var mem : Map[Int, Map[String, Double]]= sides.map{kv=>
+						(kv._1, kv._2.remaining)
+					}
+					val toFile = new File(name.getParent, memoryName)
+					val bakFile = new File(name.getParent, memoryName+".bak")
+					try {
+						if(toFile.exists){
+							if(bakFile.exists && bakFile.delete) toFile.renameTo(bakFile) 
+						}
+					}catch{
+						case x=> log.warning("failed to backup previous leftover plane minute contingents, overwriting "+toFile.getAbsolutePath,x)
+					}
+					try {
+						DynScLimitMemory.store(mem, toFile)
+					}catch{
+						case x=> log.warning("failed to store leftover plane minute contingents in "+toFile.getAbsolutePath+", keeping capacities only in RAM",x)
+					}
+					mem
+				}
+			} else {
+				// uninitialized memory
+				val fromFile = new File(name.getParent, memoryName)
+				memory = try{
+					Some(DynScLimitMemory.load(fromFile))
+				}catch{
+					case x=> {
+						log.warning("failed to load leftover minute contingents from "+fromFile.getAbsolutePath+", using empty contingengts",x)
+						Some(sides.map{kv=> (kv._1, kv._2.remaining)})
+					}
+				}
+			}
+
 			var planes = new mutable.HashMap[String, Double]()  
 			var side : Option[Int] = None 
 			
@@ -55,11 +95,11 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 					}
 					case (Some(_), planeCount(which, is)) => {
 						val i = is.toInt.toDouble * supplyFactor
-	println("add "+side+" plane "+i+" of "+which)					
+	log.debug("add "+side+" plane "+i+" of "+which)					
 						planes.put(which, planes.get(which).map(_ + i).getOrElse(i))
 					}
 					case x => 
-	println(" ignoring '"+x+"'" )				
+	log.debug(" ignoring '"+x+"'" )				
 				}
 			}
 			source.close
@@ -72,9 +112,15 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 		var pl = Map[String, Double]()
 		var supply = Map[String, Double]()
 		private var use = Map[String, Variable[Double]]()
+		
+		// sum of supply
 		var totalsupply : Double = 0D
 		
-		
+		def remaining : Map[String, Double] = {
+			use.map{kv=>
+				(kv._1, kv._2.v)
+			}
+		}
 		def tryPrice(loadout:Loadout) : Option[Double] = {
 	log debug "trying price for "+loadout+" in side "+s
 			pl.get(loadout.plane )
@@ -87,25 +133,36 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 		 * @param millis
 		 */
 		def addAirTime(load : Loadout, millis : Long)={
-	println("using "+load+ " from "+use )		
+	log.debug("using "+load+ " from "+use )		
 			for(
 					plane<-use.get(load.plane)
 			){
 				val newv = plane.v - (millis.toDouble/60000) 
-	println(".. new value "+plane.v)		
+	log.debug(".. new value "+plane.v)		
 				plane.v = newv
 				if(newv<0D) recalculate()
 			}
 		}
 
 		def cycle(newSupply: Map[String, Double]){
-println("cycling "+s+" with "+newSupply)			
+log.debug("cycling "+s+" with "+newSupply)			
 			supply=newSupply
 			totalsupply = supply.values.foldLeft(0D)(_+_)
-			
-			
-			// create a copy of supply with 0-Variables
-			use = supply.map(y=>(y._1, new Variable(0D)))
+
+			val leftoverMap : Map[String, Double]= memory.flatMap(_ get s) getOrElse Map()
+			// include leftover types that are not available in the current mission in the scale calculation
+			val totalleftover = leftoverMap.values.foldLeft(0D)( _ + _ )
+			val leftoverScale = math.max(
+					leftoverWeight, 
+					if(totalleftover > 0D) 
+						leftoverWeight * totalsupply / totalleftover
+					else 0D  
+			)
+			// create a copy of supply with Variables containing the scaled leftovers
+			use = supply.map{y=>
+				val scaledLeftover = leftoverScale * leftoverMap.get(y._1).getOrElse(0D)
+				(y._1, new Variable(scaledLeftover))
+			}
 			recalculate()
 			()
 		}	
@@ -116,7 +173,7 @@ println("cycling "+s+" with "+newSupply)
 				for(
 					supp<-supply.get(plane)					
 				) {
-	println("adding "+supp+" to "+plane+" -> "+(variable.v + supp))				
+	log.debug("adding "+supp+" to "+plane+" -> "+(variable.v + supp))				
 					variable.v = variable.v + supp
 				}
 			} 
@@ -129,8 +186,8 @@ println("cycling "+s+" with "+newSupply)
 				val total = supply.size
 	
 				val avg = sum / total
-	println("side "+s)				
-	println("total: "+total+" avg:"+avg+" sum:"+sum +"  _> relativesum: "+relativeSum)				
+	log.debug("side "+s)				
+	log.debug("total: "+total+" avg:"+avg+" sum:"+sum +"  _> relativesum: "+relativeSum)				
 				val sideRet = for((plane, variable)<-use) yield {
 					val count = variable.v
 					/* example calculation:
@@ -168,12 +225,9 @@ println("cycling "+s+" with "+newSupply)
 					sideRet
 				}
 			
-	println("recalculated: "+pl)		
+	log.debug("recalculated: "+pl)		
 			}
-	
 	}
-
-
 }
 object DynScLimitMarket {
 	val army = """\s*\[\s*PlanesArmy(\d)\s*\]\s*""".r
