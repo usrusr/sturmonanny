@@ -62,6 +62,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			var planeName = ""
 			var lastPlanePriceCommit = System.currentTimeMillis
 			var planeWarningSince = 0L
+			var lastCleared = 0L
 			var planeVerified = true
 			var lastPlaneVerification = 0L
 			var lostPlaneName = ""
@@ -148,6 +149,14 @@ println("commit plane price "+state)
 					persist()
 			  }
 			}
+			
+			/**
+			 * use to filter outdated negative news that might still trickle in for a while after  
+			 * 
+			 * @return
+			 */
+			def notFresh = 10000L > System.currentTimeMillis - math.max(lastCleared, lastPlaneVerification)
+			
 			// call when it is definitely known that the pilot is fresh in a plane
 			def definitelyInPlane() {
 				lastPayment = None
@@ -367,6 +376,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				invites.clean
 				joinNeutral()
 				planeWarningSince = 0L
+				lastCleared = System.currentTimeMillis
 			}
 			def persist() {
 //debug("persisting "+name)				
@@ -447,10 +457,10 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 			case Is.Returning => {
 				state.returns()
 			}
-			case Is.Dying => {
+			case Is.Dying => if(state.notFresh){
 				state.dies()
 			}
-			case Is.Crashing => {
+			case Is.Crashing => if(state.notFresh){
 				state.crashes()
 			}
 			case inv : Invite => {
@@ -496,11 +506,11 @@ debug(name + " Is.Selecting "+state)
 				}
 				state.clear()
     	}
-    	case Is.KIA => {
+    	case Is.KIA => if((state.flying||state.crashed) && state.notFresh){
 debug(name + " Is.KIA "+state)    	  
     	  state.dies()
     	}
-    	case Is.HitTheSilk => {
+    	case Is.HitTheSilk => if(state.flying && state.notFresh){
 debug(name + " Is.HitTheSilk "+state)    	  
 				state.crashes()
     	}    
@@ -621,7 +631,7 @@ debug(name + " sending chat "+msg)
 						}
 					}
 			
-					case x => //debug("unknown  by "+name+":"+x)
+					case x => debug("unknown  by "+name+":"+x)
 			  }
 			}		
 		
@@ -705,7 +715,7 @@ object Pilots {
 		val recruit = """(?i-)\s*!\s*recruit\s+(\S*)""".r
 		val invites = """(?i-)\s*!\s*invites\s*""".r
 		//val help = """(?i-)\s*!\s*help\s*""".r
-		val helpCommand = """(?i-)\s*!\s*help\s+(\S*)""".r
+		val helpCommand = """(?i-)\s*!\s*help(:?\s+(\S*))?""".r
 		val verbose = """(?i-)\s*!\s*verbose\s*""".r
 	}
 //	class Invitation(val by:String, val plane:IMarket.Loadout, val until:Long) 

@@ -137,7 +137,7 @@ debug("skipping "+msg+" because it is too old: "+(age/1000)+"s")
 	)
 
   var dayState : java.util.Date = _
-  val dateformat = new java.text.SimpleDateFormat("MMM d, yyyy")
+  val dateformat = new java.text.SimpleDateFormat("MMM d, yyyy", java.util.Locale.ENGLISH)
  	lazy val dayParser : Parser[java.util.Date] = {
     """\w{3} \d{1,2}, \d{4} """.r ^^ 
     {string=>

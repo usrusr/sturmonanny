@@ -10,9 +10,22 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 	val leftoverWeight = 1D // 1D: inital prices after cycle will be 50:50 derived from leftover and new supply, bigger weight: more leftover,
 	val memoryName = "DynScLimitMarket.leftovers.txt"
 
+	var server : Option[Server]=None 
+	override def setServerContext(srv:Server){
+log.debug("setting server context: "+srv)		    
+	  server = Some(srv)
+  }
+		
 	val sides = Map(new SideMarket(1).pair, new SideMarket(2).pair)
   override def addAirTime(load : Loadout, millis : Long, side:Int) = sides(side).addAirTime(load, millis)
-  protected def tryPrice(loadout:Loadout, side:Int) = sides(side).tryPrice(loadout)
+  protected def tryPrice(loadout:Loadout, side:Int) = {
+		if(side>0) sides(side).tryPrice(loadout)
+		else {
+			val s1 = sides(1).tryPrice(loadout)
+			if(s1 isDefined) s1 
+			else sides(2).tryPrice(loadout)
+		}
+	}
 
   // holds the remaining capacities of the last cycle, or None for first access
  	var memory : Option[Map[Int, Map[String, Double]]] = None
@@ -21,7 +34,7 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 	 * return true for a successful configuration update 
 	 */  
 	override def setConfiguration(pathToFile : String) : Boolean = true
-	override def setServerContext(server : Server) : Unit = true
+
 	
 	
 			/**
@@ -103,6 +116,18 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 				}
 			}
 			source.close
+			
+		  for(	srv <- server){
+	  		val planes : Planes = srv.planes 
+		  	planes.clear
+		  	for(	
+		  		side<-sides.values; 
+		  		plane<-side.pl.keys
+		  	){
+log.debug("creating "+plane+" in market -> "+planes.items )		    
+		    	planes.create(plane)
+		  	}
+		  }			
 	}
 	
   
@@ -126,7 +151,7 @@ class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
 			pl.get(loadout.plane )
 			
 	  }
-		
+
 			
 		/**
 		 * @param plane
@@ -163,6 +188,9 @@ log.debug("cycling "+s+" with "+newSupply)
 				val scaledLeftover = leftoverScale * leftoverMap.get(y._1).getOrElse(0D)
 				(y._1, new Variable(scaledLeftover))
 			}
+			
+
+
 			recalculate()
 			()
 		}	
