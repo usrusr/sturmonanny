@@ -45,7 +45,7 @@ class AllPlanesEverywhere(args: String) extends javax.xml.ws.Provider[File] with
     log debug "" + pr2
     out
     
-    val bak = new File(file.getParent, file.getName + ".mis.preflatten")
+    val bak = new File(file.getParent, file.getName + ".preflatten")
     file.renameTo(bak)
     out.renameTo(file)
     file
@@ -117,11 +117,11 @@ object AllPlanesEverywhere extends Log {
         rep("""\s*[^\[\s]\S*""".r )) ^^ {
         case number ~ planes => {
           writer map { w =>
-            w append ("[BornPlace" + number + "]")
+            w append ("[BornPlace" + number + "]\r\n")
             //            
             val side = dromesToSides(number)
             val sp = sideToPlanes.get(side)
-            for (set <- sp; p <- set) w append ("  " + p)
+            for (set <- sp; p <- set) w append ("  " + p+"\r\n")
             kept
           } getOrElse {
             //            val planeSet = dromesToPlanes.get(number).getOrElse {
