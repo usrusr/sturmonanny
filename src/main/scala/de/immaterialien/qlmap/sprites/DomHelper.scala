@@ -3,7 +3,7 @@ package de.immaterialien.qlmap.sprites
 import scala.collection._
 import org.apache.batik
 import batik.dom.svg
-import org.apache.batik.ext.awt.image.renderable._
+import org.apache.batik.ext.awt.image.renderable._ 
 import org.apache.batik.gvt.filter._
 import java.awt.image.renderable._
 import org.w3c.dom._
@@ -42,7 +42,7 @@ object DomHelper {
       ll flatten 
     }
     def domElement = e
-    def append(es: Element*) = {
+    def append(es: Element*) = { 
       for (c <- es) e.appendChild(c)
       this
     }

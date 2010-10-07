@@ -601,10 +601,10 @@ debug(name + " sending chat "+msg)
 //						chat("available commands are:")
 //						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
 //					}		
-//					case Commands.help(_) => {
-//						chat("available commands are:")
-//						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
-//					}
+					case Commands.help(_) => {
+						chat("available commands are:")
+						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
+					}
 					case Commands.helpCommand(cmd)=> cmd match {
 						case "balance"=>chat("displays how many "+conf.names.currency+" you have")
 						case "available"=>chat("'available abc' displays the allowed planes with 'abc' in their name")
@@ -714,8 +714,8 @@ object Pilots {
 		val state = """(?i-)\s*!\s*state\s*""".r
 		val recruit = """(?i-)\s*!\s*recruit\s+(\S*)""".r
 		val invites = """(?i-)\s*!\s*invites\s*""".r
-		//val help = """(?i-)\s*!\s*help\s*""".r
-		val helpCommand = """(?i-)\s*!\s*help(:?\s+(\S*))?""".r
+		val help = """(?i-)\s*!\s*help\s*""".r
+		val helpCommand = """(?i-)\s*!\s*help\s+(\S*)""".r
 		val verbose = """(?i-)\s*!\s*verbose\s*""".r
 	}
 //	class Invitation(val by:String, val plane:IMarket.Loadout, val until:Long) 

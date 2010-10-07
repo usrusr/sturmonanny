@@ -26,6 +26,8 @@ class Rules extends NonUpdatingMember with Logging {
     val ret = old + diff
     val lowest = conf.pilots.lowestBalance.apply
     val highest = conf.pilots.highestBalance.apply
+    
+debug("update balance "+old + " + "+diff)    
     if (ret < lowest) lowest
     else if (ret > highest) highest
     else ret

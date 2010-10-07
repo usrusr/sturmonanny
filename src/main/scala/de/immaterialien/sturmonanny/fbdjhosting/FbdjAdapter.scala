@@ -80,10 +80,16 @@ debug("FBDj configuratoin changing!")
 
 		  	  
 		  		//val created = new FbdjHost(conf)
-		  	  
+          nextMissionProvider = new NextMissionProvider(conf) 
+          
 		  	  val created = ContainerPool.getContainer(conf.fbdj.installationPath.apply, conf.fbdj.overridesJar.apply)
 		  	  created.adapterNextMissionProxy = Some(new Provider[File]{
-		  	  	override def invoke(i:File):File = nextMissionProvider.invoke(i)
+		  	  	override def invoke(i:File):File = {
+		  	  		val nmp = nextMissionProvider
+debug("nextMissionProvider: "+nmp)		  	  		
+		  	  		
+		  	  		nmp.invoke(i)
+		  	  	}
 		  	  })
 		  	  created.changeConfiguration(conf, server.initConf)
 		  	  created.start  
@@ -107,7 +113,7 @@ debug("FBDj configuratoin changing!")
           addonArguments = conf.fbdj.DCG.addonArguments.map
       
           
-          nextMissionProvider = new NextMissionProvider(conf) 
+
           
 		  		overridesPath = conf.fbdj.overridesJar.apply
 	  	    debug("initialized FBDj: \n  "+fbdjPath+"\n  "+overridesPath+"\n  "+confPath+"\n   in:"+System.identityHashCode(fbdj.get.inList)+"   out:"+System.identityHashCode(fbdj.get.outList))

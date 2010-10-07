@@ -35,7 +35,7 @@ object HtmlMissionFilter {
 }
 class HtmlUpdater(path: File, mission: File) {
   import HtmlMissionFilter._
-  val misFolder = mission.getParentFile
+  val misFolder = mission.getParentFile 
   val currentMisFilePrefix = commonMissionPrefix.findPrefixOf(mission.getName)
   val lowerPrefix = currentMisFilePrefix.getOrElse("").toLowerCase
   val misFilter = new FilenameFilter {
