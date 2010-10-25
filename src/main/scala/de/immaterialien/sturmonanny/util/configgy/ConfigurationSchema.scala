@@ -175,7 +175,7 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
       if( ! configgyName.isEmpty) sb.append(indent + "</" + configgyName + ">\r\n")
     }
     override def toString = "table " + configgyName + ":" + map
-    def innerTable(sb: scala.StringBuilder, indent: String) = for ((k, v) <- map.projection) sb.append(indent + "   " + k + " = " + printer(v) + "\r\n")
+    def innerTable(sb: scala.StringBuilder, indent: String) = for ((k, v) <- map.view) sb.append(indent + "   " + k + " = " + printer(v) + "\r\n")
     def innerTable: String = {
       val sb = new scala.StringBuilder()
       innerTable(sb, "")

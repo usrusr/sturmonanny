@@ -9,16 +9,16 @@ class Rules extends NonUpdatingMember with Logging {
   def startCost(price:Double):Double = math.max(0D, price * conf.game.startcost.apply)
   def startCost(price: Double, pilot:String, recruiter:Option[String], side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]):PriceInfo = {
   	val cost:Double = startCost(price)
-  	if(cost==0D) emptyPrice else {
-	  	val list = if(recruiter.isDefined){
-	  		val cruiterPart = recruiterPercents.toDouble/100D
-	  		val recruitPart = 1D-cruiterPart
-	  		Payment(pilot, cost*recruitPart)::Payment(recruiter.get, cost*cruiterPart)::Nil
-	  	}else{
-	  		Payment(pilot, cost)::Nil
-	  	}
-	  	PriceInfo(cost, list,side, invitation)
+  	val list = if(cost==0D) {
+			Nil 
+		} else if(recruiter.isDefined){
+  		val cruiterPart = recruiterPercents.toDouble/100D
+  		val recruitPart = 1D-cruiterPart
+  		Payment(pilot, cost*recruitPart)::Payment(recruiter.get, cost*cruiterPart)::Nil
+  	}else{
+  		Payment(pilot, cost)::Nil
   	}
+  	PriceInfo(price, list,side, invitation)
   }
   
   def refund = (conf.game.refund.apply.toDouble / 100D) 

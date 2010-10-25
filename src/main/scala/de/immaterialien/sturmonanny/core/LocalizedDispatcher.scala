@@ -38,7 +38,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
     }
 
- 	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
+ 	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!EventSource.Console(what))
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
 	  case DispatchMessage(x) => processMessage(x)
@@ -173,15 +173,15 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
  	def makeStatParserString (what:String) : Parser[String] = {
  	  (what+""": """)~rep1("""\t""") ~> regexMatch("""(\S(.*\S)?)\\n\n""".r)^^(_.group(1))
 	}
- 	def stringToState : PartialFunction[String, Is.PilotState] = {
+ 	def stringToState : PartialFunction[String, EventSource.UserState] = {
  	  case """In Flight""" => {
- 	  	Is.InFlight
+ 	  	EventSource.UserState(Is.InFlight)  
 // 	 not necessary, InFlight handled only if a plane is known  	Is.Ignored // because the stats lists displays "In Flight" while a pilot is connecting... 
  	  }
- 	  case """Landed at Airfield""" => Is.LandedAtAirfield
- 	  case """KIA""" => Is.KIA
- 	  case """Hit the Silk""" => Is.HitTheSilk  
- 	  case """Selects Aircraft""" => Is.Selecting 
+ 	  case """Landed at Airfield""" => EventSource.UserState(Is.LandedAtAirfield)
+ 	  case """KIA""" => EventSource.UserState(Is.KIA)
+ 	  case """Hit the Silk""" => EventSource.UserState(Is.HitTheSilk)  
+ 	  case """Selects Aircraft""" => EventSource.UserState(Is.Selecting) 
  	}
 	
  

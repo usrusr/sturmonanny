@@ -46,7 +46,7 @@ object NextMissionProvider
       }
     }
 
-  	val jclRet = JavaConversions.asBuffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
+  	val jclRet = JavaConversions.asScalaBuffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
   	
 println("jcl ret "+jclRet+"\n from "+ret)  	
   	jclRet
@@ -68,7 +68,10 @@ log.debug("invoking "+filter.getClass.getSimpleName+" with input "+ret)
 log.debug("got "+next+" from "+filter.getClass.getSimpleName)      	
       	if(next!=null) ret = next
       }catch{
-        case x => log.error("error in mission processor "+filter.getClass.getCanonicalName+", skipping ", x)
+        case x => {
+        	log.error("error in mission processor "+filter.getClass.getCanonicalName+", skipping ", x)
+        	x.printStackTrace()
+        }
       	case _ =>
       }
     }

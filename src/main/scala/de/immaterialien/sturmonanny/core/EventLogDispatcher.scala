@@ -30,14 +30,17 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 			
 	} 
 
- 	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!what)
+	
+	
+ 	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!  EventSource.Logfile(what))
  	def allPilotMessageSend(what: Is.Event) = server.pilots.forMatches("")(_!what) 
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
 	  case DispatchMessage(x) => processMessage(x) 
-	  case _ => // ignore 
-	}
- 	def parseOneLine(line:String) : ParseResult[_] = parse(rootLineParser, line.stripLineEnd) 
+	  case _ => // ignore  
+	} 
+
+ 	def parseOneLine(line:String) = parse(rootLineParser, line.stripLineEnd) 
 	def processLine(line:String) : Unit = {
 		val parseResult : ParseResult[_] = parseOneLine( line )
 //debug("-------------------------\nparsing line '"+line+"' \n  -> '"+parseResult+"'")  
