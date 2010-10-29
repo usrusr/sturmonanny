@@ -10,10 +10,13 @@ class FileBackend  extends IBalanceDao with util.Log { import FileBackend._
 	var map = new mutable.HashMap[String, BalanceRB]
 	var file : Option[String] = None
 	var lastSave = System.currentTimeMillis
-	var writeInterval = 3
+	var writeInterval = 10
 	
 	def load(pilot:String):Option[IBalanceDao.BalanceRB] = {
-			map.get(pilot)
+	
+			val ret = map.get(pilot)
+log debug("loading for "+pilot+" " + ret + " from "+map)			
+			ret
 	}
 
 	def store(pilot:String, balanceRed:Option[Double], balanceBlue:Option[Double]){
@@ -30,6 +33,7 @@ class FileBackend  extends IBalanceDao with util.Log { import FileBackend._
 						(balanceBlue getOrElse 0d) 
 				))
 				if(System.currentTimeMillis > (lastSave + (writeInterval*1000))){
+//log debug("save existing "+existing+" vs new "+balanceRed+"/"+balanceBlue+" updated? "+updated )					
 					save({x:String=>log.error("autosave: " + x)})
 				}else{
 //					log.debug("waiting to save "+(System.currentTimeMillis-(lastSave + (writeInterval*1000))) +" ms missing")

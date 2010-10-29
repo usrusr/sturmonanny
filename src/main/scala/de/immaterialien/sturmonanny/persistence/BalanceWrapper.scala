@@ -6,8 +6,10 @@ import net.liftweb.common.Box
 
 class BalanceWrapper extends IBalanceDao with core.UpdatingMember with util.Log{
   def load(pilot:String):Option[IBalanceDao.BalanceRB] = { 
-  	val ret = actor !! (Msg.LoadReq(pilot), 500)
-  	ret.asA[Msg.LoadRes].flatMap(_.res)
+  	val ret = actor !! (Msg.LoadReq(pilot), 1000)
+  	val res = ret.asA[Msg.LoadRes]
+  	val r = res.flatMap(_.res)
+  	r
   }
 	def store(pilot:String, balanceRed:Option[Double], balanceBlue:Option[Double]) {
 		actor ! Msg.Store(pilot, balanceRed, balanceBlue)
@@ -30,12 +32,15 @@ class BalanceWrapper extends IBalanceDao with core.UpdatingMember with util.Log{
 				val newCls = classOf[BalanceWrapper]
 						.getClassLoader.loadClass(next.cls)
 						.asInstanceOf[Class[IBalanceDao]]
-				newCls.newInstance
+				val newInstance = newCls.newInstance
+				newInstance.open(next.props, log.debug(_), log.error(_))
+				newInstance
 			}catch{ case e => {
 				log.error("could not load '"+next.cls+"' ", e)
 				None 
 			}}
-			open(next.props, log.debug(_), log.error(_)) 
+			//open(next.props, log.debug(_), log.error(_))
+			
 			last = next
 		}
 	}

@@ -27,14 +27,17 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 		var verbose = true
 		
 		
-		
-		for(loaded <- server.balance.load(name)){
+		{
+			val sb = server.balance
+			val loadedOpt = sb.load(name)
+debug ("loaded "+loadedOpt)			
+		for(loaded <- loadedOpt){
 			balance(Armies.RedSide) = loaded.red
 			balance(Armies.BlueSide) = loaded.blue
 			val currency = conf.names.currency
 			chat("your balance: "+loaded.red.toInt+currency+" on red and "+loaded.blue.toInt+currency+" on blue")
 		}
-		
+		}
 		val _invites = new AutoInvitations(this) 
 		def invites = _invites.get // wrap each access in a timeout clean
 		object state{
@@ -60,7 +63,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			var flying = false
 
 			var planeName = ""
-			var lastPlanePriceCommit = System.currentTimeMillis
+			var lastPlanePriceCommit = System.currentTimeMillis // compare against lastPlaneVerification to determine "inFlight" -1L // -1: we have a price but we are not in the air yet
 			var planeWarningSince = 0L
 			var lastCleared = 0L
 			var planeVerified = true
@@ -137,16 +140,20 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 			
 			
 			def commitPlanePrice(){
-			  if(planeVerified) for(planePrice <- lastPayment.map(_ price)){
-println("commit plane price "+state)			  	
-					val now = System.currentTimeMillis
-
-					val millis = System.currentTimeMillis - lastPlanePriceCommit
-					val difference = planePrice * millis / (-60000) 
-					debug("price update for "+millis+" with raw price"+ currency(planePrice)+ " -> difference "+currency(difference) )       
-					balance () = server.rules.updateBalance(balance, difference)
-					lastPlanePriceCommit = now
-					persist()
+			  if(planeVerified) for(planePrice <- lastPayment.map(_ price)){ 
+			  	val now = System.currentTimeMillis
+					val millis = now - lastPlanePriceCommit
+			  	if(lastPlanePriceCommit == lastPlaneVerification) {
+	println("skipping plane price "+millis+" millis")			  	
+				  	lastPlanePriceCommit = now
+				  } else {
+	println("commit plane price "+state)			  	
+						val difference = planePrice * millis / (-60000) 
+						debug("price update for "+millis+" with raw price"+ currency(planePrice)+ " -> difference "+currency(difference) )       
+						balance () = server.rules.updateBalance(balance, difference)
+						lastPlanePriceCommit = now
+						persist()
+				  }
 			  }
 			}
 			
@@ -168,15 +175,15 @@ println("    definitelyInPlane  ")
 				
 				
 				lostPlaneName = ""
-				val now = System.currentTimeMillis
-				lastPlanePriceCommit = now
+
+				lastPlanePriceCommit = System.currentTimeMillis
 				var invitation = invites in planeName
 				val side = firstNonNeutral(invitation.map(_.inv.side).toList:_*)
 				val rawPrice = server.rules.startCost(planePrice, name, invitation.map(_.inv.by), side, invitation)
 				
 //				if( ! invitation.accept(rawPrice))
 				
-				if(deathPauseUntil>now && invitation.isEmpty){
+				if(deathPauseUntil>lastPlanePriceCommit && invitation.isEmpty){
 					// pilot is in death pause, invitations are checked in rules
 					unverify()
 				} else {
@@ -192,7 +199,7 @@ println("    definitelyInPlane  ")
 						crashed = false
 						landed = false
 						
-						lastPlaneVerification = System.currentTimeMillis
+						lastPlaneVerification = lastPlanePriceCommit
 						for(i<-invitation) i.preaccept()
 						pay(rawPrice, side, invitation)
 					}
@@ -390,7 +397,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				lastCleared = System.currentTimeMillis
 			}
 			def persist() {
-//debug("persisting "+name)				
+debug("persisting "+name)				
 				server.balance .store(name, Some(balance(Armies.RedSide)), Some(balance(Armies.BlueSide)))
 			}
 			
@@ -403,40 +410,44 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 			/**
 			 * todo: by-loadout price info!
 			 */
-				val price = server.market.getPrice(plane.name, currentSide.id)
+			
+				val priceOpt = server.market.tryPrice(IMarket.Loadout(plane.name, None), currentSide.id)
+			  for(price <- priceOpt){
+//				val price = server.market.getPrice(plane.name, currentSide.id)
 
-				def padRight(in:String, reference:String):String=in+(reference.drop(in.length))
-				def padLeft(in:String, reference:String):String=(reference.drop(in.length))+in
-				val (result, affordable, verb) = (if(price > 0){
-					
-					val cost = server.rules.startCost(price)
-					val bal:Double=balance
-					val affordable = cost < bal 
-					
-					if(affordable){
-						(true, "+", "costs.once."+cost.toInt+".+" )
+					def padRight(in:String, reference:String):String=in+(reference.drop(in.length))
+					def padLeft(in:String, reference:String):String=(reference.drop(in.length))+in
+					val (result, affordable, verb) = (if(price > 0){
+						
+						val cost = server.rules.startCost(price)
+						val bal:Double=balance
+						val affordable = cost < bal 
+						
+						if(affordable){
+							(true, "+", "costs.once."+cost.toInt+".+" )
+						}else{
+							(false, "!", "would.cost."+cost.toInt+".+" )
+						}
 					}else{
-						(false, "!", "would.cost."+cost.toInt+".+" )
-					}
-				}else{
-					(true, "*", "gives")
-				})
-				
-    
-				if(all||result){
-				  // padding for longest possible name:
-					//                                   P_40SUKAISVOLOCHHAWKA2
-					val paddedPlane = padRight(plane.name, "......................")
-					//                              would cost 1000 +  
-					val paddedVerb = padLeft(verb, ".................")
+						(true, "*", "gives")
+					})
 					
-					var intPrice = price.toInt
-					intPrice = intPrice.abs
-					val paddedPrice = padLeft(""+price.abs.toInt,".....")
-					val msg = affordable+" "+paddedPlane+paddedVerb+paddedPrice+conf.names.currency+".per.minute"  
-					//server.multi ! server.multi.ChatTo(pilotName, msg)
-					chat(msg)	 
-				}
+	    
+					if(all||result){
+					  // padding for longest possible name:
+						//                                   P_40SUKAISVOLOCHHAWKA2
+						val paddedPlane = padRight(plane.name, "......................")
+						//                              would cost 1000 +  
+						val paddedVerb = padLeft(verb, ".................")
+						
+						var intPrice = price.toInt
+						intPrice = intPrice.abs
+						val paddedPrice = padLeft(""+price.abs.toInt,".....")
+						val msg = affordable+" "+paddedPlane+paddedVerb+paddedPrice+conf.names.currency+".per.minute"  
+						//server.multi ! server.multi.ChatTo(pilotName, msg)
+						chat(msg)	 
+					}
+			  }
 			}
 		}
   
