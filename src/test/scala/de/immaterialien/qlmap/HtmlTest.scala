@@ -5,7 +5,8 @@ object HtmlTest {
 
     val filter = new HtmlMissionFilter("E:/2.8workspace/qlmap/src/main/resources/mapbase/out.conf")
     var misFile = new java.io.File("E:/IL2-server/Dedi/Missions/Net/dogfight/DCG/Italien_43194401240.mis")
-//    misFile = new java.io.File("E:/IL2-server/Dedi/Missions/Net/dogfight/DCG/Italien_43194401240.mis")
+    misFile = new java.io.File("E:/IL2-server/Dedi/Missions/Net/dogfight/DCG/Italien_43194401240.mis")
+    misFile = new java.io.File("src/test/resources/de/immaterialien/sturmonanny/dcg/Iasi44194405020.mis")
     
     filter.invoke(misFile) 
   }

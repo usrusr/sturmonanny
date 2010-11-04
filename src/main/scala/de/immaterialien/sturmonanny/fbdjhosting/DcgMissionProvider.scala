@@ -3,7 +3,7 @@ import java.io.File
 import _root_.de.immaterialien.sturmonanny.core
 import _root_.de.immaterialien.sturmonanny.util
 
-object DcgMissionProvider {
+object DcgMissionProvider extends util.Log{ 
   val misFilter = new java.io.FilenameFilter(){
     override def accept(dir:File, name:String) = name.endsWith(".mis")
 	}
@@ -15,7 +15,12 @@ object DcgMissionProvider {
   def listMissions(searchPath:File):Set[String] = {
 		val list = searchPath.list(misFilter);
                   
-  	Set[String]() ++ list.toList
+  	if(list!=null) {
+  		Set[String]() ++ list.toList
+  	} else {
+  		 log.error ("failed to list in "+searchPath.getAbsolutePath)
+  		 Set[String]()
+  	}
 	}
 } 
 

@@ -243,6 +243,8 @@ debug("emerged from threadwall return "+ret.getOrElse(null))
 			def MIN_SORTIES_BIGGER(arg:String) = interface.invoke("MIN_SORTIES_BIGGER="+arg)
 			def MIN_PILOTS_SMALLER(arg:String) = interface.invoke("MIN_PILOTS_SMALLER="+arg)
 			def MIN_PILOTS_BIGGER(arg:String) = interface.invoke("MIN_PILOTS_BIGGER="+arg)
+			
+			def DEFAULTMISSIONFOLDER(arg:String) = interface.invoke("DEFAULTMISSIONFOLDER="+arg)
 			def DCGPATH(arg:String) = interface.invoke("DCGPATH="+arg)
 			def CONFIGURATION(arg:String) = interface.invoke("CONFIGURATION="+arg)
 	    def NAME(arg:String) = interface.invoke("NAME="+arg)
@@ -271,6 +273,8 @@ debug("emerged from threadwall return "+ret.getOrElse(null))
 			send MIN_SORTIES_BIGGER ""+conf.fbdj.DCG.campaignProgress.minSorties.bigger.apply
 			send MIN_PILOTS_SMALLER ""+conf.fbdj.DCG.campaignProgress.minPilots.smaller.apply
 			send MIN_PILOTS_BIGGER ""+conf.fbdj.DCG.campaignProgress.minPilots.bigger.apply
+			// manually set defaultmissionfolder (instead of relying on FBDjOverride getting it out of DCG conf) because on Linux DCG uses WINE paths while nanny probably wont 
+			send DEFAULTMISSIONFOLDER ""+conf.server.serverPath+"/Missions/Net/dogfight/DCG"
 			send DCGPATH ""+conf.fbdj.DCG.dcgPath.apply
 			send CONFIGURATION ""+conf.fbdj.fbdjConfigurationDirectory.apply
 			send NAME name

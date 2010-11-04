@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.immaterialien</groupId>
 	<artifactId>sturmonanny</artifactId>
-	<version>0.0.9-SNAPSHOT</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<inceptionYear>2010</inceptionYear>
 	<properties>
@@ -235,7 +235,8 @@
 				<executions>
 					<execution>
 						<id>deps</id>
-						<phase>deploy</phase>
+						<!-- <phase>deploy</phase> -->
+
 						<configuration>
 							<descriptors>
 								<descriptor>deps-assembly.xml</descriptor>
@@ -262,53 +263,166 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.4</version>
 				<configuration>
 					<skip>true</skip>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>wagon-maven-plugin</artifactId>
-				<version>1.0-beta-3</version>
-				<dependencies>
-					<dependency>
-						<groupId>org.apache.maven.wagon</groupId>
-						<artifactId>wagon-ftp</artifactId>
-						<version>1.0-beta-6</version>
-					</dependency>
-				</dependencies>
-				<executions>
-					<execution>
-						<id>full-upload</id>
-						<phase>release</phase>
-						<goals>
-							<goal>upload</goal>
-						</goals>
-						<configuration>
-							<fromDir>target</fromDir>
-							<includes>*.zip</includes>
-							<url>ftp://${ftpUsername}:${ftpPassword}@immaterialien.de</url>
-							<toDir>/htdocs/il2/</toDir>
-						</configuration>
-					</execution>
-					<execution>
-						<id>partial-upload</id>
-						<!-- <phase>install</phase> -->
-						<goals>
-							<goal>upload-single</goal>
-						</goals>
-						<configuration>
-							<fromFile>target/sturmonanny-${project.version}.jar</fromFile>
-							<url>ftp://${ftpUsername}:${ftpPassword}@immaterialien.de</url>
-							<toFile>/htdocs/il2/sturmonanny-core.jar</toFile>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-				</configuration>
-			</plugin>
 		</plugins>
+
+		<!-- <extensions> -->
+		<!-- <extension> -->
+		<!-- <groupId>org.apache.maven.wagon</groupId> -->
+		<!-- <artifactId>wagon-ssh-external</artifactId> -->
+		<!-- <version>1.0-beta-6</version> -->
+		<!-- </extension> -->
+		<!-- <extension> -->
+		<!-- <groupId>org.apache.maven.wagon</groupId> -->
+		<!-- <artifactId>wagon-ssh</artifactId> -->
+		<!-- <version>1.0-beta-6</version> -->
+		<!-- </extension> -->
+		<!-- <extension> -->
+		<!-- <groupId>org.apache.maven.wagon</groupId> -->
+		<!-- <artifactId>wagon-ssh-ganymed</artifactId> -->
+		<!-- <version>1.0-beta-2</version> -->
+		<!-- </extension> -->
+		<!-- </extensions> -->
+
+
 	</build>
+	<profiles>
+		<profile>
+			<id>immaterialien</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>wagon-maven-plugin</artifactId>
+						<version>1.0-beta-3</version>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.maven.wagon</groupId>
+								<artifactId>wagon-ftp</artifactId>
+								<version>1.0-beta-6</version>
+							</dependency>
+						</dependencies>
+						<executions>
+							<execution>
+								<id>full-upload</id>
+								<phase>release</phase>
+								<goals>
+									<goal>upload</goal>
+								</goals>
+								<configuration>
+									<fromDir>target</fromDir>
+									<includes>*.zip</includes>
+									<url>ftp://${ftpUsername}:${ftpPassword}@immaterialien.de</url>
+									<toDir>/htdocs/il2/</toDir>
+								</configuration>
+							</execution>
+							<execution>
+								<id>partial-upload</id>
+								<!-- <phase>install</phase> -->
+								<goals>
+									<goal>upload-single</goal>
+								</goals>
+								<configuration>
+									<fromFile>target/sturmonanny-${project.version}.jar</fromFile>
+									<url>ftp://${ftpUsername}:${ftpPassword}@immaterialien.de</url>
+									<toFile>/htdocs/il2/sturmonanny-core.jar</toFile>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+						</configuration>
+					</plugin>
+					<!-- maven.scp.executable -->
+				</plugins>
+			</build>
+		</profile>
+
+
+		<profile>
+			<id>nannybox</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+
+
+					<plugin>
+
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>wagon-maven-plugin</artifactId>
+						<version>1.0-beta-3</version>
+
+
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.maven.wagon</groupId>
+								<artifactId>wagon-ssh-external</artifactId>
+								<version>1.0-beta-6</version>
+							</dependency>
+							<dependency>
+								<groupId>org.apache.maven.wagon</groupId>
+								<artifactId>wagon-ssh</artifactId>
+								<version>1.0-beta-6</version>
+							</dependency>
+
+						</dependencies>
+
+
+
+						<executions>
+							<!-- <execution> -->
+							<!-- <id>full-upload</id> -->
+							<!-- <phase>release</phase> -->
+							<!-- <goals> -->
+							<!-- <goal>upload</goal> -->
+							<!-- </goals> -->
+							<!-- <configuration> -->
+							<!-- -->
+							<!-- <fromDir>target</fromDir> -->
+							<!-- <includes>*.zip</includes> -->
+							<!-- <serverId>il2.ulf-schreiber.de</serverId> -->
+							<!-- <url>pscpexe://il2.ulf-schreiber.de/</url> -->
+							<!-- <toDir>~/Server/nanny</toDir> -->
+							<!-- </configuration> -->
+							<!-- </execution> -->
+							<execution>
+								<id>partial-upload</id>
+								<goals>
+									<goal>upload-single</goal>
+								</goals>
+								<configuration>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+
+							<fromFile>target/sturmonanny-${project.version}.jar</fromFile>
+							<serverId>il2.ulf-schreiber.de</serverId>
+							<url>scpexe://il2.ulf-schreiber.de/</url>
+							<toFile>/home/usr/server/nanny/sturmonanny-core.jar</toFile>
+
+
+						</configuration>
+					</plugin>
+					<!-- maven.scp.executable -->
+				</plugins>
+
+
+			</build>
+		</profile>
+
+
+	</profiles>
 	<reporting>
 		<plugins>
 			<plugin>
