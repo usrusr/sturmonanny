@@ -31,12 +31,13 @@ class Server(val initConf : String, val threadGroup:java.lang.ThreadGroup) exten
 	val eventlog = new EventLogDispatcher with Member
 
 
-	val multi = new Multiplexer ("", 0, conf.server.consoleport.apply) with Member
+//	val multi = new Multiplexer ("", 0, conf.server.consoleport.apply) with Member
+	val multi = new Multiplexer ("", 0, 0) with Member
  
 //	debug("conf is initialized from '"+initConf+"'\n================\n"+conf)
 	members = members.reverse // so that member initialization happens in the order in which they are declared
 	for(m <- members){
-//		debug("initializing configuratoin for "+m.getClass.getSuperclass.getSimpleName+" <- "+m.getClass.getInterfaces.map(x=>{x.getSimpleName}).foldLeft("")((a, b)=>a+"-" + b))      
+		debug("initializing configuratoin for "+m.getClass.getSuperclass.getSimpleName+" <- "+m.getClass.getInterfaces.map(x=>{x.getSimpleName}).foldLeft("")((a, b)=>a+"-" + b))      
 		m.updateConfiguration
 	} 
 	/**

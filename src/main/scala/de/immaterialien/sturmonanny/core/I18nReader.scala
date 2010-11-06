@@ -10,15 +10,21 @@ object I18nReader{
 }
 trait I18nReader extends Logging {
 	var serverPath : String= null
-	def i18nSuffix =  """\i18n\netmessages.properties"""  
+	def i18nSuffix =  """/i18n/netmessages.properties"""  
   
 	def init(newPath:String) = {
 	  val i18nPath = newPath+i18nSuffix
 	  try{
-		  val source = Source.fromFile(i18nPath)// scala.io.BufferedSource.fromFile(i18nPath)
-		  var translations = new mutable.HashMap[String, List[String]]()
-		  for(line : String<- source.getLines) {
+	  	val file = new java.io.File(i18nPath)
+debug("init I18nReader from '"+i18nPath+"' ("+file.getAbsolutePath+" "+(if(file.exists) "exists" else "is missing")+") ")				      
 
+	  	val source = Source.fromFile(file)// scala.io.BufferedSource.fromFile(i18nPath)
+		  val lines = source.getLines.toList
+//debug("in '"+i18nPath+"' ("+file.getAbsolutePath+") #lines: "+lines.length)				      
+		  
+		  var translations = new mutable.HashMap[String, List[String]]()
+		  for(line : String<- lines) {
+//debug("i18n line '"+line+"'")		
 		    line.stripLineEnd match{
 			    case I18nReader.propertiesLine(name, text) => {
 //debug("parsed constant '"+name+"' <- '"+text+"'")				      

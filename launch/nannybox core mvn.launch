@@ -4,6 +4,6 @@
 <listEntry value="org.eclipse.ui.externaltools.launchGroup"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_LOCATION" value="E:\apache-maven-2.2.1\bin\mvn.bat"/>
-<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-o -Dmaven.test.skip=true -Pnannybox org.codehaus.mojo:wagon-maven-plugin:upload-single"/>
+<stringAttribute key="org.eclipse.ui.externaltools.ATTR_TOOL_ARGUMENTS" value="-o -Dmaven.test.skip=true -Pnannybox compile package org.codehaus.mojo:wagon-maven-plugin:upload-single"/>
 <stringAttribute key="org.eclipse.ui.externaltools.ATTR_WORKING_DIRECTORY" value="${workspace_loc:/sturmonanny}"/>
 </launchConfiguration>
