@@ -3,8 +3,7 @@ package de.immaterialien.qlmap
 import java.io._
 import scala.util.parsing.combinator._
 
-class MapConfiguration(file: File) extends Log {
-
+class MapConfigurationImpl(val file: File) extends MapConfiguration with Log{
   val (
     outPath: Option[File]
     ) = {
@@ -23,12 +22,12 @@ class MapConfiguration(file: File) extends Log {
               val out = if (outPathString startsWith ".") new File(file.getParent + File.separator + outPathString)
               else new File(outPathString)
     
-              if (out.isFile) MapConfiguration.this.log warn(out.getAbsolutePath + " is a file, need a directory")
+              if (out.isFile) MapConfigurationImpl.this.log warn(out.getAbsolutePath + " is a file, need a directory")
               else if (out.exists || out.mkdirs) {
                 outPath = Some(out)
-              } else MapConfiguration.this.log warn("failed to create recon directory " + out.getAbsolutePath)
+              } else MapConfigurationImpl.this.log warn("failed to create recon directory " + out.getAbsolutePath)
             }
-            case x => MapConfiguration.this.log warn("unkown key " + x) 
+            case x => MapConfigurationImpl.this.log warn("unkown key " + x) 
           }
         }
       }
@@ -41,4 +40,7 @@ class MapConfiguration(file: File) extends Log {
     reader.close
     (outPath)
   }
+}
+trait MapConfiguration {
+	def outPath:Option[File]
 }

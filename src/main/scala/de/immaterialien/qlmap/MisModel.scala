@@ -9,7 +9,12 @@ import java.awt.image.BufferedImage
 import java.io
 import scala.collection._
 
-class MisModel {
+object MisModel {
+	case class Waypoint(x:Double , y:Double )
+	case class WingGroundAttack(override val x:Double, override val y:Double) extends Waypoint(x,y)
+	implicit def wpToPair(wp:Waypoint):(Double,Double)=(wp.x,wp.y)
+}
+class MisModel {import MisModel._
   var front: List[(Double, Double, Int)] = Nil
   var rfront: List[(Double, Double)] = Nil
   var bfront: List[(Double, Double)] = Nil
@@ -18,6 +23,7 @@ class MisModel {
   var widthOffset = 0.
   var heightOffset = 0.
   class Chief(
+  	var name:String="", 
     var side:Option[Int]=None,
     var cls : GroundClass.GC = GroundClass.Unidentified,
     var path:List[(Double, Double)]=Nil,
@@ -41,11 +47,32 @@ class MisModel {
   }
   val chiefs = new mutable.HashMap[String, Chief]{
     override def default(name:String):Chief={
-      val ret = new Chief()
+      val ret = new Chief(name)
       put(name, ret)
       ret
     }
   }
+
+  
+  class Wing(
+  	var name:String="", 
+    var side:Option[Int]=None,
+    var path:List[Waypoint]=Nil,
+    var count :Int=1
+  ){  
+    def waypoint(xy:Waypoint){
+      path = path ::: xy ::Nil
+    }
+    override def toString = "wing:"+name+" on "+side +"("+path.size+")"
+  }
+  val wings = new mutable.HashMap[String, Wing]{
+    override def default(name:String):Wing={
+      val ret = new Wing(name)
+      put(name, ret)
+      ret
+    }
+  }
+  
   private var _imageFile: io.File = null
   def frontMarker(x: Double, y: Double, a: Int) {
 //    println("frontmarker: " + x + " / " + y + " for " + a)

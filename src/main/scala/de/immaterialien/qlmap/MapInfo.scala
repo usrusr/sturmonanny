@@ -17,7 +17,7 @@ case class MapInfo(image: Option[io.File], width: Option[Double], height: Option
     def nonnull[T](x: Option[T], y: Option[T]): Option[T] = if (x.isDefined && x.get != null) x else y
     MapInfo(nonnull(other.image, this.image),
       nonnull(other.width, this.width),
-      nonnull(other.height, this.height),
+      nonnull(other.height, this.height), 
       nonnull(other.widthOffset, this.widthOffset),
       nonnull(other.heightOffset, this.heightOffset),
       this.errors ::: other.errors)
@@ -36,7 +36,8 @@ class MapBase(confOrFolder: io.File) extends Log{
     if(confOrFolder.isDirectory)
       (confOrFolder, None) 
     else 
-      (confOrFolder.getParentFile, Some(new MapConfiguration(confOrFolder)))
+      //(confOrFolder.getParentFile, Some(new MapConfigurationImpl(confOrFolder)))
+    	(confOrFolder.getParentFile, Some(new MapConf(confOrFolder.getAbsolutePath)))
   class InfoParser(misFile: java.io.File) extends JavaTokenParsers {
     lazy val parseResult: MapInfo = {
       val file : io.Reader = if(misFile.exists) {

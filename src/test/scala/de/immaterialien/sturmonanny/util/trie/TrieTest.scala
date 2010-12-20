@@ -1,7 +1,10 @@
 package de.immaterialien.sturmonanny.util.trie
+	import org.junit.Test
+	import org.junit.Assert._
 
-  object TrieTest {
-    def main(i:Array[String]){
+  class TrieTest {
+		@Test
+    def main{
       var t = new Trie[Char, Int]() 
       t = t.add("hallo", 10)
       t = t.add("hai", 2)
@@ -10,13 +13,60 @@ package de.immaterialien.sturmonanny.util.trie
       t = t.add("tachchen", 44)
       t = t.add("bonjour", 5)
       println("---built---"+t)
+
       
-      println(t.longest("halloele")) 
       
-      println(t.get("hai"))
-      println(t.get("bye")) 
-      println(t.get("tachchensch�n")) 
-      println(t.shortest("tachchensch�n")) 
-      println(t.longest("tachchensch�n")) 
+			assertEquals(10, t.longest("halloele").get._2) 
+			  
+			assertEquals(2, t.get("hai").get)
+			assertTrue(t.get("bye").isEmpty) 
+			assertTrue(t.get("tachchenschen").isEmpty) 
+			assertEquals(4,t.shortest("tachchenschen").get._2) 
+			assertEquals(44,t.longest("tachchenschen").get._2) 
+
     }
+		
+		
+		@Test
+    def parser{
+			
+			object ps extends TrieParsers with scala.util.parsing.combinator.RegexParsers{
+//				type Elem = Char
+				
+				lazy val threeNumsSum = (""~> nums ~""~ nums ~""~ nums) ^^ {
+					case n1 ~ _ ~ n2 ~ _ ~ n3 => n1 + n2 + n3
+				}
+				
+				lazy val sums = repsep(threeNumsSum, ",")
+				
+				lazy val single = nums <~ ""
+				lazy val nums = {
+					val p = new TrieMapParser[Int]()
+					p.add("one",1)
+					p.add("two",2)
+					p.add("three",3)
+					p 
+				}
+			}
+			
+			println("parser: "+ ps.nums.trie)
+
+			val res0 = ps.parseAll(ps.nums, "one")
+      println("one: "+ res0)
+      assertEquals(1,res0.get)
+ 
+			
+      val res1 = ps.parseAll(ps.threeNumsSum, "one  two three")
+      println("one  two three: "+ res1)
+      assertEquals(6,res1.get)
+
+      val res2 = ps.parseAll(ps.threeNumsSum, "one  twotwo")
+      println("one  twotwo: "+ res2)
+      assertEquals(5,res2.get)
+      
+      val res3 = ps.parseAll(ps.sums, "one  twotwo, threethreeone, three two 	one")
+      println("one  twotwo, threethreeone, three two 	one: "+ res3)
+      assertEquals(List(5,7,6),res3.get)
+    }
+
   }

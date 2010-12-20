@@ -53,18 +53,24 @@ import _root_.de.immaterialien.sturmonanny.util._
  */
 
 abstract class ConfigurationSchema(val file: String) extends Holder with ConfigurationSchema.Selfdocumenting with Log {
-  val fileReference = this({
-    log.trace("parsing file " + file)
-    if (file == null) new Config
-    else {
-    	val f = new java.io.File(file)
-    	Config.fromFile(f.getAbsolutePath)
-//      Config.fromFile(file)
-    }
-  })
+  val fileReference = {
+  	val tmp = this({
+  		log.trace("parsing file " + file)
+  		val thisArg=
+	    if (file == null) new Config
+	    else {
+	    	val f = new java.io.File(file)
+	    	val abs = f.getAbsolutePath
+	    	Config.fromFile(abs)
+	    }
+  		thisArg
+	  })
+  	tmp
+  }
   //	if(logging.isTraceEnabled){
   if (fileReference.isDefined) {
-    log.debug("======\nraw file " + file + ":\n" + scala.io.Source.fromFile(fileReference.get.getAbsoluteFile).mkString)
+  	val abs = fileReference.get.getAbsoluteFile
+    log.debug("======\nraw file " + file + ":\n" + scala.io.Source.fromFile(abs).mkString)
   }
   log.debug("--->\nresult for " + file + ":\n" + this.toString)
 
@@ -100,7 +106,15 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
     readConfiggy(conf)
     if (file != null && conf.importer != null && conf.importer.isInstanceOf[net.lag.configgy.FilesystemImporter]) {
       val fsImporter = conf.importer.asInstanceOf[net.lag.configgy.FilesystemImporter]
-      if (fsImporter.baseFolder != null) Some(new java.io.File(fsImporter.baseFolder, file))
+      if (fsImporter.baseFolder != null) {
+      	val directFile = new java.io.File(file)
+      	if(directFile.exists){
+//      	if(directFile.getAbsolutePath.startsWith(new java.io.File(fsImporter.baseFolder).getAbsolutePath)){
+      		Some(directFile)
+      	}else{
+      		Some(new java.io.File(fsImporter.baseFolder, file))
+      	}
+      }
       else None
     } else None
   }
@@ -117,15 +131,20 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
   /**
    * Groups really are just Holders (of other groups or fields) and Members (of other Groups or ConfiggyFile) 
    */
-  protected[configgy] trait Group extends Holder with ConfigurationSchema.Member {
-    override def toString = "group " + configgyName
+  protected[configgy] class Group(docOpt:String) extends Holder with ConfigurationSchema.Member {
+  	override def toString = "group " + configgyName
+  	if(docOpt!=null) doc=docOpt
+  	def this()=this(null)
   }
 
   /**
    * key/value pairs of a certain type, we don't just dive into the configgy ConfigMap because we want 
    * the types, the default values and the ability to merge a new Config into an existing ConfigFile
    */
-  protected[configgy] class Table[T](var v: T) extends ConfigurationSchema.Member with ValidationInfo {
+  protected[configgy] class Table[T](var v: T, docOpt:String) extends ConfigurationSchema.Member with ValidationInfo {
+  	if(docOpt!=null) doc = docOpt
+  	def this(v:T) = this(v, null)
+  	
     val defaultValue = v
     var map = Map[String, T]()
     def apply(what: String): T = map.get(what) getOrElse defaultValue
@@ -134,6 +153,7 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
       val it = map.values
       it.toList
     }
+  	def default = ""+v
     val extractor = v match {
       case x: Int => (cMap: ConfigMap, k: String, oldValue: T) => cMap(k, oldValue.asInstanceOf[Int]).asInstanceOf[T]
       case x: String => (cMap: ConfigMap, k: String, oldValue: T) => cMap(k, oldValue.asInstanceOf[String]).asInstanceOf[T]
@@ -183,10 +203,12 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
     }
   }
 
-  protected[configgy] class Field[T](var v: T) extends ConfigurationSchema.Member with ValidationInfo {
+  protected[configgy] class Field[T](var v: T, docOpt:String) extends ConfigurationSchema.Member with ValidationInfo {
+  	if(docOpt!=null) doc = docOpt
+  	def this(v:T) = this(v, null)
     def update(t: T) = { if (t != null) v = t }
     def apply = v
-
+    def default = ""+v
     override def readConfiggy(in: Config) = v match {
       case x: String => Field.this() = in(full, x).asInstanceOf[T]
       case x: Int => Field.this() = in(full, x).asInstanceOf[T]
@@ -377,6 +399,7 @@ object ConfigurationSchema {
     protected var doc = ""
 
     protected def writeDocumentation(sb: scala.StringBuilder, indent: String, full: String) {
+    	def default = ""
       val prefix = full.replace(".", "/")
       def comment(line: String) = sb.append(
         " " +
@@ -389,7 +412,8 @@ object ConfigurationSchema {
           indent + " ### "
           + prefix
           //        +":"
-          + " ###"
+          + " ### "
+          + (if(default==null || default.length==0){""}else{" (default:"+default+")"})
           + "\r\n")
         for (line <- doc.lines) comment(line)
       }

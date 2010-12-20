@@ -91,7 +91,9 @@ debug("nextMissionProvider: "+nmp)
 		  	  		nmp.invoke(i)
 		  	  	}
 		  	  })
-		  	  created.changeConfiguration(conf, server.initConf)
+		  	  //created.changeConfiguration(conf, server.initConf)
+		  	  created.changeConfiguration(conf, conf.file)
+		  	  
 		  	  created.start  
        
        

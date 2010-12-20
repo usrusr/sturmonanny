@@ -61,7 +61,7 @@ println("created server for "+name+": "+server)
 	  	    newServer(k,v)
 	  	  }
 	  	  case Some(existing) => {
-	  		  if(existing.initConf != v){
+	  		  if(existing.conf.file != v){
 	  		    existing.shutdown
 	  		    newServer(k,v)
 	  		  }

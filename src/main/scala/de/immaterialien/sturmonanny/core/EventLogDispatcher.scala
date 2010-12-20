@@ -43,7 +43,7 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
  	def parseOneLine(line:String) = parse(rootLineParser, line.stripLineEnd) 
 	def processLine(line:String) : Unit = {
 		val parseResult : ParseResult[_] = parseOneLine( line )
-//debug("-------------------------\nparsing line '"+line+"' \n  -> '"+parseResult+"'")  
+debug("-------------------------\nparsing line '"+line+"' \n  -> '"+parseResult+"'")  
 //log.write("/===line:===\n")
 //log.write(line)
 //log.write("\n------->\n")
@@ -81,7 +81,7 @@ debug("no parseResult: None from '"+line+"'")
  
  	def processMessage(lines:String) : Unit = {
 		val parseResult  = parseAll(rootMessageParser, lines+"\n")
-//debug("=============================\nparsing message '"+lines+"' \n  -> '"+parseResult+"'")  
+debug("=============================\nparsing message '"+lines+"' \n  -> '"+parseResult+"'")  
 		val resList = parseResult getOrElse List()
 //log.write("/===message:===\n")
 //log.write(lines)
@@ -95,7 +95,7 @@ debug("no parseResult: None from '"+line+"'")
 		      case PilotMessage(who, Is.Unknown,_) => debug("unkown message: '"+lines+"'")
 		      case PilotMessage(who, what ,_) => {
 		    	  pilotMessageSend(who, what)
-//debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
+debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")		        
 		       }
 		  }
 		}
@@ -298,7 +298,7 @@ debug("inflight event "+new Exception)
   lazy val wasKilled : Parser[PilotMessage] = {
     pilotNameParser ~ planeAndSeat ~ " was killed "  ~ atLocationParser ^^ {
       case pilot ~ plane ~ _ ~ at => {
-        PilotMessage(pilot, Is.Dying, at) 
+        PilotMessage(pilot, Is.Killed, at) 
       }
     }
   }  

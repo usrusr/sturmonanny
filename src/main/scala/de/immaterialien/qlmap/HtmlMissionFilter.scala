@@ -9,15 +9,19 @@ class HtmlMissionFilter(args: String) extends javax.xml.ws.Provider[File] with L
 
     val thread = new Thread("recon " + file.getName) {
       override def run {
-        val parsed = new MisParser(file, mapBase, groundClasses)
-        val img = MisRender.paint(file, parsed.out, mapBase)
-        //        val img = Some(new File("src/test/resources/Afrika_42194204060.mis.JPG"))
-        for (i <- img) new HtmlUpdater(i, file).update
+      	inline(file)
       }
     }
     thread.setPriority(Thread.MIN_PRIORITY)
     thread.start
     file
+  }
+  def inline(file: File){
+     val parsed = new MisParser(file, mapBase, groundClasses)
+     val img = MisRender.paint(file, parsed.out, mapBase)
+     //        val img = Some(new File("src/test/resources/Afrika_42194204060.mis.JPG"))
+     for (i <- img) new HtmlUpdater(i, file).update
+
   }
   override def toString = "html enabled recon renderer at "+args + " ("+mapBase.folder.getAbsolutePath+")"
 }

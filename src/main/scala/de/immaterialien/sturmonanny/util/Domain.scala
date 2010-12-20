@@ -44,8 +44,37 @@ trait Domain[D <: Domain[D]] extends Logging { self: D =>
       case x => debug("unknown in domain " + this.getClass.getSimpleName + ": " + x)
     }
   }
-  abstract class Element(val name: String) extends LiftActor with Logging {
+  abstract class Element(val name: String) extends LiftActor with Logging { import java.io._
     val domain = Domain.this
+    protected var messageLog : Option[Writer] = {
+    	val fname = new java.io.File({
+    		var v1 = this.getClass.getSimpleName
+    		while (v1.endsWith("$")) v1 = v1.substring(0, v1.length-1)
+    		val offs = v1.lastIndexOf("$")
+    		if(offs>0) v1 = v1.substring(offs)
+    		
+    		v1 = java.net.URLEncoder.encode(v1, "UTF-8")
+    		
+    		v1
+    	}+"."+name+".log")
+System.err.println("might be logging to "+fname);    	
+    	if( ! enableMessageLog) None else try{
+    		Some(new BufferedWriter(new FileWriter(fname), 1024))
+    	}catch{
+    		case e => error("could not open fname message log", e)
+    		None
+    	}
+    }
+    def enableMessageLog = false  
+    def remove() {
+    	for(w<-messageLog) {
+    		w.flush()
+    		w.close()
+    	}
+    	messageLog=None    	
+    }
+    
+    
     domainActor ! this
     def unknownMessage(x: Any) = debug(this.getClass.getSimpleName + " " + name + " got unidentified message " + x)
   }

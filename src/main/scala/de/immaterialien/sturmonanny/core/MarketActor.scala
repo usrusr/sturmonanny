@@ -68,7 +68,7 @@ debug(cls + " new instance not configured!")
  	  }
 	}
 	def messageHandler = {
-	  case Msg.getPrice(plane, side) => reply(Msg.getPriceResult(internal map (_ getPrice(plane, side)) getOrElse 0))
+	  case Msg.getPrice(plane, side) => reply(Msg.getPriceResult(internal map (_ getPrice(plane, side))))
 	  case Msg.addAirTime(plane, millis, side) => internal map (_ addAirTime(plane, millis, side))
 	  case Msg.setConfiguration(pathToFile) => reply(Msg.setConfigurationResult(internal map (_ setConfiguration pathToFile) getOrElse false))
 	  case Msg.cycle(mis) => {
@@ -82,18 +82,22 @@ debug(cls + " new instance not configured!")
 println("get Price "+plane+ " from "+internal)
 //if(plane.load.isEmpty)
 //new Exception().printStackTrace()
-val ret =
+val ret : Double =
 		!!(Msg.getPrice(plane, side), 500)
-	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
-	  		.price
+	  		.asA[Msg.getPriceResult].flatMap(_ price).getOrElse(0D)
+	  		
 println("got "+ret)	  		
 ret	  		
 	}
 	override def tryPrice(plane : IMarket.Loadout, side:Int) : Option[Double] = { 
-	  !!(Msg.getPrice(plane, side), 500)
+	  val ret = !!(Msg.getPrice(plane, side), 500)
 //	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
 //	  		.price
 	  		.asA[Msg.getPriceResult] map (_ price)
+	  		
+	  		
+println("tryPrice "+ret)	  		
+	  return ret getOrElse None
 	}
 	def addAirTime(plane : IMarket.Loadout, millis : Long, side:Int) {
 	  this ! Msg.addAirTime(plane, millis, side)
@@ -104,8 +108,9 @@ ret
 	  		.success
 	}
 	def cycle(mission : java.io.File) = {
+debug("market actor cycling to "+mission.getAbsolutePath)		
 	  this ! Msg.cycle(mission)
-    }
+   }
 
 
  	def setConfigurationUpdatePath(pathToFile : String){
@@ -115,7 +120,7 @@ ret
 } 
 object Msg {
 	case class getPrice(plane : IMarket.Loadout, side:Int)
-	case class getPriceResult(price : Double)
+	case class getPriceResult(price : Option[Double])
 	case class addAirTime(plane : IMarket.Loadout, millis : Long, side:Int) 
 	case class setConfiguration(pathToFile : String) 
 	case class setConfigurationResult(success : Boolean)

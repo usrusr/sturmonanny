@@ -27,7 +27,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
  
  	def updateConfiguration = {
 	  val newPath :String= conf.server.serverPath.apply
-   
+    debug ("initializing localizeddispatcher if '"+newPath+"'!='"+serverPath+"'")
 	  if(newPath!=serverPath){
 	    init(newPath)
      
@@ -35,10 +35,13 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	}
  	override def updateTranslations(translations:mutable.Map[String, List[String]]){
     	  localizedMessageParser = new LocalizedParserInstance(translations)
-//	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
+	      debug("parsed i18n message definitions: "+localizedMessageParser.constantsToLocalized)       
     }
 
- 	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!EventSource.Console(what))
+ 	def pilotMessageSend(who:String, what: Is.Event) = {
+ 		debug("console event for "+who+" " + what)
+ 		server.pilots.forElement(who)(_!EventSource.Console(what))
+ 	}
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
 	  case DispatchMessage(x) => processMessage(x)

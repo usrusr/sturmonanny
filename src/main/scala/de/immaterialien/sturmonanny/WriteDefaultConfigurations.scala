@@ -11,6 +11,9 @@ println("global...")
 	  
 println("instances...")    
 		write("instances", new global.Instances(null, null))
+		
+println("mapbase...")    
+		write("mapbase", new de.immaterialien.qlmap.MapConf(null))		
   }
   def write(name:String, conf:util.configgy.ConfigurationSchema){
 	  val pref = "empty-configs/"

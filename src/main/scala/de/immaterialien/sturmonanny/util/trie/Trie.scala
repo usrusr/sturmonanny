@@ -9,18 +9,18 @@ import java.util.{Comparator, Arrays}
      * natural toString ordering
      */
     protected object toStringComparator_ extends Comparator[AnyRef] {
-      def compare(left, right)={
+      def compare(left, right) = {
         if(left.isInstanceOf[Comparable[_]]) left.asInstanceOf[Comparable[AnyRef]].compareTo(right) 
         else (""+left) compareTo (""+right)
       }
     }
     protected def toStringComparator[C] = toStringComparator_.asInstanceOf[Comparator[C]]
     
-    protected def seqCompare[C](pl:Seq[C], pr:Seq[C], comp:Comparator[C])={
+    protected def seqCompare[C](pl:Iterable[C], pr:Iterable[C], comp:Comparator[C])={
       var lh = pl.headOption
         var rh = pr.headOption
-        var lt = pl.tail 
-        var rt = pr.tail
+        var lt = if(pl.isEmpty) List() else pl.tail 
+        var rt = if(pr.isEmpty) List() else pr.tail
         
         var res = 0
         
@@ -56,7 +56,7 @@ import java.util.{Comparator, Arrays}
     }
   
     protected trait WithPrefix[C] {
-      def prefix : Seq[C]
+      def prefix : Iterable[C]
     }
 
     protected[trie] class TrieNode[C,V]  (prefix_ : Seq[C], private val value:Option[V], rests_ :Array[TrieNode[C,V]]) extends Trie.WithPrefix[C] {
@@ -68,7 +68,7 @@ import java.util.{Comparator, Arrays}
         val concatenated : Seq[C] = prefix.toList ::: tailAndValue._1.toList
         (concatenated, tailAndValue._2)
       }
-      def find(query:Seq[C], longest:Boolean, comp : Comparator[C] ):Option[(Seq[C], V)]={
+      def find(query:Iterable[C], longest:Boolean, comp : Comparator[C] ):Option[(Seq[C], V)]={
         if( value.isDefined && (query.headOption.isEmpty || ! longest)) {
           Some(prefix, value.get)
         }else if( value.isDefined && rests.isEmpty) {
@@ -99,7 +99,7 @@ import java.util.{Comparator, Arrays}
           }
         }
       }
-      def binarySearch(query:Seq[C], comp : Comparator[C]):Int={
+      def binarySearch(query:Iterable[C], comp : Comparator[C]):Int={
         object prefixHolder extends Trie.WithPrefix[C]{
           def prefix = query
         }
@@ -252,12 +252,12 @@ import java.util.{Comparator, Arrays}
     
     def get(key:Seq[C]):Option[V]={
       root.find(key, true, comp) match {
-        case Some((key, v)) => Some(v)
+        case Some((found, v)) if(Trie.seqCompare(found,key, comp)==0) => Some(v)
         case _ => None
       }
     }
-    def longest(key:Seq[C]):Option[(Seq[C], V)]=root.find(key, true, comp) 
-    def shortest(key:Seq[C]):Option[(Seq[C], V)]=root.find(key, false, comp)
+    def longest(key:Iterable[C]):Option[(Seq[C], V)]=root.find(key, true, comp) 
+    def shortest(key:Iterable[C]):Option[(Seq[C], V)]=root.find(key, false, comp)
 
 
     def foreach[U](f: ((Seq[C], V)) => U): Unit = {

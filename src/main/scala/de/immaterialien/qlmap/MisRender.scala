@@ -8,15 +8,17 @@ import java.io
 import scala.collection._
 import de.immaterialien.qlmap.sprites.Sprites
 import de.immaterialien.gfxutil.Implicits._
+import MisModel._ // e.g. for the waypoint -> pair implicit
 
 object MisRender extends Log {
   val leadingDigits = """(\d+)\D.*""".r
   val containsColumn = """.*Column.*""".r
   val containsTrain = """.*Train.*""".r
-  var debugMode = false
+  //var debugMode = false
   def paint(forMission: io.File, model: MisModel, mapBase: MapBase): Option[io.File] = try {
     val outputPath = mapBase.configuration.flatMap(_.outPath)
     val sprites: Sprites = new Sprites(Some(mapBase.folder))
+    val conf = mapBase.configuration.getOrElse(new MapConf(""))
     var format: String = null
 
     //     reanimate to enable PNG output...    
@@ -38,6 +40,7 @@ object MisRender extends Log {
       var in = ImageIO.read(instream)
       ig = in.createGraphics()
       new MisRender(
+      	conf,
         model,
         ig,
         sprites,
@@ -49,8 +52,8 @@ object MisRender extends Log {
       ImageIO.write(in, format, outFile)
       Some(outFile)
     } finally {
-      try instream.close
-      try ig.dispose
+      if(instream!=null) try instream.close
+      if(ig!=null) try ig.dispose
     }
   } catch {
     case x => {
@@ -61,6 +64,7 @@ object MisRender extends Log {
 }
 
 private class MisRender(
+	conf:MapConf,
   model: MisModel,
   ig2: java.awt.Graphics2D,
   spritesMaker: Sprites,
@@ -69,7 +73,10 @@ private class MisRender(
   import MisRender._
 
   val randomize = true && false
-  val interpolate = 5
+  val debugMode = conf.debug.apply
+  val chiefDepth = conf.chiefs.depth.apply
+  val unitDepth = conf.units.depth.apply
+  val interpolate = conf.front.interpolate.apply
   var xsvr = iw / interpolate
   var ysvr = ih / interpolate
   lazy val svrs = {
@@ -164,10 +171,25 @@ private class MisRender(
   def sequence(in: BufferedImage) {
 //    veil()
 //    veil()
-        hatch() 
-        front(4, 2)
-    units()
-    airfields()
+//        hatch(conf.front.hatchdistance.apply) 
+//        front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
+//    units()
+//    airfields()
+  	wings()
+  }
+  def wings() {
+  	if(debugMode){
+  		ig2.setColor(awt.Color.cyan)
+  		for((name, wing)<-model.wings){
+  			if(wing.path.size>0){
+	  			var last=gameToImage(wing.path.head)
+	  			for(next<-wing.path.tail.map(x => gameToImage(x))){
+	  				ig2.drawLine(last._1,last._2,next._1,next._2) 
+	  				last=next
+	  			}
+  			}
+  		}
+  	}
   }
   def veil() {
 
@@ -178,15 +200,25 @@ private class MisRender(
     ig2.setColor(new java.awt.Color(light, light, light, 255 - background))
     ig2.fillRect(0, 0, iw, ih)
   }
+  
+  def gameToImage(xy:(Double, Double)):(Int, Int)={
+  	val ix:Double=xy._1
+  	val iy:Double=xy._2
+  	val finalX = ((((ix) - model.widthOffset) / model.width) * iw).toInt
+    val finalY = ih - (((((iy) - model.heightOffset) / model.height) * ih)).toInt
+    (finalX, finalY)
+  }
   def airfields() {
     for ((gx, gy, side) <- model.rawAirFields) {
-      val ox = gx - model.widthOffset
-      val oy = gy - model.heightOffset
-      val rx = ox / model.width
-      val ry = oy / model.height
-      val px = rx * iw
-      val py = ih - ry * ih
+//      val ox = gx - model.widthOffset
+//      val oy = gy - model.heightOffset
+//      val rx = ox / model.width
+//      val ry = oy / model.height
+//      val px = rx * iw
+//      val py = ih - ry * ih
 
+    	val (px,py)=gameToImage(gx, gy)
+    	
       drawObject(px.toInt, py.toInt, 1, side, 1, GroundClass.Airfield)
     }
   }
@@ -207,7 +239,7 @@ private class MisRender(
      * returns class, weight, count and relative position of dominant class
      */
     def atMarker(mx: Double, my: Double, mside: Int): Option[(GroundClass.GC, Double, Int, (Int, Int))] = {
-      val radius = 5000d
+      val radius:Double = conf.units.groundRadius.apply.toDouble
       def dist(ax: Double, ay: Double) = {
         val dx = ax - mx
         val dy = ay - my
@@ -300,7 +332,7 @@ private class MisRender(
           val at = atMarker(x, y, side)
           for ((cls, weight, number, offset) <- at) {
             val (who, depth) = whoAndDeepness(rx, ry, 1000)
-            if (cls.weight * cls.weight * weight + weight * depth * depth > 100000) {
+            if (cls.weight * cls.weight * weight + weight * depth * depth > 1000*unitDepth) {
 
               val finalX = (((x + offset._1) - model.widthOffset) / model.width) * iw
               val finalY = ih - ((((y + offset._2) - model.heightOffset) / model.height) * ih)
@@ -418,12 +450,14 @@ private class MisRender(
 
         val (who, depth) = whoAndDeepness(rx, ry, 1000)
         val weight = count
-        if (who!=side || cls.weight * cls.weight * weight + weight * depth * depth > 1000000) {
+        if (who!=side || cls.weight * cls.weight * weight + weight * depth * depth > 10000*chiefDepth) {
 
-          println("chief " + cls + " at " + px + "," + py + " count:" + count + " scale:" + scale)
+          println("chief " + cls+":"+chief.name+ " at " + px + "," + py + " count:" + count + " scale:" + scale)
 
           var lastX = px.toInt
           var lastY = py.toInt
+          
+
           for ((ix, iy) <- chief.path.tail) {
             val finalX = ((((ix) - model.widthOffset) / model.width) * iw).toInt
             val finalY = ih - (((((iy) - model.heightOffset) / model.height) * ih)).toInt
@@ -465,13 +499,21 @@ private class MisRender(
           	ig2.drawOval(avgX.toInt-4, avgY.toInt-4,8,8)
           }
           println("arrow at "+avgX+","+avgY+" len :"+len) 
-          if(len>10){
+          if(len>conf.chiefs.moveThreshold.apply){
           	drawObject(px.toInt, py.toInt, scale * 4D, side, 1000, GroundClass.ChiefMove, Some((difX, difY)))
           }else{
           	val dir = if(difX!=0) difX else if(difY!=0) difY else (side.toDouble - 1.5)
           	drawObject(px.toInt, py.toInt, scale * 2.5D, side, 1000, GroundClass.ChiefStand, Some(dir, -math.abs(dir)))
           }
           drawObject(px.toInt, py.toInt, scale, side, 255, cls)
+          if(debugMode){
+//          	ig2.
+          	val font = ig2.getFont
+          	ig2.setColor(awt.Color.black)
+          	ig2.setFont(new java.awt.Font(font.getName, font.getStyle, 12))
+          	ig2.drawString(""+chief.name, px.toInt+10, py.toInt+5)
+          }
+                    
         }
       }
     }
@@ -702,8 +744,7 @@ private class MisRender(
     } else (0, 0)
   }
 
-  def hatch() {
-    val step = 15;
+  def hatch(step:Int) {
 
     for {
       x <- 1 to iw - 1

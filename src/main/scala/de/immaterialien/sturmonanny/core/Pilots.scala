@@ -162,7 +162,9 @@ debug ("loaded "+loadedOpt)
 			 * 
 			 * @return
 			 */
-			def notFresh = 10000L > System.currentTimeMillis - math.max(lastCleared, lastPlaneVerification)
+			def notFresh = 10000L > System.currentTimeMillis - 
+//				math.max(lastCleared, lastPlaneVerification )
+				lastPlaneVerification 
 			
 			// call when it is definitely known that the pilot is fresh in a plane
 			def definitelyInPlane() {
@@ -251,7 +253,7 @@ println("    definitelyInPlane  ")
 						}
 					}
 				}
-debug("setting price to in pay "+rawPrice, new Exception())				
+debug("setting price to in pay "+rawPrice, new Exception("stack trace creation, not an actual exception"))				
 				lastPayment = Some(rawPrice)
 			} 
 			def firstNonNeutralOption(sides:Option[Armies.Armies]*):Armies.Armies={
@@ -451,15 +453,22 @@ debug("persisting "+name)
 			}
 		}
   
-		override def messageHandler = new PartialFunction[Any, Unit]{
+		
+		override lazy val enableMessageLog = true
+		override lazy val messageHandler = new PartialFunction[Any, Unit]{
 			override def isDefinedAt(x:Any) = {
-//debug("pilot "+name +" <- "+x)		    
+				for(w<-messageLog) try{
+					w.append(server.time.now + ":"+x+"\r\n")
+					if(x.isInstanceOf[EventSource.Console]) w.flush()
+				}
+//debug("pilot "+name +" <isdef- "+x)		    
 //				ImessageHandler isDefinedAt x
 				sourceFilteredMessageHandler isDefinedAt x
 			}
 			override def apply(x:Any) = {
+//debug("pilot "+name +" <apply- "+x)		    
 			  if( ! conf.game.homeAlone.apply){
-debug("pilot "+Pilot.this.name + " <- "+x)			  	
+//debug("pilot "+Pilot.this.name + " <- "+x)			  	
 //				  ImessageHandler apply x
 				  sourceFilteredMessageHandler apply x
 				}
@@ -479,7 +488,7 @@ debug("pilot "+Pilot.this.name + " <- "+x)
 				}else{
 					ImessageHandler.apply(event)
 					if(event != Is.InFlight) { // Is.InFlight is always allowed, never blocked 
-debug("memorizing for repetition check user state event "+event)					
+//debug("memorizing for repetition check user state event "+event)					
 						lastConsoleUserState = event
 					}
 				}
@@ -488,21 +497,21 @@ debug("memorizing for repetition check user state event "+event)
 
 			case EventSource.Console(event) => {
 				if(event == lastConsoleEvent) {
-debug("ignoring console "+event+" because of repetition")					
+//debug("ignoring console "+event+" because of repetition")					
 				}else{
 					ImessageHandler.apply(event)
 					if(event != Is.InFlight) { // Is.InFlight is always allowed, never blocked 
-debug("memorizing  for repetition check console event "+event)					
+//debug("memorizing  for repetition check console event "+event)					
 						lastConsoleEvent = event
 					}
 				}
 			}
 			case EventSource.Logfile(event) => {
 					if(event == lastLogEvent) {
-debug("ignoring log "+event+" because of repetition")					
+//debug("ignoring log "+event+" because of repetition")					
 				}else{
 					ImessageHandler.apply(event)
-debug("memorizing  for repetition check log event "+event)					
+debug("memorizing  for repetition check log event "+event)
 					lastLogEvent = event
 				}
 			}
@@ -522,6 +531,12 @@ debug("memorizing  for repetition check log event "+event)
 				state.returns()
 			}
 			case Is.Dying => if(state.notFresh){
+				state.dies()
+			}
+			/**
+			 * no state.notFresh check for the eventLog killed message, this one is quite definitive!
+			 */
+			case Is.Killed => {
 				state.dies()
 			}
 			case Is.Crashing => if(state.notFresh){
@@ -669,7 +684,7 @@ debug(name + " sending chat "+msg)
 //						chat("available commands are:")
 //						chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)
 //					}
-					case Commands.helpCommand(cmd)=> cmd.trim match {
+					case Commands.helpCommand(cmd)=> (if(cmd==null) "" else cmd.trim) match {
 						case "balance"=>chat("displays how many "+conf.names.currency+" you have")
 						case "available"=>chat("'available abc' displays the allowed planes with 'abc' in their name")
 						case "price"=>chat("'price abc' displays the price of planes with 'abc' in their name")

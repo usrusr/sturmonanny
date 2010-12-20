@@ -73,6 +73,10 @@ object Is {
  	case object Returning extends PlaneSafe with PilotSafe
 	case object Crashing extends PlaneLost
    	case object Dying extends PilotLost with PlaneLost
+   	/**
+   	 * event log version of died
+   	 */
+   	case object Killed extends PilotLost with PlaneLost
     
 
 
