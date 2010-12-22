@@ -242,6 +242,12 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
   NORMFLY 16044.57 270981.51 500.0 40.00   D &0
   	 */
     ("\\S+".r ~ double ~ double ~ double ~ double ~ """([^&\s]+(\s+\d+)?\s+)?&""".r ~ direct("\\d".r) <~ eol) ^^ {
+    	case "TAKEOFF"~x~y~height~speed~targetOpt~side => {wing=>
+    		wing.waypoint(MisModel.WingTakeoff(x,y))
+    	}
+    	case "LANDING"~x~y~height~speed~targetOpt~side => {wing=>
+    		wing.waypoint(MisModel.WingLanding(x,y))
+    	}    	
     	case "GATTACK"~x~y~height~speed~targetOpt~side => {wing=>
     		wing.waypoint(MisModel.WingGroundAttack(x,y))
     	}

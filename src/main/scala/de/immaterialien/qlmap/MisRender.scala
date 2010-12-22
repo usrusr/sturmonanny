@@ -169,7 +169,7 @@ private class MisRender(
   }
 
   def sequence(in: BufferedImage) {
-//    veil()
+    veil()
 //    veil()
 //        hatch(conf.front.hatchdistance.apply) 
 //        front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
@@ -177,10 +177,28 @@ private class MisRender(
 //    airfields()
   	wings()
   }
+  
+  def sideForGame(gameCoords:(Double, Double)):Int={
+  	val gxy = gameToRelative(gameCoords)
+  	val (who, _ ) = whoAndDeepness(gxy._1, gxy._2, 10000)
+  	who
+  }
+  
   def wings() {
+  	// init side if possible (assumes that takoff or landing is within friendly territory)
+  	for((name, wing)<-model.wings) wing side (sideForGame _)
+
+  	
   	if(debugMode){
   		ig2.setColor(awt.Color.cyan)
   		for((name, wing)<-model.wings){
+  			ig2.setColor(awt.Color.cyan)
+  			for(side <- wing.side){
+  				
+  				if(side==1) ig2.setColor(awt.Color.red)
+  				else ig2.setColor(awt.Color.blue)
+  			}
+  			
   			if(wing.path.size>0){
 	  			var last=gameToImage(wing.path.head)
 	  			for(next<-wing.path.tail.map(x => gameToImage(x))){
@@ -189,7 +207,29 @@ private class MisRender(
 	  			}
   			}
   		}
+  		
   	}
+  	
+  	for((name, wing)<-model.wings){
+//	println("   ---> "+name)						
+  		for(wp<-wing.path) wp match {
+	  		case gattack : WingGroundAttack => {
+	  			if(debugMode){
+//	println("gattack "+name)						
+	  				ig2.setColor(awt.Color.cyan)
+						for(side <- wing.side){
+							if(side==1) ig2.setColor(awt.Color.red)
+							else ig2.setColor(awt.Color.blue)
+						}  				
+	  				val(gx, gy) =gameToImage(gattack)
+	  				val radius = 9
+	  				ig2.drawOval(gx-radius, gy-radius,(2*radius),(2*radius))
+	//  				if()
+	  			}
+	  		}
+	  		case _ => 
+	  	}
+	  }
   }
   def veil() {
 
@@ -200,6 +240,7 @@ private class MisRender(
     ig2.setColor(new java.awt.Color(light, light, light, 255 - background))
     ig2.fillRect(0, 0, iw, ih)
   }
+
   
   def gameToImage(xy:(Double, Double)):(Int, Int)={
   	val ix:Double=xy._1
@@ -208,6 +249,17 @@ private class MisRender(
     val finalY = ih - (((((iy) - model.heightOffset) / model.height) * ih)).toInt
     (finalX, finalY)
   }
+  
+  def gameToRelative(xy:(Double, Double)):(Double,Double) = {
+  	    val (x, y) = (xy._1, xy._2)
+        val ox = x - model.widthOffset
+        val oy = y - model.heightOffset
+        val rx = ox / model.width
+        val ry = oy / model.height
+        
+        (rx, ry)
+  }
+  
   def airfields() {
     for ((gx, gy, side) <- model.rawAirFields) {
 //      val ox = gx - model.widthOffset
@@ -321,14 +373,16 @@ private class MisRender(
 
       for (marker <- markers) {
         val (x, y) = (marker._1, marker._2)
-        val ox = x - model.widthOffset
-        val oy = y - model.heightOffset
-        val rx = ox / model.width
-        val ry = oy / model.height
+//        val ox = x - model.widthOffset
+//        val oy = y - model.heightOffset
+//        val rx = ox / model.width
+//        val ry = oy / model.height
+      	val (rx, ry) = gameToRelative(marker)
         val px = rx * iw
         val py = ih - ry * ih
 
-        if (ox >= 0 && ox <= model.width && oy >= 0 && oy <= model.height) {
+        //if (r >= 0 && ox <= model.width && oy >= 0 && oy <= model.height) {
+        if (rx >= 0d && rx <= 1d && ry >= 0d && ry <= 1d) {
           val at = atMarker(x, y, side)
           for ((cls, weight, number, offset) <- at) {
             val (who, depth) = whoAndDeepness(rx, ry, 1000)

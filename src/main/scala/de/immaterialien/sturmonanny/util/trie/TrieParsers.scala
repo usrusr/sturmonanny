@@ -45,6 +45,7 @@ trait TrieParsers extends Parsers{
 		var trie = new Trie[Elem, V]()
 		def add(addee:Seq[Elem], v:V)={
 			trie = trie.add(addee, v)
+//println("----------\nadded:"+addee.mkString("")+"\n"+trie)			
 		}
 		def remove(addee:Seq[Elem])={
 			trie = trie.remove(addee)

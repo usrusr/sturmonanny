@@ -209,9 +209,14 @@ import java.util.{Comparator, Arrays}
             
             val edited = if(longer.startsWith(shorter)){
               val newLonger = new TrieNode[C,V](longer.drop(shorter.length).toBuffer, longerVal, longerRest)
-              val newShorter = new TrieNode[C,V](shorter, shorterVal, mergeRests(comp, shorterRest, Array(newLonger)))
+              //val newShorter = new TrieNode[C,V](shorter, shorterVal, mergeRests(comp, shorterRest, Array(newLonger)))
+              //newShorter
+              val newShorter = new TrieNode[C,V](shorter, shorterVal, shorterRest)
+              val merged = newShorter.add(newLonger, comp)
+              merged
+              //val newShorter = shorter.add(newLonger, comp)
               
-              newShorter
+              
             }else{
               val zipped = shorter.zip(longer)
               val prefix = zipped.takeWhile((xy) => xy._1==xy._2).map(_ _1).toBuffer

@@ -7,6 +7,7 @@ package de.immaterialien.sturmonanny.util.trie
     def main{
       var t = new Trie[Char, Int]() 
       t = t.add("hallo", 10)
+      t = t.add("hey", 5)
       t = t.add("hai", 2)
       t = t.add("welcome", 3)
       t = t.add("tach", 4)

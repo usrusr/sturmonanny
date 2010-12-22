@@ -10,8 +10,10 @@ import java.io
 import scala.collection._
 
 object MisModel {
-	case class Waypoint(x:Double , y:Double )
+	case class Waypoint(x:Double , y:Double)
 	case class WingGroundAttack(override val x:Double, override val y:Double) extends Waypoint(x,y)
+	case class WingTakeoff(override val x:Double, override val y:Double) extends Waypoint(x,y)
+	case class WingLanding(override val x:Double, override val y:Double) extends Waypoint(x,y)
 	implicit def wpToPair(wp:Waypoint):(Double,Double)=(wp.x,wp.y)
 }
 class MisModel {import MisModel._
@@ -42,7 +44,7 @@ class MisModel {import MisModel._
       
     }
     def waypoint(xy:(Double,Double)){
-      path = path ::: xy ::Nil
+      path = path ::: xy ::Nil 
     }
   }
   val chiefs = new mutable.HashMap[String, Chief]{
@@ -64,6 +66,15 @@ class MisModel {import MisModel._
       path = path ::: xy ::Nil
     }
     override def toString = "wing:"+name+" on "+side +"("+path.size+")"
+    
+    def side(func:((Double,Double))=>Int):Option[Int]= if(side.isDefined) side else {
+    	side = path.filter(_ match{
+    		case _ : WingLanding => true
+    		case _ : WingTakeoff => true
+    		case _ => false
+    	}).headOption.map(wp => func(wp)) 
+    	side
+    }
   }
   val wings = new mutable.HashMap[String, Wing]{
     override def default(name:String):Wing={
