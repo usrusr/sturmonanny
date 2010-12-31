@@ -22,27 +22,27 @@ class DispatcherTest {
 		} 
 		d.updateConfiguration
   
-  		d.pilotNameParser learnNewName "1"
-  		d.pilotNameParser learnNewName "2"
-  		d.pilotNameParser learnNewName "3"
+  		d.pilotNameParser.add("1","1") // d.pilotNameParser learnNewName "1"
+  		d.pilotNameParser.add("2","2") // d.pilotNameParser learnNewName "2"
+  		d.pilotNameParser.add("3","3") // d.pilotNameParser learnNewName "3"
 //Thread sleep 30      
-  		d.pilotNameParser learnNewName "4"
-  		d.pilotNameParser learnNewName "5" 
-  		d.pilotNameParser learnNewName "6" 
+  		d.pilotNameParser.add("4","4") // d.pilotNameParser learnNewName "4"
+  		d.pilotNameParser.add("5","5") // d.pilotNameParser learnNewName "5" 
+  		d.pilotNameParser.add("6","6") // d.pilotNameParser learnNewName "6" 
   
-		d.pilotNameParser learnNewName "entrop regulation" 
+		d.pilotNameParser.add("entrop regulation","entrop regulation") // d.pilotNameParser learnNewName "entrop regulation" 
     d processLine """Chat: --- Pilot(entrop regulation) was killed.\n"""
     
     println("direct parse result: "+ d.parseAll(d.statusChat, """Chat: --- Pilot(1) was killed.\n""")) 
     println("direct parse result newline: "+ d.parseAll(d.statusChat, """Chat: --- Pilot(2) was killed.\n""")) 
 
-  		d.pilotNameParser learnNewName "Mad"
-//  		d.pilotNameParser learnNewName "entrop regulationabcdefg"
+  		d.pilotNameParser.add("Mad","Mad") // d.pilotNameParser learnNewName "Mad"
+//  		d.pilotNameParser.add("entrop regulationabcdefg","entrop regulationabcdefg") // d.pilotNameParser learnNewName "entrop regulationabcdefg"
 
     d processLine """\"""+"""u00201      entrop regulationabcdefg 1 0    (2)Blue     ZZ + AH     Ju-87D-5\n"""
     d processLine """\"""+"""u00201      entrop regulationabcdefg 1 0    (2)Blue     ZZ(9)sZa    Ju-87D-5\n"""
     
-//  		d.pilotNameParser learnNewName "Sturm0jetty"
+//  		d.pilotNameParser.add("Sturm0jetty","Sturm0jetty") // d.pilotNameParser learnNewName "Sturm0jetty"
   
   		d processLine """Chat: --- Pilot(entrop regulation) was killed.\n"""
 

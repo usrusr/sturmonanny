@@ -9,7 +9,7 @@ import java.util.{Comparator, Arrays}
      * natural toString ordering
      */
     protected object toStringComparator_ extends Comparator[AnyRef] {
-      def compare(left, right) = {
+      def compare(left:AnyRef, right:AnyRef) = {
         if(left.isInstanceOf[Comparable[_]]) left.asInstanceOf[Comparable[AnyRef]].compareTo(right) 
         else (""+left) compareTo (""+right)
       }
@@ -47,7 +47,7 @@ import java.util.{Comparator, Arrays}
      * Seq-implementation independent equality checks
      */
     protected class PrefixComparator[C](comp : Comparator[C]) extends Comparator[WithPrefix[C]] {
-      def compare(left, right)={
+      def compare(left:WithPrefix[C], right:WithPrefix[C])={
         val pl = left.prefix
         val pr = right.prefix
 

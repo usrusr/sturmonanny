@@ -70,18 +70,9 @@ class ServerImpl(val initConf : String, val threadGroup:java.lang.ThreadGroup) e
 	override val eventlog = new EventLogDispatcher with Member
 	override val time = new TimeSourceImpl
 
-//	val multi = new Multiplexer ("", 0, conf.server.consoleport.apply) with Member
 	override val multi = new Multiplexer ("", 0, 0) with Member
 debug("init server class")	 
 	init()
-//	/**
-//	* mix in Member to connect the UpdatingMember to this   
-//	*/
-//	trait Member extends UpdatingMember{
-//		override val server = Server.this
-//		override def conf  = server.conf
-//		server.members ::= this 
-//	}
 } 
 trait NonUpdatingMember extends UpdatingMember {
 	override def updateConfiguration=() 

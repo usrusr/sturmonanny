@@ -43,10 +43,10 @@ object NextMissionProvider
           case x => log.error("could not load mission processor "+actualClass+" for processor position "+num+":", x)
       	case _ =>
         }
-      }
+      } 
     }
 
-  	val jclRet = JavaConversions.asScalaBuffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
+  	val jclRet = JavaConversions.asBuffer(new java.util.ArrayList[Provider[File]](ret.values())).toList
   	
 println("jcl ret "+jclRet+"\n from "+ret)  	
   	jclRet

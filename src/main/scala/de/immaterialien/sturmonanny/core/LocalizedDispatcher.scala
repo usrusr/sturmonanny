@@ -14,7 +14,7 @@ object LocalizedDispatcher {
 
   private val PILOTNAMETIMEOUT = 60*1000*1000
 }
-class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParsers with Logging with I18nReader{
+class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParsers with trie.TrieParsers with Logging with I18nReader{
 	override def skipWhitespace = false  
 	def regexMatch(r : String): Parser[Regex.Match] = regexMatch(r.r) 
 	def regexMatch(r : Regex) : Parser[Regex.Match] = Parser { 
@@ -146,6 +146,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 				makeStatParserLong("""Enemy AAA Kill""") ~
 				makeStatParserLong("""Enemy Wagon Kill""") ~
 				makeStatParserLong("""Enemy Ship Kill""") ~
+				opt(makeStatParserLong("""Enemy Radio Kill""")) ~
 				makeStatParserLong("""Friend Aircraft Kill""") ~
 				makeStatParserLong("""Friend Static Aircraft Kill""") ~
 				makeStatParserLong("""Friend Tank Kill""") ~
@@ -154,6 +155,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 				makeStatParserLong("""Friend AAA Kill""") ~
 				makeStatParserLong("""Friend Wagon Kill""") ~
 				makeStatParserLong("""Friend Ship Kill""") ~
+				opt(makeStatParserLong("""Friend Radio Kill""")) ~
 				makeStatParserLong("""Fire Bullets""") ~
 				makeStatParserLong("""Hit Bullets""") ~
 				makeStatParserLong("""Hit Air Bullets""") ~
@@ -164,7 +166,8 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 				^?  ( stringToState,"'"+_+"' is not a known pilot state!" )
 			) ^^ { 
 			  case name ~ _ ~ state => {
-			    pilotNameParser.learnNewName(name)
+			    //pilotNameParser.learnNewName(name)
+			  	pilotNameParser.add(name, name)
 			    PilotMessage(name, state)
 			  }
 			}
@@ -177,6 +180,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
  	  (what+""": """)~rep1("""\t""") ~> regexMatch("""(\S(.*\S)?)\\n\n""".r)^^(_.group(1))
 	}
  	def stringToState : PartialFunction[String, EventSource.UserState] = {
+// 		TODO: state wird nicht mehr identifiziert!
  	  case """In Flight""" => {
  	  	EventSource.UserState(Is.InFlight)  
 // 	 not necessary, InFlight handled only if a plane is known  	Is.Ignored // because the stats lists displays "In Flight" while a pilot is connecting... 
@@ -199,7 +203,8 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	  channelRegex ^^ {x:String => 
 	    x match{
 	    	case channelRegex(name) => {
-	    	  pilotNameParser.learnNewName(name) 
+//	    	  pilotNameParser.learnNewName(name) 
+	    		pilotNameParser.add(name, name)
 	    	 
 	    	  PilotMessage(name, Is.Joining)
 	    	} 
@@ -211,52 +216,53 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	  }
 	}
  
+	lazy val pilotNameParser = new TrieMapParser[String]
 	
-	/**
-     * a dynamic token set (with recently-used timeout) that happens to 
-     * 
-     */
-  object pilotNameParser extends Parser[String] {
-		private val noNamesParser = literal("")
-		private var namesParser : Parser[String]= noNamesParser
-		private val namesSet = new mutable.LinkedHashMap[String, TimeOutingLiteral]()
-  
-		class TimeOutingLiteral(val string:String, var lastUse:Long) extends Parser[String] {
-			val inner = literal(string)
-			override def apply(in:Input) = {
-				lastUse = System.currentTimeMillis
-				inner.apply(in) 
-			}
-		}
-  
-		def learnNewName(name:String){
-			if( ! namesSet.contains(name)){
-				val now = System.currentTimeMillis
-				val newParser = new TimeOutingLiteral(name, now)
-				val newParserAsStringParser : Parser[String]= newParser 
-				val minLastUse = now - LocalizedDispatcher.PILOTNAMETIMEOUT
-    
-				// cleanup
-				namesSet.retain((_, p)=>p.lastUse > minLastUse)
-    
-				// longest match or first match? 
-				// we take first match, so there is no possible way to cut off an existing player from commands 
-				namesParser = 
-					if(namesSet.size==0) newParser
-					else namesSet.values.foldRight(newParserAsStringParser){
-					    (older : TimeOutingLiteral, newer : Parser[String])=> older | newer
-					}
-					
-				namesSet.put(name, newParser)
-//debug("extended namesparser with '"+name+"', new size is "+namesSet.size )	  
-			}
-		} 
-	
-		override def apply(in:Input) ={
-			val ret=  namesParser.apply(in)
-			ret
-		}
-	}
+//	/**
+//     * a dynamic token set (with recently-used timeout) that happens to 
+//     * 
+//     */
+//  object pilotNameParser extends Parser[String] {
+//		private val noNamesParser = literal("")
+//		private var namesParser : Parser[String]= noNamesParser
+//		private val namesSet = new mutable.LinkedHashMap[String, TimeOutingLiteral]()
+//  
+//		class TimeOutingLiteral(val string:String, var lastUse:Long) extends Parser[String] {
+//			val inner = literal(string)
+//			override def apply(in:Input) = {
+//				lastUse = System.currentTimeMillis
+//				inner.apply(in) 
+//			}
+//		}
+//  
+//		def learnNewName(name:String){
+//			if( ! namesSet.contains(name)){
+//				val now = System.currentTimeMillis
+//				val newParser = new TimeOutingLiteral(name, now)
+//				val newParserAsStringParser : Parser[String]= newParser 
+//				val minLastUse = now - LocalizedDispatcher.PILOTNAMETIMEOUT
+//    
+//				// cleanup
+//				namesSet.retain((_, p)=>p.lastUse > minLastUse)
+//    
+//				// longest match or first match? 
+//				// we take first match, so there is no possible way to cut off an existing player from commands 
+//				namesParser = 
+//					if(namesSet.size==0) newParser
+//					else namesSet.values.foldRight(newParserAsStringParser){
+//					    (older : TimeOutingLiteral, newer : Parser[String])=> older | newer
+//					}
+//					
+//				namesSet.put(name, newParser)
+////debug("extended namesparser with '"+name+"', new size is "+namesSet.size )	  
+//			}
+//		} 
+//	
+//		override def apply(in:Input) ={
+//			val ret=  namesParser.apply(in)
+//			ret
+//		}
+//	}
 	lazy val separatorLine = literal("-------------------------------------------------------")
 	lazy val pilotsHeader = literal("""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft""")
  	lazy val ignore : Parser[Is.Event] = (
@@ -330,7 +336,10 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 		 		}
 	 		    ()
  			}
- 			for(pmsg<-ret) pilotNameParser.learnNewName(pmsg.who)
+ 			for(pmsg<-ret) {
+ 				//pilotNameParser.learnNewName(pmsg.who)
+ 				pilotNameParser.add(pmsg.who, pmsg.who)
+ 			}
 //debug("pilot line matched to "+ret)
  			ret
  		 }

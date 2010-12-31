@@ -23,9 +23,10 @@ object At {
    case object Nowhere extends Location
 }
 object EventSource {
-	case class Logfile(msg:Is.Event)
-	case class Console(msg:Is.Event)
-	case class UserState(msg:Is.Event) extends Is.Individual // special marker wrapper for the very slow user STAT states
+	sealed trait Source
+	case class Logfile(msg:Is.Event) extends Source
+	case class Console(msg:Is.Event) extends Source
+	case class UserState(msg:Is.Event) extends Is.Individual with Source// special marker wrapper for the very slow user STAT states
 }
 
 object Is {  

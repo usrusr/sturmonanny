@@ -106,6 +106,7 @@ trait TrieParsers extends Parsers{
 					Success(list, rest)
 				}
 				case Failure(msg, rest) => Failure(msg, rest)
+				case Error (msg, rest) => Error(msg, rest)
 			}
 		}
 	}

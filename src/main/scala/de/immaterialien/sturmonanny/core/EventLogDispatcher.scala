@@ -33,14 +33,27 @@ class EventLogDispatcher extends LiftActor with UpdatingMember with RegexParsers
 	
 	
  	def pilotMessageSend(who:String, what: Is.Event) = server.pilots.forElement(who)(_!  EventSource.Logfile(what))
- 	def allPilotMessageSend(what: Is.Event) = server.pilots.forMatches("")(_!what) 
+ 	def allPilotMessageSend(what: Is.Event) = {
+ 		val msg = EventSource.Logfile(what)
+ 		server.pilots.forMatches("")(_!msg) 
+ 	}
 	override def messageHandler : PartialFunction[Any, Unit] = {	  
 	  case DispatchLine(x) => processLine(x)
 	  case DispatchMessage(x) => processMessage(x) 
 	  case _ => // ignore  
 	} 
-
- 	def parseOneLine(line:String) = parse(rootLineParser, line.stripLineEnd) 
+	
+	/**
+	 * should be exactly like parseOneLine, but not tolerating the unknown
+	 */
+ 	def testOneLine(line:String) = {
+//println("testing: '"+line+"'") 		
+ 		parse(lineParser, line.stripLineEnd) 
+ 	}
+ 	def parseOneLine(line:String) = {
+//println("parsing: '"+line+"'") 		
+ 		parse(rootLineParser, line.stripLineEnd) 
+ 	}
 	def processLine(line:String) : Unit = {
 		val parseResult : ParseResult[_] = parseOneLine( line )
 debug("-------------------------\nparsing line '"+line+"' \n  -> '"+parseResult+"'")  
@@ -106,7 +119,8 @@ debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")
 	)
   
 	lazy val rootLineParser = (
-			lineParser | (".*".r^^^ Is.Ignored)
+			lineParser 
+			| (".*".r^^^ Is.Ignored)
 	)
 	lazy val lineParser : Parser[Message]= (
 	  dateTimeParser ~> eventParser
@@ -226,7 +240,8 @@ println("identified memoed "+memoed)
  	}
  	
  	
-  def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.learnNewName(pilotName)
+  //def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.learnNewName(pilotName)
+ 	def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.add(pilotName, pilotName)
     
  	
   /**
@@ -257,8 +272,8 @@ println("identified memoed "+memoed)
     }
   }
   lazy val ejected : Parser[PilotMessage] = {
-    pilotNameParser ~ planeAndSeat ~" bailed out " ~ atLocationParser ^^ {
-    	case pilot ~ _ ~ _ ~ at => {
+    pilotNameParser ~ planeAndSeat ~opt("successfully") ~" bailed out" ~ atLocationParser ^^ {
+    	case pilot ~_ ~ _ ~ _ ~ at => {
       	PilotMessage(pilot, Is.Ejecting, at)
       }
     }
@@ -273,7 +288,7 @@ println("identified memoed "+memoed)
   }
 
   lazy val inFlight : Parser[PilotMessage] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ " in flight "  ~ atLocationParser ^^ {
+    pilotNameParser ~ ":" ~ """\S+""".r ~ " in flight"  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ at => {
 debug("inflight event "+new Exception)      	
         PilotMessage(pilot, Is.InFlight, at) 
@@ -281,7 +296,7 @@ debug("inflight event "+new Exception)
     }
   }
   lazy val landed : Parser[PilotMessage] = {
-    pilotNameParser ~ ":" ~ """\S+""".r ~ " landed "  ~ atLocationParser ^^ {
+    pilotNameParser ~ ":" ~ """\S+""".r ~ " landed"  ~ atLocationParser ^^ {
       case pilot ~ _ ~ plane ~ _ ~ at => {
         PilotMessage(pilot, Is.Returning, at) 
       }
@@ -296,7 +311,7 @@ debug("inflight event "+new Exception)
   }
   
   lazy val wasKilled : Parser[PilotMessage] = {
-    pilotNameParser ~ planeAndSeat ~ " was killed "  ~ atLocationParser ^^ {
+    pilotNameParser ~ planeAndSeat ~ " was killed"  ~ atLocationParser ^^ {
       case pilot ~ plane ~ _ ~ at => {
         PilotMessage(pilot, Is.Killed, at) 
       }
@@ -304,7 +319,7 @@ debug("inflight event "+new Exception)
   }  
 
 	lazy val atLocationParser : Parser[At.Location] = {
-	  " at " ~ simpleDouble ~" "~ simpleDouble ^^ {
+	  " ?at ".r ~ simpleDouble ~" "~ simpleDouble ^^ {
 	    case _ ~ x ~ _ ~ y => At.Coordinate(x,y)
 	    case _ => At.Nowhere
 	  }

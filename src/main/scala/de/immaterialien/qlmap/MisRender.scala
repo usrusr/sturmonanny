@@ -169,13 +169,13 @@ private class MisRender(
   }
 
   def sequence(in: BufferedImage) {
-    veil()
 //    veil()
-//        hatch(conf.front.hatchdistance.apply) 
-//        front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
-//    units()
-//    airfields()
-  	wings()
+//    veil()
+	  hatch(conf.front.hatchdistance.apply) 
+	  front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
+    units()
+    airfields()
+//  	wings()
   }
   
   def sideForGame(gameCoords:(Double, Double)):Int={
