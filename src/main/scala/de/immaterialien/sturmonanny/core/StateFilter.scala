@@ -7,6 +7,7 @@ import net.liftweb._
 class StateFilter(multi:TimedLiftActor) extends Log {
   var pending : Set[String] = Set()
   var blocked = false
+  def time = multi.time
 	def pass(msg:Multiplexer#UpMessage):Boolean = {
 //log.debug("upmessage: " + msg)	  
 	  var pass = ! blocked

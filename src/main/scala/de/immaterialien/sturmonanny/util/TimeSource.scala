@@ -1,4 +1,4 @@
-package de.immaterialien.sturmonanny.core
+package de.immaterialien.sturmonanny.util
 
 trait TimeSource {
 	def currentTimeMillis:Long
@@ -6,5 +6,5 @@ trait TimeSource {
 }
 
 class TimeSourceImpl extends TimeSource{
-	def currentTimeMillis = System.currentTimeMillis
+	def currentTimeMillis = System.currentTimeMillis 
 }

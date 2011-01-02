@@ -6,10 +6,10 @@ import scala.collection.mutable
 import scala.util.matching._
 
 
-class AutoInvitations(pilot:Pilots#Pilot) {
+class AutoInvitations(pilot:Pilots#Pilot, time:TimeSource) {
 	class InvitationState { 
 		def cleaned = { 
-			val now = System.currentTimeMillis
+			val now = time.currentTimeMillis
 			invites = invites.filter(now>_.until)
 			this
 		}
@@ -56,6 +56,6 @@ class AutoInvitations(pilot:Pilots#Pilot) {
 	private val state = new InvitationState
 	def get = state.cleaned
 }
-case class Invite(by:String, plane:IMarket.Loadout, until:Long, side:Armies.Armies, priceLimit:Double){
-	override def toString = by+"("+side+") for "+plane+ " " + ((until - System.currentTimeMillis)/1000)+"s remaining"
+case class Invite(by:String, plane:IMarket.Loadout, until:Long, side:Armies.Armies, priceLimit:Double, currentTimeMillis: ( () => Long)){
+	override def toString = by+"("+side+") for "+plane+ " " + ((until - currentTimeMillis())/1000)+"s remaining"
 }

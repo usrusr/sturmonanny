@@ -38,12 +38,12 @@ debug ("loaded "+loadedOpt)
 			chat("your balance: "+loaded.red.toInt+currency+" on red and "+loaded.blue.toInt+currency+" on blue")
 		}
 		}
-		val _invites = new AutoInvitations(this) 
+		val _invites = new AutoInvitations(this, server.time) 
 		def invites = _invites.get // wrap each access in a timeout clean
 		object state{
 		  override def toString = {
 		    " "+
-		    (if(deathPauseUntil>System.currentTimeMillis) ("pause for "+(deathPauseUntil-System.currentTimeMillis)) else "") +
+		    (if(deathPauseUntil>server.time.currentTimeMillis) ("pause for "+(deathPauseUntil-server.time.currentTimeMillis)) else "") +
         (if(died) " died" else "") +
         (if(landed) " landed" else "") +
         " plane:" +planeName+" @ "+lastPayment + 
@@ -63,7 +63,7 @@ debug ("loaded "+loadedOpt)
 			var flying = false
 
 			var planeName = ""
-			var lastPlanePriceCommit = System.currentTimeMillis // compare against lastPlaneVerification to determine "inFlight" -1L // -1: we have a price but we are not in the air yet
+			var lastPlanePriceCommit = server.time.currentTimeMillis // compare against lastPlaneVerification to determine "inFlight" -1L // -1: we have a price but we are not in the air yet
 			var planeWarningSince = 0L
 			var lastCleared = 0L
 			var planeVerified = true
@@ -80,7 +80,7 @@ debug ("loaded "+loadedOpt)
 			
 			def dies() = {
 				if( ! died) {
-					val now = System.currentTimeMillis
+					val now = server.time.currentTimeMillis
 					if(deathPauseUntil<=now){
 					  deathPauseUntil = server.rules.calculateDeathPause
 					  
@@ -103,7 +103,7 @@ debug ("loaded "+loadedOpt)
 				died = true
 			}
 			private def planeLost() : Option[String] = {
-			  if(planeVerified && deathPauseUntil<System.currentTimeMillis && somePlane) commitPlanePrice()// finish balance
+			  if(planeVerified && deathPauseUntil<server.time.currentTimeMillis && somePlane) commitPlanePrice()// finish balance
 				flying=false
 			  val startFee = lastPayment.map(_ price).getOrElse(0D)
 
@@ -141,7 +141,7 @@ debug ("loaded "+loadedOpt)
 			
 			def commitPlanePrice(){
 			  if(planeVerified) for(planePrice <- lastPayment.map(_ price)){ 
-			  	val now = System.currentTimeMillis
+			  	val now = server.time.currentTimeMillis
 					val millis = now - lastPlanePriceCommit
 			  	if(lastPlanePriceCommit == lastPlaneVerification) {
 	println("skipping plane price "+millis+" millis")			  	
@@ -162,7 +162,7 @@ debug ("loaded "+loadedOpt)
 			 * 
 			 * @return
 			 */
-			def notFresh = 10000L > System.currentTimeMillis - 
+			def notFresh = 10000L > server.time.currentTimeMillis - 
 //				math.max(lastCleared, lastPlaneVerification )
 				lastPlaneVerification 
 			
@@ -170,7 +170,7 @@ debug ("loaded "+loadedOpt)
 			def definitelyInPlane() {
 				lastPayment = None
 println("    definitelyInPlane  ")
-				//invitations.value.retain(((x,y) => y.until > System.currentTimeMillis)) 
+				//invitations.value.retain(((x,y) => y.until > server.time.currentTimeMillis)) 
 				
 				
 				val planePrice = server.market.getPrice(planeName, load, currentSide.id)
@@ -178,7 +178,7 @@ println("    definitelyInPlane  ")
 				
 				lostPlaneName = ""
 
-				lastPlanePriceCommit = System.currentTimeMillis
+				lastPlanePriceCommit = server.time.currentTimeMillis
 				var invitation = invites in planeName
 				val side = firstNonNeutral(invitation.map(_.inv.side).toList:_*)
 				val rawPrice = server.rules.startCost(planePrice, name, invitation.map(_.inv.by), side, invitation)
@@ -326,10 +326,13 @@ debug("setting price to in updateLoadout "+newPriceInfo)
 			}
 			
 			def planeVerifiable = ! planeVerified && currentSide != Armies.None && planeName != "" && load.isDefined
-			def warnPlane(){
-				if( ! planeVerified &&  planeVerifiable && planeNotEmpty && planeNotLostPlane) {
-					if(planeWarningSince == 0) planeWarningSince = System.currentTimeMillis
-					server.rules.warnPlane(Pilot.this.name, planeName, load, planeWarningSince, balance, currentSide)
+			def applyWarnings(){
+				if( ! planeVerified &&  planeVerifiable && planeNotEmpty && planeNotLostPlane){
+					if(deathPauseUntil>server.time.currentTimeMillis) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invites.allInvitationsLine)
+					else  {
+						if(planeWarningSince == 0) planeWarningSince = server.time.currentTimeMillis
+						server.rules.warnPlane(Pilot.this.name, planeName, load, planeWarningSince, balance, currentSide)
+					}
 				}
 			}
 			def tryPlaneVerification() {
@@ -358,8 +361,9 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 					planeName = what
 					tryPlaneVerification()
 				}
-				if(deathPauseUntil>System.currentTimeMillis && planeNotEmpty) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invites.allInvitationsLine)
-				else warnPlane()
+//				if(deathPauseUntil>server.time.currentTimeMillis && planeNotEmpty) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invites.allInvitationsLine)
+//				else warnPlane()
+				applyWarnings()
 			}
 
 			def returns(){
@@ -396,7 +400,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				invites.clean
 				joinNeutral()
 				planeWarningSince = 0L
-				lastCleared = System.currentTimeMillis
+				lastCleared = server.time.currentTimeMillis
 			}
 			def persist() {
 debug("persisting "+name)				
@@ -567,7 +571,7 @@ debug(name + " Is.InFlight "+state)
 	    	  state.flying = true
 	    	  state.commitPlanePrice()
 				}else if(state.planeVerifiable) {
-					state.warnPlane()
+					state.applyWarnings()
 				}
     	}
       case Is.LandedAtAirfield => {
@@ -655,15 +659,16 @@ debug(name + " sending chat "+msg)
 							if(verbose) chat("state is: "+state.toString, 300)
 						}else if(invites.current.isDefined){
 							chat("You are a recruit yourself")
-						}else if(state.lastPlaneVerification + (secs * 1000) < System.currentTimeMillis){
+						}else if(state.lastPlaneVerification + (secs * 1000) < server.time.currentTimeMillis){
 							chat("You can only recruit for up to "+secs+" s after starting")
 						}else{
 							val ni = Invite(
 													name, 
 													IMarket.Loadout(state.planeName, state.load), 
-													System.currentTimeMillis+(1000*secs), 
+													server.time.currentTimeMillis+(1000*secs), 
 													currentSide,
-													state.lastPayment.map(_ price).getOrElse(0D)
+													state.lastPayment.map(_ price).getOrElse(0D),
+													server.time.currentTimeMillis _ 
 							)
 							domain.forMatches(who){recruit=>
 								recruit ! ni

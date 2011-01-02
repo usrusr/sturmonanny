@@ -46,7 +46,7 @@ import net.liftweb.util._
 trait TimedLiftActor extends LiftActor { 
 //with Logging {
 //loglevel=LiftLogLevels.Trace
-
+	def time : TimeSource  
   /**
    * replace the temporaryMessageHandler for at least forMillis milliseconds
    */
@@ -93,7 +93,7 @@ trait TimedLiftActor extends LiftActor {
    * set new timeout
    */
   final def extendTimeFromNow(millis : Long ) {
-	    temporaryMessageHandler.until = java.lang.System.currentTimeMillis + millis
+	    temporaryMessageHandler.until = time.currentTimeMillis + millis
 	    temporaryMessageHandler.requestPing
   }  
   /**
@@ -169,12 +169,12 @@ if(until==0) println("0 until from "+new Exception().getStackTraceString)
     // interface for calling andThen
 	  var andThen : Function0[Unit] = _
 	  
-		var until = java.lang.System.currentTimeMillis + waitFor
+		var until = time.currentTimeMillis + waitFor
 	    var toDo = matchCount
-	 	def ranOut() = (matchCount>0 && toDo<1) || (java.lang.System.currentTimeMillis>until)
+	 	def ranOut() = (matchCount>0 && toDo<1) || (time.currentTimeMillis>until)
 	 	def requestPing() {
 	//debug(" requesting ping in  "+new Exception().getStackTraceString)	  
-	 	  LAPinger.schedule(TimedLiftActor.this, TimeOut(until), until - java.lang.System.currentTimeMillis )
+	 	  LAPinger.schedule(TimedLiftActor.this, TimeOut(until), until - time.currentTimeMillis )
 		}
 		if(internalTemporaryMessageHandler!=null) requestPing
 		

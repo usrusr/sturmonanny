@@ -33,7 +33,7 @@ debug("update balance "+old + " + "+diff)
     else ret
   }
   def calculateDeathPause: Long = {
-    System.currentTimeMillis + (1000 * conf.pilots.deathpenalty.apply)
+    server.time.currentTimeMillis + (1000 * conf.pilots.deathpenalty.apply)
   }
   def recruiterPercents = {
   	math.max(0, math.min(100, conf.recruiting.recruitshare.apply))
@@ -41,7 +41,7 @@ debug("update balance "+old + " + "+diff)
   def recruitPercents = 100 - recruiterPercents
   def warnPlane(who: String, plane: String, load: Option[String], since: Long, balance: Double, side:Armies.Armies) {
     val multi = server.multi
-    var difference = System.currentTimeMillis - since
+    var difference = server.time.currentTimeMillis - since
     val remaining = (conf.game.planeWarningsSeconds.apply * 1000) - difference
     val loadout = IMarket.Loadout(plane, load)
     if (remaining < 0) {
@@ -112,7 +112,7 @@ debug("update balance "+old + " + "+diff)
   }
   def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, inviteString:Option[String]) {
     val multi = server.multi
-    var difference = System.currentTimeMillis - since
+    var difference = server.time.currentTimeMillis - since
     val pauseDuration = conf.game.planeWarningsSeconds.apply
     val remaining = (pauseDuration * 1000) - difference
     val seconds: Long = remaining / 1000

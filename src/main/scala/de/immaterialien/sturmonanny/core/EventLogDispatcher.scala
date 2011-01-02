@@ -129,7 +129,7 @@ debug("success from message: "+who+" -> "+what+"  from '"+lines+"'")
 	lazy val maxAgeLineParser : Parser[Message]= (
 	  (dateTimeParser ~ eventParser) ^^ {
 	  	case date ~ msg => {
-	  		val age = System.currentTimeMillis - date.getTimeInMillis 
+	  		val age = server.time.currentTimeMillis - date.getTimeInMillis 
 	  		if( age > maxAge*1000) {
 debug("skipping "+msg+" because it is too old: "+(age/1000)+"s")	  			
 	  			GlobalMessage(Is.Ignored)

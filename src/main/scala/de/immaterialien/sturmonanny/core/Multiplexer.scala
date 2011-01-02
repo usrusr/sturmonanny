@@ -22,6 +22,7 @@ import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends TimedLiftActor with Logging with UpdatingMember {
   val timeout = 5000
   object stateFilter extends StateFilter(this)
+  def time = server.time
 
   def this(il2port: Int, scport: Int) = this("127.0.0.1", il2port, scport)
   def this(conf: Configuration) = this(conf.server.host.apply, conf.server.il2port.apply, conf.server.consoleport.apply)
@@ -84,15 +85,15 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   private[this] def outWriteLoadFiltered(line: String) {
 
     for (out <- il2out) {
-      var now = System.currentTimeMillis
+      var now = server.time.currentTimeMillis
       while (promptTime > now) {
         //debug("OUT: waiting for "+(promptTime-now)+"ms... '"+line+"'")
 
         promptNotifier.synchronized {
           promptNotifier.wait(timeout)
-          //debug("OUT: ...send after waiting "+(System.currentTimeMillis-now)+"ms '"+line+"'")
+          //debug("OUT: ...send after waiting "+(server.time.currentTimeMillis-now)+"ms '"+line+"'")
         }
-        now = System.currentTimeMillis
+        now = server.time.currentTimeMillis
       }
       promptTime = timeout + now
 
@@ -426,7 +427,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
             il2line.clear
             createdLine match {
               case Multiplexer.consoleNPattern(n) => {
-                promptTime = System.currentTimeMillis
+                promptTime = server.time.currentTimeMillis
                 Multiplexer.this.promptNotifier.synchronized {
                   Multiplexer.this.promptNotifier.notifyAll
                 }
