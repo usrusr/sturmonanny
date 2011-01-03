@@ -68,7 +68,7 @@ debug(cls + " new instance not configured!")
  	  }
 	}
 	def messageHandler = {
-	  case Msg.getPrice(plane, side) => reply(Msg.getPriceResult(internal map (_ getPrice(plane, side))))
+	  case Msg.getPrice(plane, side) => reply(Msg.getPriceResult(internal map (_ tryPrice(plane, side)) getOrElse None))
 	  case Msg.addAirTime(plane, millis, side) => internal map (_ addAirTime(plane, millis, side))
 	  case Msg.setConfiguration(pathToFile) => reply(Msg.setConfigurationResult(internal map (_ setConfiguration pathToFile) getOrElse false))
 	  case Msg.cycle(mis) => {

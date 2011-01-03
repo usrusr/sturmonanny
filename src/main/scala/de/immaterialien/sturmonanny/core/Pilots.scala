@@ -416,8 +416,8 @@ debug("persisting "+name)
 			/**
 			 * todo: by-loadout price info!
 			 */
-			
 				val priceOpt = server.market.tryPrice(IMarket.Loadout(plane.name, None), currentSide.id)
+println("price for side "+currentSide.id+" :" +priceOpt)			
 			  for(price <- priceOpt){
 //				val price = server.market.getPrice(plane.name, currentSide.id)
 
@@ -711,7 +711,7 @@ debug(name + " sending chat "+msg)
 						case "verbose"=>chat("toggles between verbose (debug) mode and a less chatty nanny")
 						case _ => {
 							chat("available commands are:")
-							chat("help [command], balance, price [plane], available [plane], recruit [pilot], invites", 500)							
+							chat("help [cmd], balance, price [pla], available [pla], recruit [pil], invites", 500)							
 						}
 					}
 			
@@ -790,18 +790,19 @@ object Pilots {
 	
 	object Commands{
 		
-		
-		
-		val balance = """(?i-)\s*!\s*balance\s*(\s\S*)?""".r
-		val price = """(?i-)\s*!\s*price\s*(\s\S*)?""".r
-		val available = """(?i-)\s*!\s*available\s*(\s\S*)?""".r
-		val state = """(?i-)\s*!\s*state\s*(\s\S*)?""".r
-		val recruit = """(?i-)\s*!\s*recruit\s*(\s\S*)?""".r
+		val balance = """(?i-)\s*!\s*balance(?:\s+(\S*))?""".r
+		val price = """(?i-)\s*!\s*price(?:\s+(\S*))?""".r
+		val available = """(?i-)\s*!\s*available(?:\s+(\S*))?""".r
+		val state = """(?i-)\s*!\s*state(?:\s+(\S*))?""".r
+		val recruit = """(?i-)\s*!\s*recruit(?:\s+(\S*))?""".r
 		val invites = """(?i-)\s*!\s*invites\s*""".r
 //		val help = """(?i-)\s*!\s*help(\s*)""".r
-		val helpCommand = """(?i-)\s*!\s*help\s*(\s\S*)?""".r
-		val verbose = """(?i-)\s*!\s*verbose\s*(\s\S*)?""".r
+		val helpCommand = """(?i-)\s*!\s*help(?:\s+(\S*))?""".r
+		val verbose = """(?i-)\s*!\s*verbose(?:\s+(\S*))?""".r
 	}
-//	class Invitation(val by:String, val plane:IMarket.Loadout, val until:Long) 
+//	class Invitation(val by:String, val plane:IMarket.Loadout, val until:Long)
+	/*
+[109]
+	 */
 }
 

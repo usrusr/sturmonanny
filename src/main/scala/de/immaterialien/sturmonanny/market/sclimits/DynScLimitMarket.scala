@@ -18,7 +18,7 @@ log.debug("setting server context: "+srv)
 		
 	val sides = Map(new SideMarket(1).pair, new SideMarket(2).pair)
   override def addAirTime(load : Loadout, millis : Long, side:Int) = sides(side).addAirTime(load, millis)
-  protected def tryPrice(loadout:Loadout, side:Int) = {
+  def tryPrice(loadout:Loadout, side:Int) = {
 		if(side>0) sides(side).tryPrice(loadout)
 		else {
 			val s1 = sides(1).tryPrice(loadout)

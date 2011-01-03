@@ -39,7 +39,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
     }
 
  	def pilotMessageSend(who:String, what: Is.Event) = {
- 		debug("console event for "+who+" " + what)
+// 		debug("console event for "+who+" " + what)
  		server.pilots.forElement(who)(_!EventSource.Console(what))
  	}
 	override def messageHandler : PartialFunction[Any, Unit] = {	  

@@ -7,8 +7,8 @@ import scala.collection._
 class ScLimitMarket extends IMarket with Log{ import ScLimitMarket._
 	
 	var pl = Map[Int, Map[String, Double]]()
-	protected def tryPrice(loadout:Loadout, side:Int) : Option[Double] = {
-log debug "trying price for "+loadout+" in side "+side
+	def tryPrice(loadout:Loadout, side:Int) : Option[Double] = {
+//log debug "trying price for "+loadout+" in side "+side
 		pl.get(side).flatMap(_ get(loadout.plane ))
 		
   }

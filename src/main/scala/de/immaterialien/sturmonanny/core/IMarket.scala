@@ -17,7 +17,7 @@ trait IMarket { import IMarket._
 		case Loadout(plane, Some(_)) => tryPrice(loadout, side) getOrElse getPrice(Loadout(plane, None), side)
 	}
 	
-	protected def tryPrice(loadout:Loadout, side:Int) : Option[Double]
+	def tryPrice(loadout:Loadout, side:Int) : Option[Double]
 	
 
 	

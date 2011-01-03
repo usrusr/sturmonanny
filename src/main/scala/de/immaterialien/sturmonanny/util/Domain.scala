@@ -53,7 +53,8 @@ trait Domain[D <: Domain[D]] extends Logging { self: D =>
     		val offs = v1.lastIndexOf("$")
     		if(offs>0) v1 = v1.substring(offs)
     		
-    		v1 = java.net.URLEncoder.encode(v1, "UTF-8")
+    		//v1 = java.net.URLEncoder.encode(v1, "UTF-8")
+    		v1 = v1.replaceAll("""[^a-zA-Z\d\.-_=\|\^@<>]+""", "_")
     		
     		v1
     	}+"."+name+".log")
