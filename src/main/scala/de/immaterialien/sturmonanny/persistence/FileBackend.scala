@@ -144,16 +144,16 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 
 		def write(fname:String, input:mutable.Map[String, BalanceRB], error:String=>Unit){ 
 			val f = new File(fname)
-println("writing to "+f)			
+//println("writing to "+f)			
 			val last = new File(fname+".bak")
 			if(last.exists && ! last.delete) error("backup "+last.getAbsolutePath+" could not be deleted")
 			if(f.exists && ! f.renameTo(last)) {
 				error("could not move to backup "+last.getAbsolutePath+", deleting "+f.getAbsolutePath)
 				if( ! f.delete) error("failed to delete "+f.getAbsolutePath)
 			}
-println("writing... "+f)			
+//println("writing... "+f)			
 			val fos = new FileOutputStream(fname)
-			val ow = new OutputStreamWriter(fos, utf8)
+			val ow = new BufferedWriter(new OutputStreamWriter(fos, utf8))
 			try for(item<-input){
 				val rb = item._2
 				var pilot = item._1
@@ -162,7 +162,7 @@ println("writing... "+f)
 				ow append "\"" append pilot append "\" =" append 
 					" red: " append (rb.red.toString) append
 					" blue: " append (rb.blue.toString) append "\n"
-println("written to "+f)			
+//println("written to "+f)			
 			} catch{
 				case e=> error("failed to write balances to "+f.getAbsolutePath+" "+e.getMessage)
 			}finally {

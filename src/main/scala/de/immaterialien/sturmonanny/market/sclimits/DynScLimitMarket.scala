@@ -133,7 +133,7 @@ log.debug("creating "+plane+" in market -> "+planes.items )
   
 	class SideMarket(s:Int) {
 		def pair=(s, this)
-	
+		override def toString = "\ns:\n  "+pl.mkString("\n  ")
 		var pl = Map[String, Double]()
 		var supply = Map[String, Double]()
 		private var use = Map[String, Variable[Double]]()
@@ -177,7 +177,7 @@ log.debug("cycling "+s+" with "+newSupply)
 			val leftoverMap : Map[String, Double]= memory.flatMap(_ get s) getOrElse Map()
 			// include leftover types that are not available in the current mission in the scale calculation
 			val totalleftover = leftoverMap.values.foldLeft(0D)( _ + _ )
-			val leftoverScale = math.max(
+			val leftoverScale = math.min(
 					leftoverWeight, 
 					if(totalleftover > 0D) 
 						leftoverWeight * totalsupply / totalleftover
@@ -186,7 +186,7 @@ log.debug("cycling "+s+" with "+newSupply)
 			// create a copy of supply with Variables containing the scaled leftovers
 			use = supply.map{y=>
 				val scaledLeftover = leftoverScale * leftoverMap.get(y._1).getOrElse(0D)
-				(y._1, new Variable(scaledLeftover))
+				(y._1, new Variable(scaledLeftover)) 
 			}
 			
 

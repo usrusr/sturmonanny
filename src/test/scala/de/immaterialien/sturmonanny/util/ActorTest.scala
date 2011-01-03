@@ -16,7 +16,8 @@ class ActorTest  {
 
    
     
-    class Waiter extends TimedLiftActor {    
+    class Waiter extends TimedLiftActor {  
+    	lazy val time = new TimeSourceImpl 
           class WaiterFunc extends PartialFunction[Any, Unit] {
       val del : PartialFunction[Any, Unit] = {
         case one() => print("< one\n") 

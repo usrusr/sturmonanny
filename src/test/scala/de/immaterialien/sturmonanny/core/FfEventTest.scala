@@ -12,6 +12,7 @@ object FfEventTest {
 		net.liftweb.actor.LAScheduler.maxThreadPoolSize = 1
 		net.liftweb.actor.LAScheduler.onSameThread = true
 		//play("src/test/resources/pilotlogs/Pilot.EJGr.Ost_Irmin.log")
+		//play("src/test/resources/pilotlogs/Pilot.EJGr.Ost_Yogy.log")
 		play("src/test/resources/pilotlogs/Pilot.EJGr.Ost_Yogy.log")
 	}
 	
@@ -29,7 +30,7 @@ object FfEventTest {
 }
 
 class FfEventTest {
-	class AdvancableTimeSource extends TimeSource {
+	class AdvancableTimeSource extends util.TimeSource {
 		var time = 0L
 		def set(newTime:Long)=time=newTime
 		def advance(diff:Long)=time += diff
