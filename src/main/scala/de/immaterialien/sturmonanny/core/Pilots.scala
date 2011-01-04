@@ -567,7 +567,7 @@ debug("memorizing  for repetition check log event "+event)
     	case Is.InFlight => {
     		
 				if(state.planeVerified){
-debug(name + " Is.InFlight "+state) 
+//debug(name + " Is.InFlight "+state) 
 	    	  state.flying = true
 	    	  state.commitPlanePrice()
 				}else if(state.planeVerifiable) {
@@ -575,11 +575,11 @@ debug(name + " Is.InFlight "+state)
 				}
     	}
       case Is.LandedAtAirfield => {
-debug(name + " Is.LandedAtAirfield "+state) 
+//debug(name + " Is.LandedAtAirfield "+state) 
 				state.returns()
     	}
  			case Is.Selecting => {
-debug(name + " Is.Selecting "+state)    	  
+//debug(name + " Is.Selecting "+state)    	  
 				if(state.flying) {
 					chat("refly counted as a lost plane")
 					state.crashes()
@@ -590,7 +590,7 @@ debug(name + " Is.Selecting "+state)
 				state.clear()
     	}
     	case Is.KIA => if((state.flying||state.crashed) && state.notFresh){
-debug(name + " Is.KIA "+state)    	  
+//debug(name + " Is.KIA "+state)    	  
     	  state.dies()
     	}
     	case Is.HitTheSilk => if(state.flying && state.notFresh){

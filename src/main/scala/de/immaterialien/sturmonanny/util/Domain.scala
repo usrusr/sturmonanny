@@ -46,6 +46,11 @@ trait Domain[D <: Domain[D]] extends Logging { self: D =>
   }
   abstract class Element(val name: String) extends LiftActor with Logging { import java.io._
     val domain = Domain.this
+    def toFileName(in:String)={
+  		var v1=in
+   		v1 = v1.replaceAll("""[^a-zA-Z\d\.-_=\|\^@<>]+""", "_")
+   		v1  	
+  	}
     protected var messageLog : Option[Writer] = {
     	val fname = new java.io.File({
     		var v1 = this.getClass.getSimpleName
@@ -53,11 +58,8 @@ trait Domain[D <: Domain[D]] extends Logging { self: D =>
     		val offs = v1.lastIndexOf("$")
     		if(offs>0) v1 = v1.substring(offs)
     		
-    		//v1 = java.net.URLEncoder.encode(v1, "UTF-8")
-    		v1 = v1.replaceAll("""[^a-zA-Z\d\.-_=\|\^@<>]+""", "_")
-    		
-    		v1
-    	}+"."+name+".log")
+    		toFileName(v1)
+    	}+"."+toFileName(name)+".log")
 System.err.println("might be logging to "+fname);    	
     	if( ! enableMessageLog) None else try{
     		Some(new BufferedWriter(new FileWriter(fname), 1024))
