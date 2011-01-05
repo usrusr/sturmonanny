@@ -144,10 +144,10 @@ debug ("loaded "+loadedOpt)
 			  	val now = server.time.currentTimeMillis
 					val millis = now - lastPlanePriceCommit
 			  	if(lastPlanePriceCommit == lastPlaneVerification) {
-	println("skipping plane price "+millis+" millis")			  	
+//	println("skipping plane price "+millis+" millis")			  	
 				  	lastPlanePriceCommit = now
 				  } else {
-	println("commit plane price "+state)			  	
+//	println("commit plane price "+state)			  	
 						val difference = planePrice * millis / (-60000) 
 						debug("price update for "+millis+" with raw price"+ currency(planePrice)+ " -> difference "+currency(difference) )       
 						balance () = server.rules.updateBalance(balance, difference)
@@ -162,9 +162,13 @@ debug ("loaded "+loadedOpt)
 			 * 
 			 * @return
 			 */
-			def notFresh = 10000L > server.time.currentTimeMillis - 
+			def notFresh = {
+				val age = server.time.currentTimeMillis - lastPlaneVerification
+				val ret = 10000L < age
+				ret
+			}
 //				math.max(lastCleared, lastPlaneVerification )
-				lastPlaneVerification 
+//				lastPlaneVerification 
 			
 			// call when it is definitely known that the pilot is fresh in a plane
 			def definitelyInPlane() {
@@ -403,7 +407,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				lastCleared = server.time.currentTimeMillis
 			}
 			def persist() {
-debug("persisting "+name)				
+//debug("persisting "+name)				
 				server.balance .store(name, Some(balance(Armies.RedSide)), Some(balance(Armies.BlueSide)))
 			}
 			
@@ -465,14 +469,10 @@ println("price for side "+currentSide.id+" :" +priceOpt)
 					w.append(server.time.now + ":"+x+"\r\n")
 					if(x.isInstanceOf[EventSource.Console]) w.flush()
 				}
-//debug("pilot "+name +" <isdef- "+x)		    
-//				ImessageHandler isDefinedAt x
 				sourceFilteredMessageHandler isDefinedAt x
 			}
 			override def apply(x:Any) = {
-//debug("pilot "+name +" <apply- "+x)		    
 			  if( ! conf.game.homeAlone.apply){
-//debug("pilot "+Pilot.this.name + " <- "+x)			  	
 //				  ImessageHandler apply x
 				  sourceFilteredMessageHandler apply x
 				}
@@ -567,9 +567,13 @@ debug("memorizing  for repetition check log event "+event)
     	case Is.InFlight => {
     		
 				if(state.planeVerified){
-//debug(name + " Is.InFlight "+state) 
-	    	  state.flying = true
-	    	  state.commitPlanePrice()
+//debug(name + " Is.InFlight "+state)
+					if( ! (state.crashed || state.died)){
+						if( ! state.flying ){
+							state.flying = true
+						}
+						state.commitPlanePrice()
+					}
 				}else if(state.planeVerifiable) {
 					state.applyWarnings()
 				}
@@ -581,7 +585,9 @@ debug("memorizing  for repetition check log event "+event)
  			case Is.Selecting => {
 //debug(name + " Is.Selecting "+state)    	  
 				if(state.flying) {
-					chat("refly counted as a lost plane")
+					if( ! (state.crashed || state.died)){
+						chat("refly counted as a lost plane")
+					}
 					state.crashes()
 				}else{
 					state.returns()
