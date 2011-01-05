@@ -21,7 +21,8 @@ object FfEventTest {
 	def play(fname:String) = {
 		val ff = new FfEventTest
 		val offset = math.max(fname.lastIndexOf("/"), fname.lastIndexOf("\\")) + 7
-		val parser = new ff.PilotLogParser(fname.drop(offset).dropRight(4))
+		//val parser = new ff.PilotLogParser(fname.drop(offset).dropRight(4))
+		val parser = new ff.PilotLogParser(fname.drop(offset).dropRight(4)+"test*123[]//#'")
 		
 		val reader = new java.io.FileReader(fname)
 		parser.parseAll(parser.file, reader)

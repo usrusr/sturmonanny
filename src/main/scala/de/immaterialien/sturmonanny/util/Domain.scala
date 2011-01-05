@@ -48,7 +48,7 @@ trait Domain[D <: Domain[D]] extends Logging { self: D =>
     val domain = Domain.this
     def toFileName(in:String)={
   		var v1=in
-   		v1 = v1.replaceAll("""[^a-zA-Z\d\.-_=\|\^@<>]+""", "_")
+   		v1 = v1.replaceAll("""[^a-zA-Z\d\.\-_=|^@<>]+""", "_")
    		v1  	
   	}
     protected var messageLog : Option[Writer] = {
