@@ -12,7 +12,7 @@ package de.immaterialien.sturmonanny.util.trie
       t = t.add("welcome", 3)
       t = t.add("tach", 4)
       t = t.add("tachchen", 44)
-      t = t.add("bonjour", 5)
+      t = t.add("bonjour", 55)
       println("---built---"+t)
 
       
@@ -24,8 +24,24 @@ package de.immaterialien.sturmonanny.util.trie
 			assertTrue(t.get("tachchenschen").isEmpty) 
 			assertEquals(4,t.shortest("tachchenschen").get._2) 
 			assertEquals(44,t.longest("tachchenschen").get._2) 
+			
+			//readd hey
+      t = t.add("hey", 99)      
+      println("---readded hey---"+t)
 
-    }
+      
+      for(n<-t if(n._1 == "hey".toSeq)){
+      	println("found hey")
+      }
+      for(n<-t if(n._1 == "heyey".toSeq)){
+      	println("found heyey")
+      }
+      
+      val fivesum = t.filter(_._2 == 5).map(_ _2).sum
+      assertEquals("the only 5 value should have been removed by adding (hey,99)", 0, fivesum)
+      val tensum = t.filter(_._2 == 10).map(_ _2).sum
+      assertEquals("the only 10 value should be there only once after adding (hey,99)", 10, tensum)
+		}
 		
 		
 		@Test

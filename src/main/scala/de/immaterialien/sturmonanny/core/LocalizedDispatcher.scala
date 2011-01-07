@@ -227,7 +227,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 		
 		override def add(k:Seq[Char]){
 			val cleaned = new String(k.toArray)
-			add(cleaned)
+			super.add(cleaned)
 			
 debug("pilot name parser state after adding '"+k+"': "+trie.toString)
 			

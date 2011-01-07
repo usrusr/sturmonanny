@@ -170,7 +170,7 @@ import java.util.{Comparator, Arrays}
         val index = binarySearch(toAdd, comp )
         if(index > -1){
           val oldSub = rests(index)
-          val newRests = mergeRests(comp, rests, toAdd.rests)
+          val newRests = mergeRests(comp, oldSub.rests, toAdd.rests)
           val newSub :TrieNode[C,V] = TrieNode[C,V](toAdd.prefix, toAdd.value , newRests)
           val newArray = rests.clone
           newArray.update(index, newSub)
@@ -219,15 +219,11 @@ import java.util.{Comparator, Arrays}
                   (editChild.prefix, editChild.value, editChild.rests, toAdd.prefix, toAdd.value, toAdd.rests)
             
             val edited = if(longer.startsWith(shorter)){
-              val newLonger = TrieNode[C,V](longer.drop(shorter.length).toBuffer, longerVal, longerRest)
-              //val newShorter = TrieNode[C,V](shorter, shorterVal, mergeRests(comp, shorterRest, Array(newLonger)))
-              //newShorter
+            	val newLonger = TrieNode[C,V](longer.drop(shorter.length).toBuffer, longerVal, longerRest)
+
               val newShorter = TrieNode[C,V](shorter, shorterVal, shorterRest)
               val merged = newShorter.add(newLonger, comp)
               merged
-              //val newShorter = shorter.add(newLonger, comp)
-              
-              
             }else{
               val zipped = shorter.zip(longer)
               val prefix = zipped.takeWhile((xy) => xy._1==xy._2).map(_ _1).toBuffer
