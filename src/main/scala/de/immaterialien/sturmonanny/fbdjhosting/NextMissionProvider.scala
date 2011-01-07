@@ -32,25 +32,34 @@ object NextMissionProvider
         var instance:Provider[File] = null
         val arg = conf.fbdj.DCG.addonArguments(cName)
         try{
-       	 	val cls = Class.forName(actualClass).asInstanceOf[Class[Provider[File]]]
+       	 	val cls = Class.forName(actualClass).asInstanceOf[Class[Provider[File]]] 
           
           try{
             val constructor = cls.getConstructor(classOf[String])
             instance = constructor.newInstance(arg).asInstanceOf[Provider[File]]
-          }catch{
-            case _ => {
+          }catch{ 
+            case x => { 
+x.printStackTrace            	
               val constructor = cls.getConstructor()
               instance = constructor.newInstance().asInstanceOf[Provider[File]]
             } 
           }
-      	  type withCallback = {def setMessageCallback(callback : Provider[String]):Unit}
-          if(instance.isInstanceOf[withCallback]) {
-          	instance.asInstanceOf[withCallback].setMessageCallback(messageCallback)
-          }
-          
+      	  //type withCallback = {def setMessageCallback(callback : Provider[String]):Unit}
+          //if(instance.isInstanceOf[{def setMessageCallback(callback : Provider[String]):Unit}]) {
+          try{
+	          val method = instance.getClass.getMethod("setMessageCallback", classOf[Provider[_]])
+	          
+	          if(method!=null) {
+	          	//instance.asInstanceOf[{def setMessageCallback(callback : Provider[String]):Unit}].setMessageCallback(messageCallback)
+	          	method.invoke(instance, messageCallback)
+	          }
+          }catch{case _ =>}
       	  if(instance!=null) ret.put(num, instance)
         }catch{
-          case x => log.error("could not load mission processor "+actualClass+" for processor position "+num+":", x)
+          case x => {
+x.printStackTrace          	
+          	log.error("could not load mission processor "+actualClass+" for processor position "+num+":", x)
+          }
       	case _ =>
         }
       } 

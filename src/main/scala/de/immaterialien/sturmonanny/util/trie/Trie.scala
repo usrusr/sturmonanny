@@ -150,16 +150,58 @@ import java.util.{Comparator, Arrays}
         else sb.append(" ( )")
         for(c<-rests) c.buildString(sb, indent+string.length)
       }
+      
+//      def mergeRests1(comp : Comparator[C], one:Array[TrieNode[C,V]]* ):Array[TrieNode[C,V]]={
+//        val filled = one.filter(_.length > 0).toBuffer
+//        filled.size match{
+//          case 0 =>Array()
+//          case 1 =>filled.head
+//          case _ => {
+//            val ret = Array.concat(filled:_*)
+//            //Arrays.sort(ret.asInstanceOf[Array[AnyRef]], comp.asInstanceOf[Comparator[AnyRef]])
+//            Arrays.sort(ret.asInstanceOf[Array[AnyRef]], new Trie.PrefixComparator[C](comp).asInstanceOf[Comparator[AnyRef]])
+//            ret
+//          }
+//        }
+//      }
+      
       def mergeRests(comp : Comparator[C], one:Array[TrieNode[C,V]]* ):Array[TrieNode[C,V]]={
-        val filled = one.filter(_.length > 0).toBuffer
+        val filtered = one.filter(_.length > 0).toBuffer
+        val unflattened = filtered.map(elem=>
+        		elem.flatMap(sub=>
+        			if(sub.prefix.isEmpty) {
+        				sub.rests.toList
+        			}else{
+        				List(sub) 
+        			}
+        		)
+        )
+        //val filled = filtered
+        val filled = unflattened.toBuffer
         filled.size match{
-          case 0 =>Array()
+          case 0 =>Array()  
           case 1 =>filled.head
           case _ => {
-            val ret = Array.concat(filled:_*)
+            //val ret = Array.concat(filled:_*)
+          	val ret = Array.concat(filled:_*)
+
             //Arrays.sort(ret.asInstanceOf[Array[AnyRef]], comp.asInstanceOf[Comparator[AnyRef]])
             Arrays.sort(ret.asInstanceOf[Array[AnyRef]], new Trie.PrefixComparator[C](comp).asInstanceOf[Comparator[AnyRef]])
-            ret
+            
+            var last : Option[Seq[C]]= None
+          	val filtered = ret.filter{cur =>
+          		val keep = if(last.isDefined){
+          			val equals = last.get == cur.prefix
+          			
+//println("filtering '"+cur.prefix+"' vs '"+last.get+"' = "+equals)          			
+          			! equals
+          		}else true
+          		last = Some(cur.prefix)
+          		keep 
+          	}
+//println("filtered: "+filtered)          	
+            filtered
+//            ret
           }
         }
       }

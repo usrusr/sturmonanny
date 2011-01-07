@@ -12,7 +12,7 @@ Beispiel:
       F6F-3 = -100   
 
       # das gleiche Flugzeug mit loadout 6xhvarap kostet 50 pro Minute:
-      F6F-3_6xhvarap = 50
+      F6F-3_6xhvarap = 50A
 
       # Achtung: in einigen Loadout-Bezeichnungen wird "*" oder "+" verwendet, 
       # dies kann für die Bezeichnung hier leider nicht verwendet werden und ist hier durch "x" (für "*") 

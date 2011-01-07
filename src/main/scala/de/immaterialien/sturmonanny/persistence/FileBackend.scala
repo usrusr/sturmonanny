@@ -192,9 +192,9 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 						" blue: " append (rb.blue.toString) append "\n"
 				  }
 	//println("written to "+f)			
-					log.warning(sw.toString) 
 				}
 				for(w<-writers) w append "end.\n"
+				log.warning(sw.toString) 
 			}catch{
 				case e=> error("failed to write balances to "+f.getAbsolutePath+" "+e.getMessage)
 			}finally {
