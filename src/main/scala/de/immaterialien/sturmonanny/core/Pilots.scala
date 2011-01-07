@@ -11,11 +11,12 @@ import net.liftweb.actor
 class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember with Logging{ 
 	import Pilots._
 
-	
+	def time = server.time
 	case class ClearToFly(pilot:Pilot, deathPauseUntil:Long)
 	override def messageHandler = {
 		case ClearToFly(pilot, deathPauseUntil) => if(deathPauseUntil == pilot.state.deathPauseUntil){
-			server.multi ! new server.multi.ChatTo(pilot.name, "clear for takeoff")
+			//server.multi ! new server.multi.ChatTo(pilot.name, "death pause over")
+			pilot.chat("death pause over")
 		}
 	}
 	override def newElement(name:String) = new Pilot(name)

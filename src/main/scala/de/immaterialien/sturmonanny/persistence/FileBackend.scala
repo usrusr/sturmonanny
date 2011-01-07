@@ -35,6 +35,7 @@ log debug("loading for "+pilot+" " + ret + " from "+map)
 				if(System.currentTimeMillis > (lastSave + (writeInterval*1000))){
 //log debug("save existing "+existing+" vs new "+balanceRed+"/"+balanceBlue+" updated? "+updated )					
 					save({x:String=>log.error("autosave: " + x)})
+					lastSave = System.currentTimeMillis
 				}else{
 //					log.debug("waiting to save "+(System.currentTimeMillis-(lastSave + (writeInterval*1000))) +" ms missing")
 				}
@@ -50,11 +51,28 @@ log debug("loading for "+pilot+" " + ret + " from "+map)
 			// exceptions are ok if we use the default file 
 			error = info  
 		}
-		if( ! new java.io.File(file.get).exists){
-			error("file "+file+" does not exist")
-			error = info
-		}else{
-			for(f <- file)Parser.load(f, map)
+		
+		val files = file.get :: file.get+".bak" :: Nil
+		
+		// load with some (hopefully) smart priorisation between the regular file and the backup
+		val variations = files map { fname =>
+			if( ! new java.io.File(fname).exists){
+				error("file "+file+" does not exist")
+				None
+			}else{
+				val retMap = new mutable.HashMap[String, BalanceRB]
+				val foundEnd = Parser.load(fname, retMap)
+				val quality : Double = (
+					(1d / fname.length.toDouble) + 
+					(if(foundEnd) 1000000d else retMap.size.toDouble)
+				)
+				Some((quality, retMap))
+			}
+		}
+		if( ! variations.isEmpty){
+			val existings = variations.flatten.max(Ordering.Double.on[(Double, _)](_ _1))._2
+			map.clear()
+			map ++= existings
 		}
 	}
 	def close (info:String=>Unit, error:String=>Unit){
@@ -100,9 +118,10 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 //l.warning("failedLine '"+in+"'")				
 			None
 		}
-		
+		lazy val end = "end."
 		lazy val possiblyLine = comment | empty | line //| failedLine
 		//lazy val allLines = repsep(possiblyLine, "\n") ^^ {
+		
 		lazy val allLines = rep(possiblyLine) ^^ {
 			case x => {
 //println("x = "+x);				
@@ -110,7 +129,7 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 			}
 		}
 		
-		def load(fname:String, target:mutable.Map[String, BalanceRB]){
+		def load(fname:String, target:mutable.Map[String, BalanceRB]) = {
 			target.clear()
 			if( ! new java.io.File(fname).exists) {
 				l.error("file not found: "+fname)
@@ -118,28 +137,32 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 //println("read: "+scala.io.Source.fromFile(fname).map((x=>""+x+"")).mkString);			
 			
 			val s = scala.io.Source.fromFile(fname, utf8)
-			
+			var foundEnd = false
 			for(ln<-s.getLines){
+				foundEnd = parseAll(end, ln.trim).successful
 //				println("parsing '"+ln+"'")
-				val pr = parseAll(line, ln.trim)
-				if(pr.successful) {
-//println("[parsed:"+pr.get+"]")						
-					val got = pr.get
-					if(got.isDefined) {
-						val res = got.get
-//println("parse success: "+res)						
-						target += res 
+				if( ! foundEnd){
+					val pr = parseAll(line, ln.trim)
+					if(pr.successful) {
+	//println("[parsed:"+pr.get+"]")						
+						val got = pr.get
+						if(got.isDefined) {
+							val res = got.get
+	//println("parse success: "+res)						
+							target += res 
+						}else{
+							l.warning("ignoring line   '"+ln+"'")
+						}
 					}else{
-						l.warning("ignoring line   '"+ln+"'")
+						
+						l.warning("failed to parse line '"+ln+"'")
 					}
-				}else{
-					l.warning("failed to parse line '"+ln+"'")
 				}
 			}
-
+			foundEnd
 		}
 	}
-	private object Serializer { import java.io._
+	private object Serializer extends util.Log { import java.io._
 //		val error : String=>Unit = l error _
 
 		def write(fname:String, input:mutable.Map[String, BalanceRB], error:String=>Unit){ 
@@ -154,16 +177,25 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 //println("writing... "+f)			
 			val fos = new FileOutputStream(fname)
 			val ow = new BufferedWriter(new OutputStreamWriter(fos, utf8))
-			try for(item<-input){
-				val rb = item._2
-				var pilot = item._1
-				pilot = pilot.replace("\\", "\\\\")
-				pilot = pilot.replace("\"", "\\\"")
-				ow append "\"" append pilot append "\" =" append 
-					" red: " append (rb.red.toString) append
-					" blue: " append (rb.blue.toString) append "\n"
-//println("written to "+f)			
-			} catch{
+			val sw = new StringWriter append "new storage.cfg: \n"
+			val writers = ow :: sw :: Nil 
+			
+			try{ 
+				for(item<-input){
+					val rb = item._2
+					var pilot = item._1
+					pilot = pilot.replace("\\", "\\\\")
+					pilot = pilot.replace("\"", "\\\"")
+					for(w<-writers) {
+						w append "\"" append pilot append "\" =" append 
+						" red: " append (rb.red.toString) append
+						" blue: " append (rb.blue.toString) append "\n"
+				  }
+	//println("written to "+f)			
+					log.warning(sw.toString) 
+				}
+				for(w<-writers) w append "end.\n"
+			}catch{
 				case e=> error("failed to write balances to "+f.getAbsolutePath+" "+e.getMessage)
 			}finally {
 				try ow.close

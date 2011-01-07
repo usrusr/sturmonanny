@@ -166,8 +166,8 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 				^?  ( stringToState,"'"+_+"' is not a known pilot state!" )
 			) ^^ { 
 			  case name ~ _ ~ state => {
-			    //pilotNameParser.learnNewName(name)
-			  	pilotNameParser.add(name, name)
+//			    pilotNameParser.learnNewName(name)
+			  	pilotNameParser.add(name)
 			    PilotMessage(name, state)
 			  }
 			}
@@ -204,7 +204,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	    x match{
 	    	case channelRegex(name) => {
 //	    	  pilotNameParser.learnNewName(name) 
-	    		pilotNameParser.add(name, name)
+	    		pilotNameParser.add(name)
 	    	 
 	    	  PilotMessage(name, Is.Joining)
 	    	} 
@@ -216,7 +216,26 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	  }
 	}
  
-	lazy val pilotNameParser = new TrieMapParser[String]
+//	lazy val pilotNameParser = new TrieMapParser[String] {
+//		def learnNewName(k:String){
+//			val cleaned = new String(k)
+//			add(cleaned, cleaned)
+//		}
+//	}
+	
+	lazy val pilotNameParser = new TrieParser{
+		
+		override def add(k:Seq[Char]){
+			val cleaned = new String(k.toArray)
+			add(cleaned)
+			
+debug("pilot name parser state after adding '"+k+"': "+trie.toString)
+			
+		}
+	}.map(seq=>
+		new String(seq.toArray)
+	) 
+	
 	
 //	/**
 //     * a dynamic token set (with recently-used timeout) that happens to 
@@ -337,8 +356,9 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	 		    ()
  			}
  			for(pmsg<-ret) {
- 				//pilotNameParser.learnNewName(pmsg.who)
- 				pilotNameParser.add(pmsg.who, pmsg.who)
+// 				pilotNameParser.learnNewName(pmsg.who)
+ 				pilotNameParser.add(pmsg.who)
+// 				pilotNameParser.add(pmsg.who, pmsg.who)
  			}
 //debug("pilot line matched to "+ret)
  			ret
@@ -401,11 +421,11 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 		lazy val user_cheating 	= selectLine("""user_cheating"""	, Is.Unknown)
 		lazy val user_cheatkick = selectLine("""user_cheatkick"""	, Is.Leaving)
 		lazy val gore_kill 		= selectLine("""gore_kill"""		, Is.Unknown)
-		lazy val gore_killaaa 	= selectLine("""gore_killaaa"""		, Is.Dying)
-		lazy val gore_gun 		= selectLine("""gore_gun"""			, Is.Dying)
-		lazy val gore_tank 		= selectLine("""gore_tank"""		, Is.Dying)
-		lazy val gore_ship 		= selectLine("""gore_ship"""		, Is.Dying)
-		lazy val gore_ai 		= selectLine("""gore_ai"""			, Is.Dying)
+		lazy val gore_killaaa 	= selectLine("""gore_killaaa"""		, Is.Crashing) // Is.Dying) replaced because it may trigger even after a successful bailout
+		lazy val gore_gun 		= selectLine("""gore_gun"""			, Is.Crashing) // Is.Dying) replaced because it may trigger even after a successful bailout
+		lazy val gore_tank 		= selectLine("""gore_tank"""		, Is.Crashing) // Is.Dying) replaced because it may trigger even after a successful bailout
+		lazy val gore_ship 		= selectLine("""gore_ship"""		, Is.Crashing) // Is.Dying) replaced because it may trigger even after a successful bailout
+		lazy val gore_ai 		= selectLine("""gore_ai"""			, Is.Crashing) // Is.Dying) replaced because it may trigger even after a successful bailout
 		lazy val gore_sawwing 	= selectLine("""gore_sawwing"""		, Is.Unknown)
 		lazy val gore_blowwing 	= selectLine("""gore_blowwing"""	, Is.Unknown)
 		lazy val gore_blowup 	= selectLine("""gore_blowup"""		, Is.Unknown)
@@ -426,11 +446,11 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 		lazy val gore_swim 		= selectLine("""gore_swim"""		, Is.Crashing)
 		lazy val gore_pkonchute = selectLine("""gore_pkonchute"""	, Is.Unknown)
 		lazy val gore_spins 	= selectLine("""gore_spins"""		, Is.Crashing)
-		lazy val gore_spinfatal = selectLine("""gore_spinfatal"""	, Is.Dying)
+		lazy val gore_spinfatal = selectLine("""gore_spinfatal"""	, Is.Crashing) // Is.Dying) replaced because it may trigger even after a successful bailout
 		lazy val gore_rocketed 	= selectLine("""gore_rocketed"""	, Is.Unknown)
 		lazy val gore_bombed 	= selectLine("""gore_bombed"""		, Is.Unknown)
 		lazy val gore_walkaway 	= selectLine("""gore_walkaway"""	, Is.Crashing)
-		lazy val gore_burnedcpt = selectLine("""gore_burnedcpt"""	, Is.Dying)
+		lazy val gore_burnedcpt = selectLine("""gore_burnedcpt"""	, Is.Crashing) // Is.Dying) replaced because it may trigger even after a successful bailout
 		lazy val gore_hitouttac = selectLine("""gore_hitouttac"""	, Is.Unknown)
 		lazy val gore_vulcher 	= selectLine("""gore_vulcher"""		, Is.Unknown)
 

@@ -171,11 +171,11 @@ private class MisRender(
   def sequence(in: BufferedImage) {
 //    veil()
 //    veil()
-	  hatch(conf.front.hatchdistance.apply) 
-	  front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
-    units()
-    airfields()
-//  	wings()
+//	  hatch(conf.front.hatchdistance.apply) 
+//	  front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
+//    units()
+//    airfields()
+  	wings()
   }
   
   def sideForGame(gameCoords:(Double, Double)):Int={
@@ -211,11 +211,10 @@ private class MisRender(
   	}
   	
   	for((name, wing)<-model.wings){
-//	println("   ---> "+name)						
+println("wing "+name)  		
   		for(wp<-wing.path) wp match {
 	  		case gattack : WingGroundAttack => {
 	  			if(debugMode){
-//	println("gattack "+name)						
 	  				ig2.setColor(awt.Color.cyan)
 						for(side <- wing.side){
 							if(side==1) ig2.setColor(awt.Color.red)
@@ -225,6 +224,16 @@ private class MisRender(
 	  				val radius = 9
 	  				ig2.drawOval(gx-radius, gy-radius,(2*radius),(2*radius))
 	//  				if()
+	  			}
+	  			if(Math.random < (conf.wings.probabilities.groundAttack.apply.toDouble / 100D)) {
+	  				
+	  				val (px, py) = gameToImage(gattack)
+println("known gattack at "+px+" "+py)	  				
+	  				for(side <- wing.side){
+	  					drawObject(px, py, 1, side, 1, GroundClass.WingBomb)
+	  				}
+	  			}else{
+println("surprise gattack")	  				
 	  			}
 	  		}
 	  		case _ => 

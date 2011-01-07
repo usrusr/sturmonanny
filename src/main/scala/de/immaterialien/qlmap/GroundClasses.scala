@@ -121,7 +121,8 @@ object GroundClass extends Enumeration with Log {
  val Unidentified = GC (1, "Unidentified")
  val ChiefMove = GC (0, "ChiefMove")
  val ChiefStand = GC (0, "ChiefStand")
-  
+ val WingBomb = GC (0, "WingBomb")
+ 
  implicit def vtogc(v: Value): GC = v.asInstanceOf[GC]
 
   def parse(in: String): Value = if (in == null) Unidentified else try {

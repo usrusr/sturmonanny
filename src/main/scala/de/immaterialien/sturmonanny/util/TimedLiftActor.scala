@@ -43,7 +43,7 @@ import net.liftweb.util._
  * @author Ulf Schreiber
  */
 
-trait TimedLiftActor extends LiftActor { 
+trait TimedLiftActor extends LiftActor with TimeHolder{ 
 //with Logging {
 //loglevel=LiftLogLevels.Trace
 	def time : TimeSource  

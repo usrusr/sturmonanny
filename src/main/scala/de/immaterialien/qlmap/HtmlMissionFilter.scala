@@ -5,11 +5,13 @@ import scala.xml._
 class HtmlMissionFilter(args: String) extends javax.xml.ws.Provider[File] with Log {
   val mapBase = new MapBase(new File(args))
   val groundClasses = new GroundClasses(mapBase.folder.getAbsolutePath )
+  def afterDone = ()
   override def invoke(file: File): File = {
 
     val thread = new Thread("recon " + file.getName) {
       override def run {
       	inline(file)
+      	afterDone
       }
     }
     thread.setPriority(Thread.MIN_PRIORITY)

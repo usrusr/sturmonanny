@@ -49,4 +49,9 @@ class MapConf(private val fname:String) extends ConfigurationSchema(fname) with 
 		object depth extends Field(100, "chief visibility, in % of default chief visibility depth (higher: deeper recon)")
 		object moveThreshold extends Field(10, "lower: prefer arrow icon over battle icon")
 	}
+	object wings extends Group {
+		object probabilities extends Group { doc = "probabilities, independent of depth"
+			object groundAttack extends Field(0, "probability of a planned AI ground attack to be known")
+		}
+	}
 }

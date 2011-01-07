@@ -6,7 +6,7 @@ import de.immaterialien.sturmonanny.util.trie._
 class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) extends RegexParsers with TrieParsers with Log {
 	
 	override val whiteSpace = """[ \t]+""".r
-	
+	 
 	lazy val eol = rep(opt(whiteSpace) ~ (
 //			new Parser[Unit]{
 //				override def apply(in:Input)={
@@ -184,6 +184,19 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
         Failure("expected '"+str+"' but found '"+found+"'", in)
     }
   }
+  def matcher(reg:String):Parser[scala.util.matching.Regex.Match] = matcher(reg.r)
+  def matcher(reg:scala.util.matching.Regex):Parser[scala.util.matching.Regex.Match] = new Parser[scala.util.matching.Regex.Match] {
+    def apply(in: Input) = {
+    		val off = in.offset
+    		(reg findPrefixMatchOf (in.source.subSequence(off, in.source.length))) match {
+	        case Some(matched) =>
+	          Success(matched, 
+              in.drop(matched.end))
+	        case None =>
+	          Failure("no match for "+reg+" ", in)
+	      }
+    }
+  }
   def direct(reg:scala.util.matching.Regex):Parser[String] = new Parser[String] {
     def apply(in: Input) = {
     		val off = in.offset
@@ -239,19 +252,32 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
   LANDING 51899.93 249354.27 0 0 &0
   
   
+DCG BUG???                               ||
+  NORMFLY 80404.32 216200.90 3000.0 400.00II_JG5_230 2 &0  
+  
   NORMFLY 16044.57 270981.51 500.0 40.00   D &0
   	 */
-    ("\\S+".r ~ double ~ double ~ double ~ double ~ """([^&\s]+(\s+\d+)?\s+)?&""".r ~ direct("\\d".r) <~ eol) ^^ {
-    	case "TAKEOFF"~x~y~height~speed~targetOpt~side => {wing=>
+    //("\\S+".r ~ double ~ double ~ double ~ doubleNoBlank ~ direct("""\s*([^&\s]+(\s+\d+)?\s+)?&""".r) ~ direct("\\d".r) <~ eol) ^^ {
+  	("\\S+".r ~ double ~ double ~ double 
+  			~ (matcher("""(-?(?:\d+|(?:\d*\.\d+)))\s*([^&\s]+(?:\s+\d+)?\s+)?&""") ^^^ { mtch:scala.util.matching.Regex.Match =>
+  				val speed = mtch.group(1).toDouble
+  				val targetStr = mtch.group(2)
+  				val targetOpt = if(targetStr!=null && ! targetStr.isEmpty) Some(targetStr) else None
+  				(speed, targetOpt)
+  			})
+  			//~ doubleNoBlank ~ direct("""\s*([^&\s]+(\s+\d+)?\s+)?&""".r)
+  			
+  			~ direct("\\d".r) <~ eol) ^^ {
+    	case "TAKEOFF"~x~y~height~speedTargetOpt~side => {wing=>
     		wing.waypoint(MisModel.WingTakeoff(x,y))
     	}
-    	case "LANDING"~x~y~height~speed~targetOpt~side => {wing=>
+    	case "LANDING"~x~y~height~speedTargetOpt~side => {wing=>
     		wing.waypoint(MisModel.WingLanding(x,y))
     	}    	
-    	case "GATTACK"~x~y~height~speed~targetOpt~side => {wing=>
+    	case "GATTACK"~x~y~height~speedTargetOpt~side => {wing=>
     		wing.waypoint(MisModel.WingGroundAttack(x,y))
     	}
-    	case wpType~x~y~height~speed~targetOpt~side => {wing=>
+    	case wpType~x~y~height~speedTargetOpt~side => {wing=>
     		wing.waypoint(MisModel.Waypoint(x,y))
     	}
     }
@@ -320,7 +346,10 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
     """-?\d+\s+""".r ^^ (_.trim toInt)
   }
   lazy val double: Parser[Double] = {
-    """-?(\d+|(:?\d*\.\d+))\s+""".r ^^ (_.trim toDouble)
+    """-?(\d+|(?:\d*\.\d+))\s+""".r ^^ (_.trim toDouble)
+  }
+    lazy val doubleNoBlank: Parser[Double] = {
+    """-?(\d+|(?:\d*\.\d+))""".r ^^ (_.trim toDouble)
   }
   lazy val iniInfo: Parser[Unit] = {
     rep(("\\s*MAP\\s".r ~> """\S+""".r <~ eol) ^^ {

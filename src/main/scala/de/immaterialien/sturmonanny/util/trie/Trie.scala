@@ -16,6 +16,17 @@ import java.util.{Comparator, Arrays}
     }
     protected def toStringComparator[C] = toStringComparator_.asInstanceOf[Comparator[C]]
     
+    object TrieNode {
+    	def default[T : Manifest]:Array[T] = Array.empty[T] 
+    	def apply[C,V](prefix : Seq[C], value:Option[V], rests_ :Array[TrieNode[C,V]]) : Trie.TrieNode[C,V] = {
+//    		val pl = prefix_.toList
+//    		val prefix = prefix_.toArray
+    		val cleanedOfUnwantedReferences = prefix.toBuffer
+
+    		new TrieNode(cleanedOfUnwantedReferences, value, rests_) 
+    	}
+    }
+    
     protected def seqCompare[C](pl:Iterable[C], pr:Iterable[C], comp:Comparator[C])={
       var lh = pl.headOption
         var rh = pr.headOption
@@ -59,7 +70,7 @@ import java.util.{Comparator, Arrays}
       def prefix : Iterable[C]
     }
 
-    protected[trie] class TrieNode[C,V]  (prefix_ : Seq[C], private val value:Option[V], rests_ :Array[TrieNode[C,V]]) extends Trie.WithPrefix[C] {
+    protected[trie] class TrieNode[C,V] private (prefix_ : Seq[C], private val value:Option[V], rests_ :Array[TrieNode[C,V]]) extends Trie.WithPrefix[C] {
       def prefix:Seq[C] = prefix_
       def rests:Array[TrieNode[C,V]] = rests_
   
@@ -160,10 +171,10 @@ import java.util.{Comparator, Arrays}
         if(index > -1){
           val oldSub = rests(index)
           val newRests = mergeRests(comp, rests, toAdd.rests)
-          val newSub :TrieNode[C,V] = new TrieNode[C,V](toAdd.prefix, toAdd.value , newRests)
+          val newSub :TrieNode[C,V] = TrieNode[C,V](toAdd.prefix, toAdd.value , newRests)
           val newArray = rests.clone
           newArray.update(index, newSub)
-          new TrieNode[C,V](prefix_, value, newArray)
+          TrieNode[C,V](prefix_, value, newArray)
         }else {
           val insertion = (index * -1)-1
           if( // identify "insert" case
@@ -181,14 +192,14 @@ import java.util.{Comparator, Arrays}
                   || (rests(insertion).prefix.startsWith(toAdd.prefix.take(1)))
               )
             ){
-            val newSub :TrieNode[C,V] = new TrieNode[C,V](toAdd.prefix.toBuffer, toAdd.value, Array())
+            val newSub :TrieNode[C,V] = TrieNode[C,V](toAdd.prefix.toBuffer, toAdd.value, Array())
             
             val before = rests.take(insertion)
             val mid = Array(newSub)
             val after = rests.takeRight(rests.size-insertion)
             
             val newArray = Array.concat[TrieNode[C,V]](before, mid, after)
-            new TrieNode[C,V](prefix_, value, newArray)
+            TrieNode[C,V](prefix_, value, newArray)
           }else{
             val editIndex = if(insertion>0 && rests(insertion-1).prefix.startsWith(toAdd.prefix.take(1))){
               insertion-1
@@ -208,10 +219,10 @@ import java.util.{Comparator, Arrays}
                   (editChild.prefix, editChild.value, editChild.rests, toAdd.prefix, toAdd.value, toAdd.rests)
             
             val edited = if(longer.startsWith(shorter)){
-              val newLonger = new TrieNode[C,V](longer.drop(shorter.length).toBuffer, longerVal, longerRest)
-              //val newShorter = new TrieNode[C,V](shorter, shorterVal, mergeRests(comp, shorterRest, Array(newLonger)))
+              val newLonger = TrieNode[C,V](longer.drop(shorter.length).toBuffer, longerVal, longerRest)
+              //val newShorter = TrieNode[C,V](shorter, shorterVal, mergeRests(comp, shorterRest, Array(newLonger)))
               //newShorter
-              val newShorter = new TrieNode[C,V](shorter, shorterVal, shorterRest)
+              val newShorter = TrieNode[C,V](shorter, shorterVal, shorterRest)
               val merged = newShorter.add(newLonger, comp)
               merged
               //val newShorter = shorter.add(newLonger, comp)
@@ -220,14 +231,14 @@ import java.util.{Comparator, Arrays}
             }else{
               val zipped = shorter.zip(longer)
               val prefix = zipped.takeWhile((xy) => xy._1==xy._2).map(_ _1).toBuffer
-              val newLonger = new TrieNode[C,V](longer.drop(prefix.length).toBuffer, longerVal, longerRest)
-              val newShorter = new TrieNode[C,V](shorter.drop(prefix.length).toBuffer, shorterVal, shorterRest)
-              val newBranching = new TrieNode[C,V](prefix, None, mergeRests(comp, Array(newLonger), Array(newShorter)))
+              val newLonger = TrieNode[C,V](longer.drop(prefix.length).toBuffer, longerVal, longerRest)
+              val newShorter = TrieNode[C,V](shorter.drop(prefix.length).toBuffer, shorterVal, shorterRest)
+              val newBranching = TrieNode[C,V](prefix, None, mergeRests(comp, Array(newLonger), Array(newShorter)))
               newBranching
             }
             val newArray = rests.clone
             newArray.update(editIndex, edited)
-            new TrieNode[C,V](prefix, value, newArray)
+            TrieNode[C,V](prefix, value, newArray)
           }
         }
       }
@@ -244,15 +255,15 @@ import java.util.{Comparator, Arrays}
    * slow, so you might want to supply something like Ordering.natural yourself for C<Comparable[C]   
    */
   class Trie[C, V] private (size:Int, protected val comp :Comparator[C], private val root:Trie.TrieNode[C,V]) extends Traversable[(Seq[C], V)]{
-    def this(comp :Comparator[C]=Trie.toStringComparator[C])=this(0, comp, new Trie.TrieNode[C,V](List(), None, Array()))
+    def this(comp :Comparator[C]=Trie.toStringComparator[C])=this(0, comp, Trie.TrieNode[C,V](List(), None, Array()))
     def add(k:Seq[C], v:V):Trie[C,V]={
       val increment = if(get(k).isDefined) 0 else 1
-      new Trie(size+increment, comp, root.add(new Trie.TrieNode[C,V](k, Some(v), Array()), comp))
+      new Trie(size+increment, comp, root.add(Trie.TrieNode[C,V](k, Some(v), Array()), comp))
     }
 
     def remove(k:Seq[C]):Trie[C,V]={
       if(get(k).isEmpty) this
-      else new Trie(size-1, comp, root.add(new Trie.TrieNode[C,V](k, None, Array()), comp))
+      else new Trie(size-1, comp, root.add(Trie.TrieNode[C,V](k, None, Array()), comp))
     }
     
     def get(key:Seq[C]):Option[V]={

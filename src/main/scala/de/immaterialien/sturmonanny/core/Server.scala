@@ -7,7 +7,7 @@ import _root_.de.immaterialien.sturmonanny.persistence.BalanceWrapper
   
 
 
-trait Server extends Logging{ 
+trait Server extends Logging with TimeHolder{ 
 	def conf : Configuration 
 	def conf_= (newConf : Configuration)
 	def shutdown

@@ -7,8 +7,8 @@ import net.liftweb.common._
 import net.liftweb.actor._
 import net.liftweb.util._
 
-trait Domain[D <: Domain[D]] extends Logging { self: D =>
-
+trait Domain[D <: Domain[D]] extends Logging with TimeHolder{ self: D =>
+	private val timeout = 24*60*60*1000
   // public interface 
   def create(name: String): Unit = if (!(items contains name)) domainActor ! Create(name)
   def remove(name: String): Unit = domainActor ! Remove(name)
@@ -28,6 +28,7 @@ trait Domain[D <: Domain[D]] extends Logging { self: D =>
       case ForMatches(pat, body) => {
         val founds = find(pat)
         for (found <- founds) {
+        	found.lastAccess = time.now
           //    	    find(pat) map ({found=>
           //debug("found: "+found.name+" applying "+body)    	    		
           body(found)
@@ -41,11 +42,19 @@ trait Domain[D <: Domain[D]] extends Logging { self: D =>
       case Remove(name)=>items remove name
       case Create(name)=>newElement(name)
       case Clear => items.clear
+      case Cleanup => {
+      	val now = time.now
+
+      	items.retain((_,v) => ! v.isTimeout) 
+      }
       case x => debug("unknown in domain " + this.getClass.getSimpleName + ": " + x)
     }
   }
   abstract class Element(val name: String) extends LiftActor with Logging { import java.io._
     val domain = Domain.this
+    protected[Domain] var lastAccess = time.now
+    protected[Domain] def isTimeout = time.now - lastAccess > timeout 
+    
     def toFileName(in:String)={
   		var v1=in
    		v1 = v1.replaceAll("""[^a-zA-Z\d\.\-_=|^@<>]+""", "_")
@@ -112,6 +121,8 @@ System.err.println("might be logging to "+fname);
   private case class Remove(val name:String)
   private case class Create(val name:String)
   private case object Clear
+  private case object Cleanup
+  
   //   	protected object PERSIST
 
 }
