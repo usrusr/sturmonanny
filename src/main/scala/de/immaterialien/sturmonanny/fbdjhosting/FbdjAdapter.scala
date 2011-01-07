@@ -80,7 +80,7 @@ debug("FBDj configuratoin changing!")
 
 		  	  
 		  		//val created = new FbdjHost(conf)
-          nextMissionProvider = new NextMissionProvider(conf) 
+          nextMissionProvider = new NextMissionProvider(server) 
           
 		  	  val created = ContainerPool.getContainer(conf.fbdj.installationPath.apply, conf.fbdj.overridesJar.apply)
 		  	  created.adapterNextMissionProxy = Some(new Provider[File]{

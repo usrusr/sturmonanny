@@ -7,6 +7,7 @@ class MapConf(private val fname:String) extends ConfigurationSchema(fname) with 
 		val outPathString = reconDir.apply
 		
 		log.debug("reconDir:" + outPathString) 
+		
     val out = if (outPathString startsWith ".") {
     	if(fileReference.isDefined){
     		new File(fileReference.get.getParent + File.separator + outPathString)
@@ -32,6 +33,7 @@ class MapConf(private val fname:String) extends ConfigurationSchema(fname) with 
 				   if it is relative then it will be interpreted as relative to mapbase """
 	}
 	object debug extends Field(false, "set to true for full chief route display")
+	object finishMessage extends Field("new recon map available", "message to be sent by TalkingHtmlMissionFilter")
 	object front extends Group {
 		object interpolate extends Field(5){
 			doc="larger: faster, more jaggy lines (roughly: biggest jaggyness-error in pixels)"

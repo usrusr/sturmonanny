@@ -8,11 +8,17 @@ import scala.collection.JavaConversions
 
 object NextMissionProvider 
 	extends de.immaterialien.sturmonanny.util.Log 
-	{   
-  def makeList(conf:core.Configuration):List[Provider[File]] = if(conf==null) Nil else{
-  	 
+	{ 
+	class MessageCallback(server:core.Server) extends Provider[String]{
+		override def invoke(msg:String):String = {
+			server.multi ! new server.multi.ChatBroadcast(msg)
+			msg
+		}
+	}
+  def makeList(conf:core.Configuration, server:core.Server):List[Provider[File]] = if(conf==null) Nil else{
+  	
     val ret = new java.util.TreeMap[Int, Provider[File]]
-    
+    lazy val messageCallback = new MessageCallback(server)
     ret.put(0, new DcgMissionProvider(conf))
     val addons = conf.fbdj.DCG.addons
     val allAddons = addons.map
@@ -37,7 +43,11 @@ object NextMissionProvider
               instance = constructor.newInstance().asInstanceOf[Provider[File]]
             } 
           }
-      	  
+      	  type withCallback = {def setMessageCallback(callback : Provider[String]):Unit}
+          if(instance.isInstanceOf[withCallback]) {
+          	instance.asInstanceOf[withCallback].setMessageCallback(messageCallback)
+          }
+          
       	  if(instance!=null) ret.put(num, instance)
         }catch{
           case x => log.error("could not load mission processor "+actualClass+" for processor position "+num+":", x)
@@ -53,9 +63,10 @@ println("jcl ret "+jclRet+"\n from "+ret)
   }
 }
 
-class NextMissionProvider(private var filters:List[Provider[File]]) extends javax.xml.ws.Provider[File] with util.Log{ 
-	def this(conf:core.Configuration)=this(NextMissionProvider.makeList(conf))
-	def updateConfiguration(conf:core.Configuration) = filters=NextMissionProvider.makeList(conf)
+class NextMissionProvider(private var filters:List[Provider[File]], server:core.Server) extends javax.xml.ws.Provider[File] with util.Log{ 
+	//def this(conf:core.Configuration)=this(NextMissionProvider.makeList(conf))
+	def this(server:core.Server)=this(NextMissionProvider.makeList(server.conf, server), server)
+	def updateConfiguration(conf:core.Configuration) = filters=NextMissionProvider.makeList(conf,server)
 
   override def invoke(oldMissionPath:File):File = {
     var ret = oldMissionPath
