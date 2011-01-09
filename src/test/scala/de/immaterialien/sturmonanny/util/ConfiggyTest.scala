@@ -4,7 +4,8 @@ import net.lag.configgy._
 
 import _root_.de.immaterialien.sturmonanny.core.Configuration
 import _root_.de.immaterialien.sturmonanny.util.configgy._
- 
+import org.junit.Test
+import org.junit.Assert._
 class ConfiggyTest {
   @org.junit.Test
   def test()=ConfiggyTest.main(null)
@@ -21,5 +22,8 @@ object ConfiggyTest {
     println("game.refund after "+(c.game.refund) ) 
     println("game.refund after "+(0  + c.game.refund.apply) )  
               println("parsed \n"+c)
+              
+    val pimp = c.fbdj.DCG.addonArguments("de_immaterialien_sturmonanny_dcg_PimpMyBornPlace")              
+    assertTrue(pimp.startsWith(" "))
   }
 }

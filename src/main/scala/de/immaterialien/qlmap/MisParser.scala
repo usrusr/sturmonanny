@@ -27,7 +27,7 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
   log debug (" reading " + misFile.getAbsolutePath + " -> " + parseResult)
   file.close
 
-  lazy val fileParser: Parser[Unit] = { 
+  lazy val fileParser: Parser[Unit] = { "\\s*".r  ~> 
     rep((iniLine("MAIN") ~> iniInfo) | 
         (chiefWaypoints) |
         (wingDefinition) | 
@@ -44,7 +44,7 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
 
   def iniLine(what: String): Parser[Unit] = {
     "[" ~> direct(what) <~ direct("]") ~ eol^^ {case x=>
-//println("ini["+ x + "]")    	
+println("ini["+ x + "]")    	
     	()
     }
   }
@@ -53,7 +53,9 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
 //  lazy val newLine: Parser[Unit] = ("\r\n" | "\n\r" | "\n") ^^^ ()
 
   lazy val iniLine: Parser[Unit] = {
-    "[" ~> "[^\\]]+".r <~ "]"~ eol ^^^ ()
+    "[" ~> "[^\\]]+".r <~ "]"~ eol ^^ (x=>
+println("unknown ini["+ x + "]")     		
+    )
   }
   lazy val anyLine: Parser[Unit] = {
     ("[^\\[].+".r)~ eol ^^^ ()
@@ -82,7 +84,12 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
     rep(bornPlace) ^^^ ()
   }
   lazy val bornPlace: Parser[Unit] = {
-    ("""\s*""".r ~> int ~ double ~ double ~ double)<~ eol ^^ {
+    ("""\s*""".r ~> int ~ double ~ double ~ double)<~ 
+    (
+    		//"""\s+[^\r\n]+""".r ~
+    		opt(rep(double)) ~
+    		eol
+    ) ^^ {
       case a ~ h ~ x ~ y => {
         out.bornPlace(a, x, y)
         out.airfield(a, x, y)
@@ -127,7 +134,7 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
     ((
     		"["~>"""([^\]\s_]+_)+Road""".r<~"]" ~ eol
     ) ~ 
-     (chiefWaypoint <~ int ~ int ~ double  ~ eol) ~ opt(rep(chiefWaypoint <~ eol))
+     (chiefWaypoint ) ~ opt(rep(chiefWaypoint))
     )^^ {
       case nameparts ~ first ~ rest  => {
 //println("chiefWaypoints abc: "+nameparts+" / "+first+ " / "+rest)      	
@@ -143,7 +150,7 @@ class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) 
 //    }
   }
   lazy val chiefWaypoint : Parser[(Double, Double)] = {
-    (double ~ double ~ double) ^^ {case x~y~_ => (x,y)}
+    (double ~ double ~ double <~ opt(int ~ int ~ double)  ~ eol) ^^ {case x~y~_ => (x,y)}
   }
 
   lazy val wingWaypoints : Parser[Unit] = {
@@ -343,13 +350,18 @@ DCG BUG???                               ||
   }
 
   lazy val int: Parser[Int] = {
-    """-?\d+\s+""".r ^^ (_.trim toInt)
+    """-?\d+[ \t]*""".r ^^ (_.trim toInt)
   }
   lazy val double: Parser[Double] = {
-    """-?(\d+|(?:\d*\.\d+))\s+""".r ^^ (_.trim toDouble)
+    //"""-?(\d+|(?:\d*\.\d+))\s+""".r ^^ (_.trim toDouble)
+  	"""-?(?:(?:\d*\.\d+)|\d+)[ \t]*""".r ^^ 
+  	(_.trim toDouble)
+//  	{x=> println("double("+x+")"); x.trim toDouble}
   }
     lazy val doubleNoBlank: Parser[Double] = {
-    """-?(\d+|(?:\d*\.\d+))""".r ^^ (_.trim toDouble)
+    //"""-?(\d+|(?:\d*\.\d+))""".r ^^ (_.trim toDouble)
+    """-?(?:(?:\d*\.\d+)|\d+)""".r ^^ (_.trim toDouble)
+    
   }
   lazy val iniInfo: Parser[Unit] = {
     rep(("\\s*MAP\\s".r ~> """\S+""".r <~ eol) ^^ {

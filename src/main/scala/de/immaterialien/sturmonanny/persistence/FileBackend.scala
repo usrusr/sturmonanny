@@ -66,11 +66,14 @@ log debug("loading for "+pilot+" " + ret + " from "+map)
 					(1d / fname.length.toDouble) + 
 					(if(foundEnd) 1000000d else retMap.size.toDouble)
 				)
-				Some((quality, retMap))
+				Some((quality, retMap, fname))
+				
 			}
 		}
 		if( ! variations.isEmpty){
-			val existings = variations.flatten.max(Ordering.Double.on[(Double, _)](_ _1))._2
+			val existingsTuple = variations.flatten.max(Ordering.Double.on[(Double, _, _)](_ _1))
+			val existings = existingsTuple._2
+log.debug("read storage from "+existingsTuple._3+" : \n"+existings) 			
 			map.clear()
 			map ++= existings
 		}
@@ -140,15 +143,15 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 			var foundEnd = false
 			for(ln<-s.getLines){
 				foundEnd = parseAll(end, ln.trim).successful
-//				println("parsing '"+ln+"'")
+				println("parsing '"+ln+"'")
 				if( ! foundEnd){
 					val pr = parseAll(line, ln.trim)
 					if(pr.successful) {
-	//println("[parsed:"+pr.get+"]")						
+	l.debug("[parsed:"+pr.get+"]")						
 						val got = pr.get
 						if(got.isDefined) {
 							val res = got.get
-	//println("parse success: "+res)						
+	l.debug("parse success: "+res)						
 							target += res 
 						}else{
 							l.warning("ignoring line   '"+ln+"'")
@@ -159,6 +162,7 @@ object FileBackend extends util.Log { import scala.util.parsing.combinator._
 					}
 				}
 			}
+l.debug("found end = "+foundEnd+" in "+fname)			
 			foundEnd
 		}
 	}

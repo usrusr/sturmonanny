@@ -1,12 +1,14 @@
 package de.immaterialien.sturmonanny.dcg
 
+
 import de.immaterialien.sturmonanny
 import scala.util.parsing.combinator._
 import sturmonanny.util._
 import java.io._
 import scala.collection._
 
-class AllPlanesEverywhere(args: String) extends javax.xml.ws.Provider[File] with Log {
+//class AllPlanesEverywhere(args: String) extends javax.xml.ws.Provider[File] with Log {
+class AllPlanesEverywhere(args: String) extends DoNothingMisRewriter(args){
   override def invoke(file: File): File = {
 
     val g = new AllPlanesEverywhere.Gatherer
@@ -35,24 +37,26 @@ class AllPlanesEverywhere(args: String) extends javax.xml.ws.Provider[File] with
       "")
 
     log debug "" + pr1
-    val out = new File(file.getParent, file.getName + ".flat.mis")
+    val out = new File(file.getParent, file.getName.dropRight(4) + "."+intermediateName+".mis")
+    if(out.exists) out.delete
     val w = new FileWriter(out)
     g.writer = Some(w)
-    val f2 = new FileReader(file)
+    val f2 = new FileReader(file) 
     val pr2 = g.parseAll(g.fileParser, f2)
     f2.close
     w.close
     log debug "" + pr2
     out
     
-    val bak = new File(file.getParent, file.getName + ".preflatten")
+    val bak = new File(file.getParent, file.getName + ".pre."+intermediateName)
+    if(bak.exists) bak.delete
     file.renameTo(bak)
     out.renameTo(file)
     file
   }
 }
 
-object AllPlanesEverywhere extends Log {
+object AllPlanesEverywhere {
   /**
    * will make two passes: 
    * first with writer = None gathering info in the two maps
@@ -60,64 +64,20 @@ object AllPlanesEverywhere extends Log {
    * third with writer , gathering in dromesToSides 
    * @author ulf
    */
-  protected class Gatherer extends RegexParsers {
-    case object kept extends Kept
-    trait Kept
-    implicit def multipleKepts(ks: Seq[Kept]): Kept = kept
-    implicit def seqKepts(k1: ~[Kept, Kept]): Kept = kept
-
-    override def skipWhitespace = false
+  protected class Gatherer extends DoNothingMisRewriter.Gatherer {
     val dromesToSides = new mutable.ArrayBuffer[Int]
-    //    val dromesToPlanes = new mutable.HashMap[Int, mutable.Set[String]]
     val dromesToPlanes = new mutable.ArrayBuffer[List[String]]
     /**
      * will be populated between first and second pass 
      */
     val sideToPlanes = new mutable.HashMap[Int, mutable.Set[String]]
-    var writer: Option[Writer] = None
 
-    def pass[T](in: T): T = {
-      writer map (_ append in.toString)
-      in
-    }
-    def keep(in: String): Kept = {
-      writer map (_ append in)
-      kept
-    }
-    lazy val fileParser: Parser[Kept] = {
-      rep((iniLine("BornPlace") ~> bornPlaces) | (iniLine ~ rep(anyLine)) | "\\z".r
-        //) ~ "$".r  ^^^ kept
-		) ~ (o ~ "\\z?".r) ^^^kept
-    }
-
-    def iniLine(what: String): Parser[Kept] = {
-      o ~> ("[" ~> what <~ "]") ^^ (s => keep("[" + s + "]"))
-    }
-    def k(what: String): Parser[Kept] = {
-      what ^^ keep
-    }
-
-    lazy val stringLine: Parser[String] = ("\r\n" | "\n\r" | "\n")
-    lazy val nl: Parser[Kept] = o ~> (stringLine ^^ keep)
-    //    lazy val nl: Parser[Kept] = w
-
-    lazy val iniLine: Parser[Kept] = {
-      o ~> ("[" ~> "[^\\]]+".r <~ "]") ^^ (s => keep("[" + s + "]"))
-    }
-    lazy val anyLine: Parser[Kept] = {
-      o ~> ("[^\\[].*".r ^^ keep)
-    }
-    lazy val bornPlaces: Parser[Kept] = {
-      rep(bornPlace) ~
-        rep(o ~> aerodrome) ^^^
-        kept
-    }
-    lazy val aerodrome: Parser[Kept] = {
-      (("[BornPlace" ~> int <~ "]") ~
+    override lazy val aerodrome: Parser[Kept] = {
+      (o~> ("[BornPlace" ~> int <~ "]") ~
         rep("""\s*[^\[\s]\S*""".r )) ^^ {
         case number ~ planes => {
           writer map { w =>
-            w append ("[BornPlace" + number + "]\r\n")
+            w append ("\r\n[BornPlace" + number + "]\r\n")
             //            
             val side = dromesToSides(number)
             val sp = sideToPlanes.get(side)
@@ -136,10 +96,8 @@ object AllPlanesEverywhere extends Log {
         }
       }
     }
-    lazy val bornPlace: Parser[Kept] = {
-      (o ~> keepBornPlace ~ w ~ keepDouble ~ w ~ keepDouble ~ w ~ keepDouble) ^^^ kept
-    }
-    lazy val keepBornPlace: Parser[Kept] =
+
+    override lazy val bornPlaceSide: Parser[Kept] =
       int ^^
         { side =>
           if (writer isEmpty) {
@@ -149,16 +107,5 @@ object AllPlanesEverywhere extends Log {
             keep(side.toString)
           }
         }
-    lazy val int: Parser[Int] = {
-      """-?\d+""".r ^^ (_.trim toInt)
-    }
-    lazy val keepDouble: Parser[Kept] = {
-      """-?(\d+|(:?\d*\.\d+)?)""".r ^^ keep
-    }
-    lazy val double: Parser[Double] = {
-      """-?(\d+|(:?\d*\.\d+)?)""".r ^^ (_.trim toDouble)
-    }
-    lazy val w: Parser[Kept] = whiteSpace ^^ keep
-    lazy val o: Parser[Kept] = "\\s*".r ^^ keep
   }
 }

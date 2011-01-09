@@ -23,7 +23,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   val timeout = 5000
   object stateFilter extends StateFilter(this)
   def time = server.time
-
+ 
   def this(il2port: Int, scport: Int) = this("127.0.0.1", il2port, scport)
   def this(conf: Configuration) = this(conf.server.host.apply, conf.server.il2port.apply, conf.server.consoleport.apply)
   override def updateConfiguration {
@@ -352,6 +352,8 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   var il2out: Option[PrintWriter] = None
   var il2in: Option[Reader] = None
 
+
+  
   @volatile
   var promptTime = 0L
 
@@ -483,12 +485,40 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   }
 
   def tryinitialize() = {}
+  Multiplexer.instancesForShutdown.put(this, None)
 }
 object Multiplexer extends Logging {
   case object interrupt
   def daemon(body: => Unit): Then = {
     new Then(body)
   }
+  
+  lazy val instancesForShutdown = {
+  	val ret = java.util.Collections.synchronizedMap(new java.util.WeakHashMap[Multiplexer,Option[Int]])
+  Runtime.getRuntime.addShutdownHook(
+  new Thread("nanny shutdown broadcast"){
+  	override def run { import scala.collection.JavaConversions._
+println("shutdown hook engaged")
+error("shutdown hook engaged")
+  		for(instance <- ret.keySet ;
+  				writer <- instance.il2out
+  				){
+println("shutdown hook writing to: "+writer)
+error("shutdown hook writing to: "+writer)
+
+  			// we omit synchronisation as this is only an optional emergency measure anyways, if something goes wrong we will have terminated soon enough
+  			writer.append("chat sturmonanny disconnecting, might be in active maintenance ALL\n")
+  			writer.flush
+  		}
+println("shutdown hook done")
+error("shutdown hook done")
+  	
+  	}
+  })
+    	
+  	ret
+  }
+
   class Then(body: => Unit) extends Logging {
 
     def then(fin: => Unit): Thread = {

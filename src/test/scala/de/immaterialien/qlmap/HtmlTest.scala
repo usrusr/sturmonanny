@@ -33,7 +33,9 @@ net.lag.configgy.Configgy.configure("log.conf")
 //"src/test/resources/nbmaps/Iasi44194405200.mis", 
 //"src/test/resources/nbmaps/Iasi44194405210.mis",
 
-"src/test/resources/de/immaterialien/qlmap/Iasi44194405011.mis",  			
+//"src/test/resources/de/immaterialien/qlmap/Iasi44194405011.mis",  			
+"src/test/resources/de/immaterialien/sturmonanny/dcg/failedSequence.orig.processed.mis",  			
+
   	"").filter(_.length>0)){
   		val misFile = new java.io.File(mis)
   		filter.inline(misFile) 
