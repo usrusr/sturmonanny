@@ -41,43 +41,45 @@ debug("update balance "+old + " + "+diff)
   def recruitPercents = 100 - recruiterPercents
   def warnPlane(who: String, plane: String, load: Option[String], since: Long, balance: Double, side:Armies.Armies) {
     val multi = server.multi
-    var difference = server.time.currentTimeMillis - since
-    val remaining = (conf.game.planeWarningsSeconds.apply * 1000) - difference
     val loadout = IMarket.Loadout(plane, load)
-    if (remaining < 0) {
-      kick(who, "too much time in rare planes like " + loadout)
-      //			multi ! new multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+loadout)
-    } else {
-      lazy val startPrice = server.market.getPrice(loadout, side.id) * conf.game.startcost.apply
-      val seconds: Long = remaining / 1000
-
-      val ratio = remaining.toDouble / (remaining + difference).toDouble
-      val message = if (ratio > 0.8) {
-        who + ", please fly something more common than a " + loadout
-      } else if (ratio > 0.65) {
-        loadout + " requires " + startPrice + "% but you only have " + balance.toInt + conf.names.currency
-      } else if (ratio > 0.56) {
-        "You can check your " + conf.names.currency + " by chatting \"! balance\" to Server"
-      } else if (ratio > 0.48) {
-        "You can check plane prices by chatting \"! prices\" to Server"
-      } else if (ratio > 0.42) {
-        "Get out of that " + plane + ", " + who + ", we have other plans for it!"
-      } else if (ratio > 0.31) {
-        "You have " + seconds + "s to get out of that " + plane + "!"
-      } else if (ratio > 0.27) {
-        who + ", you are stealing a " + plane + "! You have " + seconds + "s!"
-      } else if (ratio > 0.22) {
-        "You have " + seconds + "s to get out of this " + plane + ", " + who + "!"
-      } else if (ratio > 0.19) {
-        "Are you a traitor, " + who + "? Get out of there ASAP!"
-      } else if (ratio > 0.12) {
-        "The " + plane + " must not fall into enemy hands!"
-      } else if (ratio > 0.08) {
-        "Opening fire on " + who + " in " + seconds + "s!"
-      } else {
-        who + ", if you want to live, jump!"
-      }
-      multi ! new multi.ChatTo(who, message)
+    val startPrice = server.market.getPrice(loadout, side.id) * conf.game.startcost.apply
+    if(startPrice > 0){ 
+	    var difference = server.time.currentTimeMillis - since
+	    val remaining = (conf.game.planeWarningsSeconds.apply * 1000) - difference
+	    if (remaining < 0) {
+	      kick(who, "too much time in rare planes like " + loadout)
+	      //			multi ! new multi.ChatBroadcast(who + " has been kicked: too much time in rare planes like "+loadout)
+	    } else {
+	      val seconds: Long = remaining / 1000
+	
+	      val ratio = remaining.toDouble / (remaining + difference).toDouble
+	      val message = if (ratio > 0.8) {
+	        who + ", please fly something more common than a " + loadout
+	      } else if (ratio > 0.65) {
+	        loadout + " requires " + startPrice + "% but you only have " + balance.toInt + conf.names.currency
+	      } else if (ratio > 0.56) {
+	        "You can check your " + conf.names.currency + " by chatting \"! balance\" to Server"
+	      } else if (ratio > 0.48) {
+	        "You can check plane prices by chatting \"! prices\" to Server"
+	      } else if (ratio > 0.42) {
+	        "Get out of that " + plane + ", " + who + ", we have other plans for it!"
+	      } else if (ratio > 0.31) {
+	        "You have " + seconds + "s to get out of that " + plane + "!"
+	      } else if (ratio > 0.27) {
+	        who + ", you are stealing a " + plane + "! You have " + seconds + "s!"
+	      } else if (ratio > 0.22) {
+	        "You have " + seconds + "s to get out of this " + plane + ", " + who + "!"
+	      } else if (ratio > 0.19) {
+	        "Are you a traitor, " + who + "? Get out of there ASAP!"
+	      } else if (ratio > 0.12) {
+	        "The " + plane + " must not fall into enemy hands!"
+	      } else if (ratio > 0.08) {
+	        "Opening fire on " + who + " in " + seconds + "s!"
+	      } else {
+	        who + ", if you want to live, jump!"
+	      }
+	      multi ! new multi.ChatTo(who, message)
+	    }
     }
   }
 

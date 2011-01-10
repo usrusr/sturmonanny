@@ -128,7 +128,7 @@ debug ("loaded "+loadedOpt)
 				if( ! crashed){
 					val priceMsg = planeLost()
 	    
-					priceMsg.map{msg => 
+					if(verbose) priceMsg.map{msg => 
 					  chat(name+": "+msg+", chat \"! available\"")
 					}
 					flying=false
@@ -190,15 +190,15 @@ println("    definitelyInPlane  ")
 				
 //				if( ! invitation.accept(rawPrice))
 				
-				if(deathPauseUntil>lastPlanePriceCommit && invitation.isEmpty){
+				if(deathPauseUntil>lastPlanePriceCommit&& invitation.isEmpty){
 					// pilot is in death pause, invitations are checked in rules
 					unverify()
 				} else {
 					val myPrice = rawPrice.forPilot(name)
 					
 					
-					if(myPrice>0D && myPrice>balance) {
-						chat(""+myPrice+conf.names.currency+" needed, available "+(balance.value)+conf.names.currency+"")
+					if(myPrice>0.01D && myPrice>balance.value) {
+						chat(""+currency(myPrice)+" needed, available "+currency(balance.value))
 						unverify()
 					}else{
 						verify()
@@ -334,16 +334,22 @@ debug("setting price to in updateLoadout "+newPriceInfo)
 			def applyWarnings(){
 				if( ! planeVerified &&  planeVerifiable && planeNotEmpty && planeNotLostPlane){
 					if(deathPauseUntil>server.time.currentTimeMillis) server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, invites.allInvitationsLine)
-					else  {
-						if(planeWarningSince == 0) planeWarningSince = server.time.currentTimeMillis
-						server.rules.warnPlane(Pilot.this.name, planeName, load, planeWarningSince, balance, currentSide)
+					else if(deathPauseUntil!=0) {
+						tryPlaneVerification
+//					} else  {
+//						if(planeWarningSince == 0) planeWarningSince = server.time.currentTimeMillis
+//						server.rules.warnPlane(Pilot.this.name, planeName, load, planeWarningSince, balance, currentSide)
 					}
 				}
 			}
 			def tryPlaneVerification() {
+				if(deathPauseUntil<server.time.now) deathPauseUntil=0
 				if( planeVerifiable ) {
 					definitelyInPlane()
-					if( ! planeVerified) server.rules.warnPlane(Pilot.this.name, planeName, load, lastPlanePriceCommit, balance, currentSide)					
+					if( ! planeVerified) {
+						if(planeWarningSince == 0) planeWarningSince = server.time.currentTimeMillis
+						server.rules.warnPlane(Pilot.this.name, planeName, load, lastPlanePriceCommit, balance, currentSide)					
+					}
 				}
 			}
 			
@@ -378,7 +384,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 						val ref = refund(pay.what)
 						if(pay.who==name){
 							balance(pi.side) = server.rules.updateBalance(balance(pi.side), ref)
-							chat("ref: "+currency(ref))
+							chat("refund "+currency(ref))
 						}else{
 							domain.forElement(pay.who){ recruiter =>
 								recruiter ! BalanceUpdate(ref, pi.side, "Refund for recruit "+name+": "+currency(ref))

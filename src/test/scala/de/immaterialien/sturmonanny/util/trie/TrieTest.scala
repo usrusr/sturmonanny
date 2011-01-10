@@ -98,12 +98,32 @@ package de.immaterialien.sturmonanny.util.trie
 					p.add("one",1)
 					p.add("two",2)
 					p.add("three",3)
+					p.add("two9",9)					
 					p 
 				}
 			}
 			
 			println("parser: "+ ps.nums.trie)
 
+			val res5 = ps.parseAll(ps.sums, "twoone")
+      println("one  two9two, threethreeone, three two 	one: "+ res5)
+      assertEquals(List(2),res5.get)
+
+
+		  val res7 = ps.parseAll(ps.nums, "two9")
+      println("one  two three: "+ res7)
+      assertEquals(9,res7.get)
+      
+			val res6 = ps.parseAll(ps.nums, "two")
+      println("two"+ res6)
+      assertEquals(2,res6.get)
+      
+      val res4 = ps.parseAll(ps.sums, "one  two9two, threethreeone, three two 	one")
+      println("one  two9two, threethreeone, three two 	one: "+ res4)
+      assertEquals(List(12,7,6),res4.get)
+			
+
+			
 			val res0 = ps.parseAll(ps.nums, "one")
       println("one: "+ res0)
       assertEquals(1,res0.get)
@@ -120,6 +140,9 @@ package de.immaterialien.sturmonanny.util.trie
       val res3 = ps.parseAll(ps.sums, "one  twotwo, threethreeone, three two 	one")
       println("one  twotwo, threethreeone, three two 	one: "+ res3)
       assertEquals(List(5,7,6),res3.get)
+      
+
+      
     }
 
   }

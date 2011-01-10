@@ -5,15 +5,16 @@ import scala.collection.mutable
 
 trait TrieParsers extends Parsers{
 	private class InputWrapper(in:Input) extends Iterable[Elem] {
+		override def headOption = if(in.atEnd) None else Some(in.first)
 		override def iterator : Iterator[Elem] = new Iterator[Elem] {
 			//var cur = in.drop(in.offset)
 			var cur = in
-//println("next "+cur.first+ "in.offset:"+in.offset)				
+println("next "+cur.first+ "in.offset:"+in.offset)				
 			override def hasNext = cur.atEnd
 			override def next = {
 				val ret = cur.first
 				cur = cur.drop(1)
-//println("next "+ret+ "")				
+println("next "+ret+ "")				
 				ret
 			}
 		}
@@ -30,13 +31,13 @@ trait TrieParsers extends Parsers{
 				i=i+1
 			}
 			
-//println("taking "+howmany+" :"+buf)			
+println("taking "+howmany+" :"+buf)			
 			buf
 //			ret
 		}
 		override def drop(howmany:Int)={
 			val ret = new InputWrapper(in.drop(howmany))
-//println("dropping "+howmany+" :")			
+println("dropping "+howmany+" :")			
 			ret
 		}
 	}

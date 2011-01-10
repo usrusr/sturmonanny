@@ -75,19 +75,30 @@ import java.util.{Comparator, Arrays}
       def rests:Array[TrieNode[C,V]] = rests_
   
       
-      private def returnDeeper(deeper:Option[(Seq[C], V)]):Option[(Seq[C], V)]=deeper.map{tailAndValue=>
-        val concatenated : Seq[C] = prefix.toList ::: tailAndValue._1.toList
-        (concatenated, tailAndValue._2)
+      private def returnDeeper(deeper:Option[(Seq[C], V)], longest:Boolean):Option[(Seq[C], V)]={
+      	def localAndDeeper = deeper.map{tailAndValue=>
+	        	val concatenated : Seq[C] = prefix.toList ::: tailAndValue._1.toList
+	        	(concatenated, tailAndValue._2)
+	      	}
+//      	def localValue = Some(prefix, value.get)
+      	if(value.isDefined) {
+      		 if( ! longest || ! localAndDeeper.isDefined) Some(prefix, value.get)
+      		 else localAndDeeper
+      	}else{
+      		localAndDeeper
+      	}
       }
       def find(query:Iterable[C], longest:Boolean, comp : Comparator[C] ):Option[(Seq[C], V)]={
         if( value.isDefined && (query.headOption.isEmpty || ! longest)) {
+val ho=query.headOption
+val ie=ho.isEmpty
           Some(prefix, value.get)
         }else if( value.isDefined && rests.isEmpty) {
           Some(prefix, value.get)
         }else{
           val insertion = binarySearch(query.take(1), comp)
           if(insertion > -1) {
-            returnDeeper(rests(insertion).find(query.drop(1), longest, comp))
+            returnDeeper(rests(insertion).find(query.drop(1), longest, comp), longest)
           } else {
             val invInsertion = (-1 * insertion)-1
             if(insertion == rests.length) {
@@ -102,9 +113,11 @@ import java.util.{Comparator, Arrays}
               val nextBiggerPrefix = nextBigger.prefix.toSeq
               val queryPrefix = query.take(nextLen).toSeq
               if(seqCompare(nextBiggerPrefix, queryPrefix, comp)==0){
-                returnDeeper(nextBigger.find(query.drop(nextLen), longest, comp))
+              	val found = nextBigger.find(query.drop(nextLen), longest, comp)
+                returnDeeper(found, longest)
               }else{
-                None
+              	returnDeeper(None, longest)
+                
               }
             }
           }
