@@ -90,13 +90,14 @@ import java.util.{Comparator, Arrays}
       }
       def find(query:Iterable[C], longest:Boolean, comp : Comparator[C] ):Option[(Seq[C], V)]={
         if( value.isDefined && (query.headOption.isEmpty || ! longest)) {
-val ho=query.headOption
-val ie=ho.isEmpty
+//val ho=query.headOption
+//val ie=ho.isEmpty
           Some(prefix, value.get)
         }else if( value.isDefined && rests.isEmpty) {
           Some(prefix, value.get)
         }else{
-          val insertion = binarySearch(query.take(1), comp)
+        	val q=query.take(1)
+          val insertion = binarySearch(q, comp)
           if(insertion > -1) {
             returnDeeper(rests(insertion).find(query.drop(1), longest, comp), longest)
           } else {
@@ -106,7 +107,7 @@ val ie=ho.isEmpty
               return None
             }
             if(invInsertion >= rests.length){
-              None
+              returnDeeper(None, longest)
             }else{
               val nextBigger = rests(invInsertion)
               val nextLen = nextBigger.prefix.length

@@ -105,9 +105,13 @@ package de.immaterialien.sturmonanny.util.trie
 			
 			println("parser: "+ ps.nums.trie)
 
-			val res5 = ps.parseAll(ps.sums, "twoone")
-      println("one  two9two, threethreeone, three two 	one: "+ res5)
-      assertEquals(List(2),res5.get)
+			val res8 = ps.parseAll(ps.threeNumsSum, "twotwo9two")
+      println("twotwo9two"+ res8)
+      assertEquals(13,res8.get)
+			
+			val res5 = ps.parseAll(ps.sums, "two one two9")
+      println("two one two9: "+ res5)
+      assertEquals(List(12),res5.get)
 
 
 		  val res7 = ps.parseAll(ps.nums, "two9")

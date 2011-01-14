@@ -106,18 +106,20 @@ class FfEventTest {
 			| "MissionEnd" ^^^ Is.MissionEnd
 			| "Crashing" ^^^ Is.Crashing
 			| "Dying" ^^^ Is.Dying
-			| "Killed" ^^^ Is.Killed			
+			| "Killed" ^^^ Is.Killed(0)			
 			| "KIA" ^^^ Is.KIA			
 			| "InFlight" ^^^ Is.InFlight
 			| "LandedAtAirfield" ^^^ Is.LandedAtAirfield
 			| "HitTheSilk" ^^^ Is.HitTheSilk
 			| "Ejecting" ^^^ Is.Ejecting			
 			| ("MissionChanging"~"(" ~> "[^\\)]+".r <~ ")") ^^ {what:String=> Is.MissionChanging(new java.io.File(what))}
-			| ("TakingSeat(" ~> "[^\\)]+".r <~")") ^^ { plane => Is.TakingSeat(plane) } 
+			| ("TakingSeat(" ~> noncomma ~ opt("," ~> ("[^\\)]+".r ^^(_ toInt)) ) <~")") ^^ { 
+				case plane ~ seat => Is.TakingSeat(plane, seat.getOrElse(0))
+				case _ => Is.Ignored
+				} 
 			| ("Loading(" ~> noncomma ~ noncomma ~ double <~")") ^^ { case plane ~load~ fuel => Is.Loading(plane, load, fuel) } 
 			| ("UserState("~>event<~(")")) ^^ {ev=>EventSource.UserState(ev)}
 			| ("Chatting("~>"""[^\r\n]*(?=\)\))""".r <~")") ^^^ Is.Ignored
-//1294170608757:Console(InPlaneForSide(P-51B-NA,Red))
 //			| Loading(Fw-190F-8,1sc5004sc50,0.0)
 		)
 		lazy val side : Parser[Armies.Armies] = (
@@ -125,6 +127,7 @@ class FfEventTest {
 			| ("Blue" ^^^ Armies.Blue)
 			| ("Red" ^^^ Armies.Red)
 		)
+		
 		lazy val double = """\d+(\.\d+)""".r ^^ (_ toDouble)
 		lazy val noncomma = "[^,\\)]*".r <~","
 		lazy val lf = """[\r\n]+""".r 

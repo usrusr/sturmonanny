@@ -64,7 +64,7 @@ object Is {
 	/**
 	 * either coming from refly menu or switching seats inside a plane
 	 */
-  case class TakingSeat(plane : String) extends PilotEvent
+  case class TakingSeat(plane : String, position:Int) extends PilotEvent
   case class Loading(plane : String, weapon:String, fuel:Double) extends PilotEvent
   
  
@@ -77,7 +77,7 @@ object Is {
    	/**
    	 * event log version of died
    	 */
-   	case object Killed extends PilotLost with PlaneLost
+   	case class Killed(seat:Int) extends PilotLost with PlaneLost
     
 
 

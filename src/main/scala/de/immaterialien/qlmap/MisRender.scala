@@ -15,7 +15,7 @@ object MisRender extends Log {
   val containsColumn = """.*Column.*""".r
   val containsTrain = """.*Train.*""".r
   //var debugMode = false
-  def paint(forMission: io.File, model: MisModel, mapBase: MapBase): Option[io.File] = try {
+  def paint(forMission: io.File, model: MisModel, mapBase: MapBase, mapWriter:Option[mutable.Buffer[scala.xml.Elem]]=None): Option[io.File] = try {
     val outputPath = mapBase.configuration.flatMap(_.outPath)
     val sprites: Sprites = new Sprites(Some(mapBase.folder))
     val conf = mapBase.configuration.getOrElse(new MapConf(""))
@@ -45,7 +45,8 @@ object MisRender extends Log {
         ig,
         sprites,
         in.getHeight,
-        in.getWidth
+        in.getWidth,
+        mapWriter
         ).sequence(in)
       val outPath = outputPath.getOrElse(forMission.getParentFile)
       val outFile = new java.io.File(outPath, forMission.getName + "." + format)
@@ -69,7 +70,9 @@ private class MisRender(
   ig2: java.awt.Graphics2D,
   spritesMaker: Sprites,
   ih: Int,
-  iw: Int) {
+  iw: Int,
+  mapWriter:Option[mutable.Buffer[scala.xml.Elem]]
+  ) {
   import MisRender._
 
   val randomize = true && false
@@ -509,6 +512,8 @@ println("surprise gattack")
         val px = rx * iw
         val py = ih - ry * ih
 
+        
+        
         val scale = 0.3D + (math.log(count) * 0.02)
 
         val (who, depth) = whoAndDeepness(rx, ry, 1000)
@@ -517,6 +522,8 @@ println("surprise gattack")
 
           println("chief " + cls+":"+chief.name+ " at " + px + "," + py + " count:" + count + " scale:" + scale)
 
+          if(debugMode) for(xml<-mapWriter) xml += <area shape="circle" coords={px.toInt+","+py.toInt+",10"} title={chief.name} href="#" ></area>
+          
           var lastX = px.toInt
           var lastY = py.toInt
           

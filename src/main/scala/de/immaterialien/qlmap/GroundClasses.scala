@@ -88,7 +88,15 @@ object CsvParser extends RegexParsers with Log {
       for(line<-s.getLines) {
   //println ("in: "+ line )        
         val parsed = parseAll(parser, line)
-        parsed.map(tmp += _).getOrElse(log warn "failed to parse '"+line++"' from "+f.getAbsolutePath)
+        //parsed.map(tmp += _).getOrElse(log warn "failed to parse '"+line++"' from "+f.getAbsolutePath)
+        parsed.map({found=> 
+        	val opt = tmp.get(found _1)
+        		// prefer anything over tanks, as convois contain some flak vehicles which are classified as tanks
+        		if( opt.isEmpty || opt.get == GroundClass.Tank) tmp += found
+        		else {
+        			opt.get   
+        		}
+        }).getOrElse(log warn "failed to parse '"+line++"' from "+f.getAbsolutePath)
       }
     }finally{
       if(stream!=null) try stream.close

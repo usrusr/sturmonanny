@@ -32,8 +32,11 @@ debug("update balance "+old + " + "+diff)
     else if (ret > highest) highest
     else ret
   }
-  def calculateDeathPause: Long = {
-    server.time.currentTimeMillis + (1000 * conf.pilots.deathpenalty.apply)
+  def calculateDeathPause(players:Int): Long = {
+  	val upper = conf.pilots.deathpenalty.apply
+  	val step = conf.pilots.penaltyPerPilot.apply
+  	val duration = if(step>upper) step else math.min(upper, step*players) 
+    server.time.currentTimeMillis + (1000 * duration)
   }
   def recruiterPercents = {
   	math.max(0, math.min(100, conf.recruiting.recruitshare.apply))

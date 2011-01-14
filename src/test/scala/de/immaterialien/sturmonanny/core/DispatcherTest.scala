@@ -2,7 +2,8 @@ package de.immaterialien.sturmonanny.core
 
 import org.junit.Test
 import org.junit.Assert._
-
+import de.immaterialien.sturmonanny.core._
+import scala.util.parsing.combinator._
 
 class DispatcherTest {
 	net.lag.configgy.Configgy.configure("log.conf")
@@ -15,6 +16,71 @@ class DispatcherTest {
      case _ => false
 	  })
 	 }
+
+	@Test  
+	def testSwiss() : Unit ={
+		val d = new LocalizedDispatcher(){
+		  override def conf = new Configuration("default.conf", null)
+		  override def pilotMessageSend(who:String, what:Is.Event) = debug("would have sent to "+who+"<-"+what) 
+		} 
+		d.updateConfiguration
+		
+		
+d.pilotNameParser.add("usrusr")
+d.pilotNameParser.add("ejgr.ost_Irmin")
+d.pilotNameParser.add("mottom")
+d.pilotNameParser.add("EJGr.Ost_yogy")
+d.pilotNameParser.add("II./ZG26-Sashke")
+d.pilotNameParser.add("I./ZG26-Storyteller")
+d.pilotNameParser.add("I./ZG26-swiss")
+d.pilotNameParser.add("I./ZG26-Gelbe6")
+d.pilotNameParser.add("I./ZG26-Fischer-")
+d.pilotNameParser.add("*BG*UVIGI")
+d.pilotNameParser.add("41Sqn_Sunny")
+d.pilotNameParser.add("41Sqn_Rhythm")
+d.pilotNameParser.add("Mad")
+d.pilotNameParser.add("heli3")
+d.pilotNameParser.add("I./ZG15_robtek")
+d.pilotNameParser.add("czerwi41")
+d.pilotNameParser.add("andrewbor")
+d.pilotNameParser.add("I/JG27_Buran")
+d.pilotNameParser.add("III/JG27_Hias")
+d.pilotNameParser.add("Anw./ZG15_Rost")
+d.pilotNameParser.add("II./ZG26-Ruhland")
+d.pilotNameParser.add("II./ZG26-Lafutsch")
+d.pilotNameParser.add("ANW/ZG26-Natoll")
+d.pilotNameParser.add("FritzX")
+d.pilotNameParser.add("FG28_Kodiak")
+d.pilotNameParser.add("FG28_matkenhauser")
+d.pilotNameParser.add("FG28_Peterace")
+d.pilotNameParser.add("JG107_Schall")
+d.pilotNameParser.add("FG28_ERASER")
+d.pilotNameParser.add("Pressler")
+d.pilotNameParser.add("wurzel")
+d.pilotNameParser.add("[URU]statusquo0")
+d.pilotNameParser.add("41Sqn_Banks")
+d.pilotNameParser.add("41Sqn_Gravit")
+d.pilotNameParser.add("I./ZG15_Brecher")
+d.pilotNameParser.add("III/JG27_Flix")
+d.pilotNameParser.add("III/JG27_Lucky")
+d.pilotNameParser.add("EAF310_Thor")
+d.pilotNameParser.add("EAF322_Bob")
+d.pilotNameParser.add("FODA_Spirit")
+d.pilotNameParser.add("6_IAP_Lusky")
+d.pilotNameParser.add("I./ZG26-swiss0")
+		
+d.parse(d.rootLineParser, """Chat: --- Pilot(I./ZG26-swiss) was killed.\n""".stripLineEnd+"\n") match {
+			case d.Success(PilotMessage("I./ZG26-swiss", Is.Dying, _),_) =>
+			case _ => fail("not I./ZG26-swiss")
+		}
+
+val r0 = d.parse(d.rootLineParser, """Chat: --- Pilot(I./ZG26-swiss0) was killed.\n""".stripLineEnd+"\n")match {
+			case d.Success(PilotMessage("I./ZG26-swiss0", Is.Dying, _),_) =>
+			case _ => fail("not I./ZG26-swiss0")
+		}
+	}
+	
+	
 	@Test  
 	def testRegex() : Unit ={
 		val d = new LocalizedDispatcher(){

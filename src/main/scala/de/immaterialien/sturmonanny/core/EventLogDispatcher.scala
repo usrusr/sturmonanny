@@ -267,7 +267,7 @@ println("identified memoed "+memoed)
   lazy val seatOccupied : Parser[PilotMessage] = {
     memorizingPilotNameParser ~ planeAndSeat ~" seat occupied by " ~ memoedName ~ atLocationParser ^^ {
     	case pilot ~ both ~ _ ~ _ ~ at => {
-      	PilotMessage(pilot, Is.TakingSeat(both.plane), at)
+      	PilotMessage(pilot, Is.TakingSeat(both.plane, both.seat), at)
       }
     }
   }
@@ -313,7 +313,7 @@ debug("inflight event "+new Exception)
   lazy val wasKilled : Parser[PilotMessage] = {
     pilotNameParser ~ planeAndSeat ~ " was killed"  ~ atLocationParser ^^ {
       case pilot ~ plane ~ _ ~ at => {
-        PilotMessage(pilot, Is.Killed, at) 
+        PilotMessage(pilot, Is.Killed(plane.seat), at) 
       }
     }
   }  

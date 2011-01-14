@@ -20,9 +20,11 @@ class HtmlMissionFilter(args: String) extends javax.xml.ws.Provider[File] with L
   }
   def inline(file: File){
      val parsed = new MisParser(file, mapBase, groundClasses)
-     val img = MisRender.paint(file, parsed.out, mapBase)
+     val mapWriter = new scala.collection.mutable.ArrayBuffer[Elem]
+     val img = MisRender.paint(file, parsed.out, mapBase, Some(mapWriter))
      //        val img = Some(new File("src/test/resources/Afrika_42194204060.mis.JPG"))
-     for (i <- img) new HtmlUpdater(i, file).update
+     
+     for (i <- img) new HtmlUpdater(i, file, mapWriter).update
 
   }
   override def toString = "html enabled recon renderer at "+args + " ("+mapBase.folder.getAbsolutePath+")"
@@ -39,7 +41,7 @@ object HtmlMissionFilter {
   }
   val commonMissionPrefix = """^(\d*\D*)""".r
 }
-class HtmlUpdater(path: File, mission: File) {
+class HtmlUpdater(path: File, mission: File, mapContent:Seq[Elem]) {
   import HtmlMissionFilter._
   val misFolder = mission.getParentFile 
   val currentMisFilePrefix = commonMissionPrefix.findPrefixOf(mission.getName)
@@ -100,7 +102,15 @@ class HtmlUpdater(path: File, mission: File) {
                 <body>
                   <table>
                     <tr>
-                      <td><img src={ newImage }/></td>
+                      <td>{
+    										if(mapContent.isEmpty) <img src={ newImage } />
+    										else <img src={ newImage } usemap="#mouseover" />
+                      }</td>
+    											{if( ! mapContent.isEmpty){
+    												<map name="mouseover">
+    													{mapContent}
+    												</map>
+													}}
                       <td valign="top" height="100%">
                         { name }<br/>
                         <a href="latest.recon.html" title="jump to latest">{ formatDateTime(mission.lastModified) }</a><br/>

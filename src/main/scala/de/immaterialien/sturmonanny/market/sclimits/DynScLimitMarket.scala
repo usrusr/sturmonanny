@@ -5,9 +5,12 @@ import IMarket._
 import java.io._
 import scala.collection.{mutable, immutable}
 class DynScLimitMarket extends IMarket with Log{ import DynScLimitMarket._
-	val priceFactor = 10D
-	val supplyFactor = 2D // minutes for one SC plane
-	val leftoverWeight = 1D // 1D: inital prices after cycle will be 50:50 derived from leftover and new supply, bigger weight: more leftover,
+//	val priceFactor = 10D
+//	val supplyFactor = 2D // minutes for one SC plane
+	val priceFactor = 100D
+	val supplyFactor = 0.2D // minutes for one SC plane
+
+	val leftoverWeight = 4D // 1D: inital prices after cycle will be 50:50 derived from leftover and new supply, bigger weight: more leftover,
 	val memoryName = "DynScLimitMarket.leftovers.txt"
 
 	var server : Option[Server]=None 

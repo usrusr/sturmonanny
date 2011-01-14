@@ -15,12 +15,43 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 	case class ClearToFly(pilot:Pilot, deathPauseUntil:Long)
 	override def messageHandler = {
 		case ClearToFly(pilot, deathPauseUntil) => if(deathPauseUntil == pilot.state.deathPauseUntil){
-			//server.multi ! new server.multi.ChatTo(pilot.name, "death pause over")
-			pilot.chat("death pause over")
+			//server.multi ! new server.multi.ChatTo(pilot.name, "death penalty over")
+			pilot.chat("death penalty over")
 		}
 	}
+	private var playerCountSince = 0L
+	private var playerCountStateRedBlue = (0,0)
+	/**
+	 * prefer an actual count over tracking enter/leave
+	 * @return
+	 */
+	def roughPlayerCountRedBlue = {
+		val now = server.time.now
+		if(playerCountSince+10000 < server.time.now){
+			val timeout = now - 10000
+			playerCountStateRedBlue = items.values.foldLeft((0,0)){
+				(redBlue, pilot) =>
+				if(pilot.isTimeout(10000) || !pilot.isInstanceOf[Pilot]) redBlue else pilot.asInstanceOf[Pilot].currentSide match {
+				  case Armies.Red => (1 + redBlue._1,redBlue._2) 
+				  case Armies.Blue => (redBlue._1,redBlue._2 + 1)
+				  case Armies.None => (redBlue._1,redBlue._2) 
+				}  
+			}
+		}
+		playerCountStateRedBlue
+	}
+	def roughPlayerCount(sideProvider:SideProvider) = {
+		val rb = roughPlayerCountRedBlue
+	
+		sideProvider.currentSide match {
+				  case Armies.Red => rb._1
+				  case Armies.Blue => rb._2
+				  case _ => rb._1+rb._2
+		}
+	}
+	
 	override def newElement(name:String) = new Pilot(name)
-	class Pilot(override val name : String) extends Pilots.this.Element(name) with SideProvider{
+	class Pilot(override val name : String) extends Pilots.this.Element(name) with SideProvider{ 
 		val balance = Army Var 0D
 //		val refund = Army Var 0D
 //		val invitations = Army Val (new mutable.HashMap[IMarket.Loadout, Pilots.Invitation]())
@@ -35,8 +66,7 @@ debug ("loaded "+loadedOpt)
 		for(loaded <- loadedOpt){
 			balance(Armies.RedSide) = loaded.red
 			balance(Armies.BlueSide) = loaded.blue
-			val currency = conf.names.currency
-			chat("your balance: "+loaded.red.toInt+currency+" on red and "+loaded.blue.toInt+currency+" on blue")
+			chat("your balance: "+currency(loaded.red)+" on red and "+currency(loaded.blue)+" on blue")
 		}
 		}
 		val _invites = new AutoInvitations(this, server.time) 
@@ -62,7 +92,8 @@ debug ("loaded "+loadedOpt)
 			var landed = true
 			
 			var flying = false
-
+			var wasInFlight = false
+			var seat=0
 			var planeName = ""
 			var lastPlanePriceCommit = server.time.currentTimeMillis // compare against lastPlaneVerification to determine "inFlight" -1L // -1: we have a price but we are not in the air yet
 			var planeWarningSince = 0L
@@ -80,10 +111,10 @@ debug ("loaded "+loadedOpt)
 			var lastPayment : Option[Rules.PriceInfo]=None 
 			
 			def dies() = {
-				if( ! died) {
+				if(wasInFlight && ! died ) {
 					val now = server.time.currentTimeMillis
 					if(deathPauseUntil<=now){
-					  deathPauseUntil = server.rules.calculateDeathPause
+					  deathPauseUntil = server.rules.calculateDeathPause(roughPlayerCount(Pilot.this))
 					  
 					  actor.LAPinger.schedule(Pilots.this, ClearToFly(Pilot.this, deathPauseUntil), deathPauseUntil-now)
 					  
@@ -92,10 +123,10 @@ debug ("loaded "+loadedOpt)
 		
 					  priceMsg match{
 					    case Some(msg) => {
-					      chat(name+": death pause for "+seconds+"s and "+msg)
+					      chat(name+": death penalty for "+seconds+"s and "+msg)
 					    }
 					    case None => {
-					      chat(name+": death pause for "+seconds+"s, then clear to refly "+lostPlaneName)
+					      chat(name+": death penalty for "+seconds+"s, then clear to refly "+lostPlaneName)
 					    } 
 					  }
 					}
@@ -191,13 +222,13 @@ println("    definitelyInPlane  ")
 //				if( ! invitation.accept(rawPrice))
 				
 				if(deathPauseUntil>lastPlanePriceCommit&& invitation.isEmpty){
-					// pilot is in death pause, invitations are checked in rules
+					// pilot is in death penalty, invitations are checked in rules
 					unverify()
 				} else {
 					val myPrice = rawPrice.forPilot(name)
 					
 					
-					if(myPrice>0.01D && myPrice>balance.value) {
+					if(myPrice>0.01D && myPrice>math.max(0d, balance.value)) {
 						chat(""+currency(myPrice)+" needed, available "+currency(balance.value))
 						unverify()
 					}else{
@@ -292,7 +323,7 @@ error("this code should be dead code now!")
 							if(inv.isDefined){
 								if(inv.get.inv.priceLimit<newPrice){
 									val diff = newPrice - payment.price  // positive if more expensive
-									chat("expensive loadout not paid for by recruiter: -"+currency(diff))
+									if(verbose) chat("expensive loadout not paid for by recruiter: -"+currency(diff))
 									balance(side) = server.rules.updateBalance(balance(side), -diff) 
 								}else{
 									for(newpm<- newPriceInfo.payments){
@@ -411,6 +442,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				invites.clean
 				joinNeutral()
 				planeWarningSince = 0L
+				state.wasInFlight = false
 				lastCleared = server.time.currentTimeMillis
 			}
 			def persist() {
@@ -547,8 +579,8 @@ debug("memorizing  for repetition check log event "+event)
 			/**
 			 * no state.notFresh check for the eventLog killed message, this one is quite definitive!
 			 */
-			case Is.Killed => {
-				state.dies()
+			case Is.Killed(seat) => {
+				if(seat==state.seat) state.dies()
 			}
 			case Is.Crashing => if(state.notFresh){
 				state.crashes()
@@ -572,7 +604,7 @@ debug("memorizing  for repetition check log event "+event)
 				state.returns()
 			}
     	case Is.InFlight => {
-    		
+    		if(! state.wasInFlight && state.notFresh) state.wasInFlight=true
 				if(state.planeVerified){
 //debug(name + " Is.InFlight "+state)
 					if( ! (state.crashed || state.died)){
@@ -610,20 +642,24 @@ debug("memorizing  for repetition check log event "+event)
 debug(name + " Is.HitTheSilk "+state)    	  
 				state.crashes()
     	}    
-    	case Is.TakingSeat(plane) => {
+    	case Is.TakingSeat(plane, seat) => {
 debug(name + " Is.TakingSeat "+state)    	  
     		state.updatePlaneName(plane)
+    		state.seat = seat
     	}
     	case Is.Joining => {
-					state.lostPlaneName = ""
+					state.lostPlaneName = "" 
     	}
     	case Is.Leaving => {
     		if(state.flying) {
 					 server.multi ! new server.multi.ChatBroadcast(this.name + " leaving, counted as a lost plane")
 					state.crashes()
+					state.clear()
+					joinNeutral
 				}else{
 					state.persist()
 					state.clear()
+					joinNeutral
 				}
     	}
     	case BalanceUpdate(diff, side, reason)=>{
@@ -653,7 +689,9 @@ debug(name + " Is.TakingSeat "+state)
 debug(name + " sending chat "+msg)  			  
 			  msg match { 
   	  		case Commands.balance(_) => {
-						chat("current balance is "+balance)
+  	  			if(currentSide == Armies.None) {
+  	  				chat("your balance: "+currency(balance(Armies.Red))+" on red and "+currency(balance(Armies.Blue))+" on blue")
+  	  			}else chat("current balance is "+currency(balance))
 					}
 					case Commands.price(which) => {
 						priceMessages(which, true)

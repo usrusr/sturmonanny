@@ -45,7 +45,7 @@ trait Domain[D <: Domain[D]] extends Logging with TimeHolder{ self: D =>
       case Cleanup => {
       	val now = time.now
 
-      	items.retain((_,v) => ! v.isTimeout) 
+      	items.retain((_,v) => ! v.isTimeout()) 
       }
       case x => debug("unknown in domain " + this.getClass.getSimpleName + ": " + x)
     }
@@ -53,7 +53,8 @@ trait Domain[D <: Domain[D]] extends Logging with TimeHolder{ self: D =>
   abstract class Element(val name: String) extends LiftActor with Logging { import java.io._
     val domain = Domain.this
     protected[Domain] var lastAccess = time.now
-    protected[Domain] def isTimeout = time.now - lastAccess > timeout 
+    def isTimeout(to:Long=timeout) = time.now - lastAccess > to 
+
     
     def toFileName(in:String)={
   		var v1=in

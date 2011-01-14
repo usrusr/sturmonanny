@@ -119,8 +119,15 @@ landing refund should be distributed in the same ratio but this is not implement
     //	  object startBalance extends Field(10)
 
     object deathpenalty extends Field(90) {
-      doc = """ seconds of death penalty, pilots will not be allowed to board a plane during this time"""
+      doc = """ seconds of death penalty, pilots will not be allowed to board a plane during this time (total upper limit)"""
     }
+    
+    object penaltyPerPilot extends Field(10) {
+      doc = """ relative death penalty: number of seconds penalty grows for each player on the same team 
+(the absolute limit is set by deathpenalty, if penaltyPerPilot is larger than penaltyPerPilot even solo players will get penalty
+otherwise a solo player would be able to refly at once)"""
+    }
+    
   }
 
   object market extends Group {
