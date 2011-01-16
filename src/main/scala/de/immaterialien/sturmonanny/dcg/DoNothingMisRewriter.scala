@@ -201,8 +201,12 @@ println("keep '"+inval+"' -> '"+in+"' nlstate:"+nlState)
     lazy val double: Parser[Double] = {
       """-?(?:(?:\d*\.\d+)|\d+)""".r ^^ (_.trim toDouble)
     }
+    lazy val doubleString: Parser[String] = {
+      """-?(?:(?:\d*\.\d+)|\d+)""".r 
+    }
     
     //lazy val w: Parser[Kept] = whiteSpace ^^ keep
+    val wString: Parser[String] = "[ \\t]+".r 
     lazy val w: Parser[Kept] = "[ \\t]+".r ^^ keep
     
     lazy val o: Parser[Kept] = "\\s*".r ^^ (_=> keep("\r\n"))

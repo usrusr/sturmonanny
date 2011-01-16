@@ -10,8 +10,8 @@
 	<properties>
 		<scala.version>2.8.1</scala.version>
 		<!--<scala.version>2.8.0.Beta1-RC1</scala.version> -->
-<!--		<lift.version>2.0-scala280-SNAPSHOT</lift.version>-->
-    <lift.version>2.1</lift.version>
+		<!-- <lift.version>2.0-scala280-SNAPSHOT</lift.version> -->
+		<lift.version>2.1</lift.version>
 	</properties>
 
 
@@ -25,22 +25,22 @@
 		<!-- <id>scala-tools.org</id> -->
 		<!-- <name>Scala-Tools Maven2 Repository</name> -->
 		<!-- <url>http://scala-tools.org/repo-releases</url> -->
-		<!-- </pluginRepository> --> 
+		<!-- </pluginRepository> -->
 	</pluginRepositories>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
-			<version>${scala.version}</version> 
+			<version>${scala.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<dependency>
-      <groupId>net.liftweb</groupId>
-      <artifactId>lift-webkit_2.8.0</artifactId>
-      <version>${lift.version}</version>
-    </dependency>
+			<groupId>net.liftweb</groupId>
+			<artifactId>lift-webkit_2.8.0</artifactId>
+			<version>${lift.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>net.liftweb</groupId>
 			<artifactId>lift-common_2.8.0</artifactId>
@@ -121,7 +121,7 @@
 		<dependency>
 			<groupId>net.lag</groupId>
 			<artifactId>configgy</artifactId>
-			<version>1.5.2-usr-281merged</version>
+			<version>1.5.2-usr-281merged-1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
@@ -220,14 +220,18 @@
 						<exclude>org.scala-lang:scala-library</exclude>
 					</excludes>
 					<classpathContainers>
-						<classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER</classpathContainer>
+						<classpathContainer>ch.epfl.lamp.sdt.launching.SCALA_CONTAINER
+						</classpathContainer>
 					</classpathContainers>
 					<projectnatures>
-						<java.lang.String>ch.epfl.lamp.sdt.core.scalanature</java.lang.String>
-						<java.lang.String>org.eclipse.jdt.core.javanature</java.lang.String>
+						<java.lang.String>ch.epfl.lamp.sdt.core.scalanature
+						</java.lang.String>
+						<java.lang.String>org.eclipse.jdt.core.javanature
+						</java.lang.String>
 					</projectnatures>
 					<buildcommands>
-						<java.lang.String>ch.epfl.lamp.sdt.core.scalabuilder</java.lang.String>
+						<java.lang.String>ch.epfl.lamp.sdt.core.scalabuilder
+						</java.lang.String>
 					</buildcommands>
 				</configuration>
 			</plugin>
@@ -276,6 +280,12 @@
 					<skip>true</skip>
 				</configuration>
 			</plugin>
+
+
+
+
+
+
 		</plugins>
 
 		<!-- <extensions> -->
@@ -400,86 +410,193 @@
 			</build>
 		</profile>
 
-    <profile>
-      <id>nannybox-deps</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-		        <artifactId>maven-assembly-plugin</artifactId>
-		        <version>2.2-beta-5</version>
-		
-		        <executions>
-		          <execution>
-		            <id>deps</id>
-		             <phase>package</phase> 
-		
-		            <configuration>
-		              <descriptors>
-		                <descriptor>deps-assembly.xml</descriptor>
-		              </descriptors>
-		              <appendAssemblyId>true</appendAssemblyId>
-		            </configuration>
-		            <goals>
-		              <goal>assembly</goal>
-		            </goals>
-		          </execution>
-<!--		          <execution>-->
-<!--		            <id>zip</id>-->
-<!--		            <phase>package</phase>-->
-<!--		            <configuration>-->
-<!--		              <descriptors>-->
-<!--		                <descriptor>assembly.xml</descriptor>-->
-<!--		              </descriptors>-->
-<!--		            </configuration>-->
-<!--		            <goals>-->
-<!--		              <goal>assembly</goal>-->
-<!--		            </goals>-->
-<!--		          </execution>-->
-		        </executions>
-		      </plugin>        
-        
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>wagon-maven-plugin</artifactId>
-            <version>1.0-beta-3</version>
-            <dependencies>
-              <dependency>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh-external</artifactId>
-                <version>1.0-beta-6</version>
-              </dependency>
-              <dependency>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>1.0-beta-6</version>
-              </dependency>
-            </dependencies>
+		<profile>
+			<id>nannybox-deps</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<version>2.2-beta-5</version>
 
-            <executions>
-              <execution>
-                <id>partial-upload</id>
-                <goals>
-                  <goal>upload-single</goal>
-                </goals>
-                <configuration>
-                </configuration>
-              </execution>
-            </executions>
-            <configuration>
-              <fromFile>target/sturmonanny-${project.version}-dependencies.jar</fromFile>
-              <serverId>il2.ulf-schreiber.de</serverId>
-              <url>scpexe://il2.ulf-schreiber.de/</url>
-              <toFile>/home/usr/server/nanny/sturmonanny-dependencies.jar</toFile>
-            </configuration>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
+						<executions>
+							<execution>
+								<id>deps</id>
+								<phase>package</phase>
 
+								<configuration>
+									<descriptors>
+										<descriptor>deps-assembly.xml</descriptor>
+									</descriptors>
+									<appendAssemblyId>true</appendAssemblyId>
+								</configuration>
+								<goals>
+									<goal>assembly</goal>
+								</goals>
+							</execution>
+							<!-- <execution> -->
+							<!-- <id>zip</id> -->
+							<!-- <phase>package</phase> -->
+							<!-- <configuration> -->
+							<!-- <descriptors> -->
+							<!-- <descriptor>assembly.xml</descriptor> -->
+							<!-- </descriptors> -->
+							<!-- </configuration> -->
+							<!-- <goals> -->
+							<!-- <goal>assembly</goal> -->
+							<!-- </goals> -->
+							<!-- </execution> -->
+						</executions>
+					</plugin>
 
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>wagon-maven-plugin</artifactId>
+						<version>1.0-beta-3</version>
+						<dependencies>
+							<dependency>
+								<groupId>org.apache.maven.wagon</groupId>
+								<artifactId>wagon-ssh-external</artifactId>
+								<version>1.0-beta-6</version>
+							</dependency>
+							<dependency>
+								<groupId>org.apache.maven.wagon</groupId>
+								<artifactId>wagon-ssh</artifactId>
+								<version>1.0-beta-6</version>
+							</dependency>
+						</dependencies>
+
+						<executions>
+							<execution>
+								<id>partial-upload</id>
+								<goals>
+									<goal>upload-single</goal>
+								</goals>
+								<configuration>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+							<fromFile>target/sturmonanny-${project.version}-dependencies.jar
+							</fromFile>
+							<serverId>il2.ulf-schreiber.de</serverId>
+							<url>scpexe://il2.ulf-schreiber.de/</url>
+							<toFile>/home/usr/server/nanny/sturmonanny-dependencies.jar
+							</toFile>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>qlmap-standalone</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<resources>
+					<resource>
+						<directory>
+						  ${basedir}/qlmap-standalone/resources
+						</directory>
+					</resource>
+				</resources>
+				<!-- <archive> -->
+				<!-- <manifest> -->
+				<!-- <mainClass>de.immaterialien.qlmap.Invoke</mainClass> -->
+				<!-- </manifest> -->
+				<!-- </archive> -->
+				<plugins>
+				<plugin>
+  <artifactId>maven-assembly-plugin</artifactId>
+  <version>2.2-beta-5</version>
+  <executions>
+    <execution>
+      <id>jar-with-dependencies</id>
+      <phase>package</phase>
+      <goals>
+        <goal>single</goal>
+      </goals>
+      <configuration>
+        <descriptorRefs>
+          <descriptorRef>jar-with-dependencies</descriptorRef>
+        </descriptorRefs>
+        <appendAssemblyId>true</appendAssemblyId>
+              <archive>
+                <manifest>
+                  <mainClass>de.immaterialien.qlmap.Invoke</mainClass>
+                </manifest>
+              </archive>        
+      </configuration>
+    </execution>
+  </executions>
+</plugin>
+				
+
+					<plugin>
+						<groupId>com.pyx4me</groupId>
+						<artifactId>proguard-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>proguard</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+
+							<obfuscate>false</obfuscate>
+							<!-- <injar>${project.build.finalName}-dependencies.jar</injar> -->
+<!--              <injar>${project.build.finalName}.jar</injar>-->
+              <injar>${project.build.finalName}-jar-with-dependencies.jar</injar>
+
+							<!-- <injar>../qlmap-standalone/resources</injar> -->
+							<!--<injar>../qlmap-standalone/manifest.jar</injar> -->
+							<!-- <includeDependency>true</includeDependency> -->
+							<outjar>qlmap-${project.build.finalName}.jar</outjar>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<proguardInclude>${basedir}/qlmap-standalone/proguard.conf</proguardInclude>
+
+<!--							<options>-->
+<!--								<option>-injar target/${project.build.finalName}-dependencies.jar</option>-->
+<!--							</options>-->
+              <includeDependency>false</includeDependency>
+
+							<addMavenDescriptor>true</addMavenDescriptor>
+
+							<archive>
+								<manifest>
+									<mainClass>de.immaterialien.qlmap.Invoke</mainClass>
+								</manifest>
+							</archive>
+							<libs>
+								<lib>${java.home}/lib/rt.jar</lib>
+								<lib>${java.home}/lib/jsse.jar</lib>
+								<!-- <lib>target/${project.build.finalName}-dependencies.jar</lib> -->
+
+							</libs>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<configuration>
+							<archive>
+								<manifest>
+									<mainClass>de.immaterialien.qlmap.Invoke</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+
+		</profile>
 	</profiles>
 	<reporting>
 		<plugins>
