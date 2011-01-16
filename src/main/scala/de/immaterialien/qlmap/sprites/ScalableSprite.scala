@@ -35,7 +35,7 @@ object ScalableSprite {
 
   def create(cls: GC, side: Int, mapBaseFolder: Option[File]): Option[Paintable] = {
     val fname: String = (cls match {
-      case Artillery => Car.toString
+//      case Artillery => Car.toString
       case Plane => "Airfield"
       case x => x toString
     }) + ".svg"

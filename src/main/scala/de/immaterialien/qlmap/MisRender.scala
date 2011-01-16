@@ -176,7 +176,10 @@ private class MisRender(
 //    veil()
 	  hatch(conf.front.hatchdistance.apply) 
 	  front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
-    units()
+//  	         front(conf.front.subdivisions.apply, 1)
+    forChiefs
+    forSide(1)
+    forSide(2)
     airfields()
   	wings()
   }
@@ -298,12 +301,12 @@ println("surprise gattack")
 //    s
     c
   }
-  def units() {
+//  def units() {
     /**
      * returns class, weight, count and relative position of dominant class
      */
-    def atMarker(mx: Double, my: Double, mside: Int): Option[(GroundClass.GC, Double, Int, (Int, Int))] = {
-      val radius:Double = conf.units.groundRadius.apply.toDouble
+    def atMarker(mx: Double, my: Double, mside: Int, radiusFactor:Double): Option[(GroundClass.GC, Double, Int, (Int, Int))] = {
+      val radius:Double = conf.units.groundRadius.apply.toDouble * radiusFactor *0.5D
       def dist(ax: Double, ay: Double) = {
         val dx = ax - mx
         val dy = ay - my
@@ -322,8 +325,9 @@ println("surprise gattack")
          * weight within the radius is constant, drops off gently outside 
          */
         def addSoft(ax: Double, ay: Double) = {
-          val update = radius / math.min(radius, dist(ax, ay))
+          val update = radius / math.max(radius, dist(ax, ay))
           val countUpdate = if (radius > dist(ax, ay)) 1d else 0d
+//          val countUpdate = update
           i = i + update
           num += countUpdate.toInt
           cumulatedOffX += countUpdate * (ax - mx)
@@ -351,6 +355,7 @@ println("surprise gattack")
           c
         }
         count.addHard(x, y)
+//        count.addSoft(x, y)
       }
       if (map.isEmpty) None else {
         val order = new Ordering[(GroundClass.GC, Counter)] {
@@ -382,8 +387,10 @@ println("surprise gattack")
       val markers = if (side == 1) model.rfront else model.bfront
       val other = if (side == 1) model.bfront else model.rfront
       val sd = if (side == 1) "red" else if (side == 2) "blue" else "???"
-
-      for (marker <- markers) {
+      val allMarkers = model.front.map(x=>(x._1,x._2))
+//      for (marker <- markers) {
+//      for (marker <- other) {
+      for (marker <- allMarkers) {
         val (x, y) = (marker._1, marker._2)
 //        val ox = x - model.widthOffset
 //        val oy = y - model.heightOffset
@@ -395,11 +402,10 @@ println("surprise gattack")
 
         //if (r >= 0 && ox <= model.width && oy >= 0 && oy <= model.height) {
         if (rx >= 0d && rx <= 1d && ry >= 0d && ry <= 1d) {
-          val at = atMarker(x, y, side)
+          val (who, depth) = whoAndDeepness(rx, ry, 1000)
+          val at = atMarker(x, y, side, 1D)
           for ((cls, weight, number, offset) <- at) {
-            val (who, depth) = whoAndDeepness(rx, ry, 1000)
-            if (cls.weight * cls.weight * weight + weight * depth * depth > 1000*unitDepth) {
-
+            if (who!=side ||true|| cls.weight * cls.weight * weight + weight * depth * depth > 1000*unitDepth) {
               val finalX = (((x + offset._1) - model.widthOffset) / model.width) * iw
               val finalY = ih - ((((y + offset._2) - model.heightOffset) / model.height) * ih)
 
@@ -407,7 +413,7 @@ println("surprise gattack")
               //              val finalY = (px-imgOffY).toInt
 
               val scale = calculateScale(number)
-
+//println("cls:"+cls);if(cls.toString.contains("tiller"))
               drawObject(finalX.toInt, finalY.toInt, scale, side, depth, cls)
             }
           }
@@ -415,7 +421,7 @@ println("surprise gattack")
       }
     }
     
-    def groupChiefs = { import model.Chief // interesting instance-import!
+    private def groupChiefs = { import model.Chief // interesting instance-import!
     	val groupedMap = new mutable.HashMap[String, ChiefGroup]
     	class ChiefGroup(val name:String,  val chief:Chief, val members:List[String]){
     		private var memberOfBigger=false
@@ -587,10 +593,10 @@ println("surprise gattack")
         }
       }
     }
-    forChiefs
-    forSide(1)
-    forSide(2)
-  }
+//    forChiefs
+//    forSide(1)
+//    forSide(2)
+//  }
 
   lazy val drawInit = {
     import java.awt._
