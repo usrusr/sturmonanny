@@ -41,49 +41,7 @@ println(" intermediateName: "+ret)
 		    file
 		  }		
 	
-//  override def invoke(file: File): File = {
-//
-//    val g = new AllPlanesEverywhere.Gatherer
-//    val f1 = new FileReader(file)
-//    val pr1 = g.parseAll(g.fileParser, f1)
-//    f1.close
-//
-//    {
-//      var i = 0
-//      for (side <- g.dromesToSides) {
-//        val set = g.sideToPlanes.get(side).getOrElse {
-//          val s = new mutable.LinkedHashSet[String]
-//          g.sideToPlanes.put(side, s)
-//          s
-//        }
-//        val planes = g.dromesToPlanes(i)
-//        i += 1
-//        set ++= planes.map(_ trim)
-//      }
-//    }
-//    
-//    println("between " + pr1 +
-////      "\ndromesToSides = " + g.dromesToSides +
-////      "\ndromesToPlanes = " + g.dromesToPlanes +
-////      "\nsideToPlanes = " + g.sideToPlanes +
-//      "")
-//
-//    log debug "" + pr1
-//    val out = new File(file.getParent, file.getName + ".flat.mis")
-//    val w = new FileWriter(out)
-//    g.writer = Some(w)
-//    val f2 = new FileReader(file)
-//    val pr2 = g.parseAll(g.fileParser, f2)
-//    f2.close
-//    w.close
-//    log debug "" + pr2
-//    out
-//    
-//    val bak = new File(file.getParent, file.getName + ".preflatten")
-//    file.renameTo(bak)
-//    out.renameTo(file)
-//    file
-//  }
+
 }
 
 object DoNothingMisRewriter extends Log {
@@ -105,7 +63,7 @@ object DoNothingMisRewriter extends Log {
     var writer: Option[Writer] = None
 
     def pass[T](in: T): T = {
-println("pass '"+in+"'")     	
+//println("pass '"+in+"'")     	
       writer map (_ append in.toString)
       in
     }
@@ -114,18 +72,13 @@ println("pass '"+in+"'")
     var nlState = true
     var bofState = true
     def keep(inval: String): Kept = {
-    	//val inval = if(invalToTrim.trim.isEmpty) invalToTrim.replaceAll("""[\t ]""", "") else invalToTrim
-    	
-//    	val in= if(!nlState) inval else  inval match {
-//    		case startNl(rest) => rest
-//    		case _ => inval
-//    	}
+
     	var in= inval match {
     		case startNl(rest) => if(nlState || bofState) rest else "\r\n" + rest
     		case _ => inval
     	}
     	if(!bofState && nlState && in.startsWith("[")) in="\r\n"+in
-println("keep '"+inval+"' -> '"+in+"' nlstate:"+nlState)       	
+//println("keep '"+inval+"' -> '"+in+"' nlstate:"+nlState)       	
     	nlState = inval match {
     		case endNl(rest) => true 
     		case _ =>false
@@ -139,14 +92,19 @@ println("keep '"+inval+"' -> '"+in+"' nlstate:"+nlState)
     }
     lazy val fileParser: Parser[Kept] = {
       rep(
-      		(iniLine("BornPlace") ~> bornPlaces) 
-      		| (iniLine("Chiefs") ~ rep(anyLine) ~> rep(chiefRoads)) 
+//      		(iniLine("BornPlace") ~> bornPlaces) 
+//      		| (iniLine("Chiefs") ~ rep(anyLine) ~> rep(chiefRoads)) 
+      		interestingBlocks
       		| (iniLine ~ rep(anyLine)) 
       		| "\\z".r
         //) ~ "$".r  ^^^ kept
 		) ~ (o ~ "\\z?".r) ^^^kept
     }
 
+    lazy val interestingBlocks: Parser[Kept] = {
+      		(iniLine("DOES_NOT_EXIST") ~> rep(anyLine)) ^^^kept
+    }
+    
     def iniLine(what: String): Parser[Kept] = {
       o ~> ("[" ~> what <~ "]") ^^ (s => keep("[" + s + "]"))
     }
@@ -203,6 +161,9 @@ println("keep '"+inval+"' -> '"+in+"' nlstate:"+nlState)
     }
     lazy val doubleString: Parser[String] = {
       """-?(?:(?:\d*\.\d+)|\d+)""".r 
+    }
+    lazy val wordString: Parser[String] = {
+      """\S+""".r 
     }
     
     //lazy val w: Parser[Kept] = whiteSpace ^^ keep

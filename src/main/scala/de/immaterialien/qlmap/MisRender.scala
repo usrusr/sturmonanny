@@ -176,10 +176,13 @@ private class MisRender(
 //    veil()
 	  hatch(conf.front.hatchdistance.apply) 
 	  front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
-//  	         front(conf.front.subdivisions.apply, 1)
+////  	         front(conf.front.subdivisions.apply, 1)
+	  nstatics
     forChiefs
-    forSide(1)
-    forSide(2)
+//    forSide(1)
+//    forSide(2)
+    
+    
     airfields()
   	wings()
   }
@@ -383,6 +386,7 @@ println("surprise gattack")
 
       }
     }
+    @deprecated
     def forSide(side: Int) {
       val markers = if (side == 1) model.rfront else model.bfront
       val other = if (side == 1) model.bfront else model.rfront
@@ -419,6 +423,131 @@ println("surprise gattack")
           }
         }
       }
+    }
+    /**
+     * a more fault tolerant "inversed" version of forSide ("for(n<-nstatic)for(m<-marker)" instead of "for(m<-marker)for(n<-nstatic)")
+     */
+    def nstatics{
+    	val radius:Double = conf.units.groundRadius.apply.toDouble * 10
+    	def distance(ax: Double, ay: Double,mx: Double, my: Double):Double = {
+	        val dx = ax - mx
+	        val dy = ay - my
+	        math.sqrt(dx * dx + dy * dy)
+	    }
+    	class Counter(mx:Double,my:Double) {
+    		def this(xys:(Double,Double,Int))=this(xys._1,xys._2)
+    		def dist(ax: Double, ay: Double):Double = distance(ax,ay,mx,my)
+        var i = 0d
+        var num = 0
+        var cumulatedOffX = 0D
+        var cumulatedOffY = 0D
+        // in game coords
+        def offX = cumulatedOffX / num
+        // in game coords
+        def offY = cumulatedOffY / num
+        /**
+         * weight within the radius is constant, drops off gently outside 
+         */
+        def addSoft(ax: Double, ay: Double) = {
+          val update = radius / math.max(radius, dist(ax, ay))
+          val countUpdate = if (radius > dist(ax, ay)) 1d else 0d
+//          val countUpdate = update
+          i = i + update
+          num += countUpdate.toInt
+          cumulatedOffX += countUpdate * (ax - mx)
+          cumulatedOffY += countUpdate * (ay - my)
+        }
+        def addHard(ax: Double, ay: Double) = {
+          val update = if (radius > dist(ax, ay)) 1d else 0d
+          i = i + update
+          num += update.toInt
+          cumulatedOffX += update * (ax - mx)
+          cumulatedOffY += update * (ay - my)
+        }
+        def thisOrOther(thisCls: GroundClass.GC, oCls: GroundClass.GC, oCnt: Double): (GroundClass.GC, Double) = {
+          if (oCnt > i) (oCls, oCnt) else (thisCls, this.i)
+        }
+
+        override def toString = num + ":w(" + i + ")@" + offX + "," + offY
+      }
+    	val markers = model.front
+    	val markerCounters = Map() ++ markers.map(f=>{
+    		
+    		def maker()={
+    			new mutable.HashMap[GroundClass.GC, Counter]()
+    		}
+    	//	(f,(new Counter(f),new Counter(f) ))}
+    		(f,(maker(),maker() ))}
+    	)
+    	for ((cls, x, y, side) <- model.rawGroundUnits) if(cls.weight > 0) {
+    		val withDist: List[((Double, Double, Int), Double)]=markers.map(m=> (m, distance(m._1,m._2,x,y)))
+
+    		val (closest,dist) = withDist min Ordering[Double].on[(_,Double)](_._2)
+    		
+    		// increase search radius for units on foreign territory (because there's not really a reason to expect them _at_ the enemy front marker...)
+    		val sideRadiusFactor = if(closest._3 != side) 4 else 1
+    		
+    		if(dist<radius * sideRadiusFactor){
+    			
+    			val rb=markerCounters(closest)
+    			val cntMap = if(side==1)rb._1 else rb._2 
+    			val cnt = cntMap.get(cls).getOrElse{
+    				val ncnt=new Counter(closest)
+    				cntMap+=((cls,ncnt))
+    				ncnt
+    			}
+    			cnt.addHard(x, y)
+    		}
+      }
+    	// iterate over markerCounters for sides
+    	for((marker,bothCounters)<-markerCounters){
+    		val(rx,ry) = gameToRelative((marker._1, marker._2))
+    		val markerSide = marker._3
+    		val (who, depth) = whoAndDeepness(rx, ry, 1000)
+    		
+    		var sidesList = (bothCounters._1, 1)::(bothCounters._2, 2)::Nil
+ 
+    		// paint foreign groups last
+    		if(markerSide==2) sidesList = sidesList.reverse
+    		
+    		for((counters, side) <- sidesList) if(!counters.isEmpty) {
+
+    			
+    			
+	        val isAirfield = counters.get(GroundClass.Airfield).map(counter =>
+	          counter.num > 0
+	          ).getOrElse(false)
+	
+	        if (isAirfield) for (fuelCount <- counters.get(GroundClass.Fuel)) {
+	          val airfieldFuelPenalty = GroundClass.Fuel.weight / 2
+	          fuelCount.i = fuelCount.i / airfieldFuelPenalty
+	        }
+	
+	        val (cls, counter) = counters.max(Ordering[Double].on[(GroundClass.GC, Counter)](cc => {
+    				val cls = cc._1
+    				val cnt = cc._2
+    				cnt.i * cls.weight
+    			}))
+	        
+	        //val ret = map.max(order)
+//	        val (cls, counter) = map.max(order)
+	        log debug ("  identified " + counter + " " + cls + " from " + counters)
+	        val (weight, number, offset) = (counter.i, counter.num, (counter.offX.toInt, counter.offY.toInt))
+    			
+
+            if (markerSide!=side || cls.weight * cls.weight * weight + weight * depth * depth > 1000*unitDepth) {
+              val finalX = (((marker._1 + offset._1) - model.widthOffset) / model.width) * iw
+              val finalY = ih - ((((marker._2 + offset._2) - model.heightOffset) / model.height) * ih)
+
+              //              val finalX = (px+imgOffX).toInt
+              //              val finalY = (px-imgOffY).toInt
+
+              val scale = calculateScale(number)
+//println("cls:"+cls);if(cls.toString.contains("tiller"))
+              drawObject(finalX.toInt, finalY.toInt, scale, side, depth, cls)
+            }
+    		}
+    	}
     }
     
     private def groupChiefs = { import model.Chief // interesting instance-import!

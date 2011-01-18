@@ -43,9 +43,18 @@ object DelayedChiefs {
   	val max = math.max(range._1, range._2)
   	lazy val seed = scala.util.Random.nextLong
   	lazy val reSeedable = new scala.util.Random
+  	
+  	override lazy val interestingBlocks: Parser[Kept] = {
+      (iniLine("Chiefs") ~ rep(anyLine) ~> rep(chiefRoads)) ^^^  kept
+    }
+  	
+  	
+  	
     override lazy val chiefRoads: Parser[Kept]  = (
     	("""\s*\[.*_Chief_Road\]""".r ^^ keep) ~ extendedChiefWaypoint ~ (opt(rep(chiefWaypoint))^^^kept) 
     )^^^kept
+    
+    
     
 //    lazy val extendedChiefWaypoint : Parser[Kept]  = (
 //    		o ~> keepDouble ~ w ~ keepDouble ~ w ~ keepDouble ~ w 

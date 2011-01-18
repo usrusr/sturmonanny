@@ -19,6 +19,10 @@ object PimpMyBornPlace {
   protected class Gatherer(toAdd:String) extends DoNothingMisRewriter.Gatherer {
   	val internalToAdd = if(toAdd.startsWith("(") && toAdd.endsWith(")")) toAdd.drop(1).dropRight(1) else toAdd
   	
+  	override lazy val interestingBlocks: Parser[Kept] = {
+      		(iniLine("BornPlace") ~> bornPlaces) ^^^kept
+    }
+  	
   	override lazy val bornPlace: Parser[Kept] = {
       (o ~> bornPlaceSide ~ w ~ keepDouble ~ w ~ keepDouble ~ w ~ keepDouble
       		~ (opt("[ \\t\\S]+".r ^^ keep)^^{ opt =>

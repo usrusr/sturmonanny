@@ -71,7 +71,10 @@ object AllPlanesEverywhere {
      * will be populated between first and second pass 
      */
     val sideToPlanes = new mutable.HashMap[Int, mutable.Set[String]]
-
+  	override lazy val interestingBlocks: Parser[Kept] = {
+      		(iniLine("BornPlace") ~> bornPlaces) ^^^kept
+    }
+  	
     override lazy val aerodrome: Parser[Kept] = {
       (o~> ("[BornPlace" ~> int <~ "]") ~
         rep("""\s*[^\[\s]\S*""".r )) ^^ {

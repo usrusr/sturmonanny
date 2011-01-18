@@ -9,6 +9,7 @@ class AllPlanesTest {
 }
 object AllPlanesTest {
 	def main(args: Array[String]) { 
+		net.lag.configgy.Configgy.configure("log.conf")
 //		val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/Iasi44194405020.mis")
 //		val f1 = new File("C:/zuti-IL2-server/Dedi/Missions/Net/dogfight/DCG/Iasi44194405010.mis.mis.preflatten")
 		
@@ -31,6 +32,10 @@ object AllPlanesTest {
 			new AllPlanesEverywhere("config"),
 			new PimpMyBornPlace(" 1 1000 200 11 0 500 12000 30 0 0 0 0 0 3.8 0 0 0"),
 			new DelayedChiefs("min=2 max=10"),				
+			new RetreatBornPlace("distance=20000 radius=3000 minRemaining=2 " +
+					" bluedummy=vehicles.artillery.Artillery$Maxime bluedummy=vehicles.artillery.Artillery$Maxime bluedummy=vehicles.artillery.Artillery$MG42"+
+					" reddummy=vehicles.artillery.Artillery$Maxime "
+			),				
 			new DoNothingMisRewriter("config"){override def invoke(in:File)=in}
 		)
 		for(ap<-aps) ap.invoke(f1)
