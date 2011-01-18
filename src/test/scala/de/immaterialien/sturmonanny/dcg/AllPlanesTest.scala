@@ -33,7 +33,7 @@ object AllPlanesTest {
 			new PimpMyBornPlace(" 1 1000 200 11 0 500 12000 30 0 0 0 0 0 3.8 0 0 0"),
 			new DelayedChiefs("min=2 max=20"),				
 			new RetreatBornPlace("distance=20000 radius=3000 minRemaining=2 " +
-					" bluedummy=vehicles.artillery.Artillery$Maxime bluedummy=vehicles.artillery.Artillery$Maxime bluedummy=vehicles.artillery.Artillery$MG42"+
+					" bluedummy=2 vehicles.artillery.Artillery$Maxime bluedummy= 3 vehicles.artillery.Artillery$MG42"+
 					" reddummy=vehicles.artillery.Artillery$Maxime "
 			),				
 			new DoNothingMisRewriter("config"){override def invoke(in:File)=in}

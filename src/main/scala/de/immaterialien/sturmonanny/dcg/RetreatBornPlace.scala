@@ -16,11 +16,10 @@ class RetreatBornPlace(args: String) extends DoNothingMisRewriter(args) { import
     val pr1 = g.parseAll(g.fileParser, f1)
     f1.close
 
-    val minDistance = distancePattern.findFirstMatchIn(args).map(_.group(1).toInt).getOrElse(1000)
+    // the factor 2 is needed because we are interested in distance to front, not distance to frontMarker
+    val minDistance = 2 * distancePattern.findFirstMatchIn(args).map(_.group(1).toInt).getOrElse(1000)
     val minRemaining = minRemainingPattern.findFirstMatchIn(args).map(_.group(1).toInt).getOrElse(2)
-//    {
-//      
-//    }
+
     
     for((side,places)<-g.sidesToPlaceLocs){
     	val placesWithDistance = places.map(place=>{
@@ -70,8 +69,8 @@ object RetreatBornPlace {
 	val distancePattern = """(?i)(?:enemy)?distance\s*=\s*(\d+)""".r
 	val radiusPattern = """(?i)(?:destruction)?radius\s*=\s*(\d+)""".r
 	val minRemainingPattern = """(?i)min(?:Remaining)?\s*=\s*(\d+)""".r
-	val replacementRedPattern = """(?i)reddummy\s*=\s*(\S+)""".r
-	val replacementBluePattern = """(?i)bluedummy\s*=\s*(\S+)""".r
+	val replacementRedPattern = """(?i)reddummy\s*=\s*(\d*)\s*(\S+)""".r
+	val replacementBluePattern = """(?i)bluedummy\s*=\s*(\d*)\s*(\S+)""".r
   /**
    * will make two passes: 
    * first with writer = None gathering info in the two maps
@@ -80,12 +79,25 @@ object RetreatBornPlace {
    * @author ulf
    */
   protected class Gatherer(args:String) extends DoNothingMisRewriter.Gatherer {
-		// the factor 2 is needed because we are interested in distance to front, not distance to frontMarker
-		val radius = 2 * radiusPattern.findFirstMatchIn(args).map(_.group(1) toInt).getOrElse(500) 
+		val radius = radiusPattern.findFirstMatchIn(args).map(_.group(1) toInt).getOrElse(500) 
 		def replacement(patt:scala.util.matching.Regex)={
 			val matches = patt.findAllIn(args)
-			val ret = matches.matchData.map(_ group 1).toList
-			if(ret.isEmpty) List("vehicles.artillery.Artillery$MG42") else ret
+			val vectors = matches.matchData.map(matcher=>{
+				
+				val c:Int = matcher group 1 match {
+					case null => 1
+					case "" => 1
+					case cntString => cntString.toInt match {
+						case n if(n<1) => 1
+						case i => i
+					}
+				}
+				val name = matcher group 2
+				Vector.fill[String](c){name}
+			}).toList
+
+			val ret = Vector.concat(vectors :_*)
+			if(ret.isEmpty) Vector("vehicles.artillery.Artillery$MG42") else ret
 		}
 		val redReplacements = replacement(replacementRedPattern)
 		val blueReplacements = replacement(replacementBluePattern)
@@ -145,9 +157,10 @@ object RetreatBornPlace {
         	}else{
         		allReplacements.get(side) match {
         			case None => typeString
-        			case Some(Nil) => typeString
-        			case Some(repl :: Nil) => repl
-        			case Some(lst:List[String]) => {
+        			//case Some(v) if(v.length==0) => typeString
+        			case Some(Vector()) => typeString
+        			case Some(lst:Vector[String]) if(lst.size==1) => lst(0) 
+        			case Some(lst:Vector[String]) => {
         				val rnd = scala.util.Random.nextInt(lst.length)
         				val ret = lst(rnd)
         				ret
@@ -176,30 +189,6 @@ object RetreatBornPlace {
         }
       }
     }
-//    override lazy val aerodrome: Parser[Kept] = (
-//      (o ~> ("[BornPlace" ~> int <~ "]") ~
-//        rep("""\s*[^\[\s]\S*""".r)) ^^ {
-//        case number ~ planes => {
-//          writer map { w =>
-//            w append ("\r\n[BornPlace" + number + "]\r\n")
-//            //            
-//            //            val side = dromesToSides(number)
-//            //            val sp = sideToPlanes.get(side)
-//            val (sid,xyz) = counterToBornPlaceLocs(number)
-////            val distance :Double = closestEnemyDistance(xyz._1,xyz._2,sid)
-//            val destroyed = destroy(sid).contains(xyz)
-//            if( ! destroyed){
-//            	for (p <- planes) keep (p)
-//            }else{
-//            	// AI only
-//            }
-//            kept
-//          } getOrElse {
-//            kept
-//          }
-//        }
-//      }
-//    )
 
     override lazy val bornPlace: Parser[Kept] =
       (o ~> int ~ wString ~ doubleString ~ wString ~ doubleString ~ wString ~ doubleString ~
