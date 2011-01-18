@@ -31,7 +31,7 @@ object AllPlanesTest {
 		val aps = List(
 			new AllPlanesEverywhere("config"),
 			new PimpMyBornPlace(" 1 1000 200 11 0 500 12000 30 0 0 0 0 0 3.8 0 0 0"),
-			new DelayedChiefs("min=2 max=10"),				
+			new DelayedChiefs("min=2 max=20"),				
 			new RetreatBornPlace("distance=20000 radius=3000 minRemaining=2 " +
 					" bluedummy=vehicles.artillery.Artillery$Maxime bluedummy=vehicles.artillery.Artillery$Maxime bluedummy=vehicles.artillery.Artillery$MG42"+
 					" reddummy=vehicles.artillery.Artillery$Maxime "
