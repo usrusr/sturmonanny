@@ -17,15 +17,26 @@ class FixedPriceMarket extends IMarket with Logging{
 	override def tryPrice(loadout : IMarket.Loadout, side:Int) : Option[Double] = {
 	  //val res = priceList.map(_.planes(plane)) map (_ toDouble)
 		
+		
 		val name = loadout.toString
 			.replace("*", "x")
 			.replace("+", "")
 			.replace(" ", "")
-		val res = for(list <- priceList) yield list.planes(name)
-		 
-println("price for "+loadout+" aka "+name+" -> " +res);
-		
-	  res map (_ toDouble)
+			
+		for(list <- priceList) {
+			val maps = side match {
+				case 1 => List(list.red, list.planes)
+				case 2 => List(list.blue, list.planes)
+				case _ => List(list.red, list.blue, list.planes)
+			}
+			
+			for(m<-maps){
+				val r = m.get(name)
+				if(r.isDefined) return Some(
+						r.get.toDouble/list.divisor.apply.toDouble)
+			}
+		}
+		None
 	}
 	override def setServerContext(srv:Server){
 debug("setting server context: "+srv)		    
@@ -43,7 +54,8 @@ debug("initializing market")
 			  // make sure we know all planes, for queries into the plane domain
 			  for(	srv <- server; 
 			  		l<-priceList; 
-			  		(plane, _) <- l.planes.map){
+			  		list<-List(l.planes, l.red, l.blue);
+			  		(plane, _) <- list.map){
 			    val planes : Planes = srv.planes 
 debug("creating "+plane+" in market -> "+planes.items )		    
 			    planes.create(plane)

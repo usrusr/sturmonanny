@@ -12,11 +12,12 @@ trait IMarket { import IMarket._
 	final def getPrice(plane:String, side:Int) : Double = getPrice(plane, None, side)
 	final def getPrice(plane:String, load:String, side:Int) : Double = getPrice(plane, Some(load), side)
 	final def getPrice(plane:String, load:Option[String], side:Int) : Double = getPrice(Loadout(plane, load), side)
-	def getPrice(loadout:Loadout, side:Int) : Double = loadout match {
-		case Loadout(_, None) => tryPrice(loadout, side) getOrElse 0D
-		case Loadout(plane, Some(_)) => tryPrice(loadout, side) getOrElse getPrice(Loadout(plane, None), side)
-	}
-	
+//	def getPrice(loadout:Loadout, side:Int) : Double = loadout match {
+//		case Loadout(_, None) => tryPrice(loadout, side) getOrElse 0D
+//		case Loadout(plane, Some(_)) => tryPrice(loadout, side) getOrElse getPrice(Loadout(plane, None), side)
+//	}
+//	
+	def getPrice(loadout:Loadout, side:Int) : Double = tryPrice(loadout, side) getOrElse 0D
 	def tryPrice(loadout:Loadout, side:Int) : Option[Double]
 	
 

@@ -4,6 +4,7 @@ import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
 
 class PriceList(file:String) extends ConfigurationSchema(file) {
+	object divisor extends Field(1){doc="prices can be given only in full numbers, use this to scale them down for precision"}
 	object planes extends Table(0)  {
 	doc = """ 
 Beispiel:
@@ -20,7 +21,13 @@ Beispiel:
       # Aus 1*ParaFlare+6*10kg würde also 1xParaFlare6x10kg, was dem Bezeichnungsmuster der original-1C-Loadouts entspricht 
 			S-328_1xParaFlare6x10kg = 20
 	</planes>
-"""
+""" 
+	}
+	object red extends Table(0)  {
+		doc = "like planes but only applies to red"
+	}
+  object blue extends Table(0)  {
+		doc = "like planes but only applies to blue"
 	}
  }
 object PriceList {

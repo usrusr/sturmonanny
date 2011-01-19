@@ -148,6 +148,7 @@ abstract class ConfigurationSchema(val file: String) extends Holder with Configu
     val defaultValue = v
     var map = Map[String, T]()
     def apply(what: String): T = map.get(what) getOrElse defaultValue
+    def get(what: String): Option[T] = map.get(what)
     def update(what: String, value: T) = map = map + ((what, value))
     def toList: List[T] = {
       val it = map.values

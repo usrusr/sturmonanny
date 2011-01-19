@@ -6,7 +6,7 @@ import _root_.de.immaterialien.sturmonanny.util._
 import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema._
 import _root_.de.immaterialien.sturmonanny.core._
  
-class MarketActor(val initClassName :String, val initConfigurationPath:String) extends IMarket with LiftActor with UpdatingMember with Logging{     
+class MarketActor(val initClassName :String, val initConfigurationPath:String) extends IMarket with LiftActor with UpdatingMember with Logging{ import IMarket._
 	var internal : Option[IMarket] = None
 	var className : String = "de.immaterialien.sturmonanny.core.AllPlanesEqualMarket"  
 	var configurationPath : String = "/dev/null"
@@ -89,7 +89,23 @@ val ret : Double =
 println("got "+ret)	  		
 ret	  		
 	}
-	override def tryPrice(plane : IMarket.Loadout, side:Int) : Option[Double] = { 
+	override def tryPrice(loadout : IMarket.Loadout, side:Int) : Option[Double] = { 
+//	  val ret = !!(Msg.getPrice(plane, side), 500)
+////	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
+////	  		.price
+//	  		.asA[Msg.getPriceResult] map (_ price)
+//	  		
+//	  		
+//println("tryPrice "+ret)	  		
+//	  return ret getOrElse None
+		
+		loadout match {
+			case Loadout(_, None) => tryPriceInternal(loadout, side) 
+			case Loadout(plane, Some(_)) => tryPriceInternal(loadout, side) map {x=>Some(x)} getOrElse tryPriceInternal(Loadout(plane, None), side)
+		}
+		
+	}
+	private def tryPriceInternal(plane : IMarket.Loadout, side:Int) : Option[Double] = { 
 	  val ret = !!(Msg.getPrice(plane, side), 500)
 //	  		.asA[Msg.getPriceResult].getOrElse(Msg.getPriceResult(0d))
 //	  		.price
