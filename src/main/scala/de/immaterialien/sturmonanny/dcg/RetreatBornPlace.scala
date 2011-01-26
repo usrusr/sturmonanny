@@ -208,7 +208,7 @@ object RetreatBornPlace {
 	          //	          counterToBornPlaceLocs += ((side, xyz))
         	}
         	
-          keep(side.toString); keep(w1); keep(ys); keep(w2); keep(xs); keep(w3); keep(ys)
+          keep(side.toString); keep(w1); keep(hs); keep(w2); keep(xs); keep(w3); keep(ys)
           mdsOpt match {
           	case Some(rep11 ~ w4 ~ noSpawnIn ~ rest) => {
           		val noSpawnOut = if(writer.isEmpty) noSpawnIn else {

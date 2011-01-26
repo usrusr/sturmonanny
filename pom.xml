@@ -35,7 +35,17 @@
 			<version>${scala.version}</version>
 			<scope>compile</scope>
 		</dependency>
-
+<!--		<dependency>-->
+<!--		    <groupId>hsqldb</groupId>-->
+<!--		    <artifactId>hsqldb</artifactId>-->
+<!--		    <version>1.8.0.7</version>-->
+<!--		</dependency>-->
+<!---->
+<!--<dependency>-->
+<!--  <groupId>org.squeryl</groupId>-->
+<!--<artifactId>squeryl_2.8.1</artifactId>-->
+<!--<version>0.9.4-RC3</version>-->
+<!--</dependency> -->
 		<dependency>
 			<groupId>net.liftweb</groupId>
 			<artifactId>lift-webkit_2.8.0</artifactId>
@@ -247,7 +257,7 @@
 				<executions>
 					<execution>
 						<id>deps</id>
-						<!-- <phase>deploy</phase> -->
+						 <phase>deploy</phase> 
 
 						<configuration>
 							<descriptors>

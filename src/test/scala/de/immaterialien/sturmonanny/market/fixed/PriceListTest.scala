@@ -7,7 +7,7 @@ import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
 
 
 class PriceListTest {
-	@Test 
+//	@Test 
 	def testFile() : Unit ={ 
 //		val p = new MyList("src/test/scala/de/immaterialien/sturmonanny/market/fixed/test.conf")
 		val p = new MyList("./src/test/scala/de/immaterialien/sturmonanny/market/fixed/test.conf")
@@ -21,8 +21,8 @@ class PriceListTest {
 		p.prices.planes("Spit") = 3
 		println("changed Spit: "+ p.prices.planes("Spit"))
 		p.prices.planes("P51") = 2 
-		p.aliases.planes("P51") = "Mustang" 
-		p.aliases.pilots("usrusr") = "Ulf"
+		p.aliases.planes("P51") = "Mustang"  
+		p.aliases.pilots("usrusr") = "Ulf" 
 //		p.prices.planes("String") = "geht nicht" 
 		 
   		p.aliases.group.subgroup.test() = "na sowas!"
@@ -31,6 +31,17 @@ class PriceListTest {
   		println("price list is \n"+ p) 
 		()
 	} 
+	
+	@Test 
+	def testFile2() : Unit ={ 
+//		val p = new MyList("src/test/scala/de/immaterialien/sturmonanny/market/fixed/test.conf")
+		val p = new MyList("planes.conf")
+
+//		p.
+  
+  		println("price list is \n"+ p) 
+		()
+	} 	
 } 
 object PriceListTest {
 	def main(args: Array[String]) = try{

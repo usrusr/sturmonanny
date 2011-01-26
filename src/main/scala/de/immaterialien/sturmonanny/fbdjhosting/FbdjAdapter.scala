@@ -85,6 +85,16 @@ debug("FBDj configuratoin changing!")
 		  	  val created = ContainerPool.getContainer(conf.fbdj.installationPath.apply, conf.fbdj.overridesJar.apply)
 		  	  created.adapterNextMissionProxy = Some(new Provider[File]{
 		  	  	override def invoke(i:File):File = {
+
+		  	  		/**
+					     * parse no dcg flag 
+					     */
+					    if(i.getName.endsWith("(no dcg!)")) {
+					    	val ret = new File(i.getAbsolutePath.dropRight(9))
+					    	server.market.cycle(ret) 
+					    	return ret	
+					    } 
+		  	  		
 		  	  		val nmp = nextMissionProvider
 debug("nextMissionProvider: "+nmp)		  	  		
 		  	  		

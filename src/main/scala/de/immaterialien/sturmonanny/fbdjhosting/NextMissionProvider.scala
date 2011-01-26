@@ -38,11 +38,20 @@ object NextMissionProvider
             val constructor = cls.getConstructor(classOf[String])
             instance = constructor.newInstance(arg).asInstanceOf[Provider[File]]
           }catch{ 
-            case x => { 
-x.printStackTrace            	
-              val constructor = cls.getConstructor()
-              instance = constructor.newInstance().asInstanceOf[Provider[File]]
+            case x : java.lang.reflect.InvocationTargetException => { 
+//x.printStackTrace         
+							try{
+								val constructor = cls.getConstructor()
+								instance = constructor.newInstance().asInstanceOf[Provider[File]]
+							}catch{ 
+								case y => { 
+									x.printStackTrace
+								}
+            	}
             } 
+            case x => { 
+x.printStackTrace
+            }
           }
       	  //type withCallback = {def setMessageCallback(callback : Provider[String]):Unit}
           //if(instance.isInstanceOf[{def setMessageCallback(callback : Provider[String]):Unit}]) {
@@ -79,6 +88,8 @@ class NextMissionProvider(private var filters:List[Provider[File]], server:core.
 
   override def invoke(oldMissionPath:File):File = {
     var ret = oldMissionPath
+
+
 println("mission callback filters: "+filters)    
     for(filter<-filters){
       try{

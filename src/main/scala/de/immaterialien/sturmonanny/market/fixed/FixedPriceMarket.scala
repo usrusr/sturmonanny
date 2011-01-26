@@ -6,7 +6,7 @@ import _root_.de.immaterialien.sturmonanny.util._
 
 class FixedPriceMarket extends IMarket with Logging{ 
 	var filename : Option[String] = None 
-	var priceList : Option[PriceList] = None  
+	var priceList : Option[RegexPriceList] = None  
 	var server : Option[Server] = None 
 
  	def addAirTime(plane : IMarket.Loadout, millis : Long, side:Int) = ()
@@ -19,9 +19,12 @@ class FixedPriceMarket extends IMarket with Logging{
 		
 		
 		val name = loadout.toString
-			.replace("*", "x")
-			.replace("+", "")
 			.replace(" ", "")
+//			.replace("*", "x")
+//			.replace("+", "")
+//			.replace("(", "_")
+//			.replace(")", "_")
+//			.replace(".", "_")
 			
 		for(list <- priceList) {
 			val maps = side match {
@@ -31,7 +34,7 @@ class FixedPriceMarket extends IMarket with Logging{
 			}
 			
 			for(m<-maps){
-				val r = m.get(name)
+				val r = m.get(name) 
 				if(r.isDefined) return Some(
 						r.get.toDouble/list.divisor.apply.toDouble)
 			}
@@ -46,7 +49,7 @@ debug("setting server context: "+srv)
 	def setConfiguration(pathToFile : String) = {
 	  if(Some(pathToFile)==filename) true
 	  else try {
-		  val newList = new PriceList(pathToFile)
+		  val newList = new RegexPriceList(pathToFile)
 		  
 debug("initializing market")		    
 			  priceList = Some(newList)

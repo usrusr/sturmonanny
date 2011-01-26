@@ -683,7 +683,8 @@ debug(name + " Is.TakingSeat "+state)
 			else net.liftweb.actor.LAPinger.schedule(server.multi, m, delay)
 		}
 		def currency(double:Double):String={
-			("%1.0f" format double)+conf.names.currency.apply
+			val curName=conf.names.currency.apply
+			("%1.0f" format double)+(if(curName.length>3) " " else "")+ curName
 		}
 		def processCommand(msg:String){ 
 debug(name + " sending chat "+msg)  			  

@@ -24,7 +24,8 @@ trait Server extends Logging with TimeHolder{
 	val eventlog : EventLogDispatcher with Member
 	val multi : Multiplexer with Member
 	val time : TimeSource //with Member
- 
+//	val squeryl : SquerylContext with Member
+	
 debug("init server trait")	
 
 	protected def init(){
@@ -69,8 +70,8 @@ class ServerImpl(val initConf : String, val threadGroup:java.lang.ThreadGroup) e
 	override val dispatcher = new LocalizedDispatcher with Member
 	override val eventlog = new EventLogDispatcher with Member
 	override val time = new TimeSourceImpl
-
 	override val multi = new Multiplexer ("", 0, 0) with Member
+//	override val squeryl = new SquerylContext with Member
 debug("init server class")	 
 	init()
 } 

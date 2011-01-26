@@ -93,7 +93,6 @@ control characters:
   object recruiting extends Group {
     doc = """ for a limited time after starting, pilots can invite (recruit) other pilots to fly the same plane
  recruited pilots are allowed to fly before their death-pause runs out 
-****** NOT YET IMPLEMENTED *******
 """
     object time extends Field(120) {
       doc = """ this number defines the seconds after start that players are allowed to recruit others into their group
@@ -141,6 +140,13 @@ otherwise a solo player would be able to refly at once)"""
     }
     object properties extends Table("") {
       doc = "configuration properties for the IBalanceDao implementation, e.g. filename, JDBC driver, URL and credentials or something similar"
+    }
+    object jdbc extends Group {
+    	doc="the usual quad for jdbc database connections"
+    	object driver extends Field("org.h2.Driver")
+			object url extends Field("jdbc:h2:nannydb;MODE=MySQL")
+			object user extends Field("SA")
+			object pass extends Field("")
     }
   }
 
@@ -196,13 +202,6 @@ overrides FBDj autoconnect
       //     object minutesPerMission extends Field(60){
       //       doc="duration of a single DCG mission, the FBDj mission will run a little longer, waiting for DCG to create the next mission"
       //     }
-
-      object dcgCommand extends Field("il2dcg.exe /netdogfight") {
-        doc = """Command line to execute for creating the next SC mission, must not return before the mission is created. 
-After the command returns the latest new .mis file from the mission directory of the current mission will be started by FBDj
-example: "C:\myDcgInstallation\il2dcg.exe /netdogfight" """
-
-      }
       object dcgPath extends Field("C:/DCG") {
         doc = """path to the DCG installation, 
 required to find the DCG.ini (if empty, FBDj may assume that the DCG.ini resides in the mission directory
@@ -210,13 +209,23 @@ required to find the DCG.ini (if empty, FBDj may assume that the DCG.ini resides
 and may need additional DCG files to reside there)"""
 
       }
+      object dcgCommand extends Field("il2dcg.exe /netdogfight") {
+        doc = """Command line to execute for creating the next SC mission, must not return before the mission is created. 
+After the command returns the latest new .mis file from the mission directory of the current mission will be started by FBDj.
+Will be started in the directory defined in dcgPath.
+example: "il2dcg.exe /netdogfight" """
+
+      }
+
 
       object campaignProgress extends Group {
         doc = """here you can define some criteria that have to be met for campaign progress, 
 if they are not met the same map will be repeated over and over again.
 a minimum value for the "bigger" side means that at least one army has to reach the minimum, 
 a minimum value for the "smaller" side means that both armies have to reach the minimum to make the DCG campaign progress. 
-(default values are all 0 wich means that the campaign will even progress if no human pilots are flying)"""
+(default values are all 0 wich means that the campaign will even progress if no human pilots are flying)
+****** currently not implemented correctly, the fdbj mod does not recognise the correct side of a sortie fast enough ******* 
+"""
         object minSorties extends Group {
           doc = """counts total sorties, use this instead of minPilots to enable single pilots to progress the campaign"""
           object bigger extends Field(0)

@@ -34,9 +34,11 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
       debug("updating mutltiplexer to " + host + ":" + il2port)
       this ! SwitchConnection(host, il2port)
     }
-    if (conf.server.consoleport != scport) {
-      scport = conf.server.consoleport.apply
+    val newScPort = conf.server.consoleport.apply
+    if (newScPort != scport) {
+      scport = newScPort
       if (serverThread != null) serverThread interrupt
+      else newServerThread
     }
   }
 
@@ -363,17 +365,28 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   def newServerThread: Thread = if (scport == 0) null else Multiplexer.daemon {
 
     try {
+      val whitelist = conf.server.IPS.apply
+    	
       val actualListenersocket: ServerSocket = listenersocket.getOrElse {
         debug("console listening on " + scport)
-        listenersocket = Some(new ServerSocket(scport))
+        
+        val whiteSet = whitelist.split(",").map(_ trim).toList
+
+        val onlyLocal = whiteSet.filter(le=> Multiplexer.localIps.pattern.matcher(le.trim).matches).size == whiteSet.size
+        val bindAddress = if(onlyLocal) InetAddress.getByName("127.0.0.1") else null
+        
+        
+        
+        val serverSocket = new ServerSocket(scport, 0, bindAddress) 
+        	
+        listenersocket = Some(serverSocket)
         listenersocket.get
       }
       val clientconnection: Socket = actualListenersocket.accept
       Thread.interrupted // accept interrupted us, that's ok, clear
       val remote = clientconnection.getRemoteSocketAddress.asInstanceOf[InetSocketAddress]
-      val whitelist = conf.server.IPS.apply
 
-      if (!whitelist.trim.isEmpty) {
+      if (!whitelist.trim.isEmpty) { 
         val remoteAdd = remote.getAddress.getHostAddress
 
         if (!whitelist.contains(remoteAdd)) {
@@ -488,6 +501,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   Multiplexer.instancesForShutdown.put(this, None)
 }
 object Multiplexer extends Logging {
+	val localIps = """\Q127.0.0.1\E|\Q0:0:0:0:0:0:0:1\E""".r
   case object interrupt
   def daemon(body: => Unit): Then = {
     new Then(body)

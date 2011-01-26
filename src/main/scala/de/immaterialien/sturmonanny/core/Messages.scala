@@ -12,7 +12,7 @@ object PilotMessage {
 
 case class GlobalMessage(event : Is.Global) extends Message
 
-case class DispatchLine(line:String)
+case class DispatchLine(line:String) 
 case class DispatchMessage(message:String) {
 //	val stack = new Exception().getStackTraceString
 }
