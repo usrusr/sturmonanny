@@ -80,18 +80,14 @@ println("jcl ret "+jclRet+"\n from "+ret)
   	jclRet
   }
 }
-
-class NextMissionProvider(private var filters:List[Provider[File]], server:core.Server) extends javax.xml.ws.Provider[File] with util.Log{ 
-	//def this(conf:core.Configuration)=this(NextMissionProvider.makeList(conf))
-	def this(server:core.Server)=this(NextMissionProvider.makeList(server.conf, server), server)
-	def updateConfiguration(conf:core.Configuration) = filters=NextMissionProvider.makeList(conf,server)
-
+sealed trait MissionMetaProcessor extends javax.xml.ws.Provider[File] with util.Log{
+	def filteredFilters : Iterable[javax.xml.ws.Provider[File]]
   override def invoke(oldMissionPath:File):File = {
     var ret = oldMissionPath
 
 
-println("mission callback filters: "+filters)    
-    for(filter<-filters){
+println("mission callback filters: "+filteredFilters)    
+    for(filter<-filteredFilters){ 
       try{
 println("invoking "+filter.getClass.getSimpleName+" with input "+ret)
 log.debug("invoking "+filter.getClass.getSimpleName+" with input "+ret)      	
@@ -108,5 +104,16 @@ log.debug("got "+next+" from "+filter.getClass.getSimpleName)
     }
     
     ret
-  }
+  }	
+}
+trait NonMutatingFilter
+class NextMissionProvider(private var filters:List[Provider[File]], server:core.Server) extends MissionMetaProcessor { 
+	//def this(conf:core.Configuration)=this(NextMissionProvider.makeList(conf))
+	def this(server:core.Server)=this(NextMissionProvider.makeList(server.conf, server), server)
+	def updateConfiguration(conf:core.Configuration) = filters=NextMissionProvider.makeList(conf,server)
+
+	object onlyNonMutating extends MissionMetaProcessor {
+		def filteredFilters = filters.filter(_.isInstanceOf[NonMutatingFilter])
+	}
+	def filteredFilters = filters
 }

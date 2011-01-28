@@ -89,16 +89,19 @@ debug("FBDj configuratoin changing!")
 		  	  		/**
 					     * parse no dcg flag 
 					     */
-					    if(i.getName.endsWith("(no dcg!)")) {
-					    	val ret = new File(i.getAbsolutePath.dropRight(9))
-					    	server.market.cycle(ret) 
-					    	return ret	
-					    } 
-		  	  		
-		  	  		val nmp = nextMissionProvider
+					    if(i.getName.endsWith("(keep)")) {
+					    	val ret = new File(i.getAbsolutePath.dropRight(6))
+					    	server.market.cycle(ret)
+					    	
+					    	val nmp = nextMissionProvider.onlyNonMutating
+debug("filtered nextMissionProvider: "+nmp)		  	  		
+					    	nmp.invoke(ret)					    	
+					    } else {
+					    	val nmp = nextMissionProvider
 debug("nextMissionProvider: "+nmp)		  	  		
 		  	  		
-		  	  		nmp.invoke(i)
+		  	  			nmp.invoke(i)
+					    }
 		  	  	}
 		  	  })
 		  	  //created.changeConfiguration(conf, server.initConf)

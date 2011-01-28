@@ -263,10 +263,13 @@ DCG BUG???                               ||
   NORMFLY 80404.32 216200.90 3000.0 400.00II_JG5_230 2 &0  
   
   NORMFLY 16044.57 270981.51 500.0 40.00   D &0
+  GATTACK 71900.00 194300.00 500.0 80.00   D 20_Chief 1 &1
+                                   (-?(?:\d+|(?:\d*\.\d+)))\s*(?:(?:\w\s*)?([^&\s]+(?:\s+\d+)?\s+)?)?
   	 */
     //("\\S+".r ~ double ~ double ~ double ~ doubleNoBlank ~ direct("""\s*([^&\s]+(\s+\d+)?\s+)?&""".r) ~ direct("\\d".r) <~ eol) ^^ {
   	("\\S+".r ~ double ~ double ~ double 
-  			~ (matcher("""(-?(?:\d+|(?:\d*\.\d+)))\s*([^&\s]+(?:\s+\d+)?\s+)?&""") ^^^ { mtch:scala.util.matching.Regex.Match =>
+//  			~ (matcher("""(-?(?:\d+|(?:\d*\.\d+)))\s*([^&\s]+(?:\s+\d+)?\s+)?&""") ^^^ { mtch:scala.util.matching.Regex.Match =>
+  			~ (matcher("""(-?(?:\d+|(?:\d*\.\d+)))\s*(?:(?:\w\s*)?([^&\s]+(?:\s+\d+)?\s+)?)?&""") ^^^ { mtch:scala.util.matching.Regex.Match =>
   				val speed = mtch.group(1).toDouble
   				val targetStr = mtch.group(2)
   				val targetOpt = if(targetStr!=null && ! targetStr.isEmpty) Some(targetStr) else None

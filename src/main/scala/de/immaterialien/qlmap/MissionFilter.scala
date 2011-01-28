@@ -2,7 +2,7 @@ package de.immaterialien.qlmap
 
 import java.io._
 
-class MissionFilter(args: String) extends javax.xml.ws.Provider[File] with Log {
+class MissionFilter(args: String) extends javax.xml.ws.Provider[File] with Log with de.immaterialien.sturmonanny.fbdjhosting.NonMutatingFilter{
   val mapBase = new MapBase(new File(args))
   val groundClasses = new GroundClasses(args)
   override def invoke(file: File): File = {

@@ -79,7 +79,7 @@ debug(cls + " new instance not configured!")
 	  case _ =>
 	}
 	override def getPrice(plane : IMarket.Loadout, side:Int) : Double = {
-println("get Price "+plane+ " from "+internal)
+println("get Price "+plane+ " from "+internal + " in "+side)
 //if(plane.load.isEmpty)
 //new Exception().printStackTrace()
 val ret : Double =

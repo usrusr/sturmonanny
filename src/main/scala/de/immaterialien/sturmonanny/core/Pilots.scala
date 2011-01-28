@@ -209,8 +209,8 @@ println("    definitelyInPlane  ")
 				//invitations.value.retain(((x,y) => y.until > server.time.currentTimeMillis)) 
 				
 				
-				val planePrice = server.market.getPrice(planeName, load, currentSide.id)
-				
+//				val planePrice = server.market.getPrice(planeName, load, currentSide.id)
+				val planePrice = server.market.tryPrice(IMarket.Loadout(planeName, load), currentSide.id).getOrElse(0D)
 				
 				lostPlaneName = ""
 
