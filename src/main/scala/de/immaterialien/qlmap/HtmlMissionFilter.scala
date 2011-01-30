@@ -22,8 +22,7 @@ class HtmlMissionFilter(args: String) extends javax.xml.ws.Provider[File] with L
      val parsed = new MisParser(file, mapBase, groundClasses)
      val mapWriter = new scala.collection.mutable.ArrayBuffer[Elem]
      val img = MisRender.paint(file, parsed.out, mapBase, Some(mapWriter))
-     //        val img = Some(new File("src/test/resources/Afrika_42194204060.mis.JPG"))
-     
+     debug("created "+img.map(_ getAbsolutePath))
      for (i <- img) new HtmlUpdater(i, file, mapWriter).update
 
   }
@@ -80,7 +79,9 @@ class HtmlUpdater(path: File, mission: File, mapContent:Seq[Elem]) {
     val recons = parent.listFiles(reconFilter)
     val sorted = recons.sortBy(f => (-1L * f.lastModified))
 
-    val misList = <html><body style="font-size:smaller;">
+    val misList = <html>
+<head><link rel="stylesheet" href="../customizerecon/styles.css" type="text/css"></link></head>
+<body style="font-size:smaller;">
                           {
                             sorted.map { file =>
                               val fname = file.getName
@@ -98,6 +99,7 @@ class HtmlUpdater(path: File, mission: File, mapContent:Seq[Elem]) {
     val mis = <html>
                 <head>
                   <title>{ name }</title>
+    							<link rel="stylesheet" href="../customizerecon/styles.css" type="text/css"></link>
                 </head>
                 <body>
                   <table>

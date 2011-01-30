@@ -102,7 +102,11 @@ class MisModel {import MisModel._
     }
   }
   def imageFile =  if(_imageFile.exists) new java.io.FileInputStream(_imageFile) else {
-    this.getClass.getResourceAsStream("/mapbase/"+_imageFile.getName)
+    val ret = this.getClass.getResourceAsStream("/mapbase/"+_imageFile.getName)
+    if(ret==null){
+    	throw new java.io.FileNotFoundException("no map image "+_imageFile.getName+" found in "+_imageFile.getParentFile.getAbsolutePath)
+    }
+    ret
   }
   
   var rawAirFields:List[(Double, Double, Int)]=Nil

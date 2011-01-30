@@ -27,7 +27,7 @@
 		<!-- <url>http://scala-tools.org/repo-releases</url> -->
 		<!-- </pluginRepository> -->
 	</pluginRepositories>
-
+  
 	<dependencies>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
@@ -145,9 +145,33 @@
 		<resources>
 			<resource>
 				<directory>src/main/webapp</directory>
+        <filtering>true</filtering>
 			</resource>
 		</resources>
-		<plugins>
+  <plugins>
+<!--    <plugin>-->
+<!--        <groupId>org.codehaus.mojo</groupId>-->
+<!--        <artifactId>buildnumber-maven-plugin</artifactId>-->
+<!--        <version>1.0-beta-4</version>-->
+<!--      <executions>-->
+<!--        <execution>-->
+<!--          <phase>validate</phase>        -->
+<!--          <goals>-->
+<!--            <goal>create</goal>-->
+<!--          </goals>-->
+<!--        </execution>-->
+<!--      </executions>-->
+<!--      <configuration>-->
+<!---->
+<!--          <format>{0,date,yyyy-MM-dd HH:mm:ss}</format>-->
+<!--          <items>-->
+<!--            <item>timestamp</item>-->
+<!--          </items>-->
+<!---->
+<!--      </configuration>-->
+<!--    </plugin>-->
+
+		
 			<plugin>
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
@@ -315,7 +339,6 @@
 		<!-- <version>1.0-beta-2</version> -->
 		<!-- </extension> -->
 		<!-- </extensions> -->
-
 
 	</build>
 	<profiles>

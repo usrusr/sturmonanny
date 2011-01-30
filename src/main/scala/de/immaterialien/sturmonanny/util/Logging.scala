@@ -4,6 +4,7 @@ import net.liftweb.util._
 import net.lag.logging.Logger
 
 trait Logging { 
+//println("Logging hello")	
  // this : Lg => Logging     
 //trait Logging[Lg] {
 //  this : Lg with Logging[Lg] => 

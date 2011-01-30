@@ -37,6 +37,9 @@ object MisRender extends Log {
     var ig: java.awt.Graphics2D = null
     try {
       instream = model.imageFile
+      if(instream==null){
+      	log.error("no instream for ")
+      }
       var in = ImageIO.read(instream)
       ig = in.createGraphics()
       new MisRender(
@@ -172,7 +175,7 @@ private class MisRender(
   }
 
   def sequence(in: BufferedImage) {
-//    veil()
+    veil()
 //    veil()
 	  hatch(conf.front.hatchdistance.apply) 
 	  front(conf.front.subdivisions.apply, conf.front.interpolate.apply)
@@ -950,7 +953,8 @@ println("surprise gattack")
   }
 
   def hatch(step:Int) {
-
+log.debug("hatching...")
+var drawn = "nothing drawn"
     for {
       x <- 1 to iw - 1
       y <- 1 to ih - 1
@@ -958,7 +962,6 @@ println("surprise gattack")
       val isR = ((x + y) % step == 0)
       val isB = ((x - y) % step == 0)
       val max = 70
-
       def draw(who: Int, deep: Int) {
         ig2.setColor(new java.awt.Color(0, 0, 0, 0))
         if (who == 1 && isR) ig2.setColor(new java.awt.Color(255, 0, 0, deep))
@@ -968,7 +971,9 @@ println("surprise gattack")
           else if (isR) ig2.setColor(new java.awt.Color(255, 0, 0, max))
           else if (isB) ig2.setColor(new java.awt.Color(0, 0, 255, max))
         }
-        ig2.drawLine(x, y, x, y)
+        
+        ig2.drawLine(x, y, x+1, y)
+var drawn = "drawn ("+x+","+y+")"        
       }
 
       if (isR || isB) {
@@ -986,6 +991,7 @@ println("surprise gattack")
 
       ()
     }
+log.debug("...hatching done "+drawn)
 
     ()
   }

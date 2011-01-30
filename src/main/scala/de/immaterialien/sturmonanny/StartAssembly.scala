@@ -32,6 +32,7 @@ object StartAssembly {
 	  if( ! ips.trim.isEmpty){
 	    val old = server.getHandler
 	    var handler : jetty.handler.AbstractHandler = new jetty.handler.AbstractHandler(){
+	    	
 	      override def handle(pathInContext:String , request:HttpServletRequest , response:HttpServletResponse, number:Int ){
 	        request match {
 	          case req:jetty.Request=> if( ! ips.contains(request.getRemoteAddr)){

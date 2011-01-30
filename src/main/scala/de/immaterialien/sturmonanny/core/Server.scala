@@ -7,11 +7,22 @@ import _root_.de.immaterialien.sturmonanny.persistence.BalanceWrapper
   
 
 
-trait Server extends Logging with TimeHolder{ 
+trait Server extends Logging with TimeHolder{
+println("Server hello")	
 	def conf : Configuration 
 	def conf_= (newConf : Configuration)
 	def shutdown
-	
+	debug("init server trait...") 
+//	 {
+//		val stream = classOf[Server].getResourceAsStream("/version.properties")
+//		val filteredProps = new java.util.Properties()
+//		filteredProps.load(stream)
+//		
+//		val v = filteredProps.getProperty("version")
+//		stream.close
+//		v
+//	}
+	val version = 0
 	private var members : List[UpdatingMember] = Nil
 	
 	val balance : BalanceWrapper with Member 
@@ -26,7 +37,7 @@ trait Server extends Logging with TimeHolder{
 	val time : TimeSource //with Member
 //	val squeryl : SquerylContext with Member
 	
-debug("init server trait")	
+debug("init server trait in build "+ version)	
 
 	protected def init(){
 		//	debug("conf is initialized from '"+initConf+"'\n================\n"+conf)
@@ -46,11 +57,12 @@ debug("init server trait")
 	}	
 }
 class ServerImpl(val initConf : String, val threadGroup:java.lang.ThreadGroup) extends Server{ Server =>
+println("ServerImpl hello")
   def this(initConf:String) = this(initConf, null)
 	def this() = this("default.conf") 
 	private var members : List[UpdatingMember] = Nil 
 	//this : Server =>
- 
+debug("starting server, version "+version) 
 	private var internalconf = new Configuration(initConf, this)  
 	override def conf = internalconf  
 	override def conf_= (newConf : Configuration) {  
@@ -84,22 +96,26 @@ trait UpdatingMember {
 	def conf  : Configuration = Configuration.default(server)
 }
 
-object Server {
+object Server extends Logging{
   def withThreadGroup(conf:String):Server={
+println("starting server within thread group...")  	
     val notifier = new java.lang.Object
     var result :Server=null
     var throwable:Throwable=null
     val tg = new ThreadGroup("server "+conf)
     val t = new Thread(tg, "server "+conf+" init"){
       override def run={
+println("inside thread group...")  	
         try{
         	result = new ServerImpl(conf, tg)
+println("done new ServerImpl "+result)        	
         }catch{
           case x => {
+error("could not load server ",x)          	
             throwable = x
           }
         }finally {
-//println("done "+throwable+" -> "+result)      
+println("done "+throwable+" -> "+result)      
 	        notifier.synchronized{
 	          notifier.notifyAll
 	        }

@@ -37,7 +37,8 @@ net.lag.configgy.Configgy.configure("log.conf")
 //"src/test/resources/de/immaterialien/qlmap/Iasi44194405011.mis",  			
 //"src/test/resources/de/immaterialien/sturmonanny/dcg/failedSequence.orig.processed.mis",  			
 //"src/test/resources/nbmaps/Iasi44194405123.mis",
-"src/test/resources/hnmaps/iasi_44194405050.mis", 
+//"src/test/resources/hnmaps/iasi_44194405180.mis", 
+"src/test/resources/hnmaps/okinawa_45194504010.mis",
   	"").filter(_.length>0)){
   		val misFile = new java.io.File(mis)
   		filter.inline(misFile) 
@@ -47,8 +48,8 @@ net.lag.configgy.Configgy.configure("log.conf")
 class HtmlTest {
   @org.junit.Test 
   def runMain = HtmlTest.main((
-//  		"src/test/resources/de/immaterialien/qlmap/Iasi44194405011.mis"
-  		"sturmonanny/src/test/resources/hnmaps/iasi_44194405050.mis"
+  		"src/test/resources/de/immaterialien/qlmap/Iasi44194405011.mis"
+//  		"sturmonanny/src/test/resources/hnmaps/iasi_44194405150.mis"
   		::Nil).toArray)
   //misFile = new java.io.File("src/test/resources/de/immaterialien/sturmonanny/dcg/Iasi44194405020.mis")
 }

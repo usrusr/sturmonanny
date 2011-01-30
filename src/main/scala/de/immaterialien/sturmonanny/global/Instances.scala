@@ -35,11 +35,14 @@ println("dropping "+k)
     
     initInstances()
   }
-  private def newServer(name:String, conf:String):Unit={
+  private def newServer(name:String, conf:String)={
+  		var server :  de.immaterialien.sturmonanny.core.Server= null 
       try{ 
-        val server = core.Server.withThreadGroup(conf)
+println("go create... "+name+": "+conf+" in "+new java.io.File(conf).getAbsolutePath)        
+        server = core.Server.withThreadGroup(conf)
 println("created server for "+name+": "+server)        
         if(instancesMapToLoad!=null) instancesMapToLoad.put(name, server)
+        
       }catch {
         case x : java.io.FileNotFoundException => status.error(name+": file "+conf+" was not found ("+new java.io.File(conf).getAbsolutePath+")")
         case x : java.io.IOException => status.error(name+": could not read "+conf)
@@ -50,20 +53,33 @@ println("created server for "+name+": "+server)
         }
         case x => status.error(name+": error reading "+conf)
       }
+      server
   }
   
   protected def initInstances() = for((k, v) <- instances.map){
     if(instancesMapToLoad!=null) instancesMapToLoad.get(k) match {
 	  	  case None => {
-	  	    newServer(k,v)
+println("found none for '"+k+"', creating server... ") 	  	  	
+	  	    val ret = newServer(k,v)
+	  	    val typename = if(ret!=null) ret.getClass.getName else "unknown type"
+println("...created "+ret + " which is "+typename) 	  	  	
+
+	  	    ret
 	  	  } 
 	  	  case Some(null) => {
-	  	    newServer(k,v)
+println("found Some(null) for '"+k+"', creating server... ") 	  	  	
+	  	    val ret = newServer(k,v)
+println("...created "+ret) 	  	  	
+	  	    ret
 	  	  }
 	  	  case Some(existing) => {
 	  		  if(existing.conf.file != v){
+println("found "+existing+" for '"+k+"', sutting down old ... ") 	  	  	
 	  		    existing.shutdown
-	  		    newServer(k,v)
+println("...and creating new...") 	  	  	
+		  	    val ret = newServer(k,v)
+println("...created "+ret) 	  	  	
+		  	    ret
 	  		  }
 	      }   
 	  	}
