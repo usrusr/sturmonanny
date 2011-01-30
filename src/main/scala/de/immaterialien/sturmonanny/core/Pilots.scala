@@ -109,6 +109,7 @@ debug ("loaded "+loadedOpt)
 			 * full payment pilot->price, as divided after applying recruit share
 			 */
 			var lastPayment : Option[Rules.PriceInfo]=None 
+			var nextPayment : Option[(Rules.PriceInfo, Armies.Armies, Option[AutoInvitations#InvitationState#Invitation])] = None
 			
 			def dies() = {
 				if(wasInFlight && ! died ) {
@@ -239,7 +240,7 @@ println("    definitelyInPlane  ")
 						
 						lastPlaneVerification = lastPlanePriceCommit
 						for(i<-invitation) i.preaccept()
-						pay(rawPrice, side, invitation)
+						verifyStartPay(rawPrice, side, invitation)
 					}
 //					server.rules.startCostCheck(planePrice, balance) match {
 //					case Rules.CostResult(true, newBalance, newRefund, startFee) => {
@@ -262,11 +263,18 @@ println("    definitelyInPlane  ")
 			def planeNotEmpty = ! (planeName==null || planeName=="")
 			def planeNotLostPlane = lostPlaneName==null || lostPlaneName=="" || planeName != lostPlaneName
 
-			def pay(rawPrice:Rules.PriceInfo, side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]) {
+			def verifyStartPay(rawPrice:Rules.PriceInfo, side:Armies.Armies, invitation:Option[AutoInvitations#InvitationState#Invitation]) {
+				chat("Plane verified")
+				state.verify()
+				
+				nextPayment = Some(rawPrice, side, invitation)
+			}
+			
+			def applyStartPay:Unit= for((rawPrice, side, invitation) <- nextPayment){
 				rawPrice.payments match {
 					case me :: Nil => {
 						chat("Start fee "+currency(me.what)++", possible refund: "+currency(refund(me.what)))
-						balance (side) = server.rules.updateBalance(balance(side), - me.what) 
+						balance (side) = server.rules.updateBalance(balance(side), - me.what)
 					}
 					case me :: boss :: Nil => {
 						chat("Start fee "+currency(me.what)++", possible refund: "+currency(refund(me.what)))
@@ -277,8 +285,8 @@ println("    definitelyInPlane  ")
 						}
 					}
 					case Nil => {
-						chat("Plane verified")
-						state.verify()
+//						chat("Plane verified")
+//						state.verify()
 					}
 					case other => for(pay<-other){
 						domain.forElement(pay.who){ payer =>
@@ -289,8 +297,9 @@ println("    definitelyInPlane  ")
 						}
 					}
 				}
-debug("setting price to in pay "+rawPrice, new Exception("stack trace creation, not an actual exception"))				
+//debug("setting price to in pay "+rawPrice, new Exception("stack trace creation, not an actual exception"))				
 				lastPayment = Some(rawPrice)
+				nextPayment = None
 			} 
 			def firstNonNeutralOption(sides:Option[Armies.Armies]*):Armies.Armies={
 				val fs = sides.flatten
@@ -316,7 +325,7 @@ error("this code should be dead code now!")
 					val newPriceInfo = server.rules.startCost(newPrice, name, inv.map(_.inv.by),side, inv)
 					if(lastPayment.isEmpty) {
 						if(verbose) chat("directly paying with loadout "+what)
-						pay(newPriceInfo, side, inv)
+						verifyStartPay(newPriceInfo, side, inv)
 					} else { 
 						val payment = lastPayment.get
 						if(payment.price != newPrice ){
@@ -438,6 +447,7 @@ debug("update plane name '"+planeName+"' to '"+what+"'")
 				flying=false
 				planeName = ""
 				lastPayment = None
+				nextPayment = None
 				load = None
 				invites.clean
 				joinNeutral()
@@ -609,6 +619,7 @@ debug("memorizing  for repetition check log event "+event)
 //debug(name + " Is.InFlight "+state)
 					if( ! (state.crashed || state.died)){
 						if( ! state.flying ){
+							state.applyStartPay
 							state.flying = true
 						}
 						state.commitPlanePrice()
