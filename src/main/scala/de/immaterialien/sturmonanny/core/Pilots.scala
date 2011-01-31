@@ -173,6 +173,7 @@ debug ("loaded "+loadedOpt)
 			
 			
 			def commitPlanePrice(){
+				applyStartPay				
 			  if(planeVerified) for(planePrice <- lastPayment.map(_ price)){ 
 			  	val now = server.time.currentTimeMillis
 					val millis = now - lastPlanePriceCommit
@@ -273,15 +274,15 @@ println("    definitelyInPlane  ")
 			def applyStartPay:Unit= for((rawPrice, side, invitation) <- nextPayment){
 				rawPrice.payments match {
 					case me :: Nil => {
-						chat("Start fee "+currency(me.what)++", possible refund: "+currency(refund(me.what)))
-						balance (side) = server.rules.updateBalance(balance(side), - me.what)
+						chat("Possible refund: "+currency(refund(me.what)))
+						balance (side) = server.rules.updateBalance(balance(side), - refund(me.what))
 					}
 					case me :: boss :: Nil => {
-						chat("Start fee "+currency(me.what)++", possible refund: "+currency(refund(me.what)))
-						balance (side) = server.rules.updateBalance(balance(side), - me.what) 
+						chat("Possible refund: "+currency(refund(me.what)))
+						balance (side) = server.rules.updateBalance(balance(side), - refund(me.what)) 
 						domain.forElement(boss.who){ recruiter => 
-							if(invitation.isDefined) recruiter ! BalanceUpdate(-boss.what, invitation.get.inv.side, " recruited "+name+", possible refund: "+currency(refund(boss.what)))
-							else recruiter ! BalanceUpdate(-boss.what, currentSide, name+" used your invitation") // something's wrong if this message appears!
+							if(invitation.isDefined) recruiter ! BalanceUpdate(-refund(boss.what), invitation.get.inv.side, " recruited "+name+", possible refund: "+currency(refund(boss.what)))
+							else recruiter ! BalanceUpdate(-refund(boss.what), currentSide, name+" used your invitation") // something's wrong if this message appears!
 						}
 					}
 					case Nil => {
@@ -291,7 +292,7 @@ println("    definitelyInPlane  ")
 					case other => for(pay<-other){
 						domain.forElement(pay.who){ payer =>
 							payer ! BalanceUpdate(
-									-pay.what, 
+									-refund(pay.what), 
 									invitation.map(_.inv.side).getOrElse(currentSide), 
 									" recruitment cost for "+name) // something's wrong if this message appears!
 						}
@@ -483,9 +484,9 @@ println("price for side "+currentSide.id+" :" +priceOpt)
 						val affordable = cost < bal 
 						
 						if(affordable){
-							(true, "+", "costs.once."+cost.toInt+".+" )
+							(true, "+", "refund."+refund(cost).toInt+".+" )
 						}else{
-							(false, "!", "would.cost."+cost.toInt+".+" )
+							(false, "!", "min.solvency."+cost.toInt+".+" )
 						}
 					}else{
 						(true, "*", "gives")
@@ -497,7 +498,8 @@ println("price for side "+currentSide.id+" :" +priceOpt)
 						//                                   P_40SUKAISVOLOCHHAWKA2
 						val paddedPlane = padRight(plane.name, "......................")
 						//                              would cost 1000 +  
-						val paddedVerb = padLeft(verb, ".................")
+						//                              min.solvency.1000 +
+						val paddedVerb = padLeft(verb, "...................")
 						
 						var intPrice = price.toInt
 						intPrice = intPrice.abs
@@ -619,7 +621,7 @@ debug("memorizing  for repetition check log event "+event)
 //debug(name + " Is.InFlight "+state)
 					if( ! (state.crashed || state.died)){
 						if( ! state.flying ){
-							state.applyStartPay
+
 							state.flying = true
 						}
 						state.commitPlanePrice()
