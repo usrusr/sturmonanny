@@ -13,7 +13,8 @@ object AllPlanesTest {
 //		val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/Iasi44194405020.mis")
 //		val f1 = new File("C:/zuti-IL2-server/Dedi/Missions/Net/dogfight/DCG/Iasi44194405010.mis.mis.preflatten")
 		
-		val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/failedSequence.orig.mis")
+//		val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/failedSequence.orig.mis")
+		val f0 = new File("src/test/resources/italy_crash1.mis")
 		
 		val f1 = new File(f0.toString.dropRight(4)+".processed.mis")
 		f1.delete

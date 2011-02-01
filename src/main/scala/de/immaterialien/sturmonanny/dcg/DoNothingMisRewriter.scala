@@ -23,7 +23,7 @@ println(" intermediateName: "+ret)
 		
 		    val g = gatherer
 
-		    val out = new File(file.getParent, file.getName.dropRight(4) + "."+intermediateName+".mis")
+		    val out = new File(file.getParent, file.getName.dropRight(4) + "."+intermediateName+".tmp")
 		    if(out.exists) out.delete
 		    val w = new FileWriter(out)
 		    g.writer = Some(w)
