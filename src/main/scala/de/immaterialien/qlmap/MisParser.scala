@@ -1,9 +1,9 @@
 package de.immaterialien.qlmap
 
 import scala.util.parsing.combinator._
-import de.immaterialien.sturmonanny.util.trie._
+import de.immaterialien.sturmonanny.util._
 
-class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) extends RegexParsers with TrieParsers with Log {
+class MisParser(misFile: java.io.File, config: MapBase, grounds: GroundClasses) extends ParseUtil with trie.TrieParsers with Log {
 	
 	override val whiteSpace = """[ \t]+""".r
 	 
@@ -58,7 +58,9 @@ println("unknown ini["+ x + "]")
     )
   }
   lazy val anyLine: Parser[Unit] = {
-    ("[^\\[].+".r)~ eol ^^^ ()
+    ("[^\\[].+".r)~ eol ^^ (x=>
+    		println("ignoring '"+x+"'")
+    		)
   }
   lazy val emptyLine: Parser[Unit] = {
     ("\\s*".r) ~ eol ^^^ ()
@@ -169,66 +171,53 @@ println("unknown ini["+ x + "]")
       }
     }
   }
-  /**
-   * like a literal but without ignoring leading whitespace
-   * @param str
-   * @return
-   */
-  def direct(str:String):Parser[String] = new Parser[String] {
-    def apply(in: Input) = {
-    	val off = in.offset
-      var i = 0
-      var j = off
-      while (i < str.length && j < in.source.length && str.charAt(i) == in.source.charAt(j)) {
-        i += 1
-        j += 1
-      }
-      val found = in.source.subSequence(off, j).toString
-      val r = "".r
-      if (i == str.length)
-        Success(found, in.drop(j - off))
-      else 
-        Failure("expected '"+str+"' but found '"+found+"'", in)
-    }
-  }
-  def matcher(reg:String):Parser[scala.util.matching.Regex.Match] = matcher(reg.r)
-  def matcher(reg:scala.util.matching.Regex):Parser[scala.util.matching.Regex.Match] = new Parser[scala.util.matching.Regex.Match] {
-    def apply(in: Input) = {
-    		val off = in.offset
-    		(reg findPrefixMatchOf (in.source.subSequence(off, in.source.length))) match {
-	        case Some(matched) =>
-	          Success(matched, 
-              in.drop(matched.end))
-	        case None =>
-	          Failure("no match for "+reg+" ", in)
-	      }
-    }
-  }
-  def direct(reg:scala.util.matching.Regex):Parser[String] = new Parser[String] {
-    def apply(in: Input) = {
-    		val off = in.offset
-    		(reg findPrefixMatchOf (in.source.subSequence(off, in.source.length))) match {
-	        case Some(matched) =>
-	          Success(in.source.subSequence(off, off + matched.end).toString, 
-              in.drop(matched.end))
-	        case None =>
-	          Failure("no match for "+reg+" ", in)
-	      }
-    	
-    	
+//  /**
+//   * like a literal but without ignoring leading whitespace
+//   * @param str
+//   * @return
+//   */
+//  def direct(str:String):Parser[String] = new Parser[String] {
+//    def apply(in: Input) = {
+//    	val off = in.offset
 //      var i = 0
-//      var j = 0
+//      var j = off
 //      while (i < str.length && j < in.source.length && str.charAt(i) == in.source.charAt(j)) {
 //        i += 1
 //        j += 1
 //      }
-//      val found = in.source.subSequence(0, j).toString
+//      val found = in.source.subSequence(off, j).toString
+//      val r = "".r
 //      if (i == str.length)
-//        Success(found, in.drop(j - in.offset))
+//        Success(found, in.drop(j - off))
 //      else 
 //        Failure("expected '"+str+"' but found '"+found+"'", in)
-    }
-  }
+//    }
+//  }
+//  def matcher(reg:String):Parser[scala.util.matching.Regex.Match] = matcher(reg.r)
+//  def matcher(reg:scala.util.matching.Regex):Parser[scala.util.matching.Regex.Match] = new Parser[scala.util.matching.Regex.Match] {
+//    def apply(in: Input) = {
+//    		val off = in.offset
+//    		(reg findPrefixMatchOf (in.source.subSequence(off, in.source.length))) match {
+//	        case Some(matched) =>
+//	          Success(matched, 
+//              in.drop(matched.end))
+//	        case None =>
+//	          Failure("no match for "+reg+" ", in)
+//	      }
+//    }
+//  }
+//  def direct(reg:scala.util.matching.Regex):Parser[String] = new Parser[String] {
+//    def apply(in: Input) = {
+//    		val off = in.offset
+//    		(reg findPrefixMatchOf (in.source.subSequence(off, in.source.length))) match {
+//	        case Some(matched) =>
+//	          Success(in.source.subSequence(off, off + matched.end).toString, 
+//              in.drop(matched.end))
+//	        case None =>
+//	          Failure("no match for "+reg+" ", in)
+//	      }
+//    }
+//  }
 
   lazy val wingWaypoint: Parser[MisModel#Wing=>Unit] = {
   	/*
@@ -352,15 +341,15 @@ DCG BUG???                               ||
   	})// | (("""[^\[\]\s]+""".r ~ "\\s+".r ~ """[^\[\]\s]+""".r ~ rep("\\s+".r ~ """[^\[\]\s]+""".r)) ^^^ (_=>()))
   }
 
-  lazy val int: Parser[Int] = {
-    """-?\d+[ \t]*""".r ^^ (_.trim toInt)
-  }
-  lazy val double: Parser[Double] = {
-    //"""-?(\d+|(?:\d*\.\d+))\s+""".r ^^ (_.trim toDouble)
-  	"""-?(?:(?:\d*\.\d+)|\d+)[ \t]*""".r ^^ 
-  	(_.trim toDouble)
-//  	{x=> println("double("+x+")"); x.trim toDouble}
-  }
+//  lazy val int: Parser[Int] = {
+//    """-?\d+[ \t]*""".r ^^ (_.trim toInt)
+//  }
+//  lazy val double: Parser[Double] = {
+//    //"""-?(\d+|(?:\d*\.\d+))\s+""".r ^^ (_.trim toDouble)
+//  	"""-?(?:(?:\d*\.\d+)|\d+)[ \t]*""".r ^^ 
+//  	(_.trim toDouble)
+////  	{x=> println("double("+x+")"); x.trim toDouble}
+//  }
     lazy val doubleNoBlank: Parser[Double] = {
     //"""-?(\d+|(?:\d*\.\d+))""".r ^^ (_.trim toDouble)
     """-?(?:(?:\d*\.\d+)|\d+)""".r ^^ (_.trim toDouble)

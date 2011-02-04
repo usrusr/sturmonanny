@@ -44,7 +44,7 @@ println(" intermediateName: "+ret)
 
 }
 
-object DoNothingMisRewriter extends Log {
+object DoNothingMisRewriter extends Log with  ParseUtil {
   /**
    * will make two passes: 
    * first with writer = None gathering info in the two maps

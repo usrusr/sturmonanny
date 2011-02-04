@@ -1,0 +1,27 @@
+[1 italy_43]
+A-20C = -0.5
+A-20G= 5
+P-47D-10= -4
+SpitfireMkVbCLP= 5
+
+[1 italy_43  194309]
+A-20G= -0.333  # ab September ist A-20G in großen Stückzahlen verfügbar
+
+[2 italy_43 19430815]
+# alternate history:
+Fw-190A-5= -5 # günstig eine Palette Fockes auf ebay geschossen
+# Fw-190A-5165ATA= 5 die Turbolader mussten aber
+# zwecks Reverse-Engineering nach München geschickt werden
+
+[2 italy_43 ]
+Ju-88A-4 =  -5
+MC-205_I= -5
+MC-205_III= -1
+Bf-109G-6AS=5
+Fw-190A-5= 15
+
+
+[1 normandy_44]
+P-51B-NA=-100 # Todesursache #1: Blackouts
+[2 normandy_44]
+Bf-109G-6_Late=-100 # 'stangs vs. 109!

@@ -33,6 +33,7 @@ class MapConf(private val fname:String) extends ConfigurationSchema(fname) with 
 				   if it is relative then it will be interpreted as relative to mapbase """
 	}
 	object debug extends Field(false, "set to true for full chief route display")
+	object outputFormat extends Field("JPG", "standard java2d output format, known to work are JPG (small,fuzzy), PNG (big,perfect), GIF (small, weird colors)")
 	object finishMessage extends Field("new recon map available", "message to be sent by TalkingHtmlMissionFilter")
 	object front extends Group {
 		object interpolate extends Field(5){

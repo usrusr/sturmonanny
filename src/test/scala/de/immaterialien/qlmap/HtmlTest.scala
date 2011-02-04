@@ -36,9 +36,10 @@ net.lag.configgy.Configgy.configure("log.conf")
 
 //"src/test/resources/de/immaterialien/qlmap/Iasi44194405011.mis",  			
 //"src/test/resources/de/immaterialien/sturmonanny/dcg/failedSequence.orig.processed.mis",  			
-//"src/test/resources/nbmaps/Iasi44194405123.mis",
+"src/test/resources/nbmaps/Iasi44194405123.mis",
 //"src/test/resources/hnmaps/iasi_44194405180.mis", 
-"src/test/resources/hnmaps/okinawa_45194504010.mis",
+//"src/test/resources/hnmaps/italy_43194308120.mis",
+//"E:/IL2-server/DCG/_ita_iasi_norm_oki/italy_43.mis",
   	"").filter(_.length>0)){
   		val misFile = new java.io.File(mis)
   		filter.inline(misFile) 

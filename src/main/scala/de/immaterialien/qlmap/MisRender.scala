@@ -19,7 +19,7 @@ object MisRender extends Log {
     val outputPath = mapBase.configuration.flatMap(_.outPath)
     val sprites: Sprites = new Sprites(Some(mapBase.folder))
     val conf = mapBase.configuration.getOrElse(new MapConf(""))
-    var format: String = null
+    var format: String = mapBase.configuration.map(_.outputFormat.apply).getOrElse("JPG")
 
     //     reanimate to enable PNG output...    
     //         val iis = ImageIO.createImageInputStream(model.imageFile)
@@ -31,8 +31,9 @@ object MisRender extends Log {
     //         iis.close
 
     // jpg
-    if (format == null) format = "JPG"
-    //format = "PNG"      
+//    if (format == null) format = "JPG"
+    //format = "PNG"
+//format  = "GIF"
     var instream: java.io.InputStream = null
     var ig: java.awt.Graphics2D = null
     try {
@@ -485,21 +486,24 @@ println("surprise gattack")
     	for ((cls, x, y, side) <- model.rawGroundUnits) if(cls.weight > 0) {
     		val withDist: List[((Double, Double, Int), Double)]=markers.map(m=> (m, distance(m._1,m._2,x,y)))
 
-    		val (closest,dist) = withDist min Ordering[Double].on[(_,Double)](_._2)
+    		if(withDist.isEmpty) {new Counter((0d,0d,0))} else{
     		
-    		// increase search radius for units on foreign territory (because there's not really a reason to expect them _at_ the enemy front marker...)
-    		val sideRadiusFactor = if(closest._3 != side) 4 else 1
-    		
-    		if(dist<radius * sideRadiusFactor){
-    			
-    			val rb=markerCounters(closest)
-    			val cntMap = if(side==1)rb._1 else rb._2 
-    			val cnt = cntMap.get(cls).getOrElse{
-    				val ncnt=new Counter(closest)
-    				cntMap+=((cls,ncnt))
-    				ncnt
-    			}
-    			cnt.addHard(x, y)
+	    		val (closest,dist) =  withDist min Ordering[Double].on[(_,Double)](_._2)
+	    		
+	    		// increase search radius for units on foreign territory (because there's not really a reason to expect them _at_ the enemy front marker...)
+	    		val sideRadiusFactor = if(closest._3 != side) 4 else 1
+	    		
+	    		if(dist<radius * sideRadiusFactor){
+	    			
+	    			val rb=markerCounters(closest)
+	    			val cntMap = if(side==1)rb._1 else rb._2 
+	    			val cnt = cntMap.get(cls).getOrElse{
+	    				val ncnt=new Counter(closest)
+	    				cntMap+=((cls,ncnt))
+	    				ncnt
+	    			}
+	    			cnt.addHard(x, y)
+    		  }
     		}
       }
     	// iterate over markerCounters for sides
