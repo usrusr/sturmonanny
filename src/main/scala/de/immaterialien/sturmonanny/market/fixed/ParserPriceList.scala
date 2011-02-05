@@ -75,7 +75,7 @@ println("parsed: "+parsed)
 //    	bol ~> "[^#\\s]\\S*[^\\s=]".r ~ "=" ~ double ^^ {
 //    		case plane ~ _ ~ price => (plane -> price)
 //    	}
-    	bol ~> matcher("""(\S+)\s*=\s*(-?(?:(?:\d*\.\d+)|\d+))""")^^ {
+    	bol ~> matcher("""[ \t]*(\S+)[ \t]*=[ \t]*(-?(?:(?:\d*\.\d+)|\d+))""")^^ {
     		groups=>{
 	    		val plane = groups.group(1)
 	    		val price = groups.group(2).toDouble
@@ -93,11 +93,11 @@ println("parsed: "+parsed)
     	// [ 99 ]
     	// [ 99 999 ]
       matcher(
-      		"""\[\s*"""+
-      		"""(?:(\d)\s+)?""" + // army
+      		"""\[[ \t]*"""+
+      		"""(?:(\d)[ \t]+)?""" + // army
       		"""(\S\S+)"""+ // campaign
-      		"""(?:\s+(\d+))?"""+ // mindate
-      		"""\s*\]""") ^^ { m  => 
+      		"""(?:[ \t]+(\d+))?"""+ // mindate
+      		"""[ \t]*\]""") ^^ { m  => 
       			val side = math.max(0, ifNull(m.group(1),"0").toInt)
       			val campaign = m.group(2)
       			val dateStr = dateFloor(ifNull(m.group(3),""))
@@ -110,5 +110,8 @@ println("parsed: "+parsed)
     	(box, lines)
     }
     lazy val otherBox = bol ~> firstBox
+  }
+  override def toString = {
+  	timeTable.toList.mkString("\n")
   }
 }
