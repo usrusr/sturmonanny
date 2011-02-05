@@ -201,7 +201,7 @@
 					<displayCmd>true</displayCmd>
 					<!-- <fork>true</fork> -->
 					<!-- <recompileMode>all</recompileMode> -->
-					<verbose>true</verbose>
+<!--					<verbose>true</verbose>-->
 					<!-- <args></args> -->
 				</configuration>
 			</plugin>
