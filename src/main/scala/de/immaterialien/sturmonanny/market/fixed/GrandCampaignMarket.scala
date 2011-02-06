@@ -30,20 +30,23 @@ import GrandCampaignMarket._
 //			timeTable=update
 			updateFromTimeTable
 		}
-		
-//		for(
-//				set<-planesInMis.values;
-//				plane<-set
-//				) {
-//debug("creating "+plane+" in market ")		    
-//			    planes.create(plane)
-//
-//		}
+debug("server is "+server)		
+		for(
+				set<-planesInMis.values;
+				plane<-set;
+				srv <- server
+				) {
+debug("creating "+plane+" in market ")
+				srv.planes.create(plane)
+
+		}
 //		def dateFloor(date:String) = date+("0"*(9-math.min(date.length, 9))) 
 		
 	}
  	def updateFromTimeTable {
- 		if(misFile!=null){
+ 		if(misFile==null){
+warn("no updating from timetable when mission is null")  			
+ 		}else{
 	 		lastUpdate = System.currentTimeMillis
 	 		
 	 		val (campa, misDate) = misFile.getName match {
@@ -58,13 +61,18 @@ import GrandCampaignMarket._
 			for(((entryCampa,dateLimit) , thisMap)<-priceListParser.timeTable){
 	//			val dateLimit = dateFloor(sinceMis._2)
 	//			val entryCampa=sinceMis._1
-	//println("dateLimit:"+dateLimit+" misdate:"+misDate)			
+debug("dateLimit:"+dateLimit+" misdate:"+misDate +" -> "+thisMap)			
+//debug("updated from timetable for "+misFile+": "+result)	 		
 				if(entryCampa == campa && dateLimit.toLong <= misLong){
 					for((side,prices)<-thisMap){
 						result += (side -> (result.get(side).getOrElse(Map[String,Double]()) ++ prices ))
 					}
+debug("added to result dateLimit:"+dateLimit+" misdate:"+misDate +" ++ "+thisMap)
+				}else{
+debug("skipped dateLimit:"+dateLimit+" misdate:"+misDate +" -> "+thisMap)
 				}
 			} 		
+debug("updated from timetable for "+misFile+": "+result)	 		
 			priceList = result
 	 	}
  	}

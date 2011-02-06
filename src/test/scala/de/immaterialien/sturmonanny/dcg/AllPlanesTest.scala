@@ -32,17 +32,17 @@ object AllPlanesTest {
 //		ap.invoke(f1)
 		val aps = List(
 				
-			new ForceAiAirStart(""),	
+//			new ForceAiAirStart(""),	
 							
 //			new ForceDotsInChiefs(""),
 //			new AllPlanesEverywhere("config"),
-//			new PimpMyBornPlace(" 1 1000 200 11 0 500 12000 30 0 0 0 0 0 3.8 0 0 0"),
+			new PimpMyBornPlace(" 1 1000 200 11 0 500 12000 30 0 0 0 0 0 3.8 0 0 0"),
 //			new DelayedChiefs("min=2 max=20"),				
 //			
-//			new RetreatBornPlace("distance=20000 radius=3000 minRemaining=2 " +
-//					" bluedummy=2 vehicles.artillery.Artillery$Maxime bluedummy= 3 vehicles.artillery.Artillery$MG42"+
-//					" reddummy=vehicles.artillery.Artillery$Maxime "
-//			),
+			new RetreatBornPlace("distance=10000 radius=3000 minRemaining=2 " +
+					" bluedummy=2 vehicles.artillery.Artillery$Maxime bluedummy= 3 vehicles.artillery.Artillery$MG42"+
+					" reddummy=vehicles.artillery.Artillery$Maxime "
+			),
 			
 //			new de.immaterialien.qlmap.HtmlMissionFilter("E:/2.8workspace/qlmap/src/main/resources/mapbase/out.conf"),						
 			new DoNothingMisRewriter("config"){override def invoke(in:File)=in}

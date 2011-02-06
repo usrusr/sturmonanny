@@ -23,12 +23,23 @@ class RetreatBornPlace(args: String) extends DoNothingMisRewriter(args) { import
     
     for((side,places)<-g.sidesToPlaceLocs){
     	val placesWithDistance = places.map(place=>{
-	    	val closestDistance = g.sidesToMarkers.filter(_._1 != side).flatMap(_._2).map(marker=> {
-	    		val dx=(marker._1 - place._1)
-	    		val dy=(marker._2 - place._2)
+	    	val closestDistances = g.sidesToMarkers.filter(_._1 != side).flatMap(_._2).map(marker=> {
+	    		val dx=(place._1 - marker._1 )
+	    		val dy=(place._2 - marker._2 )
 	    		val dist=math.sqrt((dx*dx)+(dy*dy))
+if(dist<minDistance)	    		
+log.debug("side "+side+
+		" x: "+place._1+" - "+marker._1+"" + " = "+dx+
+		" y: "+place._2+" - "+marker._2+"" + " = "+dy+
+		" result:"+dist
+		)	    		
 	    		dist
-	    	}).firstOption.getOrElse(java.lang.Double.MAX_VALUE)
+	    	})
+	    	//val closestDistance = closestDistances.firstOption.getOrElse(java.lang.Double.MAX_VALUE)
+	    	val closestDistance = if(closestDistances.isEmpty) java.lang.Double.MAX_VALUE else {
+	    		//closestDistances.firstOption.get
+	    		closestDistances.min
+	    	}
     		(place, closestDistance)
     	})
     	val fromRadius = placesWithDistance.filter(_._2 < minDistance).toList
