@@ -96,6 +96,7 @@ object DoNothingMisRewriter extends Log with  ParseUtil {
 //      		| (iniLine("Chiefs") ~ rep(anyLine) ~> rep(chiefRoads)) 
       		interestingBlocks
       		| (iniLine ~ rep(anyLine)) 
+      		| (("\\s*".r ^^ keep) ~ k("[MAIN]") ~ rep(anyLine))
       		| "\\z".r
         //) ~ "$".r  ^^^ kept
 		) ~ (o ~ "\\z?".r) ^^^kept
@@ -171,6 +172,7 @@ object DoNothingMisRewriter extends Log with  ParseUtil {
     lazy val w: Parser[Kept] = "[ \\t]+".r ^^ keep
     
     lazy val o: Parser[Kept] = "\\s*".r ^^ (_=> keep("\r\n"))
+//    lazy val o: Parser[Kept] = "[ \\t]*[\\r\\n]\\s*".r ^^ (_=> keep("\r\n"))
     
     
     def matcher(reg:String):Parser[scala.util.matching.Regex.Match] = matcher(reg.r)

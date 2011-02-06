@@ -176,7 +176,7 @@ private class MisRender(
   }
 
   def sequence(in: BufferedImage) {
-    veil()
+    if(debugMode)veil()
 //    veil()
 	  hatch(conf.front.hatchdistance.apply) 
 	  front(conf.front.subdivisions.apply, conf.front.interpolate.apply)

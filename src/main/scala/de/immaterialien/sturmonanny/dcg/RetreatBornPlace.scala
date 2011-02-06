@@ -129,6 +129,7 @@ object RetreatBornPlace {
      */
     def isDestroyed(x:Double,y:Double, side:Int) : Boolean = {
     	val destroyeds = destroy.get(side).getOrElse(Nil)
+//println("testing "+(x,y)+" for "+side)    	
   		val safe = destroyeds.projection.map(e=> {
   			val dx = x - e._1
   			val dy = y - e._2
@@ -136,7 +137,9 @@ object RetreatBornPlace {
 //println("dsit "+dist+" < "+radius)  			
   			dist
   		}).filter(_ < radius).isEmpty
-  		! safe
+  		val ret = ! safe
+//println("ret "+ret)  			
+  		ret
 		}
     // 167_Static vehicles.artillery.Artillery$Zenit25mm_1940 1 46298.88 217773.49 560.00 0.0 0
 		lazy val nstationary4: Parser[Kept] = (

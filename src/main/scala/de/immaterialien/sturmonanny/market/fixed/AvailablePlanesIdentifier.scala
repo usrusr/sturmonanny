@@ -8,13 +8,18 @@ import java.io._
 import scala.collection._
 
 
-object AvailablePlanesIdentifier {
-	def cycle(mis:java.io.File) = {
+object AvailablePlanesIdentifier extends Log {
+	def cycle(mis:java.io.File) =try{
 		val gatherer = new MisPlanesSelector
 		val reader = new java.io.FileReader(mis)
 		val parseRet = gatherer.parseAll(gatherer.fileParser, reader)
 		reader.close
 		Map()++(gatherer.sideToPlanes.map{kv=> (kv._1 -> (Set[String]()++kv._2))})
+	}catch{
+		case x=>{
+			log.error("could not identify planes from "+mis)
+			Map[Int,scala.collection.mutable.Set[String]]()
+		}
 	}
 	
   private class MisPlanesSelector extends de.immaterialien.sturmonanny.dcg.DoNothingMisRewriter.Gatherer {

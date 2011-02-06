@@ -79,12 +79,14 @@ trait TrieParsers extends Parsers{
 		override def apply(in: Input):ParseResult[Seq[Elem]]={
 			val inWrap = new InputWrapper(in)
 			val found = trie.longest(inWrap)
-			if(found.isDefined){
+			val ret  = if(found.isDefined){
 				val foundSeq = found.get._1
 				Success(foundSeq, in.drop(foundSeq.length))
 			}else{
 				Failure("not contained in trie", in)
 			}
+//println("pares "+ret+ " "+trie)			
+			ret
 		}
 		/**
 		 * convert the Parser[Seq[Elem]] into something more useful<p>

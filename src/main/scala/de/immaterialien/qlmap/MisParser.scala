@@ -58,9 +58,10 @@ println("unknown ini["+ x + "]")
     )
   }
   lazy val anyLine: Parser[Unit] = {
-    ("[^\\[].+".r)~ eol ^^ (x=>
-    		println("ignoring '"+x+"'")
-    		)
+    ("[^\\[].+".r)~ eol ^^^() 
+//    ^^ (x=>
+//    		println("ignoring '"+x+"'")
+//    		)
   }
   lazy val emptyLine: Parser[Unit] = {
     ("\\s*".r) ~ eol ^^^ ()

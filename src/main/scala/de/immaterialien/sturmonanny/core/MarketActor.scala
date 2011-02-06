@@ -28,7 +28,8 @@ class MarketActor(val initClassName :String, val initConfigurationPath:String) e
 	 //internal = loadMarket(initClassName, initConfigurationPath)
 	 
 	 setServerContext(server)
- 	private def loadMarket(cls:String, cfg:String) : Option[IMarket] = { 
+ 	private def loadMarket(cls:String, cfg:String) : Option[IMarket] = {
+debug("reconfiguring market to  "+cls)			 
  	  if(cls==className && ! internal.isEmpty) internal else {
 	 	  try{
 debug("reconfiguring market to  "+cls)	 	    

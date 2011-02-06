@@ -42,28 +42,31 @@ import GrandCampaignMarket._
 //		def dateFloor(date:String) = date+("0"*(9-math.min(date.length, 9))) 
 		
 	}
- 	def updateFromTimeTable{
- 		lastUpdate = System.currentTimeMillis
- 		val (campa, misDate) = misFile.getName match {
-			case misNameExtractor(str,date) => (str,date+("9"*(9-date.length)))
-			case _ => {
-				error("failed to identify GrandCampaignPricing name for "+misFile+" , using 'default' entry")
-				("default", "000000000")
-			}
-		}
- 		val misLong = misDate.toLong
-		var result : Map[Int, Map[String,Double]] = Map()  
-		for(((entryCampa,dateLimit) , thisMap)<-priceListParser.timeTable){
-//			val dateLimit = dateFloor(sinceMis._2)
-//			val entryCampa=sinceMis._1
-//println("dateLimit:"+dateLimit+" misdate:"+misDate)			
-			if(entryCampa == campa && dateLimit.toLong <= misLong){
-				for((side,prices)<-thisMap){
-					result += (side -> (result.get(side).getOrElse(Map[String,Double]()) ++ prices ))
+ 	def updateFromTimeTable {
+ 		if(misFile!=null){
+	 		lastUpdate = System.currentTimeMillis
+	 		
+	 		val (campa, misDate) = misFile.getName match {
+				case misNameExtractor(str,date) => (str,date+("9"*(9-date.length)))
+				case _ => {
+					error("failed to identify GrandCampaignPricing name for "+misFile+" , using 'default' entry")
+					("default", "000000000")
 				}
 			}
-		} 		
-		priceList = result
+	 		val misLong = misDate.toLong
+			var result : Map[Int, Map[String,Double]] = Map()  
+			for(((entryCampa,dateLimit) , thisMap)<-priceListParser.timeTable){
+	//			val dateLimit = dateFloor(sinceMis._2)
+	//			val entryCampa=sinceMis._1
+	//println("dateLimit:"+dateLimit+" misdate:"+misDate)			
+				if(entryCampa == campa && dateLimit.toLong <= misLong){
+					for((side,prices)<-thisMap){
+						result += (side -> (result.get(side).getOrElse(Map[String,Double]()) ++ prices ))
+					}
+				}
+			} 		
+			priceList = result
+	 	}
  	}
 
 
