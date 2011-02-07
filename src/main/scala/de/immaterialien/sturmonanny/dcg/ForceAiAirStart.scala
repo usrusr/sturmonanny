@@ -22,7 +22,7 @@ object ForceAiAirStart {
   /**
    * will make one pass 
    */
-  protected class Gatherer() extends DoNothingMisRewriter.Gatherer with trie.TrieParsers {
+  protected class Gatherer() extends DoNothingMisRewriter.Gatherer with trie.TrieParsers with Log {
 
     override lazy val interestingBlocks: Parser[Kept] = {
       	(iniLine("WING")
@@ -48,9 +48,57 @@ object ForceAiAirStart {
       println("squadArgs:" + x)
       kept
     }
+    /*
+    TAKEOFF 11118.04 142103.59 0 0 &1
+		NORMFLY 11233.00 143706.00 4500.0 300.00 &1
+    */
+    val takeoffs=new mutable.HashMap[(Int, Int), Int]
+    
+    lazy val takeoffpair = {
+    	o~>"TAKEOFF" ~wString~ double ~wString~ double ~wString~ double ~wString~ double ~"""([ \t]+[^&\s]\S*)*[ \t]+&\d+""".r ~
+    	 o~"NORMFLY" ~wString~ double ~wString~ double ~wString~ double ~wString~ double ~"""([ \t]+[^&\s]\S*)*[ \t]+&\d+""".r  
+    } ^^ {
+    	case _ ~_~ tx ~_~ ty ~_~ th ~_~ _  ~ _ ~
+    	  _ ~_ ~_~ nx ~_~ ny ~_~ nh ~_~ sn ~radio => {
+    	  	val divisor=10000
+    	  	val bin =((nx/divisor).toInt,(ny/divisor).toInt)
+    	  	val binCount = takeoffs.get(bin).getOrElse(0)
+//println("takeoff to "+bin)
+					takeoffs += (bin -> (binCount + 1))
+					
+					val interpolate = 1D/(10D+binCount)
+					
+					val ix = tx + (nx-tx)*interpolate
+					val iy = ty + (ny-ty)*interpolate
+					def dotTwo(double:Double) = {
+    	  		val string = "%1.00f" format double
+    	  		if(string.contains(".")) string else string+".00"
+    	  	}
+					def dotOne(double:Double) = {
+    	  		val string = "%1.0f" format double
+    	  		if(string.contains(".")) string else string+".0"
+    	  	}
+					//val ih = nh + 10*binCount
+					val minTh = math.max(500, th)
+					val dynamicbonus = ((nh-minTh)*0.01)*binCount
+					val ih = minTh + (nh-minTh)*interpolate + 50*binCount + dynamicbonus
+					
+					val ret1 = "NORMFLY "+dotTwo(ix)+" "+dotTwo(iy)+" "+dotOne(ih)+" "+dotTwo(sn)+ radio 
+					val ret2 = "NORMFLY "+dotTwo(nx)+" "+dotTwo(ny)+" "+dotOne(nh)+" "+dotTwo(sn)+ radio
+					
+//println("interpolate: "+interpolate)					
+log.debug("was takeoff: "+ret1)					
+log.debug("was normfly: "+ret2)
+					keep(ret1)
+					keep("\r\n")
+					keep(ret2)
+					keep("\r\n")
+    	  }
+    }
     lazy val squadWay = {
     	o ~> (squadWayBlock ^^ (x=>keep(x.mkString("")))) ~
-        opt("\\s*TAKEOFF.*".r) ~ // ignore first takeoff
+        //opt("\\s*TAKEOFF.*".r) ~ // ignore first takeoff
+    		opt(takeoffpair) ~ 
         rep(anyLine)
     } ^^ { x =>
       println("squadWay:" + x)
@@ -74,52 +122,5 @@ object ForceAiAirStart {
           Failure("expected '" + str + "' but found '" + found + "'", in)
       }
     }
-    //    override lazy val wayPoint: Parser[Kept]  = (
-    //    	("""\s*\[.*_Chief_Road\]""".r ^^ keep) ~ extendedChiefWaypoint ~ (opt(rep(chiefWaypoint))^^^kept) 
-    //    )^^^kept
-    //    
-    //    
-
-    //    lazy val extendedChiefWaypoint : Parser[Kept]  = (
-    //    		o ~> keepDouble ~ w ~ keepDouble ~ w ~ keepDouble ~ w 
-    //    		~ (int^^{old=>
-    //    			val rand = min + (max-min).toDouble * math.random
-    //    			val total = math.max(old, rand.toInt)
-    //    			keep(total.toString)
-    //    		})  
-    //    		~ w ~ keepInt ~ w ~ keepDouble 
-    //    )^^^kept  	
-
-    //    lazy val extendedChiefWaypoint : Parser[Kept]  = (
-    //    		(o ~> doubleString ~ wString ~ doubleString ~ wString ~ doubleString ~ wString ~ int ^^ {
-    //    			case xs1 ~ w1 ~ ys1 ~ w2 ~ zs ~ w3 ~ rs ~ w4 ~ oldTime => {  
-    //	    			val rand = min + (max-min).toDouble * math.random
-    //	    			val total = math.max(old, rand.toInt)
-    //	    			
-    //	    			keep(xs1); keep(w1); keep(ys1); keep(w2); keep(zs); keep(w3); keep(rs); keep(w4); keep(total.toString) 
-    //	    			kept
-    //    			}
-    //    		(o~> locationToWait) ~ w ~ keepInt ~ w ~ keepDouble 
-    //    )^^^kept  
-    //    lazy val locationToWait : Parser[Kept] = {
-    //  		doubleString ~ wString ~ doubleString ~ wString ~ doubleString ~ wString ~ int ^^ {
-    //    			case xs1 ~ w1      ~ ys1          ~ w2      ~ zs           ~ w3      ~ oldTime => {
-    //    				
-    //    				var rand = if(grid<=0) math.random else {
-    //    					def bucketize(doubleString:String)= {
-    //    						(doubleString.toDouble/grid).toLong 
-    //    					}
-    //    					reSeedable.setSeed((bucketize(xs1) ^ seed ^ (bucketize(ys1)<<8)))
-    //    					reSeedable.nextDouble 
-    //    				}
-    //    				
-    //	    			val transformedRand = min + (max-min).toDouble * rand
-    //	    			val total = math.max(oldTime, transformedRand.toInt)
-    //	    			
-    //	    			keep(xs1); keep(w1); keep(ys1); keep(w2); keep(zs); keep(w3); keep(total.toString) 
-    //	    			kept
-    //    			}
-    //    		}
-    //  	}
   }
 }
