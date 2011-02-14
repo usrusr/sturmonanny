@@ -1,6 +1,7 @@
 package de.immaterialien.sturmonanny.core
 
 import java.net._
+
 import java.io._
 
 import net.liftweb.actor._
@@ -9,7 +10,7 @@ import net.liftweb.common._
 import _root_.de.immaterialien.sturmonanny.util._
 import _root_.de.immaterialien.sturmonanny.util.event
 import _root_.de.immaterialien.sturmonanny.util.configgy.ConfigurationSchema
-
+import de.immaterialien.sturmonanny.util.Daemon._ 
 /**
  * manages a server console connection and client console connections, forwarding messages between them 
  * additional work: occasionally a message might be injected from other classes, messages coming from the 
@@ -195,7 +196,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
     //    val consoleself = this;
     val clientline = new StringBuilder
 
-    val thread = Multiplexer.daemon {
+    val thread = Daemon.daemon {
       reader read match {
         case x if x < 0 => Thread.currentThread.interrupt
         case Multiplexer.LF if clientline.last == Multiplexer.CR => {
@@ -275,7 +276,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
       
 				  queue.foreach{ list => 
 					  thread = Some(
-					  	Multiplexer.daemon{
+					  	Daemon.daemon{
 					  		list.synchronized{
 					  		  while( ! list.isEmpty) {
 					  		    val line = list.removeFirst
@@ -310,7 +311,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
 
           inQueue.foreach { list =>
             thread = Some(
-              Multiplexer.daemon {
+              Daemon.daemon {
                 list.synchronized {
                   while (!list.isEmpty) {
                     val line = list.removeFirst
@@ -362,7 +363,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   var listenersocket: Option[ServerSocket] = None
 
   var serverThread: Thread = newServerThread
-  def newServerThread: Thread = if (scport == 0) null else Multiplexer.daemon {
+  def newServerThread: Thread = if (scport == 0) null else Daemon.daemon {
 
     try {
       val whitelist = conf.server.IPS.apply
@@ -429,7 +430,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
     var il2line = new StringBuilder
     //instreamWriter.write(""+il2in)  
     il2in match {
-      case Some(instream) => Multiplexer.daemon {
+      case Some(instream) => Daemon.daemon {
         instream read match {
           case x if x < 0 => Thread.currentThread.interrupt
 
@@ -470,7 +471,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
       }
 
       case _ => {
-        Multiplexer.daemon {
+        Daemon.daemon {
           try {
             val socket = new Socket(host, il2port)
             il2in = Some(new InputStreamReader(socket.getInputStream))
@@ -500,12 +501,13 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   def tryinitialize() = {}
   Multiplexer.instancesForShutdown.put(this, None)
 }
+
 object Multiplexer extends Logging {
 	val localIps = """\Q127.0.0.1\E|\Q0:0:0:0:0:0:0:1\E""".r
-  case object interrupt
-  def daemon(body: => Unit): Then = {
-    new Then(body)
-  }
+//  case object interrupt
+//  def daemon(body: => Unit): Then = {
+//    new Then(body)
+//  }
   
   lazy val instancesForShutdown = {
   	val ret = java.util.Collections.synchronizedMap(new java.util.WeakHashMap[Multiplexer,Option[Int]])
@@ -533,26 +535,26 @@ error("shutdown hook done")
   	ret
   }
 
-  class Then(body: => Unit) extends Logging {
-
-    def then(fin: => Unit): Thread = {
-      val ret: Thread = new Thread {
-        override def run() {
-          try {
-            while (!Thread.currentThread.isInterrupted) {
-              body
-            }
-          } catch {
-            case e: Throwable => debug("Exception in daemon thread: " + e.getClass.getSimpleName + "\n" + e.getMessage + "\n" + e.getStackTraceString)
-          }
-          fin
-        }
-      }
-
-      ret.start
-      ret
-    }
-  }
+//  class Then(body: => Unit) extends Logging {
+//
+//    def then(fin: => Unit): Thread = {
+//      val ret: Thread = new Thread {
+//        override def run() {
+//          try {
+//            while (!Thread.currentThread.isInterrupted) {
+//              body
+//            }
+//          } catch {
+//            case e: Throwable => debug("Exception in daemon thread: " + e.getClass.getSimpleName + "\n" + e.getMessage + "\n" + e.getStackTraceString)
+//          }
+//          fin
+//        }
+//      }
+//
+//      ret.start
+//      ret
+//    }
+//  }
 
   def linesListsToStrings(l: Seq[String]) = l.map(ll => new String(ll.toArray))
 

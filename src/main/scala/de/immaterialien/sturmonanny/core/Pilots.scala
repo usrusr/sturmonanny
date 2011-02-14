@@ -477,34 +477,34 @@ println("price for side "+currentSide.id+" :" +priceOpt)
 
 					def padRight(in:String, reference:String):String=in+(reference.drop(in.length))
 					def padLeft(in:String, reference:String):String=(reference.drop(in.length))+in
-					val (result, affordable, verb) = (if(price > 0){
-						
+					val verbs = ("costs ", "gives ")
+//					val verbs = ("-", "+")
+					val (result, affordable, verb, and) = (if(price > 0){
 						val cost = server.rules.startCost(price)
 						val bal:Double=balance
 						val affordable = cost < bal 
-						
 						if(affordable){
-							(true, "+", "refund."+refund(cost).toInt+".+" )
+							(true, "+", "costs.", ",.refund."+refund(cost).toInt )
 						}else{
-							(false, "!", "min.solvency."+cost.toInt+".+" )
+							(false, "!", "would.cost.",",.min.solvency."+cost.toInt+" required!" )
 						}
 					}else{
-						(true, "*", "gives")
+						(true, "*", "gives.", "")
 					})
 					
 	    
 					if(all||result){
 					  // padding for longest possible name:
-						//                                   P_40SUKAISVOLOCHHAWKA2
+						//                                      P_40SUKAISVOLOCHHAWKA2
 						val paddedPlane = padRight(plane.name, "......................")
-						//                              would cost 1000 +  
-						//                              min.solvency.1000 +
-						val paddedVerb = padLeft(verb, "...................")
+						//                                would cost 1000 +  
+						//                                min.solvency.1000 +
+						val paddedVerb = padLeft(verb,   "...........")
 						
 						var intPrice = price.toInt
 						intPrice = intPrice.abs
 						val paddedPrice = padLeft(""+price.abs.toInt,".....")
-						val msg = affordable+" "+paddedPlane+paddedVerb+paddedPrice+conf.names.currency+".per.minute"  
+						val msg = affordable+" "+paddedPlane+" "+paddedVerb+paddedPrice+conf.names.currency +".per.minute"+and 
 						//server.multi ! server.multi.ChatTo(pilotName, msg)
 						chat(msg)	 
 					}

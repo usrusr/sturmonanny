@@ -24,7 +24,7 @@ import GrandCampaignMarket._
   
 	def cycle(name : java.io.File) = {
 		misFile = name
-		planesInMis = AvailablePlanesIdentifier.cycle(misFile)
+		planesInMis = AvailablePlanesIdentifier.cycle(misFile).getOrElse(planesInMis)
 		val updateRes = priceListParser.checkUpdate
 		for(update <- updateRes){
 //			timeTable=update

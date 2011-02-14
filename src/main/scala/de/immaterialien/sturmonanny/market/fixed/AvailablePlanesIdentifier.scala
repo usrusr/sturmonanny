@@ -9,16 +9,19 @@ import scala.collection._
 
 
 object AvailablePlanesIdentifier extends Log {
-	def cycle(mis:java.io.File) =try{
+	def cycle(mis:java.io.File) =if(mis==null || !mis.exists) {
+		log.warning("could not identify planes from nonexisting "+mis)
+		None
+	}else try{
 		val gatherer = new MisPlanesSelector
 		val reader = new java.io.FileReader(mis)
 		val parseRet = gatherer.parseAll(gatherer.fileParser, reader)
 		reader.close
-		Map()++(gatherer.sideToPlanes.map{kv=> (kv._1 -> (Set[String]()++kv._2))})
+		Some(Map()++(gatherer.sideToPlanes.map{kv=> (kv._1 -> (Set[String]()++kv._2))}))
 	}catch{
 		case x=>{
 			log.error("could not identify planes from "+mis)
-			Map[Int,scala.collection.mutable.Set[String]]()
+			None
 		}
 	}
 	
