@@ -46,7 +46,13 @@ class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provide
     val cmd = CommandLine.parse(commandLine) 
     
     val executor = new DefaultExecutor()
-    executor.setWorkingDirectory(dcgPath)
+    try{
+    	executor.setWorkingDirectory(dcgPath)
+    }catch{
+    	case x:ExecuteException=>{
+    		log.warning("DCG process returned "+x.getMessage)
+    	}
+    }
     val exitValue = executor.execute(cmd)
     
     

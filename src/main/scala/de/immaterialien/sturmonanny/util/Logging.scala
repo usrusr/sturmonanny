@@ -3,7 +3,7 @@ package de.immaterialien.sturmonanny.util
 import net.liftweb.util._
 import net.lag.logging.Logger
 
-trait Logging { 
+trait Logging {  
 //println("Logging hello")	
  // this : Lg => Logging     
 //trait Logging[Lg] {
