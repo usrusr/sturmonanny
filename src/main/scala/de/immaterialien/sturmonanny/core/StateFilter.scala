@@ -13,10 +13,12 @@ class StateFilter(multi:TimedLiftActor) extends Log {
 	  var pass = ! blocked
     val lowerLine = msg.line.trim.toLowerCase
 	  
-		if(lowerLine.startsWith("mission ")){
+		if(lowerLine.startsWith("mission")){
 	    pass = true
       blocked = true
-      if(lowerLine.endsWith(" begin")){
+      if(lowerLine=="mission") {
+      	blocked=false
+			}else if(lowerLine.endsWith(" begin")){
         blocked = false
         pending = Set()
       }

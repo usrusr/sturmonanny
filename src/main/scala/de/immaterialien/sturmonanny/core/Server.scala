@@ -29,7 +29,7 @@ println("Server hello")
 	val rules : Rules with Member   
 	val pilots : Pilots with Member   
 	val planes : Planes with Member      
-	val market : MarketActor with Member
+	val market : IMarket with Member
 	val fbdj : FbdjAdapter with Member
 	val dispatcher : LocalizedDispatcher with Member
 	val eventlog : EventLogDispatcher with Member

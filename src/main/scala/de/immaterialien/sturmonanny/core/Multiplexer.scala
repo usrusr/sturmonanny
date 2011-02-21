@@ -82,7 +82,7 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
   object promptNotifier;
 
   //	private[this] def outWrite(line:String):Unit= outWrite(line::Nil)
-  private[this] def outWrite(line: String) {
+  protected[this] def outWrite(line: String) {
     outWriteLoadFiltered(stateFilter.loadLine(line))
   }
   private[this] def outWriteLoadFiltered(line: String) {

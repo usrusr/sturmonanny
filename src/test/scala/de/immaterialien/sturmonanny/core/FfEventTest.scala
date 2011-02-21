@@ -14,7 +14,9 @@ object FfEventTest {
 		//play("src/test/resources/pilotlogs/Pilot.EJGr.Ost_Irmin.log")
 		//play("src/test/resources/pilotlogs/Pilot.EJGr.Ost_Yogy.log")
 		//play("src/test/resources/pilotlogs/Pilot.EJGr.Ost_Yogy.log")
-		play("src/test/resources/pilotlogs/refly_counted_as_lost_plane.playback")
+		//play("src/test/resources/pilotlogs/refly_counted_as_lost_plane.playback")
+		//play("src/test/resources/pilotlogs/should_kick_for_price.log")
+		play("src/test/resources/Pilot.Kampfname.log")
 	}
 	
 	
@@ -57,9 +59,13 @@ class FfEventTest {
 		override val balance = new BalanceWrapper with Member 
 		override val rules = new Rules with Member   
 		override val pilots = new Pilots with Member   
-		override val planes = new Planes with Member      
-		override val market = new MarketActor(conf.market.implementation.apply, conf.market.configuration.apply) with Member
-		override val fbdj = new FbdjAdapter with Member {
+		override val planes = new Planes with Member       
+		//override val market = new MarketActor(conf.market.implementation.apply, conf.market.configuration.apply) with Member
+//		override val market = new MarketActor("de.immaterialien.sturmonanny.market.AllPlanesCost", conf.market.configuration.apply) with Member
+		override val market = new de.immaterialien.sturmonanny.market.fixed.AllPlanesCost with Member{
+			def updateConfiguration=() 
+		}
+		override val fbdj = new FbdjAdapter with Member { 
 			override def updateConfiguration = ()
 		}
 		override val dispatcher = new LocalizedDispatcher with Member
@@ -70,6 +76,7 @@ class FfEventTest {
 		override val multi = new Multiplexer ("", 0, 0) with Member {
 			override def newServerThread = null
 			override def newIl2Waiter = null
+			override protected[this] def outWrite(line: String) = println("to server: "+line)
 		}
 	debug("init server class")	 
 		init()

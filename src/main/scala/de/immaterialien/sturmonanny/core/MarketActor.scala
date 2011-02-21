@@ -80,14 +80,14 @@ debug(cls + " new instance not configured!")
 	  case _ =>
 	}
 	override def getPrice(plane : IMarket.Loadout, side:Int) : Double = {
-println("get Price "+plane+ " from "+internal + " in "+side)
+//println("get Price "+plane+ " from "+internal + " in "+side)
 //if(plane.load.isEmpty)
 //new Exception().printStackTrace()
 val ret : Double =
 		!!(Msg.getPrice(plane, side), 500)
 	  		.asA[Msg.getPriceResult].flatMap(_ price).getOrElse(0D)
 	  		
-println("got "+ret)	  		
+//println("got "+ret)	  		
 ret	  		
 	}
 	override def tryPrice(loadout : IMarket.Loadout, side:Int) : Option[Double] = { 
@@ -113,7 +113,7 @@ ret
 	  		.asA[Msg.getPriceResult] map (_ price)
 	  		
 	  		
-println("tryPrice "+ret)	  		
+//println("tryPrice "+ret)	  		
 	  return ret getOrElse None
 	}
 	def addAirTime(plane : IMarket.Loadout, millis : Long, side:Int) {

@@ -37,6 +37,7 @@ trait Domain[D <: Domain[D]] extends Logging with TimeHolder{ self: D =>
       }
       case ForElement(name, body) => {
         val elem = items.getOrElseUpdate(name, newElement(name))
+      	elem.lastAccess = time.now
         body(elem)
       }
       case Remove(name)=>items remove name

@@ -27,16 +27,20 @@ class Rules extends NonUpdatingMember with Logging {
     val lowest = conf.pilots.lowestBalance.apply
     val highest = conf.pilots.highestBalance.apply
     
-debug("update balance "+old + " + "+diff)    
+//debug("update balance "+old + " + "+diff)    
     if (ret < lowest) lowest
     else if (ret > highest) highest
     else ret
   }
-  def calculateDeathPause(players:Int): Long = {
+  /**
+   * @param players
+   * @return length in seconds
+   */
+  def calculateDeathPause(players:Int): Int = {
   	val upper = conf.pilots.deathpenalty.apply
   	val step = conf.pilots.penaltyPerPilot.apply
   	val duration = if(step>upper) step else math.min(upper, step*players) 
-    server.time.currentTimeMillis + (1000 * duration)
+    (duration)
   }
   def recruiterPercents = {
   	math.max(0, math.min(100, conf.recruiting.recruitshare.apply))
@@ -56,6 +60,7 @@ debug("update balance "+old + " + "+diff)
 	      val seconds: Long = remaining / 1000
 	
 	      val ratio = remaining.toDouble / (remaining + difference).toDouble
+//println("ratio "+ratio+" from "+remaining+" diff "+difference+" after "+seconds)	      
 	      val message = if (ratio > 0.8) {
 	        who + ", please fly something more common than a " + loadout
 	      } else if (ratio > 0.65) {
@@ -115,13 +120,13 @@ debug("update balance "+old + " + "+diff)
       else LAPinger.schedule(server.multi, command, secs * 1000)
     }
   }
-  def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, inviteString:Option[String]) {
+  def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, pauseLen:Int, inviteString:Option[String]) {
     val multi = server.multi
     var difference = server.time.currentTimeMillis - since
     val pauseDuration = conf.game.planeWarningsSeconds.apply
     val remaining = (pauseDuration * 1000) - difference
     val seconds: Long = remaining / 1000
-    val pauseLen = conf.pilots.deathpenalty.apply
+//    val pauseLen = conf.pilots.deathpenalty.apply
 
 
     if (what == null || what.trim.isEmpty) {
@@ -137,7 +142,8 @@ debug("update balance "+old + " + "+diff)
           if (inviteString.isDefined)
             "Fly " + inviteString.get + " or wait " + pauseLen + " seconds"
           else
-            "After dying, you are not allowed to fly for " + pauseLen + " seconds"
+//            "After dying, you are not allowed to fly for " + pauseLen + " seconds"
+          	"current death pause: "+pauseLen+"s (depends on team size)" 
         } else if (ratio > 0.4) {
           if (inviteString.isDefined)
             "Fly " + inviteString.get + " or wait " + pauseLen + " seconds"
