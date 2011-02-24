@@ -274,22 +274,26 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
 				  
 				  thread.foreach(_ interrupt)
       
-				  queue.foreach{ list => 
-					  thread = Some(
-					  	Daemon.daemon{
-					  		list.synchronized{
-					  		  while( ! list.isEmpty) {
-					  		    val line = list.removeFirst
+				  queue.foreach{ list =>
+				  	val fos = try{
+				  		Some(new java.io.BufferedWriter(new java.io.FileWriter("eventlog.received"))) 					  		
+				  	}catch{ case _ => None}				  
+				  	val daemon = Daemon.daemon{
+				  		list.synchronized{
+				  		  while( ! list.isEmpty) {
+				  		    val line = list.removeFirst
 //debug("from event log line '"+line.trim+"'")
+				  		    for(f<-fos)f.append(line+"\r\n")
 
-					  		   	server.eventlog ! DispatchLine(line)
-					  		  }
-					  		  list.wait(1000)
-					  		}
-					  	}then{
-					  	  thread=None
-					  	}
-					  )
+				  		   	server.eventlog ! DispatchLine(line)
+				  		  }
+				  		  list.wait(1000)
+				  		}
+				  	}then{
+				  	  thread=None
+				  	  for(f<-fos) f.close
+				  	}
+					  thread = Some(daemon)
 				  }
 				}
       }

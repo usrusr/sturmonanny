@@ -45,12 +45,12 @@ class FfEventTest {
 	val server = new ReplayServerImpl()
 	
 	class ReplayServerImpl(val initConf : String) extends Server{ Server =>
-		def this() = this("default.conf") 
+		def this() = this("default.conf")  
 		private var members : List[UpdatingMember] = Nil 
 		//this : Server =>
 	 
 		private var internalconf = new Configuration(initConf, this)  
-		override def conf = internalconf  
+		override def conf = internalconf   
 		override def conf_= (newConf : Configuration) {  
 			internalconf = newConf
 			members foreach (_ updateConfiguration)

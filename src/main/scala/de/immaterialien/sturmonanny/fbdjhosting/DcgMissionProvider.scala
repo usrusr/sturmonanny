@@ -88,8 +88,8 @@ class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provide
     val ret = if(afterList.length==1) new File(searchPath, afterList(0))
     else {
    	 		if(afterList.length==0) throw new IllegalArgumentException("DCG terminated but no new mission was found in "+searchPath)
-       
-        afterList.foldLeft((oldMissionPath,0L)){(previous, fname) =>
+log.warning("multiple DCG missions: "+afterList)       
+        val selected = afterList.foldLeft((oldMissionPath,0L)){(previous, fname) =>
           val file = new File(searchPath, fname)
           if(file.exists && file.lastModified>previous._2) {
 					  (file, file.lastModified)
@@ -97,6 +97,9 @@ class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provide
 					  previous
 					}
         }._1
+log.warning("multiple DCG missions: selected "+selected)       
+        
+        selected 
     }
     
     ret

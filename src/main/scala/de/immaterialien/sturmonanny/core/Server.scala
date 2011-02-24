@@ -22,7 +22,7 @@ println("Server hello")
 //		stream.close
 //		v
 //	}
-	val version = 0
+	val version = Server.initVersion
 	private var members : List[UpdatingMember] = Nil
 	
 	val balance : BalanceWrapper with Member 
@@ -131,6 +131,13 @@ println("done "+throwable+" -> "+result)
       result
     }
   }
+  def initVersion:String=try{
+  	
+  	val stream = classOf[Server].getResourceAsStream ("version.properties")
+  	val props  = new java.util.Properties
+  	props load stream
+  	props.getProperty("version")
+  }catch{ case x => x.getMessage }
 }
 
 

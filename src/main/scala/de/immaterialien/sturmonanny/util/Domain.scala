@@ -8,7 +8,8 @@ import net.liftweb.actor._
 import net.liftweb.util._
 
 trait Domain[D <: Domain[D]] extends Logging with TimeHolder{ self: D =>
-	private val timeout = 24*60*60*1000
+//	private val timeout = 24*60*60*1000
+private val timeout = 2*60*60*1000
   // public interface 
   def create(name: String): Unit = if (!(items contains name)) domainActor ! Create(name)
   def remove(name: String): Unit = domainActor ! Remove(name)
