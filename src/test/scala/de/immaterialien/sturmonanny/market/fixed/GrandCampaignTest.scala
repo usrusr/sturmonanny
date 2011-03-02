@@ -7,7 +7,7 @@ import org.junit.Assert._
 class GrandCampaignTest {
 
 	@Test 
-	def testFile() : Unit ={
+	def testFile() : Unit ={ 
 		val m = new GrandCampaignMarket
 		
 		m.setConfiguration("src/test/resources/de/immaterialien/sturmonanny/market/fixed/grandcampaign.price")

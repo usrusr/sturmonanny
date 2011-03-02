@@ -16,7 +16,8 @@ object FfEventTest {
 		//play("src/test/resources/pilotlogs/Pilot.EJGr.Ost_Yogy.log")
 		//play("src/test/resources/pilotlogs/refly_counted_as_lost_plane.playback")
 		//play("src/test/resources/pilotlogs/should_kick_for_price.log")
-		play("src/test/resources/Pilot.Kampfname.log")
+//		play("src/test/resources/Pilot.Kampfname.log")
+		play("src/test/resources/italy_not_an_int/Pilot.refly_counted_as_lost_plane_on_landing.log")
 	}
 	
 	
@@ -50,20 +51,25 @@ class FfEventTest {
 		//this : Server =>
 	 
 		private var internalconf = new Configuration(initConf, this)  
-		override def conf = internalconf   
+		override def conf = internalconf    
 		override def conf_= (newConf : Configuration) {  
 			internalconf = newConf
 			members foreach (_ updateConfiguration)
 		}   
 		override def shutdown = ()
-		override val balance = new BalanceWrapper with Member 
+		override val balance = new BalanceWrapper with Member { import de.immaterialien.sturmonanny.persistence._
+			override def load(pilot:String):Option[IBalanceDao.BalanceRB] = { 
+		  	Some(IBalanceDao.BalanceRB(10000D, 10000D))
+		  }
+		}
 		override val rules = new Rules with Member   
 		override val pilots = new Pilots with Member   
 		override val planes = new Planes with Member       
-		//override val market = new MarketActor(conf.market.implementation.apply, conf.market.configuration.apply) with Member
+//		override val market = new MarketActor(conf.market.implementation.apply, conf.market.configuration.apply) with Member
 //		override val market = new MarketActor("de.immaterialien.sturmonanny.market.AllPlanesCost", conf.market.configuration.apply) with Member
-		override val market = new de.immaterialien.sturmonanny.market.fixed.AllPlanesCost with Member{
+		override val market = new de.immaterialien.sturmonanny.market.fixed.AllPlanesCost with Member{ import IMarket._
 			def updateConfiguration=() 
+			override def tryPrice(loadout:Loadout, side:Int) : Option[Double] = Some(10D)
 		}
 		override val fbdj = new FbdjAdapter with Member { 
 			override def updateConfiguration = ()
@@ -83,7 +89,7 @@ class FfEventTest {
 	}
 
 
-	class PilotLogParser(pilot:String) extends RegexParsers { import de.immaterialien.sturmonanny
+	class PilotLogParser(pilot:String) extends de.immaterialien.sturmonanny.util.ParseUtil { import de.immaterialien.sturmonanny
 		override def skipWhitespace = false
 		lazy val file = rep(millisLine)
 		lazy val millisLine = """\d{13}:""".r ~ (source | event) <~ lf ^^ { case millis ~ ev => 
@@ -111,6 +117,7 @@ class FfEventTest {
 			| "Leaving" ^^^ Is.Leaving
 			| "MissionBegin" ^^^ Is.MissionBegin
 			| "MissionEnd" ^^^ Is.MissionEnd
+			| "Returning" ^^^ Is.Returning
 			| "Crashing" ^^^ Is.Crashing
 			| "Dying" ^^^ Is.Dying
 			| "Killed" ^^^ Is.Killed(0)			
@@ -120,10 +127,14 @@ class FfEventTest {
 			| "HitTheSilk" ^^^ Is.HitTheSilk
 			| "Ejecting" ^^^ Is.Ejecting			
 			| ("MissionChanging"~"(" ~> "[^\\)]+".r <~ ")") ^^ {what:String=> Is.MissionChanging(new java.io.File(what))}
-			| ("TakingSeat(" ~> noncomma ~ opt("," ~> ("[^\\)]+".r ^^(_ toInt)) ) <~")") ^^ { 
-				case plane ~ seat => Is.TakingSeat(plane, seat.getOrElse(0))
-				case _ => Is.Ignored
-				} 
+//			| ("TakingSeat(" ~> noncomma ~ opt("," ~> ("\\d+".r ^^(_ toInt)) ) <~")") ^^ { 
+//				case plane ~ seat => Is.TakingSeat(plane, seat.getOrElse(0))
+//				case _ => Is.Ignored
+//				} 
+//			| matcher("""TakingSeat\(([^,\)]+)(?:(\d+))?\)""") ^^ {mtchr =>  
+			| matcher("""TakingSeat\(([^,\)]+)(?:,(\d+))?\)""") ^^ {mtchr =>
+				Is.TakingSeat(mtchr.group(1), mtchr.group(2).toInt)
+			}
 			| ("Loading(" ~> noncomma ~ noncomma ~ double <~")") ^^ { case plane ~load~ fuel => Is.Loading(plane, load, fuel) } 
 			| ("UserState("~>event<~(")")) ^^ {ev=>EventSource.UserState(ev)}
 			| ("Chatting("~>"""[^\r\n]*(?=\)\))""".r <~")") ^^^ Is.Ignored
@@ -135,7 +146,7 @@ class FfEventTest {
 			| ("Red" ^^^ Armies.Red)
 		)
 		
-		lazy val double = """\d+(\.\d+)""".r ^^ (_ toDouble)
+//		lazy val double = """\d+(\.\d+)""".r ^^ (_ toDouble)
 		lazy val noncomma = "[^,\\)]*".r <~","
 		lazy val lf = """[\r\n]+""".r 
 		lazy val nlf = """[^\r\n]+""".r 

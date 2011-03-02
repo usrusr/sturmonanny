@@ -1,38 +1,3 @@
-  
-[1 default]
-  A-20C = 10
-  HurricaneMkIIbMod = -8
-  Il-2_1941_Early = -10
-  Il-2_1941_Late = -2
-  Il-2M_Early = 5
-  LaGG-3series29 = -5
-  LaGG-3series35 = -3
-  La-5 = 20
-  P-40M = 2
-  Pe-2series84 = -7
-  Yak-1 = -3
-  Yak-1B = 15
-  Yak-7BPF = -5
-
-[2 default]
-  Bf-109E-7 = -5
-  Bf-109F-4 = 4
-  Bf-109G-2 = 15
-  Bf-110G-2 = 20
-  CR_42 = -15
-  He-111H-2 = -15
-  He-111H-6 = -15
-  Hs-129B-2 = -10
-  IAR81c = -8
-  Ju-87D-3 = -15
-  Ju-88A-4 = -10
-  MC-200series3 = -10
-  MC-200series7 = -10
-  MC-200series7FB = -10
-  MC-202_III = -2
-  MC-202_VII = -2
-  MC-202_XII = -2
-  
 [1 stalingrad_42]
   A-20C = 10
   HurricaneMkIIbMod = -8
@@ -48,43 +13,170 @@
   Yak-1B = 15
   Yak-7BPF = -5
 
-[2 stalingrad_42]
+[2 staling_43 ]
   Bf-109E-7 = -5
-  Bf-109F-4 = 4
+  Bf-109F-4 = 5
   Bf-109G-2 = 15
-  Bf-110G-2 = 20
+  Bf-110G-2 = 18
+  Fw-190A-4 = 20
   CR_42 = -15
   He-111H-2 = -15
   He-111H-6 = -15
-  Hs-129B-2 = -10
+  Hs-129B-2 = 2
   IAR81c = -8
   Ju-87D-3 = -15
   Ju-88A-4 = -10
-  MC-200series3 = -10
+  MC-200series3 = -3
   MC-200series7 = -10
   MC-200series7FB = -10
   MC-202_III = -2
   MC-202_VII = -2
   MC-202_XII = -2
 
-[1 italy_43  194309]
-A-20G= -0.333  # ab September ist A-20G in großen Stückzahlen verfügbar
+[1 staling_43 ]
+  A-20C = 10
+  HurricaneMkIIbMod = -8
+  Il-2_1941_Early = -10
+  P-39N-1  = 8
+  Il-2_1941_Late = -2
+  Il-2M_Early = 5
+  LaGG-3series29 = -5
+  LaGG-3series35 = -3
+  La-5 = 18
+  La-5F = 20
+  P-40M = 2
+  Pe-2series84 = -7
+  Yak-1 = -3
+  Yak-1B = 15
+  Yak-7BPF = -5
 
-[2 italy_43 19430815]
-# alternate history:
-Fw-190A-5= -5 # günstig eine Palette Fockes auf ebay geschossen
-# Fw-190A-5165ATA= 5 die Turbolader mussten aber
-# zwecks Reverse-Engineering nach München geschickt werden
+[2 stalingrad_42 ]
+  Bf-109E-7 = -5
+  Bf-109F-4 = 5
+  Bf-109G-2 = 15
+  Bf-110G-2 = 20
+  CR_42 = -15
+  He-111H-2 = -15
+  He-111H-6 = -15
+  Hs-129B-2 = 2
+  IAR81c = -8
+  Ju-87D-3 = -15
+  Ju-88A-4 = -10
+  MC-200series3 = -3
+  MC-200series7 = -10
+  MC-200series7FB = -10
+  MC-202_III = -2
+  MC-202_VII = -2
+  MC-202_XII = -2
+
+
+
+[1 italy_43 ]
+  MosquitoFBMkVI = -4
+  F6F-3 = -4
+  SpitfireMkVbCLP = 2
+  SpitfireMkIXcCLP =  20
+  A-20C = -8
+  A-20G = -2
+  P-40M = -6
+  P-47D-10 = -6
+  P-51B =  5 # kommt evtl. erst später in der Kampa rein
+  B-25J-1NA = 0
+  BeaufighterMk21 = -8
 
 [2 italy_43 ]
-Ju-88A-4 =  -5
-MC-205_I= -5
-MC-205_III= -1
-Bf-109G-6AS=5
-Fw-190A-5= 15
+  Bf-109G-6AS = 6 # kommt evtl. erst später in der Kampa rein
+  Bf-110G-2 = 16 # eigentlich BS wie in fast allen Kampas, aber statt Me210...
+  Fw-190A-5165ATA = 20
+  Bf-109G-2 = 10
+  Bf-109G-6_Late = -8
+  He-111H-12 = 0
+  MC-205_I  = 0
+  SM-79  = 0
+  Ju-88A-4  = 0
+  Ju-88A-17 = 0
 
 
-[1 normandy_44]
-P-51B-NA=-100 # Todesursache #1: Blackouts
-[2 normandy_44]
-Bf-109G-6_Late=-100 # 'stangs vs. 109!
+[1 iasi_44 ]
+  La-5FN = 20
+  La-5F = 8
+  Yak-9D  = 4
+  P-39Q-10  = 0
+  P-39N-1  = -4
+  Il-2_M3  = -4
+  Il-2_3  = -6
+  A-20C  = -2
+  A-20G  = 2
+  Pe-2series110  = -4
+  P-38J  = 4
+  P-51B-NA  = 10
+
+[2 iasi_44]
+  Bf-109G-2 = 16
+  Bf-109G-6_Late = -6
+  Bf-109G-14 = 20 # kommt erst später in der Kampa rein, wenn überhaupt
+  Ju-87D-3 = -10
+  Ju-87D-5 = -8
+  IAR81c = -6
+  Ju-87G-1 = -4
+  Fw-190F-8 = -4
+  Ju-88A-4 = -8
+  Hs-129B-2  = -4
+  Fw-190A-5165ATA = 20
+
+[1 normandy_44 ]
+  P-38J  = 0
+  P-47D-22  = 0
+  P-51B-NA  = 0
+  P-51D-20NA  = 0
+  SpitfireMkIXe  = 0
+  P-47D-27  = 0
+  A-20G  = 0
+  BeaufighterMk21  = 0
+  MosquitoFBMkVI  = 0
+  B-25J-1NA  = 0
+[2 normandy_44 ]
+  Bf-109G-6_Late = 0
+  Fw-190A-8  = 0
+  Bf-109G-6AS  = 0
+  Ju-88A-4  = 0
+  Fw-190F-8  = 0
+  Bf-109G-14  = 0
+  Fw-190A-6  = 0
+  Ju-88A-17  = 0
+
+[1 okinawa_45 ]
+  P-47D  = 0
+  F4U-1D  = 0
+  F4U-1C  = 0
+  P-38L  = 0
+  SBD-5 = 0
+  F6F-5  = 0
+[2 okinawa_45 ]
+  G4M1_11  = 0
+  D3A1  = 0
+  A6M5c  = 0
+  Ki-100-I-Ko  = 0
+  Ki-84-Ib  = 0
+  N1K2-Ja  = 0
+  Ki-61-I-Hei  = 0
+
+
+# Beispiele
+#[1 italy_43  194309]
+#A-20G= -0.333  # ab September ist A-20G in großen Stückzahlen verfügbar
+#[2 italy_43 19430815]
+# alternate history:
+#Fw-190A-5= -5 # günstig eine Palette Fockes auf ebay geschossen
+# Fw-190A-5165ATA= 5 die Turbolader mussten aber
+# zwecks Reverse-Engineering nach München geschickt werden
+#[2 italy_43 ]
+#Ju-88A-4 =  -5
+#MC-205_I= -5
+#MC-205_III= -1
+#Bf-109G-6AS=5
+#Fw-190A-5= 15
+#[1 normandy_44]
+#P-51B-NA=-100 # Todesursache #1: Blackouts
+#[2 normandy_44]
+#Bf-109G-6_Late=-100 # 'stangs vs. 109!

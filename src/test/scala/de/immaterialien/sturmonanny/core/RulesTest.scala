@@ -51,6 +51,6 @@ object RulesTest {
 	val srv=new ReplayServerImpl
 	def main(args: Array[String]) {
 //		srv.conf.
-	  srv.rules.kick("testuser", "funny-reason")
+	  srv.rules.kick("testuser", "funny-reason",10)
 	} 
 } 

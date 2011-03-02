@@ -65,6 +65,6 @@ object PilotCountTest {
 		printFor(t3)
 		
 		
-		 srv.rules.kick("testuser", "funny-reason")
+		 srv.rules.kick("testuser", "funny-reason", 10)
 	}
 }

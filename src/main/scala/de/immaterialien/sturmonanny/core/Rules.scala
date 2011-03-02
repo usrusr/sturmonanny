@@ -56,7 +56,7 @@ class Rules extends NonUpdatingMember with Logging {
 //    
 //    val startPrice = rawPrice * factor
     val startPrice = wouldCost
-println(who+" warnPlane for "+loadout+ " @ "+side.id+" = "+startPrice)    
+//println(who+" warnPlane for "+loadout+ " @ "+side.id+" = "+startPrice)    
     if(startPrice > 0){ 
 println(who+" startPrice>0")		    	
 	    var difference = server.time.currentTimeMillis - since

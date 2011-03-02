@@ -7,7 +7,7 @@ class AllPlanesTest {
 	@org.junit.Test
  def test=AllPlanesTest.main(null)
 }
-object AllPlanesTest {
+object AllPlanesTest { 
 	def main(args: Array[String]) { 
 		net.lag.configgy.Configgy.configure("log.conf")
 //		val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/Iasi44194405020.mis")
@@ -16,9 +16,13 @@ object AllPlanesTest {
 //		val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/failedSequence.orig.mis")
 //		val f0 = new File("src/test/resources/italy_crash1.mis")
 //		val f0 = new File("src/test/resources/hnmaps/italy_43194308120.mis")
-			val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/sgrad_one_retreat_too_many.mis")	
-		val f1 = new File(f0.toString.dropRight(4)+".processed.mis")
-		f1.delete
+//			val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/sgrad_one_retreat_too_many.mis")	
+//			val f0 = new File("src/test/resources/italy_not_an_int/italy_43194403310.mis")
+//		val f0 = new File("src/test/resources/italy_not_an_int/staling_43194211240.mis")
+		val f0 = new File("src/test/resources/italy_not_an_int/otherBrokenChief.mis")
+		
+		val f1 = new File(f0.toString.dropRight(4)+".processed.mis") 
+		f1.delete 
 		org.apache.commons.io.FileUtils.copyFile(f0,f1)
 		
 
@@ -32,9 +36,9 @@ object AllPlanesTest {
 //		ap.invoke(f1)
 		val aps = List(
 				
-			new ForceAiAirStart(""),	
 							
-//			new ForceDotsInChiefs(""),
+			new ForceDotsInChiefs(""),
+//			new ForceAiAirStart(""),	
 //			new AllPlanesEverywhere("config"),
 //			new PimpMyBornPlace(" 1 1000 200 11 0 500 12000 30 0 0 0 0 0 3.8 0 0 0"),
 //			new DelayedChiefs("min=2 max=20"),				
