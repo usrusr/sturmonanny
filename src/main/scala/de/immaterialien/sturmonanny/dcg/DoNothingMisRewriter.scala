@@ -19,27 +19,38 @@ println(" intermediateName: "+ret)
 		ret
 	}
 	def gatherer  = new DoNothingMisRewriter.Gatherer
-		  override def invoke(file: File): File = {
-		
-		    val g = gatherer
+  override def invoke(file: File): File = {
 
-		    val out = new File(file.getParent, file.getName.dropRight(4) + "."+intermediateName+".tmp")
-		    if(out.exists) out.delete
-		    val w = new FileWriter(out)
-		    g.writer = Some(w)
-		    val f2 = new FileReader(file) 
-		    val pr2 = g.parseAll(g.fileParser, f2)
-		    f2.close
-		    w.close
-		    log debug "" + pr2
-		    out
-		    
+    val g = gatherer
+
+    val out = new File(file.getParent, file.getName.dropRight(4) + "."+intermediateName+".tmp")
+    if(out.exists) out.delete
+    val w = new FileWriter(out)
+    g.writer = Some(w)
+    val f2 = new FileReader(file) 
+    val pr2 = g.parseAll(g.fileParser, f2)
+    f2.close
+    w.close
+    log debug "" + pr2
+//    out
+    
+    pr2 match {
+    	case s:g.Success[_] =>{
+    		log debug "success: " + s
 		    val bak = new File(file.getParent, file.getName + ".pre."+intermediateName)
 		    if(bak.exists) bak.delete
 		    file.renameTo(bak)
 		    out.renameTo(file)
-		    file
-		  }		
+    	}
+    	case x => {
+    		log.error("failure in "+this.getClass.getSimpleName+": " + x)
+		    val failed = new File(file.getParent, file.getName + ".failed."+intermediateName)
+    		if(failed.exists) failed.delete
+    		if(out.exists) out.renameTo(failed)
+    	}
+    }
+    file
+  }		
 	
 
 }

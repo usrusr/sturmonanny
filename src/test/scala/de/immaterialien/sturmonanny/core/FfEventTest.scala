@@ -17,7 +17,8 @@ object FfEventTest {
 		//play("src/test/resources/pilotlogs/refly_counted_as_lost_plane.playback")
 		//play("src/test/resources/pilotlogs/should_kick_for_price.log")
 //		play("src/test/resources/Pilot.Kampfname.log")
-		play("src/test/resources/italy_not_an_int/Pilot.refly_counted_as_lost_plane_on_landing.log")
+//		play("src/test/resources/italy_not_an_int/Pilot.refly_counted_as_lost_plane_on_landing.log")
+		play("src/test/resources/italy_map_fail/deathkick.log")
 	}
 	
 	

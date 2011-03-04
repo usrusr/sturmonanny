@@ -115,7 +115,7 @@ object GroundClass extends Enumeration with Log {
  type GroundClass = Value
   
  val Tank = GC (10, "Tank")
- val Ship = GC (10, "Ship") 
+ val Ship = GC (20, "Ship") 
  val Car = GC (1, "Car")
  val Fuel = GC (100, "Fuel") // a special type of car, handled in checkDescription
  val Wagon = GC (5, "Wagon") 

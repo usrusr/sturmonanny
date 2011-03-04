@@ -52,10 +52,24 @@ debug(cls + " new instance created! "+server)
 				nu setServerContext server
 				if( nu.setConfiguration(cfg)){
 debug(cls + " new instance configured! -> "+server.planes.items.keys.mkString)
-			        nu cycle mission 
-			        className = cls
-			        configurationPath = cfg    
-				 Some(nu)
+		        nu cycle mission 
+		        className = cls
+		        configurationPath = cfg    
+
+		        val dcgMisPath = new java.io.File(""+server.conf.server.serverPath+"/Missions/Net/dogfight/DCG")
+		        try {
+		        	val list = de.immaterialien.sturmonanny.fbdjhosting.DcgMissionProvider.listMissions(dcgMisPath)
+		        	val mostRecent = new java.io.File(dcgMisPath, list.max(Ordering.by(
+		        			{fname:String=> new java.io.File(dcgMisPath, fname).lastModified})
+		        	))
+		        	nu.cycle(mostRecent)
+debug(cls + " instance temporarily cycled to "+mostRecent +" (preinit)")		        	
+		        }catch{
+		        	case e=>{
+		        		error("failed to preinit market by cycling to latest mission in "+dcgMisPath)
+		        	}
+		        }
+		        Some(nu)
 				}else{
 debug(cls + " new instance not configured!")
 				  internal 

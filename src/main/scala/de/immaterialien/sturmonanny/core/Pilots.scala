@@ -484,7 +484,7 @@ debug(name+"  definitelyInPlane "+name+" myPrice="+myPrice)
 			}
 			
 		}
-  
+
 		def priceMessages(which:String, all:Boolean){
 			val pilotName = Pilot.this.name
    
@@ -506,12 +506,12 @@ debug(name+"  definitelyInPlane "+name+" myPrice="+myPrice)
 						val bal:Double=balance
 						val affordable = cost < bal 
 						if(affordable){
-							(true, "+", "costs.", ",.refund."+refund(cost).toInt )
+							(true, "+", "costs.", ", refund "+softRound(refund(cost)) )
 						}else{
-							(false, "!", "would.cost.",",.min.solvency."+cost.toInt+" required!" )
+							(false, "!", "would.cost.",", min solvency "+softRound(cost)+" required!" )
 						}
 					}else{
-						(true, "*", "gives.", "")
+						(true, "*", "gives ", "")
 					})
 					
 	    
@@ -523,10 +523,10 @@ debug(name+"  definitelyInPlane "+name+" myPrice="+myPrice)
 						//                                min.solvency.1000 +
 						val paddedVerb = padLeft(verb,   "...........")
 						
-						var intPrice = price.toInt
-						intPrice = intPrice.abs
-						val paddedPrice = padLeft(""+price.abs.toInt,".....")
-						val msg = affordable+" "+paddedPlane+" "+paddedVerb+paddedPrice+conf.names.currency +".per.minute"+and 
+//						var intPrice = price.toInt
+//						val intPrice = price.abs
+						val paddedPrice = padLeft(""+softRound(price.abs),".....")
+						val msg = affordable+" "+paddedPlane+"."+paddedVerb+paddedPrice+conf.names.currency +" per minute"+and 
 						//server.multi ! server.multi.ChatTo(pilotName, msg)
 						chat(msg)	 
 					}
@@ -655,11 +655,13 @@ debug("ignoring log "+event+" because of repetition")
 				if(state.planeVerified){
 //debug(name + " Is.InFlight "+state)
 					if( ! (state.crashed || state.died)){
-						if( ! state.flying ){
+						if(state.landed>0 || ! state.flying ){
 							val landedSince = server.time.now - state.landed
 							if(landedSince > (2 * conf.server.pollMillis.apply)){
-debug(name + " Is.InFlight ignored because recently landed "+state)								
 								state.flying = true
+								state.landed = 0
+							}else{
+debug(name + " Is.InFlight ignored because recently landed "+state)								
 							}
 						}
 						state.commitPlanePrice()
@@ -853,5 +855,19 @@ object Pilots {
 	/*
 [109]
 	 */
+	
+		def softRound(d:Double):String={
+			val str = d.abs.toString
+			var rest :String= str.indexOf(".") match {
+				case i if i<0 => str
+				case i if i>1 => str.take(i)
+				case i if str.head=='0' => str.take(i+3).reverse.dropWhile(_=='0').dropWhile(_=='.').reverse
+				case i if str.head=='1' => str.take(i+2).reverse.dropWhile(_=='0').dropWhile(_=='.').reverse
+				case i => str.take(i)
+			}
+
+			if(d<0) "-"+rest
+			else rest
+		}	
 }
 

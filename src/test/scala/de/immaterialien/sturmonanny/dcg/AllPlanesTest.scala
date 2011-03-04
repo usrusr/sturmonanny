@@ -19,7 +19,8 @@ object AllPlanesTest {
 //			val f0 = new File("src/test/resources/de/immaterialien/sturmonanny/dcg/sgrad_one_retreat_too_many.mis")	
 //			val f0 = new File("src/test/resources/italy_not_an_int/italy_43194403310.mis")
 //		val f0 = new File("src/test/resources/italy_not_an_int/staling_43194211240.mis")
-		val f0 = new File("src/test/resources/italy_not_an_int/otherBrokenChief.mis")
+//		val f0 = new File("src/test/resources/italy_not_an_int/otherBrokenChief.mis")
+		val f0 = new File("src/test/resources/italy_map_fail/italy_43194308180.mis.pre.ForceAiAirStart")
 		
 		val f1 = new File(f0.toString.dropRight(4)+".processed.mis") 
 		f1.delete 
@@ -48,7 +49,7 @@ object AllPlanesTest {
 //					" reddummy=vehicles.artillery.Artillery$Maxime "
 //			),
 			
-//			new de.immaterialien.qlmap.HtmlMissionFilter("E:/2.8workspace/qlmap/src/main/resources/mapbase/out.conf"),						
+			new de.immaterialien.qlmap.HtmlMissionFilter("E:/2.8workspace/qlmap/src/main/resources/mapbase/out.conf"),						
 			new DoNothingMisRewriter("config"){override def invoke(in:File)=in}
 		)
 		for(ap<-aps) ap.invoke(f1)

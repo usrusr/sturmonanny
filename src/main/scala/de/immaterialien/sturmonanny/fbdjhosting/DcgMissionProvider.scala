@@ -41,7 +41,7 @@ class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provide
 //    val dcgPath = if(conf.fbdj.DCG.dcgPath.apply.isEmpty) searchPath else new File(conf.fbdj.DCG.dcgPath.apply)
 //    val commandLine = conf.fbdj.DCG.dcgCommand.apply
     val (dcgPath, commandLine)=dcgPathAndCommand(searchPath)
-    log.info("starting DCG \n "+commandLine+"\n  at\n "+dcgPath.getAbsolutePath)
+
     
     val cmd = CommandLine.parse(commandLine) 
     
@@ -53,6 +53,7 @@ class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provide
     		log.warning("DCG process returned "+x.getMessage)
     	}
     }
+    log.info("starting DCG \n "+commandLine+"\n  at\n "+dcgPath.getAbsolutePath+"\n  from "+oldMissionPath)    
     val exitValue = executor.execute(cmd)
     
     
@@ -85,8 +86,9 @@ class DcgMissionProvider(conf : core.Configuration) extends javax.xml.ws.Provide
     
     val afterList = searchPath.list(DcgMissionProvider.newMisFilter(beforeFiles))
     
-    val ret = if(afterList.length==1) new File(searchPath, afterList(0))
-    else {
+    val ret = if(afterList.length==1) {
+    	new File(searchPath, afterList(0))
+    } else {
    	 		if(afterList.length==0) throw new IllegalArgumentException("DCG terminated but no new mission was found in "+searchPath)
 log.warning("multiple DCG missions: "+afterList)       
         val selected = afterList.foldLeft((oldMissionPath,0L)){(previous, fname) =>
@@ -101,7 +103,7 @@ log.warning("multiple DCG missions: selected "+selected)
         
         selected 
     }
-    
+    log.info("starting DCG created "+ret)    
     ret
   }
   override def toString = "DCG mission generator at "+dcgPathAndCommand()

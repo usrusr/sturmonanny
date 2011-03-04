@@ -70,9 +70,10 @@ object ForceDotsInChiefs {
   	}
   	
   	lazy val nStationary = o ~> matcher(
-  			"""([^\[\s]\S*[^ \t\d])(\d*)[ \t]+"""+ // prefix: name and blanks
+  			"""([^\[\s]\S*[^ \t\d])(\d*[ \t]+)"""+ // prefix: name and blanks
   			"""([^\s\$]+\$[^\s]+)"""+ // type$chief 
-  			"""((?:[ \t]+-?\d+(?:\.\d*)?)+)"""
+  			// fails with static planes that have markings """((?:[ \t]+-?\d+(?:\.\d*)?)+)"""
+  			"""((?:[ \t]+\d+)(?:[ \t]+[^\s]+)*)"""
   			
 //  			"""([^\[\s]\S*[ \t]+)([^\s\$]+\$)\1[ \t]+([^\s\d]+)((?:[ \t]+-?\d+(?:\.\d*)?)+)"""  			
   			) ^^ { case groups => 
@@ -92,7 +93,7 @@ this error:
 23_Chief2 vehicles.artillery.Artillery$23_Chief ArmorPzIVE 2 23587.00 101912.00 423.0 0.0 0
   	 */
   	lazy val brokenNStationary = o ~> matcher(
-  			"""([^\[\s]\S*[^ \t\d])(\d*)[ \t]+"""+ // prefix: name and blanks
+  			"""([^\[\s]\S*[^ \t\d])(\d*[ \t]+)"""+ // prefix: name and blanks
   			"""([^\s\$]+\$)\1[ \t]+([^\s\d]+)"""+ // type$chief [blank] [nonnum] type
   			"""((?:[ \t]+-?\d+(?:\.\d*)?)+)"""
   			
