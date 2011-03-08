@@ -18,7 +18,7 @@ object FfEventTest {
 		//play("src/test/resources/pilotlogs/should_kick_for_price.log")
 //		play("src/test/resources/Pilot.Kampfname.log")
 //		play("src/test/resources/italy_not_an_int/Pilot.refly_counted_as_lost_plane_on_landing.log")
-		play("src/test/resources/italy_map_fail/deathkick.log")
+		play("src/test/resources/italy_map_fail/kick_on_bailout.log")
 	}
 	
 	
@@ -32,7 +32,7 @@ object FfEventTest {
 		parser.parseAll(parser.file, reader)
 		reader.close
 		println("played")
-	}
+	} 
 }
 
 class FfEventTest {
@@ -70,7 +70,7 @@ class FfEventTest {
 //		override val market = new MarketActor("de.immaterialien.sturmonanny.market.AllPlanesCost", conf.market.configuration.apply) with Member
 		override val market = new de.immaterialien.sturmonanny.market.fixed.AllPlanesCost with Member{ import IMarket._
 			def updateConfiguration=() 
-			override def tryPrice(loadout:Loadout, side:Int) : Option[Double] = Some(10D)
+			override def tryPrice(loadout:Loadout, side:Int) : Option[Double] = Some(0D)
 		}
 		override val fbdj = new FbdjAdapter with Member { 
 			override def updateConfiguration = ()

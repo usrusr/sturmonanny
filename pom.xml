@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.immaterialien</groupId>
 	<artifactId>sturmonanny</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.1.4-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<inceptionYear>2010</inceptionYear>
 	<properties>

@@ -245,6 +245,7 @@ purpose: while processing with command-line tools can easily be included in a sc
 processing implemented in a JVM-language (e.g. java) would suffer from JVM startup times if set up that way. To solve this 
 JVM-processing should better be invoked inside the sturmonanny JVM.
 
+
 example configuration:
 <addons>
 my_package_Preprocessor = -10
@@ -252,9 +253,12 @@ my_package_Postprocessor = 1
 my_other_package_AnotherPostprocessor = 10
 </addons>
 
-Keys (left of the equals sign) have to be fully qualified class names of classes present on the classpath 
-(with the dots replaced by underscores, as the config format does not allow dots - if you really have to 
-use an underscore you can double-escape it: "my_stupid_package.The_class" would become "my__stupid__package_The__class"). 
+Keys (left of the equals sign) have to be fully qualified class names of classes present on the classpath. 
+The dots have to be replaced by underscores, as the config format does not allow dots. If you really have to 
+use an underscore you can double-escape it: "my_stupid_package.The_class" would become "my__stupid__package_The__class".
+Static inner class separator ("$" instead of "." will be tried as a fallback) 
+
+
 Values (right of the equals sign) have to be unique numbers: 
 	* negative values for preprocessors (called before the script invokation)
   * positive values for postprocessors (called after the script invokation)

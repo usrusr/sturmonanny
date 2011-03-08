@@ -167,6 +167,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 			) ^^ { 
 			  case name ~ _ ~ state => {
 //			    pilotNameParser.learnNewName(name)
+			  	val s = state
 			  	pilotNameParser.add(name)
 			    PilotMessage(name, state)
 			  }
@@ -237,52 +238,6 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 		new String(seq.toArray)
 	) 
 	
-	
-//	/**
-//     * a dynamic token set (with recently-used timeout) that happens to 
-//     * 
-//     */
-//  object pilotNameParser extends Parser[String] {
-//		private val noNamesParser = literal("")
-//		private var namesParser : Parser[String]= noNamesParser
-//		private val namesSet = new mutable.LinkedHashMap[String, TimeOutingLiteral]()
-//  
-//		class TimeOutingLiteral(val string:String, var lastUse:Long) extends Parser[String] {
-//			val inner = literal(string)
-//			override def apply(in:Input) = {
-//				lastUse = System.currentTimeMillis
-//				inner.apply(in) 
-//			}
-//		}
-//  
-//		def learnNewName(name:String){
-//			if( ! namesSet.contains(name)){
-//				val now = System.currentTimeMillis
-//				val newParser = new TimeOutingLiteral(name, now)
-//				val newParserAsStringParser : Parser[String]= newParser 
-//				val minLastUse = now - LocalizedDispatcher.PILOTNAMETIMEOUT
-//    
-//				// cleanup
-//				namesSet.retain((_, p)=>p.lastUse > minLastUse)
-//    
-//				// longest match or first match? 
-//				// we take first match, so there is no possible way to cut off an existing player from commands 
-//				namesParser = 
-//					if(namesSet.size==0) newParser
-//					else namesSet.values.foldRight(newParserAsStringParser){
-//					    (older : TimeOutingLiteral, newer : Parser[String])=> older | newer
-//					}
-//					
-//				namesSet.put(name, newParser)
-////debug("extended namesparser with '"+name+"', new size is "+namesSet.size )	  
-//			}
-//		} 
-//	
-//		override def apply(in:Input) ={
-//			val ret=  namesParser.apply(in)
-//			ret
-//		}
-//	}
 	lazy val separatorLine = literal("-------------------------------------------------------")
 	lazy val pilotsHeader = literal("""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft""")
  	lazy val ignore : Parser[Is.Event] = (

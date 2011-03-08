@@ -1,8 +1,9 @@
 package de.immaterialien.qlmap
 import java.io._
 import scala.xml._
+import de.immaterialien.sturmonanny.fbdjhosting._
 
-class HtmlMissionFilter(args: String) extends javax.xml.ws.Provider[File] with Log {
+class HtmlMissionFilter(args: String) extends javax.xml.ws.Provider[File] with Log with NonMutatingFilter  {
   val mapBase = new MapBase(new File(args))
   val groundClasses = new GroundClasses(mapBase.folder.getAbsolutePath )
   def afterDone = ()
@@ -39,6 +40,13 @@ object HtmlMissionFilter {
     formatterTime.format(new java.util.Date(timestamp))
   }
   val commonMissionPrefix = """^(\d*\D*)""".r
+	class Inline(args: String) extends TalkingHtmlMissionFilter(args){
+	  override def invoke(file: File): File = {
+     	inline(file)
+     	afterDone
+     	file
+    }
+	}  
 }
 class HtmlUpdater(path: File, mission: File, mapContent:Seq[Elem]) {
   import HtmlMissionFilter._
@@ -120,6 +128,7 @@ class HtmlUpdater(path: File, mission: File, mapContent:Seq[Elem]) {
                       </td>
                     </tr>
                   </table>
+                  <p style="font-size:smallest;">{de.immaterialien.sturmonanny.core.Server.initVersion}</p>
                 </body>
               </html>
     XML.save(parent.getAbsolutePath + "/"+campaignPrefix + name + ".mis.recon.html", mis)
@@ -128,3 +137,4 @@ class HtmlUpdater(path: File, mission: File, mapContent:Seq[Elem]) {
     writeListing
   }
 }
+

@@ -131,7 +131,7 @@ println("done "+throwable+" -> "+result)
       result
     }
   }
-  def initVersion:String=try{
+  val initVersion:String=try{
   	
   	val stream = classOf[Server].getResourceAsStream ("version.properties")
   	val props  = new java.util.Properties

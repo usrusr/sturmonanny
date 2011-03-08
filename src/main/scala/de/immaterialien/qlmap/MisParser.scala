@@ -254,30 +254,54 @@ DCG BUG???                               ||
   
   NORMFLY 16044.57 270981.51 500.0 40.00   D &0
   GATTACK 71900.00 194300.00 500.0 80.00   D 20_Chief 1 &1
+  
+	TAKEOFF 103380.00 22950.00 0 0 IJN_AG_755z00 0
+  
                                    (-?(?:\d+|(?:\d*\.\d+)))\s*(?:(?:\w\s*)?([^&\s]+(?:\s+\d+)?\s+)?)?
+0 &1                           
+6000.0 440.00 &1
+
+TAKEOFF 42500.00 94000.00 0 
+0 100_Chief 0 &1
   	 */
     //("\\S+".r ~ double ~ double ~ double ~ doubleNoBlank ~ direct("""\s*([^&\s]+(\s+\d+)?\s+)?&""".r) ~ direct("\\d".r) <~ eol) ^^ {
-  	("\\S+".r ~ double ~ double ~ double 
-//  			~ (matcher("""(-?(?:\d+|(?:\d*\.\d+)))\s*([^&\s]+(?:\s+\d+)?\s+)?&""") ^^^ { mtch:scala.util.matching.Regex.Match =>
-  			~ (matcher("""(-?(?:\d+|(?:\d*\.\d+)))\s*(?:(?:\w\s*)?([^&\s]+(?:\s+\d+)?\s+)?)?&""") ^^^ { mtch:scala.util.matching.Regex.Match =>
-  				val speed = mtch.group(1).toDouble
+  	("\\S+".r ~ double ~ double ~ double
+  			
+  			~ (matcher(
+  					"""(-?(?:(?:\d*\.\d+|\d+)))"""+
+  					"""(?:[ \t]+"""+
+  						"""(?:\d+[ \t]+)*"""+
+  						"""(?:[^&\s\d][ \t]+)?"""+
+  						"""([^&\s]+)"""+
+  					""")?"""+
+  					"""(?:[ \t]+\d+)*"""+
+  					"""(?:[ \t]+&\d)?"""
+  				) ^^^ { mtch:scala.util.matching.Regex.Match =>
+//  			~ (matcher("""((-?(?:\d+|(?:\d*\.\d+)))[ \t]+)+(?:(?:\w[ \t]*)?([^&\s]+(?:[ \t]+\d+)*[ \t]+)?)?&""") ^^^ { mtch:scala.util.matching.Regex.Match =>  			
+  				val speed = mtch.group(1).trim.toDouble 
   				val targetStr = mtch.group(2)
   				val targetOpt = if(targetStr!=null && ! targetStr.isEmpty) Some(targetStr) else None
   				(speed, targetOpt)
   			})
   			//~ doubleNoBlank ~ direct("""\s*([^&\s]+(\s+\d+)?\s+)?&""".r)
   			
-  			~ direct("\\d".r) <~ eol) ^^ {
-    	case "TAKEOFF"~x~y~height~speedTargetOpt~side => {wing=>
+//  			~ direct("\\d".r) 
+  			<~ eol) ^^ {
+/* support: 
+TAKEOFF 103380.00 22950.00 
+0 0 IJN_AG_755z00 0
+ */  		
+//    	case "TAKEOFF"~x~y~height~speedTargetOpt~side => {wing=>
+  		case "TAKEOFF"~x~y~height~speedTargetOpt => {wing=>
     		wing.waypoint(MisModel.WingTakeoff(x,y))
     	}
-    	case "LANDING"~x~y~height~speedTargetOpt~side => {wing=>
+    	case "LANDING"~x~y~height~speedTargetOpt => {wing=>
     		wing.waypoint(MisModel.WingLanding(x,y))
     	}    	
-    	case "GATTACK"~x~y~height~speedTargetOpt~side => {wing=>
+    	case "GATTACK"~x~y~height~speedTargetOpt => {wing=>
     		wing.waypoint(MisModel.WingGroundAttack(x,y))
     	}
-    	case wpType~x~y~height~speedTargetOpt~side => {wing=>
+    	case wpType~x~y~height~speedTargetOpt => {wing=>
     		wing.waypoint(MisModel.Waypoint(x,y))
     	}
     }
