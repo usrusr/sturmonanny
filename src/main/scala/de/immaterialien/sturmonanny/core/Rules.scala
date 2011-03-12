@@ -137,7 +137,7 @@ println(who+" plane warning "+message)
     
     server.pilots.forElement(who)(_! KickedUntil(server.time.now + remainInclMessages))
   }
-  def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, pauseLen:Int, inviteString:Option[String]) {
+  def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, pauseLen:Int, inviteString:Option[String], flying:Boolean) {
     val multi = server.multi
     var difference = server.time.currentTimeMillis - since
     val pauseDuration = conf.game.planeWarningsSeconds.apply
@@ -161,15 +161,21 @@ println(who+" plane warning "+message)
           else
 //            "After dying, you are not allowed to fly for " + pauseLen + " seconds"
           	"current death pause: "+pauseLen+"s (depends on team size)" 
-        } else if (ratio > 0.4) {
+//        } else if (ratio > 0.4) {
+//          if (inviteString.isDefined)
+//            "Fly " + inviteString.get + " or wait " + pauseLen + " seconds"
+//          else
+//            who + ", you must be back in plane selection in " + seconds + " s!"
+//        } else if (ratio > 0.2) {
+//          "Kicking " + who + " in " + seconds + " seconds!"
+//        } else {
+//          who + ", if you want to live, jump!"
+//        }
+        }else{
           if (inviteString.isDefined)
             "Fly " + inviteString.get + " or wait " + pauseLen + " seconds"
           else
-            who + ", you must be back in plane selection in " + seconds + " s!"
-        } else if (ratio > 0.2) {
-          "Kicking " + who + " in " + seconds + " seconds!"
-        } else {
-          who + ", if you want to live, jump!"
+            who + ", you must not be in the air for " + seconds + " more seconds"
         }
 
         multi ! new multi.ChatTo(who, message)

@@ -105,6 +105,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
       var lastPlanePriceCommit = server.time.currentTimeMillis // compare against lastPlaneVerification to determine "inFlight" -1L // -1: we have a price but we are not in the air yet
       var planeWarningSince = 0L
       var wouldCost = 0D
+      var hasPaid = 0D
       var lastCleared = 0L
       var planeVerified = true
       var lastPlaneVerification = 0L
@@ -155,12 +156,12 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
         //				  }
         //				  case _ => None
         //				}
-        lastPayment = None
+//        lastPayment = None
         lostPlaneName = planeName
-        unverify()
-        planeName = ""
+//        unverify()
+//        planeName = ""
 
-        load = None
+//        load = None
         lastPayment.map(_ price).filter(_ < balance).map { _ =>
           Some("you can't afford a " + planeName + " again") //+", chat \"! available\" for information")
         } getOrElse None
@@ -319,14 +320,16 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
         //warn("verifying ", new Exception)				
       }
       def planeVerifiable = {
-        def debugOutput(in: => String) {
+        def debugOutput(in: => String) = {
           //					println(""+in)
+        	false
         }
 
-        (if (!planeVerified) true else { debugOutput("planeVerifiable: plane already verified"); false }) &&
-          (if (currentSide != Armies.None) true else { debugOutput("planeVerifiable: currentSide != Armies.None"); false }) &&
-          (if (planeName != "") true else { debugOutput("planeVerifiable: planeName empty"); false }) &&
-          (if ((load.isDefined || (notFresh && wasInFlight))) true else { debugOutput("planeVerifiable: " + (if (load.isDefined) "(load def)" else "load undef") + (if (wasInFlight) "(wasInFlight)" else "!  wasInFlight)" + " notFresh:" + notFresh)); false })
+        (if (!planeVerified) true else { debugOutput("planeVerifiable: plane already verified")}) &&
+          (if (currentSide != Armies.None) true else { debugOutput("planeVerifiable: currentSide != Armies.None") }) &&
+          (if (planeName != "") true else { debugOutput("planeVerifiable: planeName empty") }) &&
+          (if ( ! (crashed || died)) true else { debugOutput("planeVerifiable: crashed:" + crashed + " died:"+died) })
+          (if ((load.isDefined || (notFresh && wasInFlight))) true else { debugOutput("planeVerifiable: " + (if (load.isDefined) "(load def)" else "load undef") + (if (wasInFlight) "(wasInFlight)" else "!  wasInFlight)" + " notFresh:" + notFresh)) })
         //				(load.isDefined || (notFresh && wasInFlight))
       }
       //			def planeVerifiable = {
@@ -340,7 +343,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
         if ((!planeVerified) && planeVerifiable && planeNotEmpty && planeNotLostPlane) {
           if ( deathPauseUntil > server.time.currentTimeMillis && ! died) {
             //println("applywarnings to warndeath")				
-            server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, deathPauseLen, invites.allInvitationsLine)
+            server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, deathPauseLen, invites.allInvitationsLine, (state.flying && state.landed==0L))
           } else
             // don't warn for plane during death pause
             //						if(deathPauseUntil!=0)  
@@ -399,30 +402,30 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
         applyWarnings()
       }
 
-      def returnsBak() {
-        if (flying && !(landed > 0L)) {
-          commitPlanePrice()
-          for (pi <- lastPayment; pay <- pi.payments) {
-            val ref = refund(pay.what)
-            if (pay.who == name) {
-              balance(pi.side) = server.rules.updateBalance(balance(pi.side), ref)
-              chat("refund " + currency(ref))
-            } else {
-              domain.forElement(pay.who) { recruiter =>
-                recruiter ! BalanceUpdate(ref, pi.side, "Refund for recruit " + name + ": " + currency(ref))
-              }
-            }
-          }
-          //				if(refund.value>0) {
-          //					chat("Awarded a refund of "+refund.value+conf.names.currency+" for returning the "+planeName)
-          //					balance () = server.rules.updateBalance(balance, refund)
-          //					refund () = 0
-          //				}
-          landed = server.time.now
-          persist()
-//          clear()
-        }
-      }
+//      def returnsBak() {
+//        if (flying && !(landed > 0L)) {
+//          commitPlanePrice()
+//          for (pi <- lastPayment; pay <- pi.payments) {
+//            val ref = refund(pay.what)
+//            if (pay.who == name) {
+//              balance(pi.side) = server.rules.updateBalance(balance(pi.side), ref)
+//              chat("refund " + currency(ref))
+//            } else {
+//              domain.forElement(pay.who) { recruiter =>
+//                recruiter ! BalanceUpdate(ref, pi.side, "Refund for recruit " + name + ": " + currency(ref))
+//              }
+//            }
+//          }
+//          //				if(refund.value>0) {
+//          //					chat("Awarded a refund of "+refund.value+conf.names.currency+" for returning the "+planeName)
+//          //					balance () = server.rules.updateBalance(balance, refund)
+//          //					refund () = 0
+//          //				}
+//          landed = server.time.now
+//          persist()
+////          clear()
+//        }
+//      }
 
       def lands() {
         if (!(landed > 0L)) {
@@ -452,7 +455,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
           //				}
           //					landed = true
           persist()
-//          clear()
+          clear()
         }
       }
 
@@ -668,7 +671,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
       }
       case Is.Selecting => {
         //debug(name + " Is.Selecting "+state)    	  
-        if (state.flying && !(state.landed > 0L)) {
+        if (state.flying && (state.landed <= 0L) && state.planeNotEmpty) {
           if (!(state.crashed || state.died)) {
             chat("refly counted as a lost plane")
           }
