@@ -168,7 +168,7 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 			  case name ~ _ ~ state => {
 //			    pilotNameParser.learnNewName(name)
 			  	val s = state
-			  	pilotNameParser.add(name)
+			  	pilotNameLearnIfUnknown(name)
 			    PilotMessage(name, state)
 			  }
 			}
@@ -225,7 +225,6 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 //	}
 	
 	lazy val pilotNameParser = new TrieParser{
-		
 		override def add(k:Seq[Char]){
 			val cleaned = new String(k.toArray)
 			if(trie.get(cleaned).isEmpty) this.synchronized {
@@ -237,6 +236,14 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
 	}.map(seq=>
 		new String(seq.toArray)
 	) 
+	def pilotNameLearnIfUnknown(k:String){
+		if( ! pilotNameParser.contains(k)){
+			pilotNameParser.add(k)
+//			server.multi.internalConnection.inject("""socket channel '1', ip 127.0.0.1:1, """+k+""", is complete created\\n""")
+			
+		}
+	}
+	
 	
 	lazy val separatorLine = literal("-------------------------------------------------------")
 	lazy val pilotsHeader = literal("""\"""+"""u0020N       Name           Ping    Score   Army        Aircraft""")
@@ -313,7 +320,11 @@ class LocalizedDispatcher extends LiftActor with UpdatingMember with RegexParser
  			}
  			for(pmsg<-ret) {
 // 				pilotNameParser.learnNewName(pmsg.who)
- 				pilotNameParser.add(pmsg.who)
+// 				pilotNameParser.trie.g
+ 				
+// 				pilotNameParser.add(pmsg.who)
+ 				pilotNameLearnIfUnknown(pmsg.who)
+ 				
 // 				pilotNameParser.add(pmsg.who, pmsg.who)
  			}
 //debug("pilot line matched to "+ret)

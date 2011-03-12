@@ -305,6 +305,16 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
     var inQueue: Option[java.util.LinkedList[String]] = None
     var outQueue: Option[java.util.LinkedList[String]] = None
     var thread: Option[Thread] = None
+    var offset = 0
+    var lastSent = 0
+    val consoleN = """(<consoleN><)(\d+)(>\s*)""".r
+    def inject(line:String){
+    	this ! FakeLine(line)
+    }
+//    def definePilot(name:String){
+//    	this ! FakeLine(line)
+//    }    
+    case class FakeLine(line:String)
     override def messageHandler = {
       case UpdatedQueues => {
         server.fbdj.fbdj.foreach { fbdj =>
@@ -333,13 +343,30 @@ class Multiplexer(var host: String, var il2port: Int, var scport: Int) extends T
         }
       }
       case DownLine(line) => {
-        //debug("to fbdj line '"+line+"'")
+        debug("to fbdj line '"+line+"'")
         outQueue.foreach { list =>
           list.synchronized {
-            list.add(line)
+          	val modline = line match {
+          		case consoleN(head, num, tail) => {
+          			lastSent = num.toInt
+          			head + (lastSent+offset)+tail
+          		}
+          		case _ => line
+          	}
+            list.add(modline)
             list.notifyAll
           }
         }
+      }
+      case FakeLine(line) => {
+      	outQueue.foreach { list =>
+          list.synchronized {
+            list.add(line)
+            offset += 1
+            list.add("<consoleN><"+(lastSent+offset)+">\r\n")
+            list.notifyAll
+          }
+        }      	
       }
       case DownMessage(msg) => {
         //debug("to fbdj msg:\n'"+msg.map(_ trim).mkString("'\n'")+"'")

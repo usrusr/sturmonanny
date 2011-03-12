@@ -108,7 +108,15 @@ debug("nextMissionProvider: "+nmp)
 		  	  created.changeConfiguration(conf, conf.file)
 		  	  
 		  	  created.start  
-       
+		  	// not necessary when overrides correctly process host command       
+//		  	  server.pilots.forMatches(null){p=>
+//          	if(!p.isTimeout(10000)){
+//          		created.outList.add("""socket channel '-1', ip 127.0.0.1:1, """+p.name+""", is complete created\n""")
+//          	}
+//          }
+		  	  
+// not necessary when overrides correctly process host command		  	  
+//		  	  server.dispatcher.pilotNameParser.clear
        
 		  		fbdj = Some(created)
 		  		fbdjPath = conf.fbdj.installationPath.apply

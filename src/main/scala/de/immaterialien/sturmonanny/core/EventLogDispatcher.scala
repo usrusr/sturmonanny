@@ -238,8 +238,8 @@ println("identified memoed "+memoed)
  			memoed
  		}
  	}
- 	
- 	def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.add(pilotName)
+ 	def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameLearnIfUnknown(pilotName)
+// 	def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.add(pilotName)
 //  def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.learnNewName(pilotName)
 // 	def learnNewName(pilotName:String):Unit = server.dispatcher.pilotNameParser.add(pilotName, pilotName)
     

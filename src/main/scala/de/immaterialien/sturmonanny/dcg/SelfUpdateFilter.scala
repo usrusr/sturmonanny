@@ -1,8 +1,10 @@
 package de.immaterialien.sturmonanny.dcg
 
+
 import javax.xml.ws.Provider
 import java.io.File
 import de.immaterialien.sturmonanny.fbdjhosting._
+import de.immaterialien.sturmonanny.util._
 
 import java.io.File
 import java.io.IOException
@@ -13,7 +15,7 @@ import scala.collection.JavaConversions._
 object SelfUpdateFilter {
 	val waitTime = """\s*(?:waitTime\s*=\s*)?(\d+)\s*""".r
 }
-class SelfUpdateFilter(configuration:String) extends Provider[File] with TalkingFilter{ import SelfUpdateFilter._
+class SelfUpdateFilter(configuration:String) extends Provider[File] with TalkingFilter with Log{ import SelfUpdateFilter._
 	val waitBeforeShutdown = configuration match {
 		case waitTime(s)=> s.toInt
 		case _ => 5000
@@ -35,6 +37,7 @@ class SelfUpdateFilter(configuration:String) extends Provider[File] with Talking
         
         (cmd.toString, list, mxbean.getStartTime, base)
 	}
+log.debug("SelfUpdateFilter: restartCommand:"+restartCommand+ " jarFiles:"+jarFiles+" started:"+started+" basedir:"+basedir)			
 	
 	def mostRecentJar:Long = jarFiles.map(_ lastModified).max
 	
@@ -42,9 +45,10 @@ class SelfUpdateFilter(configuration:String) extends Provider[File] with Talking
 
 	override def invoke(file: File): File = {
 		var lastMod = mostRecentJar
+log.debug("SelfUpdateFilter: lastMod:"+lastMod+ " started:"+started)		
 		if(lastMod>started){
 			var nextMod = 0
-			for(cb <- messageCallback) cb invoke "sturmonanny code updated, preparing restart"
+			for(cb <- messageCallback) cb.invoke("sturmonanny code updated, preparing restart")
 			
 			/**
 			 * wait for files to stabilize, 
@@ -53,12 +57,15 @@ class SelfUpdateFilter(configuration:String) extends Provider[File] with Talking
 			while(nextMod != lastMod){
 				Thread.sleep(waitBeforeShutdown)
 				val nextMod = mostRecentJar
-				val restartTime = System.currentTimeMillis
+//				val restartTime = System.currentTimeMillis
+log.debug("SelfUpdateFilter: lastMod:"+lastMod+ " nextMod:"+nextMod)		
 				lastMod=nextMod
 			}
 			new File(file.getAbsolutePath+".nannyupdate").createNewFile
 			for(cb <- messageCallback) cb invoke "restarting now!"
+log.debug("SelfUpdateFilter: restartCommand:"+restartCommand)					
 			Runtime.getRuntime.exec(restartCommand)
+log.debug("SelfUpdateFilter: bye!")					
 			System.exit(0)
 		}
 

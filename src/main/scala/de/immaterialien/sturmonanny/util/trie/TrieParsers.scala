@@ -74,6 +74,8 @@ trait TrieParsers extends Parsers{
 		def remove(addee:Seq[Elem])={
 			trie = trie.remove(addee)
 		}		
+		def clear = trie = new Trie[Elem, Boolean]()
+		def contains(what:Seq[Elem]) = trie.get(what).isDefined
 
 		//override def apply(in:Reader)
 		override def apply(in: Input):ParseResult[Seq[Elem]]={
@@ -100,8 +102,10 @@ trait TrieParsers extends Parsers{
 	
 	class MappedParser[T](tp:TrieParser, func:Seq[Elem]=>T) extends Parser[T] {
 //		val tp = new TrieParser
+		def contains(what:Seq[Elem])=tp.contains(what)
 		def add(addee:Seq[Elem])=tp.add(addee)
 		def remove(addee:Seq[Elem])=tp.remove(addee)
+		def clear = tp.clear
 		def apply(in:Input):ParseResult[T]={
 			tp.apply(in) match {
 				case Success(seq, rest) => {
