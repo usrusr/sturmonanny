@@ -137,7 +137,7 @@ log.debug("got "+next+" from "+filter.getClass.getSimpleName)
       	case _ =>
       }
     }
-    util.Daemon.named("parallel mission postprocessing"){
+    util.Daemon.once("parallel mission postprocessing"){
     	var dtemp = ret
 	    for(filter<-parallel){ 
 	      try{
@@ -195,10 +195,10 @@ class NextMissionProvider(private var filters:List[Provider[File]], server:core.
 	def inlineAndParallel : (List[Provider[File]],List[Provider[File]])={
 		val base = filteredFilters
 		val inline = if(base.isEmpty) base else {
-			filteredFilters.takeWhile( ! _.isInstanceOf[ParallelReturn])
+			base.takeWhile( ! _.isInstanceOf[ParallelReturn])
 		}
 		val parallel=if(base.isEmpty) base else {
-			val rest = filteredFilters.dropWhile( ! _.isInstanceOf[ParallelReturn])
+			val rest = base.dropWhile( ! _.isInstanceOf[ParallelReturn])
 			if(rest.isEmpty) rest else rest.tail
 		}
 		(inline,parallel)
