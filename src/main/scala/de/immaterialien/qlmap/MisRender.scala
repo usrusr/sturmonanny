@@ -638,8 +638,9 @@ println("surprise gattack")
 //          case MisRender.containsTrain() => 10
 //        }
 //      for((chief, count)<- groupChiefs)	{
-      for((chief, count)<- countedChiefs)	{
-        val side = chief.side.get
+      for((chief, count)<- countedChiefs
+      		; side <- chief.side
+      		)	{
         val start = chief.path.head
         val end = chief.path.lastOption.get
         val cls = chief.cls

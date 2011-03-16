@@ -25,7 +25,10 @@ object AllPlanesTest {
 //		val f0 = new File("src/test/resources/italy_not_an_int/staling_43194211240.mis")
 //		val f0 = new File("src/test/resources/italy_not_an_int/otherBrokenChief.mis")
 //		val f0 = new File("src/test/resources/italy_map_fail/italy_43194308180.mis.pre.ForceAiAirStart")
-		val f0 = new File("src/test/resources/okifail/okinawa_45194504050.mis")
+//		val f0 = new File("src/test/resources/okifail/okinawa_45194504050.mis")
+		//val f0 = new File("src/test/normandy_44194407280.mis")
+		val f0 = new File("src/test/normandy_44194407050.mis")
+		
 		
 		
 		val f1 = new File(f0.toString.dropRight(4)+".processed.mis") 

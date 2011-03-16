@@ -64,6 +64,7 @@ println("keeping "+x)
 128_Chief ArmorM4A2_US 1  1	  -1.0
 		 * by converting into the actual type, if only the dot is missing (otherwise it will fail...)
   	 */
+  	val armorCount = """(\d+)-""".r
   	lazy val fixableChiefDefinition = o ~> matcher(
   			"""([^\[\s]\S*[ \t]+)"""+ // prefix: name and blanks
   			"""(Armor|Ships|Trains|Vehicles)"""+ // dotless main class
@@ -74,6 +75,10 @@ println("fixable "+groups)
   		keep(groups.group(1))
   		keep(groups.group(2))
   		keep(".")
+  		if(groups.group(2)=="Armor") groups.group(3) match {
+  			case armorCount(_) => () // tolerate
+  			case _ => keep("1-")
+			}
   		keep(groups.group(3))
   		keep(groups.group(4))
   	}

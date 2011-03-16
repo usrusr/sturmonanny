@@ -137,11 +137,15 @@ println(who+" plane warning "+message)
     
     server.pilots.forElement(who)(_! KickedUntil(server.time.now + remainInclMessages))
   }
-  def warnDeath(who: String, what: String, since: Long, pauseUntil: Long, pauseLen:Int, inviteString:Option[String], flying:Boolean) {
+  def warnDeath(who: String, what: String, pauseUntil: Long, pauseLen:Int, inviteString:Option[String], flying:Boolean) {
     val multi = server.multi
-    var difference = server.time.currentTimeMillis - since
-    val pauseDuration = conf.game.planeWarningsSeconds.apply
-    val remaining = (pauseDuration * 1000) - difference
+    val pauseDuration:Long = pauseLen
+//    var difference = server.time.currentTimeMillis - since
+//    val remaining = (pauseDuration * 1000) - difference
+    
+    val remaining = pauseUntil - server.time.now
+    val difference = (pauseDuration*1000) - remaining 
+    
     val seconds: Long = remaining / 1000
 //    val pauseLen = conf.pilots.deathpenalty.apply
 
@@ -154,7 +158,7 @@ println(who+" plane warning "+message)
         kick(who, "did not wait " + pauseLen + "s or for an invitation", remaining)
         //multi ! new multi.ChatBroadcast(who + " has been kicked: hit refly too fast")
       } else {
-        val ratio = remaining.toDouble / (remaining + difference).toDouble
+        val ratio = remaining.toDouble / (pauseDuration*1000).toDouble
         val message = if (ratio > 0.7) {
           if (inviteString.isDefined)
             "Fly " + inviteString.get + " or wait " + pauseLen + " seconds"

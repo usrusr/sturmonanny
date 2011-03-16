@@ -162,7 +162,7 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
 //        planeName = ""
 
 //        load = None
-        lastPayment.map(_ price).filter(_ < balance).map { _ =>
+        lastPayment.map(_ price).filter(_ > math.min(0D, balance)).map { _ =>
           Some("you can't afford a " + planeName + " again") //+", chat \"! available\" for information")
         } getOrElse None
       }
@@ -343,7 +343,8 @@ class Pilots extends Domain[Pilots] with actor.LiftActor with NonUpdatingMember 
         if ((!planeVerified) && planeVerifiable && planeNotEmpty && planeNotLostPlane) {
           if ( deathPauseUntil > server.time.currentTimeMillis && ! died) {
             //println("applywarnings to warndeath")				
-            server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, deathPauseLen, invites.allInvitationsLine, (state.flying && state.landed==0L))
+            //server.rules.warnDeath(Pilot.this.name, planeName, lastPlanePriceCommit, deathPauseUntil, deathPauseLen, invites.allInvitationsLine, (state.flying && state.landed==0L))
+          	server.rules.warnDeath(Pilot.this.name, planeName, deathPauseUntil, deathPauseLen, invites.allInvitationsLine, (state.flying && state.landed==0L))
           } else
             // don't warn for plane during death pause
             //						if(deathPauseUntil!=0)  

@@ -114,6 +114,7 @@ println("unknown ini["+ x + "]")
   }
   lazy val chiefDefinition: Parser[Unit] = {
     //14_Chief Armor.4-PzVA 2
+    //84_Chief Armor.ZSU-37 1
     ("""[^\[\s]\S*""".r ~ ("""[^\.\s]+\.""".r ~> direct("\\S+".r)) ~ int 
     <~ opt(double~double~double) 
     <~ eol) ^^ {
@@ -124,6 +125,13 @@ println("unknown ini["+ x + "]")
 //println("multi: "+grounds.multi)          
 //println("static: "+grounds.static)          
         } else {
+//val srch = """(8.)_Chief.*""".r        	
+//name match {
+//	case srch(x) => {
+//println("chief "+x)		
+//	}
+//	case _ => ()
+//}
           out.chiefs(name).classSideClassName(cls.get, side, className)
         }
       }
